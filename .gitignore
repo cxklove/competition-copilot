@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Node.js / Vite
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Runtime / temporary
+*.log
+tmp/
+temp/
+.cache/
+
+# Local, private, and generated data; keep data/seed/ and public data/raw/ trackable.
+data/private/
+data/local/
+data/tmp/
+data/generated/

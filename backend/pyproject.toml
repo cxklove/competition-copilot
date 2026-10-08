@@ -14,7 +14,11 @@ dependencies = ["pydantic>=2"]
 dev = ["pytest", "ruff"]
 
 [tool.setuptools]
-packages = ["competition_copilot", "competition_copilot.domain"]
+packages = [
+    "competition_copilot",
+    "competition_copilot.domain",
+    "competition_copilot.ingestion",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

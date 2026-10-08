@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/huawei-ict-2026.json",
+  "approval": {
+    "candidate_id": "huawei-ict-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-08T14:50:20.073847Z",
+    "review_note": "Human reviewed Huawei official source. Competition identity, 2026-2027 edition mapping, and seven top-level tracks approved. Date-only deadline and nested tracks remain preserved as raw/schema limitations."
+  },
+  "verification": {
+    "candidate_id": "huawei-ict-2026-candidate",
+    "verified_at": "2026-10-08T14:50:20.073847Z",
+    "verification_note": "Huawei official source was explicitly verified to support the competition identity, 2026-2027 edition mapping, and seven modeled top-level tracks. The date-only registration deadline, nested track details, and dynamic registration counts remain outside structured verified facts.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "huawei-ict",
+    "name": "华为ICT大赛",
+    "short_name": null,
+    "description": null,
+    "official_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest"
+  },
+  "competition_source": {
+    "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+    "source_type": "official",
+    "observed_at": "2026-10-08T21:34:48+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "huawei-ict-2026",
+    "competition_id": "huawei-ict",
+    "year": 2026,
+    "name": "第十一届华为ICT大赛",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+      "source_type": "official",
+      "observed_at": "2026-10-08T21:34:48+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [
+    {
+      "id": "huawei-ict-2026-teaching",
+      "edition_id": "huawei-ict-2026",
+      "name": "教学赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "huawei-ict-2026-practice",
+      "edition_id": "huawei-ict-2026",
+      "name": "实践赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "huawei-ict-2026-innovation",
+      "edition_id": "huawei-ict-2026",
+      "name": "创新赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "huawei-ict-2026-challenge",
+      "edition_id": "huawei-ict-2026",
+      "name": "挑战赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "huawei-ict-2026-programming",
+      "edition_id": "huawei-ict-2026",
+      "name": "编程赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "huawei-ict-2026-operator",
+      "edition_id": "huawei-ict-2026",
+      "name": "算子赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "huawei-ict-2026-elite",
+      "edition_id": "huawei-ict-2026",
+      "name": "精英赛",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      }
+    }
+  ]
+}

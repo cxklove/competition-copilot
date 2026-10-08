@@ -37,3 +37,9 @@ data/private/
 data/local/
 data/tmp/
 data/generated/
+
+# Python package metadata
+*.egg-info/
+
+# Python build artifacts
+build/

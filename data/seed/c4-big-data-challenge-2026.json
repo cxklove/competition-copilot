@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/c4-big-data-challenge-2026.json",
+  "approval": {
+    "candidate_id": "c4-big-data-challenge-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-08T15:42:57.612295Z",
+    "review_note": "Human reviewed the official 2026 C4 Big Data Challenge competition rules. Competition identity, 2026 edition mapping, registration time window, and zero-track modeling approved. Multi-stage competition schedule and eligibility/team rules remain preserved in raw data rather than being forced into unsupported structured fields."
+  },
+  "verification": {
+    "candidate_id": "c4-big-data-challenge-2026-candidate",
+    "verified_at": "2026-10-08T15:42:57.612295Z",
+    "verification_note": "The official C4 Big Data Challenge competition rules were explicitly verified to support the competition identity, 2026 edition, exact Beijing-time registration window, and zero-track modeling. Multi-stage competition scheduling and eligibility/team rules remain outside the current structured verified schema.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://nercbds.tsinghua.edu.cn/bdc/szsm.html"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "c4-big-data-challenge",
+    "name": "中国高校计算机大赛—大数据挑战赛",
+    "short_name": null,
+    "description": null,
+    "official_url": "https://nercbds.tsinghua.edu.cn/bdc.html"
+  },
+  "competition_source": {
+    "source_url": "https://nercbds.tsinghua.edu.cn/bdc/szsm.html",
+    "source_type": "official",
+    "observed_at": "2026-10-08T23:21:08+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "c4-big-data-challenge-2026",
+    "competition_id": "c4-big-data-challenge",
+    "year": 2026,
+    "name": "第十一届（2026年）“中国高校计算机大赛—大数据挑战赛”",
+    "registration_window": {
+      "start_at": "2026-03-26T10:00:00+08:00",
+      "end_at": "2026-07-15T12:00:00+08:00"
+    },
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://nercbds.tsinghua.edu.cn/bdc/szsm.html",
+      "source_type": "official",
+      "observed_at": "2026-10-08T23:21:08+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": []
+}

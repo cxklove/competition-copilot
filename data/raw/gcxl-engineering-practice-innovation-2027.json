@@ -1,0 +1,42 @@
+{
+  "competition_id": "gcxl-engineering-practice-innovation",
+  "name": "中国大学生工程实践与创新能力大赛",
+  "short_name": null,
+  "edition_id": "gcxl-engineering-practice-innovation-2027",
+  "edition_name": "2027年第十届中国大学生工程实践与创新能力大赛",
+  "edition_year": 2027,
+  "official_url": "http://www.gcxl.edu.cn",
+  "registration_start": null,
+  "registration_end": null,
+  "competition_start": null,
+  "competition_end": null,
+  "tracks": [
+    "工程实践赛道",
+    "智能+工程创新赛道",
+    "虚拟仿真赛道"
+  ],
+  "track_ids": [
+    "gcxl-engineering-practice-innovation-2027-engineering-practice",
+    "gcxl-engineering-practice-innovation-2027-intelligent-innovation",
+    "gcxl-engineering-practice-innovation-2027-virtual-simulation"
+  ],
+  "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+  "source_type": "official",
+  "observed_at": "2026-10-09T11:17:32+08:00",
+  "raw_payload": {
+    "source_title": "关于举办2027年第十届中国大学生 工程实践与创新能力大赛预通知",
+    "edition_text": "2027年第十届中国大学生工程实践与创新能力大赛（简称：第十届中国大学生工创大赛）预计将于2027年7-8月举办（具体时间、地点另行通知）。",
+    "eligibility_text": "参赛选手须为普通高等教育本科院校全日制在校本科生。每名参赛学生仅限参加一个赛项、加入一支参赛队。",
+    "team_text": "每支参赛队由不超过 4 名学生、不超过 2 名指导教师组成；每名参赛学生仅限参加一个赛项、加入一支参赛队。参赛队进入省级复赛后不能更换任何参赛人员。",
+    "registration_text": "所有参赛队须登录大赛组委会指定大赛报名平台（网址：http://www.gcxl.edu.cn），点击“竞赛报名”按钮完成参赛注册，并提交报名及相关参赛材料；逾期或未按要求提交的，报名无效。各省组委会须于 2027年5月10日前完成省级复赛组织及参赛详细数据报送工作，并在大赛组委会指定大赛报名平台上按时提交入围全国总决赛的参赛队名单。",
+    "competition_text": "预计将于2027年7-8月举办（具体时间、地点另行通知）。大赛采用校级初赛、省级复赛、全国总决赛三级赛制。参加全国总决赛的参赛队从各省级复赛中产生。全国总决赛各赛项省参赛名额，由大赛组委会以省级复赛各赛项实际参赛学校数、校级初赛各赛项实际参赛队数及所占比例为依据，统一核定并分配；具体名额分配办法另行发布。",
+    "tracks_text": [
+      "工程实践赛道，包括：太阳能电动车、生物质能电动车2个赛项",
+      "智能+工程创新赛道，包括：智能搬运、智能分拣、智能救援3个赛项",
+      "虚拟仿真赛道，包括：飞行器设计仿真、智能网联汽车设计、工程场景数字化和企业运营仿真4个赛项，有关各赛项相关命题与评分见附件"
+    ],
+    "organizer_text": "大赛设组织委员会（简称大赛组委会），负责大赛的组织工作。组委会下设专家委员会和秘书处。专家委员会负责竞赛命题设计、评审规则制定、竞赛成绩评定及竞赛仲裁等工作。秘书处负责竞赛日常工作。落款：教育部工程训练教学指导委员会（大连理工大学代章）、中国大学生工程实践与创新能力大赛组委会，2026年5月10日。",
+    "signup_method_text": "所有参赛队须登录大赛组委会指定大赛报名平台（网址：http://www.gcxl.edu.cn），点击“竞赛报名”按钮完成参赛注册，并提交报名及相关参赛材料。",
+    "notes": "大赛主题：交叉融合工程创新育新质，立德树人强国建设勇担当。全国总决赛设置不同等级奖项、优秀组织奖等，奖项等级、比例和数量另行通知；大赛组委会向获奖单位、获奖参赛队等颁发获奖证书。各赛道赛项命题与运行、评分与规则见本通知附件（附件PDF）。其他未尽事宜见大赛组委会后续通知。"
+  }
+}

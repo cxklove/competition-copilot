@@ -36,6 +36,14 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 - **Acceptance Criteria:** 种子数据能从来源复核；未验证的 `CompetitionCandidate` 不能进入正式数据或确定性决策。此阶段可用审阅后的文件数据，不依赖 P3 数据库层。
 - **Explicitly Out of Scope:** 全网爬虫、自动审核、生产数据库和推荐逻辑。
 
+### P2 Sample 4 — Multi-source Investigation
+
+- **Sample 4 Multi-source Investigation = COMPLETE**：对中国国际大学生创新大赛 2026、华为ICT大赛 2026、中国大学生计算机设计大赛 2026、中国大学生工程实践与创新能力大赛 2027、RoboMaster 2026、挑战杯创业计划竞赛 2026、全国大学生智能汽车竞赛、中国研究生创新实践系列大赛 2026，共 8 个代表性真实赛事进行了 Current-Schema Single-Source Challenge。
+- **Finding:** `NO CURRENT-SCHEMA MULTI-SOURCE CANDIDATE FOUND`。当前 P2 Seed 必需的结构化事实主要是 `Competition.name`、`CompetitionEdition.name`、`CompetitionEdition.year`、`CompetitionTrack.name`；单一官方年度通知或赛事官方页面通常足以支持这些身份与名称事实。
+- **Current Schema Multi-source Support = NOT REQUIRED**：跨来源事实主要涉及 Eligibility、Team Rule、Track Detailed Rule、Judging、Awards、Quota 和 Dynamic State；这些仍属 Raw-only 或未来 Domain 范围，不能据此要求当前 Seed 支持多来源。
+- **Future Multi-source Requirement = DEFERRED**：未来需求并未取消。**Future Revisit Trigger =** 当 Eligibility、Team Rule、Track Detail 或 Dynamic State 被提升为正式结构化 Domain 时，重新评估逐事实来源归属和多来源核验需求。
+- **Sample Artifact Decision:** 本次调查不创建 Sample 4 Raw 或 Seed，也不修改当前 Domain、Schema 或现有 Seed 契约。
+
 ## P3 — Repository Layer
 
 - **Goal:** 用抽象接口提供已审核数据的读写与查询。

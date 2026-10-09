@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/china-intl-college-students-innovation-2026.json",
+  "approval": {
+    "candidate_id": "china-intl-college-students-innovation-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T09:10:56.539171Z",
+    "review_note": "Human explicitly approved the competition identity, 2026 edition, and five top-level tracks. The registration window remains null. The September 25 12:00 deadline is not promoted to a whole-edition registration_end because international projects have separate arrangements and the current Edition window cannot express that scope."
+  },
+  "verification": {
+    "candidate_id": "china-intl-college-students-innovation-2026-candidate",
+    "verified_at": "2026-10-09T09:10:56.539171Z",
+    "verification_note": "Human explicitly verified the Ministry of Education official notice at the current Raw source URL as support for the competition identity, 2026 edition, and five top-level tracks.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "china-intl-college-students-innovation",
+    "name": "中国国际大学生创新大赛",
+    "short_name": null,
+    "description": null,
+    "official_url": "https://cy.ncss.cn/"
+  },
+  "competition_source": {
+    "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+    "source_type": "official",
+    "observed_at": "2026-10-09T15:29:36+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "china-intl-college-students-innovation-2026",
+    "competition_id": "china-intl-college-students-innovation",
+    "year": 2026,
+    "name": "中国国际大学生创新大赛（2026）",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+      "source_type": "official",
+      "observed_at": "2026-10-09T15:29:36+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [
+    {
+      "id": "china-intl-college-students-innovation-2026-higher-education",
+      "edition_id": "china-intl-college-students-innovation-2026",
+      "name": "高教主赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:29:36+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "china-intl-college-students-innovation-2026-red-journey",
+      "edition_id": "china-intl-college-students-innovation-2026",
+      "name": "“青年红色筑梦之旅”赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:29:36+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "china-intl-college-students-innovation-2026-vocational-education",
+      "edition_id": "china-intl-college-students-innovation-2026",
+      "name": "职教赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:29:36+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "china-intl-college-students-innovation-2026-industry",
+      "edition_id": "china-intl-college-students-innovation-2026",
+      "name": "产业赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:29:36+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "china-intl-college-students-innovation-2026-germination",
+      "edition_id": "china-intl-college-students-innovation-2026",
+      "name": "萌芽赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.moe.gov.cn/srcsite/A08/s5672/202607/t20260731_1445670.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:29:36+08:00",
+        "verification_status": "verified"
+      }
+    }
+  ],
+  "temporal_provenance": []
+}

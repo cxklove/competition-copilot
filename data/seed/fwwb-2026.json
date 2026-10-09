@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/fwwb-2026.json",
+  "approval": {
+    "candidate_id": "fwwb-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T09:10:56.543097Z",
+    "review_note": "Human explicitly approved A/B/C/D as four top-level mutually exclusive competition categories modeled as CompetitionTracks; lower-level tasks remain Raw-only. Registration start has only a date and remains null. Registration end is 2026-03-31T16:00:00+08:00 under the reviewed Asia/Shanghai jurisdiction_default policy, with temporal provenance recorded in Raw. The competition window remains null."
+  },
+  "verification": {
+    "candidate_id": "fwwb-2026-candidate",
+    "verified_at": "2026-10-09T09:10:56.544101Z",
+    "verification_note": "Human explicitly verified the current official organizing committee extension notice for the 2026 competition identity, its A/B/C/D category references, and the extended March 31 16:00 registration deadline. The original official organizing notice retained in Raw supports the full category names. Neither notice is claimed to state UTC+08:00 explicitly.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "fwwb",
+    "name": "中国大学生服务外包创新创业大赛",
+    "short_name": "服创大赛",
+    "description": null,
+    "official_url": "https://www.fwwb.org.cn/"
+  },
+  "competition_source": {
+    "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf",
+    "source_type": "official",
+    "observed_at": "2026-10-09T16:48:49+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "fwwb-2026",
+    "competition_id": "fwwb",
+    "year": 2026,
+    "name": "第十七届中国大学生服务外包创新创业大赛",
+    "registration_window": {
+      "start_at": null,
+      "end_at": "2026-03-31T16:00:00+08:00"
+    },
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf",
+      "source_type": "official",
+      "observed_at": "2026-10-09T16:48:49+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [
+    {
+      "id": "fwwb-2026-enterprise-proposition",
+      "edition_id": "fwwb-2026",
+      "name": "A类（企业命题类）",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf",
+        "source_type": "official",
+        "observed_at": "2026-10-09T16:48:49+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "fwwb-2026-entrepreneurial-practice",
+      "edition_id": "fwwb-2026",
+      "name": "B类（创业实践类）",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf",
+        "source_type": "official",
+        "observed_at": "2026-10-09T16:48:49+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "fwwb-2026-opc-maker",
+      "edition_id": "fwwb-2026",
+      "name": "C类（OPC创客类）",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf",
+        "source_type": "official",
+        "observed_at": "2026-10-09T16:48:49+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "fwwb-2026-ai-special",
+      "edition_id": "fwwb-2026",
+      "name": "D类（人工智能专项赛道暨2026腾讯开悟人工智能全球公开赛）",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.fwwb.org.cn/attached/file/20260317/20260317145517_439.pdf",
+        "source_type": "official",
+        "observed_at": "2026-10-09T16:48:49+08:00",
+        "verification_status": "verified"
+      }
+    }
+  ],
+  "temporal_provenance": [
+    {
+      "field": "registration_end",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/meicc-2026.json",
+  "approval": {
+    "candidate_id": "meicc-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T09:10:56.547098Z",
+    "review_note": "Human explicitly approved the competition identity, 2026 edition, and three top-level tracks. The 19 lower-level events remain Raw-only. The month range is not converted into a competition window."
+  },
+  "verification": {
+    "candidate_id": "meicc-2026-candidate",
+    "verified_at": "2026-10-09T09:10:56.547098Z",
+    "verification_note": "Human explicitly verified the official notice at the current Raw source URL as support for the competition identity, 2026 edition, and three top-level tracks.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "meicc",
+    "name": "中国大学生机械工程创新创意大赛",
+    "short_name": null,
+    "description": null,
+    "official_url": null
+  },
+  "competition_source": {
+    "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html",
+    "source_type": "official",
+    "observed_at": "2026-10-09T15:32:55+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "meicc-2026",
+    "competition_id": "meicc",
+    "year": 2026,
+    "name": "2026年中国大学生机械工程创新创意大赛",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html",
+      "source_type": "official",
+      "observed_at": "2026-10-09T15:32:55+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [
+    {
+      "id": "meicc-2026-creativity",
+      "edition_id": "meicc-2026",
+      "name": "创意赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:32:55+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "meicc-2026-innovation",
+      "edition_id": "meicc-2026",
+      "name": "创新赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:32:55+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "meicc-2026-graduation-design",
+      "edition_id": "meicc-2026",
+      "name": "毕业设计赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:32:55+08:00",
+        "verification_status": "verified"
+      }
+    }
+  ],
+  "temporal_provenance": []
+}

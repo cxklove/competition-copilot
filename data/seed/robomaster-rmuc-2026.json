@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/robomaster-rmuc-2026.json",
+  "approval": {
+    "candidate_id": "robomaster-rmuc-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T09:10:56.550235Z",
+    "review_note": "Human explicitly approved the competition identity and RMUC 2026 edition with no top-level CompetitionTracks. Regional, revival, and national rounds are stages; robot types are not tracks. Eligibility and team evidence remain Raw-only. Registration clock times receive no timezone interpretation, so the registration window remains null."
+  },
+  "verification": {
+    "candidate_id": "robomaster-rmuc-2026-candidate",
+    "verified_at": "2026-10-09T09:10:56.550235Z",
+    "verification_note": "Human explicitly verified the current official RoboMaster page at the Raw source URL as support for the competition identity, RMUC 2026 edition, and the eligibility and team evidence retained in Raw.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://www.robomaster.com/zh-CN/robo/rm"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "robomaster-rmuc",
+    "name": "机甲大师超级对抗赛（RMUC）",
+    "short_name": "RMUC",
+    "description": null,
+    "official_url": "https://www.robomaster.com/zh-CN/robo/rm"
+  },
+  "competition_source": {
+    "source_url": "https://www.robomaster.com/zh-CN/robo/rm",
+    "source_type": "official",
+    "observed_at": "2026-10-09T16:02:30+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "robomaster-rmuc-2026",
+    "competition_id": "robomaster-rmuc",
+    "year": 2026,
+    "name": "RMUC 2026",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://www.robomaster.com/zh-CN/robo/rm",
+      "source_type": "official",
+      "observed_at": "2026-10-09T16:02:30+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [],
+  "temporal_provenance": []
+}

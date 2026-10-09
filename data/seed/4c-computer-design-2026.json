@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/4c-computer-design-2026.json",
+  "approval": {
+    "candidate_id": "4c-computer-design-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T09:10:56.535170Z",
+    "review_note": "Human explicitly approved the competition identity, 2026 edition, and 11 official top-level categories as CompetitionTracks. Separate final venues and date schedules are not collapsed into one competition window. Eligibility evidence remains Raw-only."
+  },
+  "verification": {
+    "candidate_id": "4c-computer-design-2026-candidate",
+    "verified_at": "2026-10-09T09:10:56.535170Z",
+    "verification_note": "Human explicitly verified the official competition notice at the current Raw source URL as support for the competition identity, 2026 edition, and 11 top-level categories.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "4c-computer-design",
+    "name": "中国大学生计算机设计大赛",
+    "short_name": "4C",
+    "description": null,
+    "official_url": "http://jsjds.blcu.edu.cn/"
+  },
+  "competition_source": {
+    "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+    "source_type": "official",
+    "observed_at": "2026-10-09T15:25:28+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "4c-computer-design-2026",
+    "competition_id": "4c-computer-design",
+    "year": 2026,
+    "name": "2026年（第19届）中国大学生计算机设计大赛",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+      "source_type": "official",
+      "observed_at": "2026-10-09T15:25:28+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [
+    {
+      "id": "4c-computer-design-2026-software",
+      "edition_id": "4c-computer-design-2026",
+      "name": "软件应用与开发",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-microcourse-ai",
+      "edition_id": "4c-computer-design-2026",
+      "name": "微课与AI辅助教学",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-iot",
+      "edition_id": "4c-computer-design-2026",
+      "name": "物联网应用与物联网创新转化（创业实践）",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-bigdata",
+      "edition_id": "4c-computer-design-2026",
+      "name": "大数据应用",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-ai",
+      "edition_id": "4c-computer-design-2026",
+      "name": "人工智能应用",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-infoviz",
+      "edition_id": "4c-computer-design-2026",
+      "name": "信息可视化设计",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-dm-static",
+      "edition_id": "4c-computer-design-2026",
+      "name": "数媒静态设计",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-dm-animation",
+      "edition_id": "4c-computer-design-2026",
+      "name": "数媒动漫与短片",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-dm-game",
+      "edition_id": "4c-computer-design-2026",
+      "name": "数媒游戏与交互设计",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-music",
+      "edition_id": "4c-computer-design-2026",
+      "name": "计算机音乐创作",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "4c-computer-design-2026-sinology",
+      "edition_id": "4c-computer-design-2026",
+      "name": "国际生“汉学”（“中华优秀传统文化”数智创作）",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "https://jsjds.blcu.edu.cn/info/1042/2294.htm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:25:28+08:00",
+        "verification_status": "verified"
+      }
+    }
+  ],
+  "temporal_provenance": []
+}

@@ -1,0 +1,30 @@
+{
+  "competition_id": "robomaster-rmuc",
+  "name": "机甲大师超级对抗赛（RMUC）",
+  "short_name": "RMUC",
+  "edition_id": "robomaster-rmuc-2026",
+  "edition_name": "RMUC 2026",
+  "edition_year": 2026,
+  "official_url": "https://www.robomaster.com/zh-CN/robo/rm",
+  "registration_start": null,
+  "registration_end": null,
+  "competition_start": null,
+  "competition_end": null,
+  "tracks": [],
+  "track_ids": [],
+  "source_url": "https://www.robomaster.com/zh-CN/robo/rm",
+  "source_type": "official",
+  "observed_at": "2026-10-09T16:02:30+08:00",
+  "raw_payload": {
+    "source_title": "RoboMaster 机甲大师超级对抗赛介绍",
+    "edition_text": "2026赛季；大赛通知：第二十五届全国大学生机器人大赛的通知；RMUC 2026将不设置「区域赛·港澳台及海外赛区、邀请赛」。",
+    "eligibility_text": "官网“报名资格”规定，符合以下任一条件可报名：①成功通过RMUC 2024或RMUC 2025中期进度考核的队伍；②在RMUL 2025的3V3对抗赛小组赛中成功晋级的队伍（若小组赛有两轮，以第一轮晋级为准）；非甲级队伍条件可放宽至主奖项获得二等奖。RMUC报名条件根据每赛季实际情况调整，于当赛季报名启动时确定。报名后，组委会根据各技术评审节点的机器人研发完成度审核是否授予参赛资格；通过当赛季技术评审体系考核的队伍可获得区域赛参赛资格，并争夺当赛季全国赛晋级名额。",
+    "team_text": "官网“战队要求/报名参赛”规定：原则上同一所学校仅有一支参赛队伍拥有参赛资格。两所没有单独参赛队伍的学校可以跨校组成联队；联队至少有其中一支队伍符合RMUC报名资格方可报名。以高校为单位，召集机械、电子、控制、软件、计算机、宣传等相关专业方向的同学组成研发团队。",
+    "registration_text": "正式报名：\n报名时间：2025年10月29日18:00-2025年11月6日18:00",
+    "competition_text": "正式比赛：\n区域赛：2026年5月-6月\n复活赛：2026年7月-8月\n全国赛：2026年7月-8月\n*RMUC 2026将不设置「区域赛·港澳台及海外赛区、邀请赛」",
+    "tracks_text": [],
+    "organizer_text": null,
+    "signup_method_text": "通过RoboMaster官方“报名中心/立刻报名”入口报名；规则/资料中心：https://bbs.robomaster.com/wiki/20204847",
+    "notes": "全国大学生机器人大赛 RoboMaster 机甲大师超级对抗赛（RMUC, RoboMaster University Championship）侧重考察参赛队员对理工学科的综合应用与工程实践能力，充分融合了“机器视觉”、“嵌入式系统设计”、“机械工程”、“自主导航”、“人机交互”、“射频前端”等众多机器人相关技术学科，同时创新性地将流行呈现方式与机器人竞技相结合，使机器人对抗更加直观激烈，吸引了众多的科技爱好者和社会公众的广泛关注。规则概述：在2026赛季中，对战双方需自主研发不同种类和功能的机器人，在指定的比赛场地内进行战术对抗，通过操控机器人发射弹丸攻击对方机器人和基地；比赛结束时，基地剩余血量高的一方获得比赛胜利。规则/资料中心 https://bbs.robomaster.com/wiki/20204847 内含：1、赛事规则：比赛规则手册、机器人制作规范手册、参赛手册、串口协议；2、赛事产品介绍：裁判系统（含机载端模块、赛事引擎）、机器人套件&配件等；3、技术评审相关文档：技术评审细则、各环节须知；4、其他运营资料：品牌宣传素材包、招商指引、参赛攻略等。运营/版权：深圳市大疆无人机应用有限公司（备案号粤ICP备2022092332号）；电话：+86 (0)755 84357613；邮箱：robomaster@dji.com。"
+  }
+}

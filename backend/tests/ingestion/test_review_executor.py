@@ -8,6 +8,7 @@ import pytest
 
 from competition_copilot.domain.source_metadata import VerificationStatus
 from competition_copilot.ingestion import review_executor
+from competition_copilot.ingestion.batch_audit import audit_fixtures
 from competition_copilot.ingestion.candidate import IssueSeverity, ValidationIssue
 from competition_copilot.ingestion.models import RawCompetitionData
 from competition_copilot.ingestion.review_executor import (
@@ -34,6 +35,7 @@ def make_entry(
     *,
     approval: str = "approve",
     verification: str = "verify",
+    with_time: bool = False,
 ) -> HumanReviewEntry:
     raw_path = root / "data/raw" / f"{name}.json"
     raw_path.parent.mkdir(parents=True, exist_ok=True)
@@ -48,6 +50,20 @@ def make_entry(
         source_url="https://example.org/notice",
         source_type="official",
         observed_at=DECIDED_AT,
+        registration_end="2026-03-31T16:00:00+08:00" if with_time else None,
+        temporal_provenance=(
+            [
+                {
+                    "field": "registration_end",
+                    "timezone_name": "Asia/Shanghai",
+                    "timezone_basis": "jurisdiction_default",
+                    "precision": "minute",
+                    "source_text": "报名截止：2026年3月31日16:00",
+                }
+            ]
+            if with_time
+            else []
+        ),
         raw_payload={"source_text": "Synthetic evidence only"},
     )
     raw_path.write_text(raw.model_dump_json(), encoding="utf-8")
@@ -108,6 +124,28 @@ def test_correct_raw_binding_plans_explicit_decision(tmp_path: Path) -> None:
     assert result.status == "planned"
     assert result.code is None
     assert not seed_path(tmp_path, entry).exists()
+
+
+def test_executor_keeps_time_provenance_and_dry_run_is_read_only(
+    tmp_path: Path,
+) -> None:
+    entry = make_entry(tmp_path, with_time=True)
+
+    assert run(tmp_path, entry).status == "planned"
+    assert not seed_path(tmp_path, entry).exists()
+
+    assert run(tmp_path, entry, execute=True).status == "executed"
+    seed = deserialize_seed(seed_path(tmp_path, entry).read_bytes())
+    assert seed.schema_version == "1.1"
+    assert seed.temporal_provenance[0].timezone_basis == "jurisdiction_default"
+    assert seed.edition.registration_window.end_at.isoformat() == (
+        "2026-03-31T16:00:00+08:00"
+    )
+    audit = audit_fixtures(tmp_path / "data/raw", tmp_path / "data/seed")
+    assert audit.passed
+    assert audit.summary.seed_passed == 1
+    assert audit.fixtures[0].registration_window_state == "partial"
+    assert run(tmp_path, entry, execute=True).status == "already_materialized"
 
 
 def test_changed_raw_hash_blocks_execution(tmp_path: Path) -> None:

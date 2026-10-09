@@ -128,6 +128,8 @@ def _matches_existing_seed(
         == [track.model_dump(exclude={"source"}) for track in candidate.tracks]
         and pending_source == edition.source
         and seed.validation_issues == issues
+        and seed.temporal_provenance
+        == [item.for_seed() for item in candidate.raw_data.temporal_provenance]
     )
 
 

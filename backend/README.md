@@ -14,6 +14,15 @@ with a timezone (`YYYY-MM-DDTHH:MM:SSZ` or an explicit offset). It returns
 provisional domain models with pending source verification; ambiguous dates raise
 `NormalizationError` and no approval is performed.
 
+`RawCompetitionData.temporal_provenance` optionally records a reviewed IANA
+timezone, its basis (`source_explicit` or `jurisdiction_default`), minute/second
+precision, and the supporting source text for each structured time field. Each
+entry requires a non-null aware time whose offset matches that zone at the local
+clock time. The Raw fixture and its SHA256 binding carry the human review of a
+`jurisdiction_default`; the normalizer never infers a timezone from names,
+language, or URLs. Date-only, month ranges, and stage schedules are not promoted
+to structured clock times.
+
 `CompetitionCandidateValidator` reads a candidate and optionally supplied known
 competition and edition IDs. It returns recorded and newly found structural
 issues without changing the candidate, contacting external sources, or approving
@@ -29,7 +38,9 @@ It requires an approved candidate, a matching approved bundle, an aware review
 time, and a nonblank note. It returns detached verified copies and an immutable
 `SourceVerificationRecord`; the original approved bundle remains pending.
 
-`ingestion/seed.py` defines the version 1.0 verified seed JSON contract. Its
+`ingestion/seed.py` reads existing version 1.0 Seeds and builds version 1.1
+Seeds. Version 1.1 retains the structured time's reviewed timezone provenance
+without copying Raw-only `source_text`. Its
 builder accepts an approved candidate, a verified bundle, the validator's issues,
 and a `data/raw/...` audit reference. `serialize_seed` returns UTF-8 JSON bytes;
 `deserialize_seed` validates and restores the same envelope without reading the

@@ -218,7 +218,7 @@ def _check_seed_contract(seed: CompetitionSeedEnvelope, result: SeedAuditResult)
     sources = [seed.competition_source, seed.edition.source]
     sources.extend(track.source for track in seed.tracks)
     if (
-        seed.schema_version != "1.0"
+        seed.schema_version not in ("1.0", "1.1")
         or seed.artifact_type != "verified_competition_seed"
         or seed.approval.status is not CandidateStatus.APPROVED
         or seed.verification.previous_status is not VerificationStatus.PENDING
@@ -345,6 +345,17 @@ def _compare_raw_seed(
             AuditFinding(
                 "VALIDATION_ISSUES_MISMATCH",
                 "Seed validation issues differ from current Raw validation",
+                result.seed_path,
+            )
+        )
+    expected_temporal_provenance = [
+        item.for_seed() for item in candidate.raw_data.temporal_provenance
+    ]
+    if seed.temporal_provenance != expected_temporal_provenance:
+        result.findings.append(
+            AuditFinding(
+                "TEMPORAL_PROVENANCE_MISMATCH",
+                "Seed temporal provenance differs from Raw",
                 result.seed_path,
             )
         )

@@ -1,6 +1,20 @@
 """Unreviewed data read from an external competition source."""
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
+from typing import Self
+
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from competition_copilot.ingestion.temporal_provenance import (
+    TemporalProvenance,
+    validate_timezone_offset,
+)
 
 
 class RawCompetitionData(BaseModel):
@@ -19,6 +33,7 @@ class RawCompetitionData(BaseModel):
     registration_end: str | None = None
     competition_start: str | None = None
     competition_end: str | None = None
+    temporal_provenance: list[TemporalProvenance] = Field(default_factory=list)
     tracks: list[str] = Field(default_factory=list)
     track_ids: list[str] = Field(default_factory=list)
     source_url: str
@@ -32,3 +47,16 @@ class RawCompetitionData(BaseModel):
         if not value.strip():
             raise ValueError("source_url must not be blank")
         return value
+
+    @model_validator(mode="after")
+    def require_temporal_provenance_consistency(self) -> Self:
+        seen = set()
+        for provenance in self.temporal_provenance:
+            if provenance.field in seen:
+                raise ValueError(f"duplicate temporal provenance field: {provenance.field}")
+            seen.add(provenance.field)
+            value = getattr(self, provenance.field.value)
+            if value is None:
+                raise ValueError(f"{provenance.field} provenance requires a time value")
+            validate_timezone_offset(value, provenance)
+        return self

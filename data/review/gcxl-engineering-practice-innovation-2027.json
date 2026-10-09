@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "human_review_manifest",
+  "entries": [
+    {
+      "raw_fixture_path": "data/raw/gcxl-engineering-practice-innovation-2027.json",
+      "raw_sha256": "b809b2ba8698d8ee67b584e83c0f20abdca5bb7f46357d025e3dafab73dd7f81",
+      "competition_id": "gcxl-engineering-practice-innovation",
+      "edition_id": "gcxl-engineering-practice-innovation-2027",
+      "candidate_id": "gcxl-engineering-practice-innovation-2027-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T14:51:41.321820+08:00",
+      "review_note": "Human reviewed the official 2027 pre-notice for the China College Students Engineering Practice and Innovation Ability Competition. Competition identity, 2027 edition, three top-level tracks, and preservation of unknown registration/competition windows were explicitly approved. Edition-specific shorthand was not promoted to Competition.short_name.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T14:51:41.321820+08:00",
+      "verification_note": "Human explicitly verified the official organizing committee pre-notice as the source supporting the competition identity, 2027 edition, three top-level tracks, eligibility/team raw evidence, and the fact that exact registration and competition windows remain unknown."
+    }
+  ]
+}

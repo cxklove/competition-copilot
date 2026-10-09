@@ -46,6 +46,15 @@ the decision, not when a later workflow executes it. `compute_file_sha256` and
 `validate_raw_binding` bind each entry to the exact reviewed Raw bytes; loading
 or validating a manifest does not execute approval, verification, or Seed creation.
 
+`ingestion/review_executor.py` rechecks the manifest's Raw hash, rebuilds and
+validates each candidate, and checks all three identity fields before acting on
+explicit decisions. It continues checking later entries after one entry fails.
+The CLI is a dry-run by default; only `--execute` calls the existing review and
+verification actions and writes verified Seeds. A matching existing Seed reports
+`already_materialized` without rewriting it; a conflicting Seed fails without
+being overwritten. Manifest decision times remain separate from workflow
+execution times.
+
 `pyproject.toml` is the source of truth for direct dependencies.
 `requirements.lock` records the exact versions of the verified development
 environment, including transitive dependencies.
@@ -70,6 +79,17 @@ Pass `--raw-dir` and `--seed-dir` to audit another pair of fixture directories.
 The command returns 0 when all discovered inputs pass, or 1 for load,
 normalization, validation-error, Seed, or ID-collision failures. Warnings and
 Raw fixtures without a Seed do not cause failure.
+
+From the repository root, inspect a review manifest without writing a Seed:
+
+```powershell
+.\backend\.venv\Scripts\python backend\scripts\execute_reviews.py data\review\gcxl-engineering-practice-innovation-2027.json
+```
+
+Add `--execute` only when the recorded human decisions should be applied. The
+command reports `planned`, `executed`, `held`, `rejected`, `failed`, and
+`already_materialized` counts and returns 1 if any entry fails. Verified Seeds
+are written to `data/seed/<Raw basename>`.
 
 There is no application start command yet. To build a wheel:
 

@@ -40,6 +40,12 @@ JSON fixtures. It reuses the existing models, normalizer, and validator; it neve
 approves candidates, verifies sources, or creates Seeds. `scripts/` contains the
 thin command-line entry point for this audit.
 
+`ingestion/review_manifest.py` defines versioned, explicit human approval and
+source-verification decisions. Decision timestamps describe when a person made
+the decision, not when a later workflow executes it. `compute_file_sha256` and
+`validate_raw_binding` bind each entry to the exact reviewed Raw bytes; loading
+or validating a manifest does not execute approval, verification, or Seed creation.
+
 `pyproject.toml` is the source of truth for direct dependencies.
 `requirements.lock` records the exact versions of the verified development
 environment, including transitive dependencies.

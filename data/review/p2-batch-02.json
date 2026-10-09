@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "human_review_manifest",
+  "entries": [
+    {
+      "raw_fixture_path": "data/raw/national-college-student-math-competition-2026.json",
+      "raw_sha256": "0edf36ed6be0fb5216ef486b2c534769766e56e160d86e4a1ffdf3f99aefd96f",
+      "competition_id": "national-college-student-math-competition",
+      "edition_id": "national-college-student-math-competition-2026",
+      "candidate_id": "national-college-student-math-competition-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T19:29:30.767217+08:00",
+      "review_note": "Human explicitly approved Competition 全国大学生数学竞赛 and Edition 第十八届全国大学生数学竞赛 (2026) as an individual participation competition. Competition and Edition identity are principally supported by the China Mathematical Society official notice; the formal college organizer notice recorded in Raw supplements the individual participation evidence. Mathematics major, non-mathematics major, higher vocational, and A/B classifications are participant categories or groups, so tracks remain empty. The 2026 preliminary round and 2027 final are stage schedules; no whole-edition competition_window was invented.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T19:29:30.767217+08:00",
+      "verification_note": "Human explicitly verified the China Mathematical Society official notice at the current Raw source URL for competition identity and edition. The formal college organizer notice recorded in Raw supplements individual participation evidence; it is not treated as the national primary official source."
+    },
+    {
+      "raw_fixture_path": "data/raw/china-graduate-math-modeling-2026.json",
+      "raw_sha256": "56b65cd2c2c85df9aa28d092384c548e692f613b4c66a26e05a7db6d5f53ad9c",
+      "competition_id": "china-graduate-math-modeling",
+      "edition_id": "china-graduate-math-modeling-2026",
+      "candidate_id": "china-graduate-math-modeling-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T19:29:30.769211+08:00",
+      "review_note": "Human explicitly approved Competition 中国研究生数学建模竞赛 and 2026 Edition 2026年“华为杯”第二十三届中国研究生数学建模竞赛, graduate eligibility, and the three-person team rule retained as Raw-only evidence. A/B/C/D/E/F are problem choices rather than CompetitionTracks, so tracks remain empty. The registration_window and competition_window are exact. All four structured times carry timezone_name Asia/Shanghai and timezone_basis jurisdiction_default. The official source gave complete local clock times but did not explicitly state +08:00.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T19:29:30.769211+08:00",
+      "verification_note": "Human explicitly verified the official competition invitation and platform at the current Raw source URL for competition identity, the 2026 edition, graduate eligibility, team rules, and the registration and competition clock times. The source is not claimed to state +08:00 explicitly."
+    },
+    {
+      "raw_fixture_path": "data/raw/comap-mcm-2027.json",
+      "raw_sha256": "6cfb0d947ebda9f0fc4ee67640fe129db6b912fce34cb365c6925499b1828742",
+      "competition_id": "comap-mcm",
+      "edition_id": "comap-mcm-2027",
+      "candidate_id": "comap-mcm-2027-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T19:29:30.770729+08:00",
+      "review_note": "Human explicitly approved Competition COMAP Mathematical Contest in Modeling and Edition 2027 Mathematical Contest in Modeling for MCM only, not ICM. Problem A/B/C are problem choices, not CompetitionTracks, so tracks remain empty. Eligibility retains the official scope, including undergraduate and high school students, without narrowing it to college students only. The registration_window is partial and the competition_window is exact. The source explicitly says EST; timezone_basis is source_explicit and timezone_name is Etc/GMT+5, the IANA fixed UTC-05:00 zone. The source is not claimed to name America/New_York.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T19:29:30.770729+08:00",
+      "verification_note": "Human explicitly verified COMAP's official rules at the current Raw source URL for MCM identity, eligibility and team participation rules, and all three EST registration and contest time endpoints."
+    }
+  ]
+}

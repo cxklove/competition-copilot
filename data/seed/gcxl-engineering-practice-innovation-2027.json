@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/gcxl-engineering-practice-innovation-2027.json",
+  "approval": {
+    "candidate_id": "gcxl-engineering-practice-innovation-2027-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T07:12:43.804527Z",
+    "review_note": "Human reviewed the official 2027 pre-notice for the China College Students Engineering Practice and Innovation Ability Competition. Competition identity, 2027 edition, three top-level tracks, and preservation of unknown registration/competition windows were explicitly approved. Edition-specific shorthand was not promoted to Competition.short_name."
+  },
+  "verification": {
+    "candidate_id": "gcxl-engineering-practice-innovation-2027-candidate",
+    "verified_at": "2026-10-09T07:12:43.804527Z",
+    "verification_note": "Human explicitly verified the official organizing committee pre-notice as the source supporting the competition identity, 2027 edition, three top-level tracks, eligibility/team raw evidence, and the fact that exact registration and competition windows remain unknown.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ=="
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "gcxl-engineering-practice-innovation",
+    "name": "中国大学生工程实践与创新能力大赛",
+    "short_name": null,
+    "description": null,
+    "official_url": "http://www.gcxl.edu.cn/"
+  },
+  "competition_source": {
+    "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+    "source_type": "official",
+    "observed_at": "2026-10-09T11:17:32+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "gcxl-engineering-practice-innovation-2027",
+    "competition_id": "gcxl-engineering-practice-innovation",
+    "year": 2027,
+    "name": "2027年第十届中国大学生工程实践与创新能力大赛",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+      "source_type": "official",
+      "observed_at": "2026-10-09T11:17:32+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [
+    {
+      "id": "gcxl-engineering-practice-innovation-2027-engineering-practice",
+      "edition_id": "gcxl-engineering-practice-innovation-2027",
+      "name": "工程实践赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+        "source_type": "official",
+        "observed_at": "2026-10-09T11:17:32+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "gcxl-engineering-practice-innovation-2027-intelligent-innovation",
+      "edition_id": "gcxl-engineering-practice-innovation-2027",
+      "name": "智能+工程创新赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+        "source_type": "official",
+        "observed_at": "2026-10-09T11:17:32+08:00",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "gcxl-engineering-practice-innovation-2027-virtual-simulation",
+      "edition_id": "gcxl-engineering-practice-innovation-2027",
+      "name": "虚拟仿真赛道",
+      "description": null,
+      "official_url": null,
+      "source": {
+        "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+        "source_type": "official",
+        "observed_at": "2026-10-09T11:17:32+08:00",
+        "verification_status": "verified"
+      }
+    }
+  ]
+}

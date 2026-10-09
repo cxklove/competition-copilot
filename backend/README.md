@@ -35,6 +35,11 @@ and a `data/raw/...` audit reference. `serialize_seed` returns UTF-8 JSON bytes;
 `deserialize_seed` validates and restores the same envelope without reading the
 Raw fixture or writing a Seed file.
 
+`ingestion/batch_audit.py` performs a read-only audit of top-level Raw and Seed
+JSON fixtures. It reuses the existing models, normalizer, and validator; it never
+approves candidates, verifies sources, or creates Seeds. `scripts/` contains the
+thin command-line entry point for this audit.
+
 `pyproject.toml` is the source of truth for direct dependencies.
 `requirements.lock` records the exact versions of the verified development
 environment, including transitive dependencies.
@@ -48,6 +53,17 @@ python -m venv .venv
 .\.venv\Scripts\python -m pytest
 .\.venv\Scripts\python -m ruff check .
 ```
+
+From the repository root, audit the current fixtures with:
+
+```powershell
+.\backend\.venv\Scripts\python backend\scripts\audit_fixtures.py
+```
+
+Pass `--raw-dir` and `--seed-dir` to audit another pair of fixture directories.
+The command returns 0 when all discovered inputs pass, or 1 for load,
+normalization, validation-error, Seed, or ID-collision failures. Warnings and
+Raw fixtures without a Seed do not cause failure.
 
 There is no application start command yet. To build a wheel:
 

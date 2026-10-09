@@ -10,7 +10,7 @@ from competition_copilot.ingestion.normalizer import (
     CompetitionNormalizer,
     NormalizationError,
 )
-from competition_copilot.ingestion.seed import deserialize_seed
+from competition_copilot.ingestion.seed import CompetitionSeedEnvelope
 
 
 def raw_values(**overrides: object) -> dict[str, object]:
@@ -138,10 +138,33 @@ def test_chinese_text_and_cn_url_do_not_infer_timezone() -> None:
 
 def test_existing_four_seed_1_0_artifacts_still_load() -> None:
     root = Path(__file__).resolve().parents[3]
-    seeds = sorted((root / "data/seed").glob("*.json"))
+    names = (
+        "huawei-ict-2026.json",
+        "c4-big-data-challenge-2026.json",
+        "nuedc-analog-system-2026.json",
+        "gcxl-engineering-practice-innovation-2027.json",
+    )
 
-    assert len(seeds) == 4
-    for path in seeds:
-        seed = deserialize_seed(path.read_bytes())
+    for name in names:
+        path = root / "data/seed" / name
+        assert path.is_file(), f"Missing historical Seed: {path}"
+        seed = CompetitionSeedEnvelope.model_validate_json(path.read_bytes())
         assert seed.schema_version == "1.0"
         assert seed.temporal_provenance == []
+
+
+def test_batch_01_five_seed_1_1_artifacts_load() -> None:
+    root = Path(__file__).resolve().parents[3]
+    names = (
+        "4c-computer-design-2026.json",
+        "china-intl-college-students-innovation-2026.json",
+        "fwwb-2026.json",
+        "meicc-2026.json",
+        "robomaster-rmuc-2026.json",
+    )
+
+    for name in names:
+        path = root / "data/seed" / name
+        assert path.is_file(), f"Missing Batch 01 Seed: {path}"
+        seed = CompetitionSeedEnvelope.model_validate_json(path.read_bytes())
+        assert seed.schema_version == "1.1"

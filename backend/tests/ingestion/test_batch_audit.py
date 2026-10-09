@@ -77,8 +77,9 @@ def write_raw(
     return path
 
 
-def test_current_three_samples_pass_complete_batch_audit() -> None:
-    report = audit_fixtures(RAW_DIR, SEED_DIR)
+def test_current_three_samples_pass_complete_batch_audit(tmp_path: Path) -> None:
+    raw_dir, seed_dir = sample_dirs(tmp_path)
+    report = audit_fixtures(raw_dir, seed_dir)
     by_name = {Path(item.fixture_path).stem: item for item in report.fixtures}
     summary = report.summary
 
@@ -102,7 +103,7 @@ def test_current_three_samples_pass_complete_batch_audit() -> None:
     assert all(item.matching_seed_path is not None for item in report.fixtures)
     assert all(seed.round_trip_status == "passed" for seed in report.seeds)
     assert all(seed.raw_fixture_path is not None for seed in report.seeds)
-    assert audit_fixtures(RAW_DIR, SEED_DIR) == report
+    assert audit_fixtures(raw_dir, seed_dir) == report
 
 
 def test_audit_is_read_only_and_never_calls_review_actions(

@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/comap-mcm-2027.json",
+  "approval": {
+    "candidate_id": "comap-mcm-2027-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T11:38:17.786914Z",
+    "review_note": "Human explicitly approved Competition COMAP Mathematical Contest in Modeling and Edition 2027 Mathematical Contest in Modeling for MCM only, not ICM. Problem A/B/C are problem choices, not CompetitionTracks, so tracks remain empty. Eligibility retains the official scope, including undergraduate and high school students, without narrowing it to college students only. The registration_window is partial and the competition_window is exact. The source explicitly says EST; timezone_basis is source_explicit and timezone_name is Etc/GMT+5, the IANA fixed UTC-05:00 zone. The source is not claimed to name America/New_York."
+  },
+  "verification": {
+    "candidate_id": "comap-mcm-2027-candidate",
+    "verified_at": "2026-10-09T11:38:17.786914Z",
+    "verification_note": "Human explicitly verified COMAP's official rules at the current Raw source URL for MCM identity, eligibility and team participation rules, and all three EST registration and contest time endpoints.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "comap-mcm",
+    "name": "COMAP Mathematical Contest in Modeling",
+    "short_name": "MCM",
+    "description": null,
+    "official_url": "https://contest.comap.com/undergraduate/contests/mcm/"
+  },
+  "competition_source": {
+    "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+    "source_type": "official",
+    "observed_at": "2026-10-09T17:42:51+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "comap-mcm-2027",
+    "competition_id": "comap-mcm",
+    "year": 2027,
+    "name": "2027 Mathematical Contest in Modeling",
+    "registration_window": {
+      "start_at": null,
+      "end_at": "2027-01-28T15:00:00-05:00"
+    },
+    "competition_window": {
+      "start_at": "2027-01-28T17:00:00-05:00",
+      "end_at": "2027-02-01T20:00:00-05:00"
+    },
+    "official_url": null,
+    "source": {
+      "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+      "source_type": "official",
+      "observed_at": "2026-10-09T17:42:51+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [],
+  "temporal_provenance": [
+    {
+      "field": "registration_end",
+      "timezone_name": "Etc/GMT+5",
+      "timezone_basis": "source_explicit",
+      "precision": "minute"
+    },
+    {
+      "field": "competition_start",
+      "timezone_name": "Etc/GMT+5",
+      "timezone_basis": "source_explicit",
+      "precision": "minute"
+    },
+    {
+      "field": "competition_end",
+      "timezone_name": "Etc/GMT+5",
+      "timezone_basis": "source_explicit",
+      "precision": "minute"
+    }
+  ]
+}

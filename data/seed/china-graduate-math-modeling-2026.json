@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/china-graduate-math-modeling-2026.json",
+  "approval": {
+    "candidate_id": "china-graduate-math-modeling-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T11:38:17.782903Z",
+    "review_note": "Human explicitly approved Competition 中国研究生数学建模竞赛 and 2026 Edition 2026年“华为杯”第二十三届中国研究生数学建模竞赛, graduate eligibility, and the three-person team rule retained as Raw-only evidence. A/B/C/D/E/F are problem choices rather than CompetitionTracks, so tracks remain empty. The registration_window and competition_window are exact. All four structured times carry timezone_name Asia/Shanghai and timezone_basis jurisdiction_default. The official source gave complete local clock times but did not explicitly state +08:00."
+  },
+  "verification": {
+    "candidate_id": "china-graduate-math-modeling-2026-candidate",
+    "verified_at": "2026-10-09T11:38:17.782903Z",
+    "verification_note": "Human explicitly verified the official competition invitation and platform at the current Raw source URL for competition identity, the 2026 edition, graduate eligibility, team rules, and the registration and competition clock times. The source is not claimed to state +08:00 explicitly.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "china-graduate-math-modeling",
+    "name": "中国研究生数学建模竞赛",
+    "short_name": null,
+    "description": null,
+    "official_url": "https://cpipc.acge.org.cn/cw/hp/4"
+  },
+  "competition_source": {
+    "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314",
+    "source_type": "official",
+    "observed_at": "2026-10-09T17:42:51+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "china-graduate-math-modeling-2026",
+    "competition_id": "china-graduate-math-modeling",
+    "year": 2026,
+    "name": "2026年“华为杯”第二十三届中国研究生数学建模竞赛",
+    "registration_window": {
+      "start_at": "2026-06-01T08:00:00+08:00",
+      "end_at": "2026-09-19T17:00:00+08:00"
+    },
+    "competition_window": {
+      "start_at": "2026-09-23T08:00:00+08:00",
+      "end_at": "2026-09-27T12:00:00+08:00"
+    },
+    "official_url": null,
+    "source": {
+      "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314",
+      "source_type": "official",
+      "observed_at": "2026-10-09T17:42:51+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [],
+  "temporal_provenance": [
+    {
+      "field": "registration_start",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute"
+    },
+    {
+      "field": "registration_end",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute"
+    },
+    {
+      "field": "competition_start",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute"
+    },
+    {
+      "field": "competition_end",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute"
+    }
+  ]
+}

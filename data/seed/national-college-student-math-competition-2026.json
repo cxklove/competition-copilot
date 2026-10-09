@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.1",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/national-college-student-math-competition-2026.json",
+  "approval": {
+    "candidate_id": "national-college-student-math-competition-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T11:38:17.777755Z",
+    "review_note": "Human explicitly approved Competition 全国大学生数学竞赛 and Edition 第十八届全国大学生数学竞赛 (2026) as an individual participation competition. Competition and Edition identity are principally supported by the China Mathematical Society official notice; the formal college organizer notice recorded in Raw supplements the individual participation evidence. Mathematics major, non-mathematics major, higher vocational, and A/B classifications are participant categories or groups, so tracks remain empty. The 2026 preliminary round and 2027 final are stage schedules; no whole-edition competition_window was invented."
+  },
+  "verification": {
+    "candidate_id": "national-college-student-math-competition-2026-candidate",
+    "verified_at": "2026-10-09T11:38:17.777755Z",
+    "verification_note": "Human explicitly verified the China Mathematical Society official notice at the current Raw source URL for competition identity and edition. The formal college organizer notice recorded in Raw supplements individual participation evidence; it is not treated as the national primary official source.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://www.cms.org.cn/Home/comp/comp_details/id/1449.html"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "national-college-student-math-competition",
+    "name": "全国大学生数学竞赛",
+    "short_name": null,
+    "description": null,
+    "official_url": "https://www.cms.org.cn/Home/comp/comp_details/id/1449.html"
+  },
+  "competition_source": {
+    "source_url": "https://www.cms.org.cn/Home/comp/comp_details/id/1449.html",
+    "source_type": "official",
+    "observed_at": "2026-10-09T17:42:51+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "national-college-student-math-competition-2026",
+    "competition_id": "national-college-student-math-competition",
+    "year": 2026,
+    "name": "第十八届全国大学生数学竞赛",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://www.cms.org.cn/Home/comp/comp_details/id/1449.html",
+      "source_type": "official",
+      "observed_at": "2026-10-09T17:42:51+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": [],
+  "temporal_provenance": []
+}

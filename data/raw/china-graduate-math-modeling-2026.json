@@ -1,0 +1,59 @@
+{
+  "competition_id": "china-graduate-math-modeling",
+  "name": "中国研究生数学建模竞赛",
+  "short_name": null,
+  "edition_id": "china-graduate-math-modeling-2026",
+  "edition_name": "2026年“华为杯”第二十三届中国研究生数学建模竞赛",
+  "edition_year": 2026,
+  "official_url": "https://cpipc.acge.org.cn/cw/hp/4",
+  "registration_start": "2026-06-01T08:00:00+08:00",
+  "registration_end": "2026-09-19T17:00:00+08:00",
+  "competition_start": "2026-09-23T08:00:00+08:00",
+  "competition_end": "2026-09-27T12:00:00+08:00",
+  "temporal_provenance": [
+    {
+      "field": "registration_start",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute",
+      "source_text": "参赛团队报名起止时间为：2026年6月1日（周一）8:00至9月19日（周六）17:00。"
+    },
+    {
+      "field": "registration_end",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute",
+      "source_text": "参赛团队报名起止时间为：2026年6月1日（周一）8:00至9月19日（周六）17:00。"
+    },
+    {
+      "field": "competition_start",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute",
+      "source_text": "竞赛时间：竞赛定于2026年9月23日（周三）8:00至9月27日（周日）12:00举行。"
+    },
+    {
+      "field": "competition_end",
+      "timezone_name": "Asia/Shanghai",
+      "timezone_basis": "jurisdiction_default",
+      "precision": "minute",
+      "source_text": "竞赛时间：竞赛定于2026年9月23日（周三）8:00至9月27日（周日）12:00举行。"
+    }
+  ],
+  "tracks": [],
+  "track_ids": [],
+  "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314",
+  "source_type": "official",
+  "observed_at": "2026-10-09T17:42:51+08:00",
+  "raw_payload": {
+    "source_title": "“华为杯”第二十三届中国研究生数学建模竞赛参赛邀请函",
+    "edition_text": "中国研究生数学建模竞赛是中国研究生创新实践系列大赛主题赛事之一；2026年第二十三届由西安交通大学承办。",
+    "eligibility_text": "参赛对象为中国（含港澳台地区）高校、科研院所的在读研究生（硕士生、博士生）和将于2026年秋季学期入学的研究生（硕士生、博士生），以及国外大学在读研究生和国内大学在读国际学生。",
+    "team_text": "研究生组队参赛，每队3人，专业不限。除2026级研究生外，其他年级研究生不允许跨校、跨单位组队参赛。由队长在研创网报名。",
+    "registration_text": "参赛团队报名起止时间为：2026年6月1日（周一）8:00至9月19日（周六）17:00。参赛报名、培养单位审核、参赛缴费、作品提交等均通过研创网。培养单位审核及缴费另有各自截止时间。",
+    "schedule_text": "竞赛时间：竞赛定于2026年9月23日（周三）8:00至9月27日（周日）12:00举行。9月22日8:00起可下载试题 ZIP 包，9月23日8:00起查看解压密码；论文 MD5 码提交为9月26日12:00至9月27日12:00，PDF 论文上传为9月27日14:00至9月28日24:00。",
+    "problem_text": "邀请函将竞赛内容称为赛题，并按每道赛题遴选队伍参加后续答辩。",
+    "stage_text": "竞赛结果拟于2026年11月中下旬公示；2026年12月中上旬另有“数模之星”现场答辩及颁奖大会。",
+    "timezone_interpretation_text": "官方邀请函给出完整日期和钟点，但未明示时区；参赛团队通过中国大陆研创网统一办理报名及比赛流程。本 Raw 将这些统一流程钟点按已审核的 jurisdiction_default 政策解释为 Asia/Shanghai，不声称来源明确写有 +08:00。培养单位审核及缴费截止时间不等同于参赛团队报名截止；论文上传截止时间不等同于 competition_end。赛题是具体问题选择，不作为顶层 CompetitionTrack。"
+  }
+}

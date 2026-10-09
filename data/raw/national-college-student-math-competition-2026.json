@@ -1,0 +1,32 @@
+{
+  "competition_id": "national-college-student-math-competition",
+  "name": "全国大学生数学竞赛",
+  "short_name": null,
+  "edition_id": "national-college-student-math-competition-2026",
+  "edition_name": "第十八届全国大学生数学竞赛",
+  "edition_year": 2026,
+  "official_url": "https://www.cms.org.cn/Home/comp/comp_details/id/1449.html",
+  "registration_start": null,
+  "registration_end": null,
+  "competition_start": null,
+  "competition_end": null,
+  "temporal_provenance": [],
+  "tracks": [],
+  "track_ids": [],
+  "source_url": "https://www.cms.org.cn/Home/comp/comp_details/id/1449.html",
+  "source_type": "official",
+  "observed_at": "2026-10-09T17:42:51+08:00",
+  "raw_payload": {
+    "source_title": "关于举办第十八届全国大学生数学竞赛的通知",
+    "edition_text": "中国数学会发布第十八届全国大学生数学竞赛举办通知；本届由大连理工大学承办。",
+    "organizer_text": "中国数学会主办；大连理工大学承办本届竞赛。",
+    "eligibility_text": "参赛对象为所有全日制在校大学生。普通高校数学类本科专业学生只能报考数学专业类；普通高校非数学类本科专业学生不能报考高职高专类。",
+    "team_text": "全国通知按每位参赛学生收费，初赛为统一试题的考生笔试，按考生人数分别评奖，决赛按学生名单与个人成绩评奖。",
+    "individual_evidence_text": "全国举办通知以每位参赛学生、考生和参加决赛的学生名单为单位规定收费、考试与评奖；南通大学杏林学院的正式参赛通知写明学生自愿参赛、学生个人缴费和报名。",
+    "individual_evidence_source_url": "https://xlxy.ntu.edu.cn/2026/0918/c3057a299238/page.htm",
+    "category_text": "官方将数学专业类、非数学专业类和高职高专类称为竞赛分类，按参赛学生的专业与学校类型约束报考；初赛的数学专业类、非数学专业类再分 A/B，决赛数学专业类另有低年级组/高年级组。",
+    "schedule_text": "初赛定于2026年11月14日（星期六）上午9:00—11:30举行；决赛预计2027年4月在大连理工大学举行，具体时间将在2027年1月通知。",
+    "registration_text": "全国通知要求2026年10月19日前按省、自治区、直辖市数学会、军队院校数学教学联席会或受委托承办单位的要求报名。",
+    "notes": "中国数学会官方页面附有本届举办通知图片及 PDF。主通知未见组队提交作品规则；个人参赛形态根据主办方逐名考试与评奖规定及高校正式组织通知判断，报名仍可由学校或赛区统一组织。“个人”指参赛/考试单位，不等于全国统一允许个人直接报名。类别与 A/B 属于考生分类和组别，不提升为 CompetitionTrack。初赛与决赛属于不同阶段，初赛时段不是整届 competition_window。各赛区及学校报名安排不同，未形成统一的完整报名 datetime。"
+  }
+}

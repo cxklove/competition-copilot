@@ -1,0 +1,52 @@
+{
+  "competition_id": "comap-mcm",
+  "name": "COMAP Mathematical Contest in Modeling",
+  "short_name": "MCM",
+  "edition_id": "comap-mcm-2027",
+  "edition_name": "2027 Mathematical Contest in Modeling",
+  "edition_year": 2027,
+  "official_url": "https://contest.comap.com/undergraduate/contests/mcm/",
+  "registration_start": null,
+  "registration_end": "2027-01-28T15:00:00-05:00",
+  "competition_start": "2027-01-28T17:00:00-05:00",
+  "competition_end": "2027-02-01T20:00:00-05:00",
+  "temporal_provenance": [
+    {
+      "field": "registration_end",
+      "timezone_name": "Etc/GMT+5",
+      "timezone_basis": "source_explicit",
+      "precision": "minute",
+      "source_text": "Registration Deadline: Before 3:00 p.m. EST on Thursday, January 28, 2027."
+    },
+    {
+      "field": "competition_start",
+      "timezone_name": "Etc/GMT+5",
+      "timezone_basis": "source_explicit",
+      "precision": "minute",
+      "source_text": "Contest Starts: 5:00 p.m. EST on Thursday, January 28, 2027."
+    },
+    {
+      "field": "competition_end",
+      "timezone_name": "Etc/GMT+5",
+      "timezone_basis": "source_explicit",
+      "precision": "minute",
+      "source_text": "Contest Ends: 8:00 p.m. EST on Monday, February 1, 2027."
+    }
+  ],
+  "tracks": [],
+  "track_ids": [],
+  "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+  "source_type": "official",
+  "observed_at": "2026-10-09T17:42:51+08:00",
+  "raw_payload": {
+    "source_title": "MCM/ICM Contest Rules, Registration and Instructions, January 28 - February 1, 2027",
+    "edition_text": "COMAP's 2027 instructions identify Mathematical Contest in Modeling (MCM) and Interdisciplinary Contest in Modeling (ICM). 2027 contest dates are January 28 through February 1.",
+    "eligibility_text": "The contest is open to undergraduate and high school students. Team members must be enrolled full- or part-time at the same school or institution at the time of the contest.",
+    "team_text": "Each team may consist of one, two, or three students enrolled at the same school or institution. Each student may participate on only one team. An advisor registers the team; a school may register multiple teams.",
+    "registration_text": "Registration deadline is before 3:00 p.m. EST on Thursday, January 28, 2027.",
+    "schedule_text": "Contest starts 5:00 p.m. EST Thursday, January 28, 2027 and ends 8:00 p.m. EST Monday, February 1, 2027. The solution report deadline is 9:00 p.m. EST Monday, February 1, 2027; results are scheduled for May 8, 2027.",
+    "problem_text": "MCM problem choices are Problem A, Problem B and Problem C. Problem D, Problem E and Problem F belong to ICM.",
+    "timezone_interpretation_text": "官方日程明确写 EST。Etc/GMT+5 是表示 UTC−05:00 的 IANA 固定偏移时区，名称中的符号遵循反向的 POSIX 惯例；它记录来源明示的 EST 偏移量，不声称来源使用了 America/New_York 等地理时区名称。",
+    "semantic_note": "本 Fixture 只表示 MCM；共享规则中还出现 ICM，但它是另一赛事。官方资格也包括高中生，不能缩窄为仅限大学生。来源未给出报名开始的具体时刻。Problem A/B/C 是 MCM 的赛题选择，Problem D/E/F 属于 ICM；赛题不作为 CompetitionTrack。论文提交截止和结果公布日期均不作为 competition_end。"
+  }
+}

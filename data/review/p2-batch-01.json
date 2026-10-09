@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "human_review_manifest",
+  "entries": [
+    {
+      "raw_fixture_path": "data/raw/4c-computer-design-2026.json",
+      "raw_sha256": "0af7775e6a44f97a8321b370bd0d405ce6d7f99128f0bdd04facaa5c082e583d",
+      "competition_id": "4c-computer-design",
+      "edition_id": "4c-computer-design-2026",
+      "candidate_id": "4c-computer-design-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T17:01:21.905572+08:00",
+      "review_note": "Human explicitly approved the competition identity, 2026 edition, and 11 official top-level categories as CompetitionTracks. Separate final venues and date schedules are not collapsed into one competition window. Eligibility evidence remains Raw-only.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T17:01:21.905572+08:00",
+      "verification_note": "Human explicitly verified the official competition notice at the current Raw source URL as support for the competition identity, 2026 edition, and 11 top-level categories."
+    },
+    {
+      "raw_fixture_path": "data/raw/china-intl-college-students-innovation-2026.json",
+      "raw_sha256": "333214b067670f17c1563dca6e9368014d5144b2b6df3b31159e42afbaa49531",
+      "competition_id": "china-intl-college-students-innovation",
+      "edition_id": "china-intl-college-students-innovation-2026",
+      "candidate_id": "china-intl-college-students-innovation-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T17:01:21.905572+08:00",
+      "review_note": "Human explicitly approved the competition identity, 2026 edition, and five top-level tracks. The registration window remains null. The September 25 12:00 deadline is not promoted to a whole-edition registration_end because international projects have separate arrangements and the current Edition window cannot express that scope.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T17:01:21.905572+08:00",
+      "verification_note": "Human explicitly verified the Ministry of Education official notice at the current Raw source URL as support for the competition identity, 2026 edition, and five top-level tracks."
+    },
+    {
+      "raw_fixture_path": "data/raw/fwwb-2026.json",
+      "raw_sha256": "d8fd1f5c17e871e5914c3a8ffe6c65267df838ac2e5f8002530d1be1bae51b62",
+      "competition_id": "fwwb",
+      "edition_id": "fwwb-2026",
+      "candidate_id": "fwwb-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T17:01:21.906572+08:00",
+      "review_note": "Human explicitly approved A/B/C/D as four top-level mutually exclusive competition categories modeled as CompetitionTracks; lower-level tasks remain Raw-only. Registration start has only a date and remains null. Registration end is 2026-03-31T16:00:00+08:00 under the reviewed Asia/Shanghai jurisdiction_default policy, with temporal provenance recorded in Raw. The competition window remains null.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T17:01:21.906572+08:00",
+      "verification_note": "Human explicitly verified the current official organizing committee extension notice for the 2026 competition identity, its A/B/C/D category references, and the extended March 31 16:00 registration deadline. The original official organizing notice retained in Raw supports the full category names. Neither notice is claimed to state UTC+08:00 explicitly."
+    },
+    {
+      "raw_fixture_path": "data/raw/meicc-2026.json",
+      "raw_sha256": "01d447ff34c7a25e559c47705c8fbe09c47b9e3a8e1d6e511e7ce4f837c307c4",
+      "competition_id": "meicc",
+      "edition_id": "meicc-2026",
+      "candidate_id": "meicc-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T17:01:21.906572+08:00",
+      "review_note": "Human explicitly approved the competition identity, 2026 edition, and three top-level tracks. The 19 lower-level events remain Raw-only. The month range is not converted into a competition window.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T17:01:21.906572+08:00",
+      "verification_note": "Human explicitly verified the official notice at the current Raw source URL as support for the competition identity, 2026 edition, and three top-level tracks."
+    },
+    {
+      "raw_fixture_path": "data/raw/robomaster-rmuc-2026.json",
+      "raw_sha256": "0442437dc5aa1ebc1831449c4e37356a35024d3afe0e536bdfcac85eee9f377a",
+      "competition_id": "robomaster-rmuc",
+      "edition_id": "robomaster-rmuc-2026",
+      "candidate_id": "robomaster-rmuc-2026-candidate",
+      "approval_decision": "approve",
+      "approval_decided_at": "2026-10-09T17:01:21.907572+08:00",
+      "review_note": "Human explicitly approved the competition identity and RMUC 2026 edition with no top-level CompetitionTracks. Regional, revival, and national rounds are stages; robot types are not tracks. Eligibility and team evidence remain Raw-only. Registration clock times receive no timezone interpretation, so the registration window remains null.",
+      "source_verification_decision": "verify",
+      "source_verification_decided_at": "2026-10-09T17:01:21.907572+08:00",
+      "verification_note": "Human explicitly verified the current official RoboMaster page at the Raw source URL as support for the competition identity, RMUC 2026 edition, and the eligibility and team evidence retained in Raw."
+    }
+  ]
+}

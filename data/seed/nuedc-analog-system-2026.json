@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "verified_competition_seed",
+  "raw_fixture_path": "data/raw/nuedc-analog-system-2026.json",
+  "approval": {
+    "candidate_id": "nuedc-analog-system-2026-candidate",
+    "status": "approved",
+    "reviewed_at": "2026-10-09T02:24:24.573834Z",
+    "review_note": "Human reviewed the official 2026 NUEDC Analog System Design Special Competition notice. Competition identity, 2026 edition mapping, zero-track modeling, and preservation of stage-specific eligibility/team rules as raw evidence approved. Competition dates remain unstructured because the source does not provide an explicit timezone and the event has multiple stages."
+  },
+  "verification": {
+    "candidate_id": "nuedc-analog-system-2026-candidate",
+    "verified_at": "2026-10-09T02:24:24.574835Z",
+    "verification_note": "The official NUEDC notice was explicitly verified to support the competition identity, 2026 edition, and zero-track representation. Stage-specific eligibility, team composition, institution quotas, mentor limits, and competition schedule remain raw evidence outside the current structured verified schema.",
+    "previous_status": "pending",
+    "new_status": "verified",
+    "source_url": "https://www.nuedc-training.com.cn/index/news/details/new_id/353"
+  },
+  "validation_issues": [],
+  "competition": {
+    "id": "nuedc-analog-system",
+    "name": "全国大学生电子设计竞赛模拟电子系统设计专题赛（TI杯）",
+    "short_name": null,
+    "description": null,
+    "official_url": "http://nuedc.xjtu.edu.cn/"
+  },
+  "competition_source": {
+    "source_url": "https://www.nuedc-training.com.cn/index/news/details/new_id/353",
+    "source_type": "official",
+    "observed_at": "2026-10-09T10:10:42+08:00",
+    "verification_status": "verified"
+  },
+  "edition": {
+    "id": "nuedc-analog-system-2026",
+    "competition_id": "nuedc-analog-system",
+    "year": 2026,
+    "name": "2026年全国大学生电子设计竞赛模拟电子系统设计专题赛",
+    "registration_window": null,
+    "competition_window": null,
+    "official_url": null,
+    "source": {
+      "source_url": "https://www.nuedc-training.com.cn/index/news/details/new_id/353",
+      "source_type": "official",
+      "observed_at": "2026-10-09T10:10:42+08:00",
+      "verification_status": "verified"
+    }
+  },
+  "tracks": []
+}

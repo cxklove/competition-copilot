@@ -1,5 +1,12 @@
 # Backend
 
+**Stage status: P2 COMPLETE.** The current ingestion dataset contains 12 Raw
+fixtures and 12 Verified Seeds. Raw files are ingestion evidence; Verified
+Seeds are the formal business input for the next stage, **P3 Repository**.
+Normal competition reads in P3 need neither Raw payloads nor Human Review
+Manifests, which remain part of the ingestion audit trail. The P2 ingestion
+scope is frozen unless a genuine ingestion contract defect is found.
+
 This directory contains the Python package (`competition_copilot`), domain
 models (`competition_copilot/domain`), and unreviewed external data models
 (`competition_copilot/ingestion`). Tests live under `tests/domain` and

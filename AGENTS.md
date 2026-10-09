@@ -8,11 +8,11 @@ Competition Copilot 是面向高校学生的竞赛全生命周期决策与成长
 
 ## 开发、构建与测试
 
-目前没有依赖清单、构建配置、测试框架或可运行应用，因此没有现成的启动、构建、测试命令。提交前可运行 `git status --short` 查看改动、`git diff --check` 检查已跟踪文件的空白错误。首次引入某模块的代码时，同时提交依赖清单、锁文件及该模块 README 中准确的安装、运行、构建和测试命令。当前没有覆盖率门槛；新功能仍须满足下方测试规则。
+`backend/` 已提供 `pyproject.toml`、`requirements.lock`、pytest 测试和 Ruff lint；准确的安装、测试、lint 与构建命令见 `backend/README.md`。当前尚无完整应用启动命令。提交前运行 `git status --short` 和 `git diff --check`；首次引入其他模块时，同时提交依赖清单、锁文件及该模块 README 中准确的安装、运行、构建和测试命令。当前没有覆盖率门槛；新功能仍须满足下方测试规则。
 
 ## 代码风格与命名
 
-当前没有格式化或 lint 配置。新增 Python 代码默认使用四空格缩进和 `snake_case` 模块、函数名；新增 JavaScript/TypeScript 代码默认使用两空格缩进、`camelCase` 变量和函数名、`PascalCase` 组件名。引入语言时配置格式化与 lint 工具，并在模块内统一执行。Python 测试可放在 `backend/tests/test_*.py`；TypeScript 测试可用相邻的 `*.test.ts` 或 `*.test.tsx`。
+`backend/` 已配置 Ruff；新增 Python 代码使用四空格缩进和 `snake_case` 模块、函数名，并运行现有 lint。新增 JavaScript/TypeScript 代码默认使用两空格缩进、`camelCase` 变量和函数名、`PascalCase` 组件名；引入前端语言时配置格式化与 lint 工具，并在模块内统一执行。Python 测试放在 `backend/tests/`；TypeScript 测试可用相邻的 `*.test.ts` 或 `*.test.tsx`。
 
 ## 架构依赖方向（强制）
 

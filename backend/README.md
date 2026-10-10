@@ -40,6 +40,13 @@ repository without filesystem access. A future database adapter can implement
 the same interface without changing the upper-layer read contract. Search,
 filtering, pagination, refresh, and write APIs remain future requirements.
 
+P4.1 adds `competition_copilot/tools/`: a `Tool` Protocol with Pydantic input
+and result schemas, stable metadata, and structured error codes. The example
+`ListEditionTracksTool` accepts an injected `CompetitionRepository`; it has no
+JSON Adapter, Seed, Raw, Manifest, network, or LLM dependency. Its output wraps
+formal Domain tracks without copying Domain fields. Run its focused tests from
+`backend/` with `.\.venv\Scripts\python -m pytest tests/tools`.
+
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes
 with a timezone (`YYYY-MM-DDTHH:MM:SSZ` or an explicit offset). It returns

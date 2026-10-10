@@ -21,6 +21,7 @@ packages = [
     "competition_copilot.infrastructure",
     "competition_copilot.infrastructure.repositories",
     "competition_copilot.repositories",
+    "competition_copilot.tools",
 ]
 
 [tool.pytest.ini_options]

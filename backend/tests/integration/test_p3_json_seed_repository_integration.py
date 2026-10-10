@@ -17,6 +17,7 @@ def test_real_verified_seeds_satisfy_repository_queries() -> None:
 
     assert competitions
     assert editions
+    zero_track_editions = []
     for competition in competitions:
         assert repository.get_competition(competition.id) == competition
 
@@ -25,6 +26,10 @@ def test_real_verified_seeds_satisfy_repository_queries() -> None:
         assert edition in repository.list_editions_by_competition(edition.competition_id)
         tracks = repository.list_tracks(edition.id)
         assert tracks == repository.list_tracks(edition.id)
+        if not tracks:
+            zero_track_editions.append(edition.id)
         for track in tracks:
             assert track.edition_id == edition.id
             assert repository.get_track(track.id) == track
+
+    assert zero_track_editions

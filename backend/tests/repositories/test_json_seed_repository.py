@@ -249,6 +249,147 @@ def test_identical_competition_is_merged_across_editions(tmp_path: Path) -> None
     ]
 
 
+def test_multi_edition_and_cross_competition_relationships(tmp_path: Path) -> None:
+    _write(tmp_path, "z.json", _seed(track_ids=("track-a", "track-b")))
+    _write(
+        tmp_path,
+        "a.json",
+        _seed(edition_id="alpha-2027", year=2027, track_ids=("track-c",)),
+    )
+    _write(
+        tmp_path,
+        "m.json",
+        _seed(
+            competition_id="beta",
+            competition_name="Beta",
+            edition_id="beta-2026",
+            track_ids=("track-d",),
+        ),
+    )
+    repository = JsonSeedCompetitionRepository(tmp_path)
+
+    assert [item.id for item in repository.list_competitions()] == ["alpha", "beta"]
+    assert repository.get_competition("alpha").name == "Alpha"
+    assert [item.id for item in repository.list_editions_by_competition("alpha")] == [
+        "alpha-2026",
+        "alpha-2027",
+    ]
+    assert [item.id for item in repository.list_editions_by_competition("beta")] == [
+        "beta-2026"
+    ]
+    assert repository.get_edition("alpha-2026").competition_id == "alpha"
+    assert repository.get_edition("alpha-2027").competition_id == "alpha"
+    assert repository.get_edition("beta-2026").competition_id == "beta"
+    assert [item.id for item in repository.list_tracks("alpha-2026")] == [
+        "track-a",
+        "track-b",
+    ]
+    assert [item.id for item in repository.list_tracks("alpha-2027")] == ["track-c"]
+    assert [item.id for item in repository.list_tracks("beta-2026")] == ["track-d"]
+    for track_id, edition_id in (
+        ("track-a", "alpha-2026"),
+        ("track-b", "alpha-2026"),
+        ("track-c", "alpha-2027"),
+        ("track-d", "beta-2026"),
+    ):
+        assert repository.get_track(track_id).edition_id == edition_id
+
+
+def test_many_track_order_and_repeated_queries_are_stable(tmp_path: Path) -> None:
+    _write(
+        tmp_path,
+        "edition.json",
+        _seed(track_ids=("track-c", "track-a", "track-b")),
+    )
+    repository = JsonSeedCompetitionRepository(tmp_path)
+
+    for _ in range(3):
+        assert [item.id for item in repository.list_competitions()] == ["alpha"]
+        assert [item.id for item in repository.list_editions()] == ["alpha-2026"]
+        assert [item.id for item in repository.list_editions_by_competition("alpha")] == [
+            "alpha-2026"
+        ]
+        assert [item.id for item in repository.list_tracks("alpha-2026")] == [
+            "track-c",
+            "track-a",
+            "track-b",
+        ]
+
+
+def test_new_seed_is_visible_only_to_a_new_repository_instance(tmp_path: Path) -> None:
+    _write(tmp_path, "first.json", _seed(track_ids=("first-track",)))
+    first = JsonSeedCompetitionRepository(tmp_path)
+    before = first.list_competitions()
+
+    _write(
+        tmp_path,
+        "second.json",
+        _seed(competition_id="beta", competition_name="Beta", edition_id="beta-2027"),
+    )
+    assert first.list_competitions() == before
+    assert [item.id for item in first.list_editions()] == ["alpha-2026"]
+    with pytest.raises(RepositoryEntityNotFoundError):
+        first.get_competition("beta")
+
+    second = JsonSeedCompetitionRepository(tmp_path)
+    assert [item.id for item in second.list_competitions()] == ["alpha", "beta"]
+    assert [item.id for item in second.list_editions()] == [
+        "alpha-2026",
+        "beta-2027",
+    ]
+
+    for path in tmp_path.glob("*.json"):
+        path.unlink()
+    assert first.get_track("first-track").id == "first-track"
+    assert second.get_competition("beta").name == "Beta"
+    assert second.list_editions_by_competition("beta")[0].id == "beta-2027"
+    assert second.list_tracks("alpha-2026")[0].id == "first-track"
+
+
+def test_returned_collections_and_domain_objects_are_isolated(tmp_path: Path) -> None:
+    _write(tmp_path, "edition.json", _seed(track_ids=("one", "two")))
+    repository = JsonSeedCompetitionRepository(tmp_path)
+
+    for items in (
+        repository.list_competitions(),
+        repository.list_editions(),
+        repository.list_editions_by_competition("alpha"),
+        repository.list_tracks("alpha-2026"),
+    ):
+        assert isinstance(items, list)
+        items.clear()
+
+    assert all(isinstance(item, Competition) for item in repository.list_competitions())
+    assert all(isinstance(item, CompetitionEdition) for item in repository.list_editions())
+    assert all(isinstance(item, CompetitionTrack) for item in repository.list_tracks("alpha-2026"))
+    assert [item.id for item in repository.list_competitions()] == ["alpha"]
+    assert [item.id for item in repository.list_editions()] == ["alpha-2026"]
+    assert [item.id for item in repository.list_editions_by_competition("alpha")] == [
+        "alpha-2026"
+    ]
+    assert [item.id for item in repository.list_tracks("alpha-2026")] == [
+        "one",
+        "two",
+    ]
+
+    competition = repository.get_competition("alpha")
+    edition = repository.get_edition("alpha-2026")
+    track = repository.get_track("one")
+    assert isinstance(competition, Competition)
+    assert isinstance(edition, CompetitionEdition)
+    assert isinstance(track, CompetitionTrack)
+    for entity in (competition, edition, track):
+        assert not isinstance(entity, CompetitionSeedEnvelope)
+        assert not {
+            "schema_version",
+            "artifact_type",
+            "raw_fixture_path",
+            "approval",
+            "verification",
+            "raw_payload",
+        }.intersection(entity.model_dump())
+
+
 def test_conflicting_competition_fails_without_choosing_a_winner(tmp_path: Path) -> None:
     _write(tmp_path, "a.json", _seed())
     conflict = _write(

@@ -19,10 +19,10 @@ eligibility, recommendation, or planning.
 verified Domain facts. `CompetitionRepository` returns Domain models, never
 ingestion artifacts. Competition lists use ascending ID order; edition lists
 use ascending `(year, id)` order; Track lists preserve the reviewed order for
-their edition. Unknown single-entity lookups raise
-`RepositoryEntityNotFoundError`; empty relations return `[]`. Adapters must
-reject duplicate entity IDs and return detached models. Storage adapters are
-outside this interface package and are not part of P3.1.
+their edition. Unknown entity lookups and unknown parents in relation queries
+raise `RepositoryEntityNotFoundError`; existing parents with no children return
+`[]`. Adapters must reject duplicate entity IDs and return detached models.
+Storage adapters are outside this interface package and are not part of P3.1.
 
 P3.2 adds `competition_copilot/infrastructure/repositories/`, whose current
 `JsonSeedCompetitionRepository` adapter eagerly reads a supplied directory of

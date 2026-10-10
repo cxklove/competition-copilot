@@ -202,11 +202,15 @@ class JsonSeedCompetitionRepository(CompetitionRepository):
         self, competition_id: str
     ) -> list[CompetitionEdition]:
         indexes = self._indexes
+        if competition_id not in indexes.competitions:
+            raise RepositoryEntityNotFoundError("competition", competition_id)
         ids = indexes.edition_ids_by_competition.get(competition_id, ())
         return [indexes.editions[key].model_copy(deep=True) for key in ids]
 
     def list_tracks(self, edition_id: str) -> list[CompetitionTrack]:
         indexes = self._indexes
+        if edition_id not in indexes.editions:
+            raise RepositoryEntityNotFoundError("edition", edition_id)
         ids = indexes.track_ids_by_edition.get(edition_id, ())
         return [indexes.tracks[key].model_copy(deep=True) for key in ids]
 

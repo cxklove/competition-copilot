@@ -37,6 +37,8 @@ class CompetitionRepository(Protocol):
     across the repository; adapters fail with ``RepositoryDuplicateIdError``
     on duplicates instead of choosing a winner. Returned models are detached
     from repository-held state, so caller mutation cannot update stored data.
+    A parent-child list returns [] only when the parent exists but has no
+    children; an unknown parent raises ``RepositoryEntityNotFoundError``.
     """
 
     def list_competitions(self) -> list[Competition]:
@@ -58,11 +60,11 @@ class CompetitionRepository(Protocol):
     def list_editions_by_competition(
         self, competition_id: str
     ) -> list[CompetitionEdition]:
-        """Return matching editions by ``(year, id)``; unknown IDs yield []."""
+        """Return matching editions by ``(year, id)``; unknown parent raises."""
         ...
 
     def list_tracks(self, edition_id: str) -> list[CompetitionTrack]:
-        """Return reviewed Track order; zero or unknown editions yield []."""
+        """Return reviewed Track order; unknown parent raises, zero Tracks yield []."""
         ...
 
     def get_track(self, track_id: str) -> CompetitionTrack:

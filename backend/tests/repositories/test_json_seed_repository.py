@@ -99,8 +99,26 @@ def test_existing_empty_directory_is_a_valid_empty_repository(tmp_path: Path) ->
 
     assert repository.list_competitions() == []
     assert repository.list_editions() == []
-    assert repository.list_editions_by_competition("unknown") == []
-    assert repository.list_tracks("unknown") == []
+
+
+@pytest.mark.parametrize(
+    ("method", "entity_type"),
+    [
+        ("list_editions_by_competition", "competition"),
+        ("list_tracks", "edition"),
+    ],
+)
+def test_unknown_parent_raises_not_found_even_with_other_entities_present(
+    tmp_path: Path, method: str, entity_type: str
+) -> None:
+    _write(tmp_path, "known.json", _seed(version="1.0"))
+    repository = JsonSeedCompetitionRepository(tmp_path)
+
+    with pytest.raises(RepositoryEntityNotFoundError) as raised:
+        getattr(repository, method)("unknown")
+
+    assert raised.value.entity_type == entity_type
+    assert raised.value.requested_id == "unknown"
 
 
 def test_discovery_ignores_nested_and_non_json_files(tmp_path: Path) -> None:

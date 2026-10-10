@@ -57,7 +57,12 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 
 - **Goal:** 用只读抽象接口查询 Verified Seed 中的正式 Domain 数据。
 - **Inputs:** P1 模型、P2 Verified Seed（1.0 / 1.1）及其已核验状态约束；不以 Raw 或 Human Review Manifest 作为正式赛事读取输入。
-- **Current State:** P3.1 接口、P3.1.1 父实体存在性语义、P3.2 JSON Verified Seed Adapter 和 P3.3 查询语义已完成；P3.4 真实 Seed 集成测试已通过，待 P3 Final Review。
+- **Status:** **P3 Repository Layer — COMPLETE**。P3 Repository Integration Test：PASS；P3 Final Review：PASS。下一阶段为 **P4 Tool Layer**。
+- **正式读取边界：** 上层依赖只读 `CompetitionRepository`，返回 `Competition`、`CompetitionEdition`、`CompetitionTrack`。当前 Infrastructure Adapter 为 `JsonSeedCompetitionRepository`，正式输入是 Verified Seed，支持 Seed 1.0 / 1.1；JSON 不是 Repository Contract 的永久存储要求。
+- **最终查询语义：** 未知实体或父实体抛出 `RepositoryEntityNotFoundError`；已存在父实体没有子实体时返回 `[]`。Competition 按 ID 升序，Edition 按 `(year, id)` 升序，Track 保留 Seed 中的审核顺序。
+- **冻结范围：** P3 repository scope is frozen。不得为 Search、Eligibility、Recommendation、Agent、MCP、Skill Gap 或 Planner 随意扩展基础 Contract；仅真正的数据访问 Contract defect 可以重新打开 P3。
+- **P4 交接：** P4 通过抽象 `CompetitionRepository` 读取正式数据，测试可使用 fake / in-memory Repository；不得直接依赖 JSON Adapter、`data/seed`、Seed Envelope、Raw 或 Human Review Manifest。未来数据库 Adapter 可实现同一接口而不改变上层读取契约。
+- **延期事项：** keyword / fuzzy search、按年份或状态筛选、截止时间查询、分页、数据库持久化、缓存 / 刷新、热重载和 Repository 写入 API，均按后续真实 Tool / Application 需求设计，不属于 P3 blocker。
 - **Main Deliverables:** 只读 Repository Interface、JSON Verified Seed Adapter 及 Domain 映射；Raw 与 Manifest 不参与正式查询。
 - **Files/Modules:** `backend/competition_copilot/repositories/` 接口、`backend/competition_copilot/infrastructure/repositories/` Adapter、`backend/tests/repositories/` 与 `backend/tests/integration/` 测试。
 - **Tests Required:** 接口契约、查询语义、错误处理、Seed 版本兼容和真实数据集集成测试。

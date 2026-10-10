@@ -1,11 +1,13 @@
 # Backend
 
-**Stage status: P2 COMPLETE.** The current ingestion dataset contains 12 Raw
-fixtures and 12 Verified Seeds. Raw files are ingestion evidence; Verified
-Seeds are the formal business input for **P3 Repository**.
+**Stage status: P2 and P3 COMPLETE; next: P4 Tool Layer.** The current ingestion
+dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
+evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
 Manifests, which remain part of the ingestion audit trail. The P2 ingestion
 scope is frozen unless a genuine ingestion contract defect is found.
+The P3 repository scope is frozen unless a genuine data-access contract defect
+is found. P3 Repository Integration Test and P3 Final Review both passed.
 
 This directory contains the Python package (`competition_copilot`), domain
 models (`competition_copilot/domain`), and unreviewed external data models
@@ -30,6 +32,13 @@ verified Seed JSON files. It exposes only detached Domain models and needs no
 Raw fixtures or Human Review Manifests for normal reads. JSON Seed files are
 the current infrastructure source, not a permanent storage requirement of the
 Repository interface.
+
+P4 competition reads depend on the abstract `CompetitionRepository`, not on
+`JsonSeedCompetitionRepository`, `data/seed`, `CompetitionSeedEnvelope`, Raw
+fixtures, or Human Review Manifests. P4 tests can inject a fake or in-memory
+repository without filesystem access. A future database adapter can implement
+the same interface without changing the upper-layer read contract. Search,
+filtering, pagination, refresh, and write APIs remain future requirements.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

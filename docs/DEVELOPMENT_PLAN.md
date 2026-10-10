@@ -28,10 +28,19 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 
 ## P2 — Competition Data Ingestion + Seed Dataset
 
+- **Status:** **P2 Ingestion & Verified Data Pipeline — COMPLETE**. P2 Integration Test：PASS；P2 Final Review：PASS。已形成 12 份 Raw Fixture 和 **12 Verified Competition Seeds**，同时支持 Seed 1.0 与 1.1。下一阶段为 **P3 Repository**。
+- **已完成的数据链：** `External Source → Raw → Normalize → Validate → Candidate → Human Approval → Source Verification → Verified Seed`。Raw、候选、人工批准和已核验 Seed 保持独立；结构校验通过不会自动批准或核验来源。
+- **已完成的批量流程：** `Raw Batch → Batch Audit → Human Review → Raw SHA256 Binding → Dry-run → Explicit Execute → Verified Seed → Idempotence → Audit`。Human Review Manifest 保存明确决定，执行器默认 dry-run；重复执行对一致 Seed 返回 `already_materialized`，不覆盖冲突 Seed。
+- **P2 ingestion scope is frozen.** 除非发现真正的 ingestion Contract defect，不直接回到 P2 扩展 CompetitionStage、Eligibility、TeamRule、MentorRule、InstitutionQuota、Judging / Awards、Dynamic State、Competition Digital Twin 或 CompetitionEvent；这些归属未来 Domain / Application 阶段。
+- **延期的真实数据信号：** multi-stage schedule、stage-specific eligibility、team rule、mentor limit、institution quota、nested track / sub-item hierarchy、dynamic state 和 fact-level multi-source provenance 目前保留为 Raw-only 证据，均不是 P2 blocker。
+- **时间政策：** 来源明确写出时区的完整钟点可结构化为 `source_explicit`；经人工确认的中国大陆本地业务钟点可用 `Asia/Shanghai` 和 `jurisdiction_default` 记录解释依据。Date-only 不补钟点，month range 不补日期，multi-stage schedule 不压成虚假 Edition TimeWindow；国际或跨境 scope 不明时不自动推断时区。
+- **Track 语义：** 仅将官方顶层赛道、顶层大类或经人工确认的最高层竞赛类别建为 `CompetitionTrack`。赛项、赛题、Problem、初赛 / 复赛 / 决赛、地区、机器人角色、评审组别和 participant category 不自动升级。Zero Track 与 Many Track 已由真实数据验证；One Track 未观察到，但 Contract 支持，属于非阻塞覆盖缺口。
+- **P3 输入边界：** 正式业务数据从 **Verified Seed** 读取，不以 `data/raw` 为正式数据源。P3 正常读取 Competition 数据不需要 Human Review Manifest 或 `raw_payload`；Manifest 属 ingestion audit layer。核心读取模型为 `Competition`、`CompetitionEdition`、`CompetitionTrack`、`SourceMetadata` 和 `TimeWindow`。
+
 - **Goal:** 独立建立可审核、可追溯的少量赛事样本。
 - **Inputs:** P1 Schema、公开赛事来源、人工审核标准。
-- **Main Deliverables:** `External Source → Importer → Raw Data → Normalizer → Validator → CompetitionCandidate → Human Approval → Official Competition Data` 流程及审核记录；关键事实含 `source_url`、`source_type`、`observed_at`、`verification_status`。
-- **Files/Modules Expected:** `data/seed/`、`data/raw/` 样例、`scripts/` 导入与校验工具、`backend/adapters/ingestion/`（按实现需要）。
+- **Main Deliverables:** `External Source → Raw → Normalize → Validate → Candidate → Human Approval → Source Verification → Verified Seed` 流程及审核记录；关键事实含 `source_url`、`source_type`、`observed_at`、`verification_status`。
+- **Files/Modules Delivered:** `data/raw/`、`data/review/`、`data/seed/` Artifact，`backend/competition_copilot/ingestion/` 生产逻辑，`backend/scripts/` CLI 与 `backend/tests/` 自动化测试。
 - **Tests Required:** 格式转换、缺失来源、重复候选、审核拒绝和未经验证数据隔离测试。
 - **Acceptance Criteria:** 种子数据能从来源复核；未验证的 `CompetitionCandidate` 不能进入正式数据或确定性决策。此阶段可用审阅后的文件数据，不依赖 P3 数据库层。
 - **Explicitly Out of Scope:** 全网爬虫、自动审核、生产数据库和推荐逻辑。
@@ -47,7 +56,7 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 ## P3 — Repository Layer
 
 - **Goal:** 用抽象接口提供已审核数据的读写与查询。
-- **Inputs:** P1 模型、P2 审核后的数据与状态约束。
+- **Inputs:** P1 模型、P2 Verified Seed（1.0 / 1.1）及其已核验状态约束；不以 Raw 或 Human Review Manifest 作为正式赛事读取输入。
 - **Main Deliverables:** Repository Interface、替代实现及数据映射；明确候选区与正式库隔离。
 - **Files/Modules Expected:** `backend/repositories/` 接口、`backend/adapters/persistence/` 实现、`backend/tests/repositories/`。
 - **Tests Required:** 接口契约、查询/保存、错误处理、候选隔离与适配器替换测试。

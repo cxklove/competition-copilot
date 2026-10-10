@@ -2,7 +2,7 @@
 
 **Stage status: P2 COMPLETE.** The current ingestion dataset contains 12 Raw
 fixtures and 12 Verified Seeds. Raw files are ingestion evidence; Verified
-Seeds are the formal business input for the next stage, **P3 Repository**.
+Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
 Manifests, which remain part of the ingestion audit trail. The P2 ingestion
 scope is frozen unless a genuine ingestion contract defect is found.
@@ -14,6 +14,15 @@ models (`competition_copilot/domain`), and unreviewed external data models
 or review. `CompetitionCandidate` holds provisional parsed data and validation
 issues separately from official competition data. Neither record is an input to
 eligibility, recommendation, or planning.
+
+`competition_copilot/repositories/` defines read-only access contracts for
+verified Domain facts. `CompetitionRepository` returns Domain models, never
+ingestion artifacts. Competition lists use ascending ID order; edition lists
+use ascending `(year, id)` order; Track lists preserve the reviewed order for
+their edition. Unknown single-entity lookups raise
+`RepositoryEntityNotFoundError`; empty relations return `[]`. Adapters must
+reject duplicate entity IDs and return detached models. Storage adapters are
+outside this interface package and are not part of P3.1.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

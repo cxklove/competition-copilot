@@ -18,6 +18,7 @@ packages = [
     "competition_copilot",
     "competition_copilot.domain",
     "competition_copilot.ingestion",
+    "competition_copilot.repositories",
 ]
 
 [tool.pytest.ini_options]

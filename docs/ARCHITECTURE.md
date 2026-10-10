@@ -41,11 +41,13 @@ Competition Digital Twin 用版本化 `Snapshot` 表达某届赛事在某次观�
 ## 5. Data Ingestion Architecture
 
 ```text
-External Source → Importer → Raw Data → Normalizer → Validator
-→ CompetitionCandidate → Human Approval → Official Competition Data
+External Source → Raw → Normalize → Validate → Candidate
+→ Human Approval → Source Verification → Verified Seed
 ```
 
-优先官方来源。Importer 留存原始内容和来源；Normalizer 统一字段与单位；Validator 检查结构、来源、重复和冲突，但不代替人工核验。`CompetitionCandidate` 与正式数据隔离；人工核对原始证据并批准后才进入正式赛事库。未批准候选不得支持确定性资格、推荐或计划决策。早期 Seed Dataset 可先用可审阅文件和人工批准流程，不以数据库为前提。P0 不选定采集技术，也不实现爬虫。
+P2 已完成上述可审计的文件数据链：Raw 保留原始证据，Normalizer 只做确定性结构化，Validator 不代替人工判断。Human Review Manifest 以 Raw SHA256 绑定明确的批准和来源核验决定；执行器默认 dry-run，只有显式执行才生成 Verified Seed。未批准或未核验的 Candidate 不得成为正式业务数据，也不得支持确定性资格、推荐或计划决策。当前共有 12 份 Verified Seed，兼容 1.0 与 1.1；P2 ingestion scope is frozen。
+
+P3 Repository 以 Verified Seed 为正式数据输入，通过 `Competition`、`CompetitionEdition`、`CompetitionTrack`、`SourceMetadata` 和 `TimeWindow` 读取核心事实；不直接以 `data/raw` 为业务数据源，也不要求常规读取方解析 Manifest 或 `raw_payload`。Manifest 保留在 ingestion audit layer。阶段日程、资格、团队规则、名额、评审、奖项和动态状态的结构化属于后续阶段。
 
 ## 6. Competition Monitoring Architecture
 
@@ -105,7 +107,7 @@ Tool 是 Agent 与业务能力之间的标准接口之一，提供稳定的输�
 
 ## 14. Repository Structure
 
-规划中的顶层目录：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。未来 `backend/` 可按 `domain/`（模型及规则）、`application/`（用例及流程）、`repositories/`（数据访问接口）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）组织。本阶段仅记录建议目录，不创建业务模块。
+顶层目录约定：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。已完成的 Domain 与 P2 ingestion 实现位于 `backend/competition_copilot/`，真实 Raw、Review Manifest 和 Verified Seed 位于 `data/`。后续 `backend/` 可按 `application/`（用例及流程）、`repositories/`（数据访问接口）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）扩展；P3 Repository 尚未实现。
 
 ## 15. Dependency Rules
 

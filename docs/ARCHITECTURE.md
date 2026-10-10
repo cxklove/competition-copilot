@@ -107,7 +107,7 @@ Tool 是 Agent 与业务能力之间的标准接口之一，提供稳定的输�
 
 ## 14. Repository Structure
 
-顶层目录约定：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。已完成的 Domain 与 P2 ingestion 实现位于 `backend/competition_copilot/`，真实 Raw、Review Manifest 和 Verified Seed 位于 `data/`。后续 `backend/` 可按 `application/`（用例及流程）、`repositories/`（数据访问接口）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）扩展；P3 Repository 尚未实现。
+顶层目录约定：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。已完成的 Domain 与 P2 ingestion 实现位于 `backend/competition_copilot/`，真实 Raw、Review Manifest 和 Verified Seed 位于 `data/`。P3 只读接口位于 `backend/competition_copilot/repositories/`，当前 JSON Verified Seed Adapter 位于 `backend/competition_copilot/infrastructure/repositories/`。后续 `backend/` 可按 `application/`（用例及流程）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（其他持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）扩展。
 
 ## 15. Dependency Rules
 

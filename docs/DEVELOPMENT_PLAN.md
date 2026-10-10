@@ -55,11 +55,12 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 
 ## P3 — Repository Layer
 
-- **Goal:** 用抽象接口提供已审核数据的读写与查询。
+- **Goal:** 用只读抽象接口查询 Verified Seed 中的正式 Domain 数据。
 - **Inputs:** P1 模型、P2 Verified Seed（1.0 / 1.1）及其已核验状态约束；不以 Raw 或 Human Review Manifest 作为正式赛事读取输入。
-- **Main Deliverables:** Repository Interface、替代实现及数据映射；明确候选区与正式库隔离。
-- **Files/Modules Expected:** `backend/repositories/` 接口、`backend/adapters/persistence/` 实现、`backend/tests/repositories/`。
-- **Tests Required:** 接口契约、查询/保存、错误处理、候选隔离与适配器替换测试。
+- **Current State:** P3.1 接口、P3.1.1 父实体存在性语义、P3.2 JSON Verified Seed Adapter 和 P3.3 查询语义已完成；P3.4 真实 Seed 集成测试已通过，待 P3 Final Review。
+- **Main Deliverables:** 只读 Repository Interface、JSON Verified Seed Adapter 及 Domain 映射；Raw 与 Manifest 不参与正式查询。
+- **Files/Modules:** `backend/competition_copilot/repositories/` 接口、`backend/competition_copilot/infrastructure/repositories/` Adapter、`backend/tests/repositories/` 与 `backend/tests/integration/` 测试。
+- **Tests Required:** 接口契约、查询语义、错误处理、Seed 版本兼容和真实数据集集成测试。
 - **Acceptance Criteria:** 上层只依赖接口；Repository 和 Adapter 均不计算资格、评分或其他业务规则。
 - **Explicitly Out of Scope:** Domain 决策、Agent 调用和 Tool 编排。
 

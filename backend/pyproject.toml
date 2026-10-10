@@ -18,6 +18,8 @@ packages = [
     "competition_copilot",
     "competition_copilot.domain",
     "competition_copilot.ingestion",
+    "competition_copilot.infrastructure",
+    "competition_copilot.infrastructure.repositories",
     "competition_copilot.repositories",
 ]
 

@@ -24,6 +24,13 @@ their edition. Unknown single-entity lookups raise
 reject duplicate entity IDs and return detached models. Storage adapters are
 outside this interface package and are not part of P3.1.
 
+P3.2 adds `competition_copilot/infrastructure/repositories/`, whose current
+`JsonSeedCompetitionRepository` adapter eagerly reads a supplied directory of
+verified Seed JSON files. It exposes only detached Domain models and needs no
+Raw fixtures or Human Review Manifests for normal reads. JSON Seed files are
+the current infrastructure source, not a permanent storage requirement of the
+Repository interface.
+
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes
 with a timezone (`YYYY-MM-DDTHH:MM:SSZ` or an explicit offset). It returns

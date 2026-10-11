@@ -65,6 +65,8 @@ Hard Constraints → Candidate Filtering → Matching Score → Ranking → Deci
 
 Domain Service 使用版本化输入和规则确定性检查硬资格；事实缺失或未核验时返回待核验状态，不能推断为合格。只有通过硬约束的已核验赛事进入匹配评分与排序。评分公式和版本属于 Domain，不属于 Agent 或 Repository。`DecisionResult` 返回状态、排序依据、稳定的 `reason_code` 与逐项 `evidence`，引用事实来源及规则版本。用户旅程中 Agent 在资格检查前给出的赛事仅为发现候选清单，不是最终合格结论或正式排名。
 
+P5.1 的 `domain/eligibility.py` 定义独立的硬资格契约：`EligibilityContext` 显式携带学生和正式 Competition/Edition/可选 Track 快照；纯 `EligibilityRule` 对目标返回带稳定规则 ID、作用层级、reason code 和现有 `Evidence` 的 `RuleEvaluation`。`EligibilityDecision` 复用 `DecisionResult` 的 reason codes 与 evidence，并以 `ELIGIBLE`、`INELIGIBLE`、`UNKNOWN` 表示资格；缺少画像或规则资料属于一等的 `UNKNOWN`，未记录限制不等于已确认没有限制。P5.2 才负责规则适用性与确定性聚合，P5.3 才接入真实结构化资格数据。资格只判断官方硬约束；技能、兴趣和匹配度属于后续推荐或诊断。规则不得读取 Repository、Raw、Manifest、系统时间、网络或 LLM；若未来需要评估时间，须显式作为输入。
+
 ## 8. Planning Architecture
 
 ```text

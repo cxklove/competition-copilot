@@ -56,6 +56,13 @@ Final Review passed. The six Competition Read Tool contracts are frozen unless
 a genuine Tool boundary defect is found; P5 eligibility rules belong in a
 separate deterministic Domain/Application capability.
 
+P5.1 starts the separate `competition_copilot.domain.eligibility` contract for
+deterministic hard eligibility constraints. It defines explicit student/target
+context, pure rule evaluations, reusable decision evidence, and three outcomes:
+`ELIGIBLE`, `INELIGIBLE`, and `UNKNOWN`. Missing profile or official rule data
+remains `UNKNOWN`; rule aggregation and real structured eligibility data are
+later P5 work. No existing Competition Read Tool performs eligibility checks.
+
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes
 with a timezone (`YYYY-MM-DDTHH:MM:SSZ` or an explicit offset). It returns

@@ -104,13 +104,14 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 ## P6 — Competition Matching / Recommendation Engine
 
 - **Goal:** 在资格过滤后给出可解释的个性化排序。
-- **Current status:** **P6 underway; P6.1/P6.2 PASS and frozen; P6.3 eligibility-aware candidate ranking implemented, pending review.** Confirmed and uncertain candidates have independent score-descending rankings with stable target-ID ties; blocked candidates have deterministic reporting order without rank. Full rankings retain every evaluation; there is no Top-K truncation or candidate discovery. Current scoring/ranking tests use synthetic data because real competition skill mapping remains unavailable. P6 is not COMPLETE.
+- **Current status:** **P6 underway; P6.1/P6.2/P6.3 PASS and frozen; P6.4 Recommendation Integration Test — PASS.** The real Repository, Policy Provider and P5 evaluator feed the production P6 scoring/ranking engines. Test-only soft signals verify unknown and blocked cases; explicitly synthetic ELIGIBLE decisions for real targets verify normal scoring and confirmed ranking. No real skill mapping or candidate discovery is introduced. P6 is not COMPLETE; P6 Final Review remains required.
 - **P5 边界：** Recommendation 显式携带 P5 `EligibilityDecision` 并校验目标一致。`INELIGIBLE` 只能是 eligibility blocked，不能用高分覆盖；`UNKNOWN` 只能保留资格不确定性；`ELIGIBLE` 才允许正常软适配度结果，但并不自动等于推荐。缺少软画像信息不等于资格不合格。P6 处理技能、兴趣、经验和偏好等软信号，不能重新判断硬资格。
 - **Inputs:** P5 资格结果、学生偏好、已验证赛事事实、评分规则版本。
 - **Main Deliverables:** `Hard Constraints → Candidate Filtering → Matching Score → Ranking → DecisionResult`；评分拆解与推荐 Tool。
-- **Files/Modules:** P6.1 契约位于 `backend/competition_copilot/domain/recommendation.py`，合成测试位于 `backend/tests/domain/test_recommendation.py`；Application、Tool、排序模块留待后续 P6 阶段确定。
+- **Files/Modules:** P6.1 契约位于 `backend/competition_copilot/domain/recommendation.py`，合成测试位于 `backend/tests/domain/test_recommendation.py`；Application、Tool 模块留待后续阶段确定。
 - **P6.2 modules:** `backend/competition_copilot/domain/recommendation_scoring.py` and `backend/tests/domain/test_recommendation_scoring.py`.
-- **P6.3 modules:** `backend/competition_copilot/domain/recommendation_ranking.py` and `backend/tests/domain/test_recommendation_ranking.py`. Empty input is valid; duplicate targets fail-fast before sorting. Ranking contracts are immutable and preserve existing eligibility, scores and audit. Application, Tool, real integration and optional Top-K read views remain future work.
+- **P6.3 modules:** `backend/competition_copilot/domain/recommendation_ranking.py` and `backend/tests/domain/test_recommendation_ranking.py`. Empty input is valid; duplicate targets fail-fast before sorting. Ranking contracts are immutable and preserve existing eligibility, scores and audit. Application, Tool and optional Top-K read views remain future work.
+- **P6.4 acceptance:** `backend/tests/integration/test_p6_recommendation_integration.py` dynamically loads real Seed/Policy artifacts. It verifies real INELIGIBLE, partial/missing-policy UNKNOWN, synthetic eligible high/low/unavailable soft scoring, separated ranking buckets, cross-target rejection, duplicate rejection, full audit/JSON, repeatability and read-only Raw/Manifest-independent execution. Current real policies are partial, so synthetic confirmed eligibility is explicitly test-only and never persisted.
 - **Tests Required:** 资格排除、并列排序、权重边界、缺失偏好、稳定性及理由证据测试。
 - **Acceptance Criteria:** 不合资格项不进入可报名推荐；相同版本化输入排序相同，返回 `reason_code` 和 `evidence`。
 - **Explicitly Out of Scope:** Agent 自行评分、未经验证的赛事推荐和备赛计划。

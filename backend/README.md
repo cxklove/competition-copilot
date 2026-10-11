@@ -1,6 +1,6 @@
 # Backend
 
-**Stage status: P2, P3, P4, and P5 COMPLETE; P6.1/P6.2 PASS; P6.3 Ranking underway.** The current ingestion
+**Stage status: P2, P3, P4, and P5 COMPLETE; P6.1/P6.2/P6.3 PASS; P6.4 Integration PASS.** The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -160,6 +160,16 @@ empty input returns a valid empty result. It preserves input evaluations and
 does not rescore, re-evaluate eligibility, discover candidates, query repositories,
 truncate Top-K, or use LLM/network. P6 remains incomplete. From the repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_recommendation_ranking.py`.
+
+P6.4 tests the full real Repository + Policy + P5 eligibility + P6 scoring/ranking
+chain in `tests/integration/test_p6_recommendation_integration.py`. Soft signals
+are explicit test-only fixtures, and synthetic ELIGIBLE decisions for real targets
+exercise normal recommendation without claiming official confirmed eligibility.
+Real partial/missing policies remain uncertain; real violations remain blocked.
+Tests dynamically discover artifacts and verify mixed buckets, complete audit,
+JSON, target integrity, determinism, and read-only Raw/Manifest-independent execution.
+P6 is not COMPLETE until P6 Final Review. From the repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p6_recommendation_integration.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

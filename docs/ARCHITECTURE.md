@@ -96,6 +96,14 @@ preserves full evaluations without rewriting them, and records stable policy
 rescoring, eligibility re-evaluation, candidate discovery, Top-K truncation,
 Repository access, LLM or network. P6.1/P6.2 and frozen earlier contracts stay unchanged.
 
+P6.4 integration acceptance connects real `JsonSeedCompetitionRepository`,
+`JsonEligibilityPolicyProvider` and `CompetitionEligibilityEvaluator` to the
+production P6 scoring and ranking engines. Soft scores are test-only target-ID
+fixtures; synthetic ELIGIBLE decisions test normal paths without changing real
+partial policies. Tests preserve nested audit and JSON, verify target integrity,
+determinism and read-only execution, and require no Raw/Manifest runtime reads.
+No production orchestration or real skill mapping is added. P6 Final Review remains.
+
 ## 8. Planning Architecture
 
 ```text

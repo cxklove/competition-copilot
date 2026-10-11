@@ -171,8 +171,28 @@ readiness score, learning schedule or resource matching is defined.
 P7 has started, not completed. Real requirements must come from structured,
 reviewed data, never target names/descriptions or LLM inference. P7.1 has no
 Repository, Infrastructure, Tool, filesystem, network, LLM, eligibility or
-recommendation dependency; tests use synthetic data only. P7.2 implements the
-future gap engine; P7.3 supplies real requirement data and its provider.
+recommendation dependency; tests use synthetic data only. P7.3 supplies future
+real requirement data and its provider.
+
+### P7.2 Deterministic Skill Gap Engine
+
+`domain/skill_gap_engine.py` is a pure Domain Service. `SkillGapEngine.evaluate`
+consumes and validates a prepared `SkillGapContext`, matches exact skill IDs and
+compares explicit ordinal ranks BEGINNER < INTERMEDIATE < ADVANCED. UNKNOWN has
+no rank. It evaluates every REQUIRED/DESIRED requirement in supplied tuple order,
+retaining requirement facts and every matching student evidence source. No student
+provenance is generated from levels; missing facts remain UNKNOWN.
+
+Overall precedence is known gap (including DESIRED) → GAP_IDENTIFIED, otherwise
+incomplete coverage or unknown student facts → UNDETERMINED, otherwise COMPLETE
+and all declared requirements satisfied → NO_GAP. MISSING requirements produce
+empty items and UNDETERMINED; PARTIAL can identify a gap but cannot confirm no gap.
+Coverage remains in the RequirementSet alongside the qualitative gap status.
+Output uses normal validated immutable snapshots, item/coverage reason codes and
+source-free system audit `SKILL_GAP_ANALYSIS_V1`. Errors propagate atomically.
+The engine is read-only, deterministic and has no readiness score, skill guessing,
+eligibility/recommendation logic, provider, Repository, filesystem, network, LLM
+or planning dependency. P7 is not COMPLETE.
 
 ## 8. Planning Architecture
 

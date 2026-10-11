@@ -1,7 +1,8 @@
 # Backend
 
 **Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
-P7 started: P7.1 Skill Requirement & Skill Gap Contract implemented, pending review;
+P7 started: P7.1 Skill Requirement & Skill Gap Contract PASS;
+P7.2 Deterministic Skill Gap Engine implemented, pending review;
 P7 is not COMPLETE. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -221,9 +222,23 @@ for changed results. Validators reject inconsistent supplied conclusions; P7.1
 does not compute gaps, run eligibility/recommendation, match learning resources
 or build plans. It adds no Repository, provider, real requirement artifact,
 filesystem, network or LLM dependency. Structured requirements must not be
-guessed from competition names/descriptions. P7.2 engine and P7.3 real data/provider
-remain future stages. Synthetic contract tests run from the repository root:
+guessed from competition names/descriptions. P7.3 real data/provider remains a
+future stage. Synthetic contract tests run from the repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_gap.py`.
+
+P7.2 `domain.skill_gap_engine.SkillGapEngine.evaluate(SkillGapContext)` returns a
+validated immutable `SkillGapDecision`. Exact skill IDs match profile facts;
+BEGINNER < INTERMEDIATE < ADVANCED is an explicit ordinal ordering, with UNKNOWN
+unranked. Every requirement is evaluated in supplied order, preserving its type
+and source evidence plus all matching supplied student evidence. Missing student
+skills are UNKNOWN, never zero; missing requirements are UNDETERMINED, never no gap.
+A known REQUIRED or DESIRED gap produces GAP_IDENTIFIED even with PARTIAL coverage
+or other unknown skills. PARTIAL coverage cannot confirm NO_GAP; only COMPLETE
+with all declared skills known satisfied can. Reasons and a deterministic system
+analysis audit are retained. Contract errors fail atomically rather than becoming
+business uncertainty. There is no skill guessing, readiness score, provider,
+Repository, planning, eligibility/recommendation, network or LLM dependency.
+Engine tests: `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_gap_engine.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

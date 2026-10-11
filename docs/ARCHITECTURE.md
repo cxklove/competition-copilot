@@ -75,6 +75,10 @@ P5.4 已通过真实 Verified Seed → `JsonSeedCompetitionRepository` → `Comp
 
 **P5 Eligibility scope is frozen.** P5 判断官方硬资格约束；技能、兴趣、经验、获奖概率、偏好、学习成本和排名属于 P6 及后续软匹配能力。P6 按 `Eligibility → Soft Suitability → Recommendation / Ranking` 消费 P5 结果，不得重做资格判断：`INELIGIBLE` 不因高分变为可参加，`UNKNOWN` 不伪装成确认合格。Recommendation、Skill Gap、Planning、Agent 和 MCP 不得重新实现 P5 三值状态、硬规则、聚合优先级、缺失数据或 Policy coverage 语义；仅真正的 Eligibility contract / semantic defect 可重新打开 P5。研究生入学状态、全日制/在读状态、Team Context、团队规则及更多 Policy 属未来数据和 Domain 需求，当前保持保守 `UNKNOWN`。
 
+P6.1 在 `domain/recommendation.py` 建立单候选纯 Domain 契约：`RecommendationContext` 携带 StudentProfile、正式 Competition/Edition/可选 Track 快照、稳定 Candidate ID 和 P5 `EligibilityDecision`，构造时拒绝目标或资格结果错配。`RecommendationEvaluation` 复用 `DecisionResult` 的 reason codes 与 `Evidence`，保留原始资格结果；推荐状态与资格状态分离。`ELIGIBILITY_BLOCKED` 对应 P5 `INELIGIBLE`，不携带软分数；`ELIGIBILITY_UNCERTAIN` 对应 P5 `UNKNOWN`，允许将来记录软适配度但不能确认推荐；仅 P5 `ELIGIBLE` 可产生正常推荐或不推荐结果，亦可在软资料不足时保持适配度未确定。可选 0–1 分数只表示软适配度，并需分项证据，不是资格概率。P6.1 不执行评分、权重计算、跨候选排序或 Skill Gap 诊断；这些仍属后续阶段。Contract 不依赖 Repository、Tool、Infrastructure、文件系统、网络或 LLM。
+
+P6.1 的 Context、Candidate、ScoreComponent 和 Evaluation 为不可变快照，P6 自有集合采用 tuple。共享 Domain 输入会转换为经过校验的独立冻结视图；资格视图继承 P5 原有字段、三值状态及校验，并保留完整审计，不重做资格语义。原始 P5 决策、赛事或画像对象的后续修改不会改变已经验证的 P6 快照；不同结果须重新构造合法快照，未验证的 copy update 被拒绝。
+
 ## 8. Planning Architecture
 
 ```text

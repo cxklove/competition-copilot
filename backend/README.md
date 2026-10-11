@@ -1,6 +1,6 @@
 # Backend
 
-**Stage status: P2, P3, P4, and P5 COMPLETE; next: P6 Recommendation.** The current ingestion
+**Stage status: P2, P3, P4, and P5 COMPLETE; P6.1 Recommendation Contract underway.** The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -105,6 +105,27 @@ aggregation, missing-data, or policy-coverage semantics. Only a genuine
 eligibility contract or semantic defect reopens P5. Graduate admission,
 full-time/enrollment status, team context and rules, and more competition
 policies remain future data/domain work; uncertainty remains `UNKNOWN`.
+
+P6.1 starts `competition_copilot.domain.recommendation`, a pure, single-candidate
+contract pending review; P6 is not complete. `RecommendationContext` verifies
+Competition/Edition/optional Track relationships and requires a matching P5
+`EligibilityDecision`. `RecommendationEvaluation` reuses `DecisionResult` and
+`Evidence`, preserves the P5 result, and separates recommendation status from
+eligibility status. An ineligible target is blocked without a soft score; an
+unknown eligibility result remains explicitly uncertain, even if a future
+soft score is high. Eligible targets can be recommended, not recommended, or
+left without a suitability conclusion when soft profile data is missing.
+Optional scores and score components are limited to 0–1 soft suitability, not
+eligibility probability. P6.1 defines no scoring formula, weights, ranking,
+Top-K, repository access, Tool, network, or LLM use. Domain tests use only
+synthetic models; P6.2 scoring and P6.3 ranking remain future work.
+
+P6 recommendation models are immutable snapshots with tuple collections. Shared
+Domain inputs are validated into detached, frozen P6 views; the eligibility view
+inherits P5 fields and invariants and preserves its full audit. Later mutation
+of the original P5 decision or target objects cannot change the recommendation.
+Create a new validated snapshot for a different result; unvalidated copy updates
+are rejected.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

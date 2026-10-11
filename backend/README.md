@@ -203,7 +203,12 @@ Edition/Track `SkillRequirementTarget`, REQUIRED/DESIRED `SkillRequirement`,
 `SkillRequirementSet`, `SkillGapContext`, `SkillGapItem` and `SkillGapDecision`.
 Skill identity and ordinal proficiency reuse `Skill.id` / `SkillLevel`; there is
 no numeric gap or overall readiness score. Verified requirement source evidence
-is separate from student evidence and system analysis audit. Coverage is explicit
+is separate from student evidence and system analysis audit. `SkillGapContext`
+explicitly carries immutable `student_skill_evidence`; each relevant known skill
+requires supplied evidence matching its canonical STUDENT_SKILL field and level.
+Missing/UNKNOWN skills need no fake evidence; irrelevant skills need no evidence,
+while any supplied additional or multiple-source evidence must match the profile.
+Coverage is explicit
 COMPLETE/PARTIAL/MISSING, retained in the decision's requirement set. Empty data
 means MISSING, not no gap. Missing student skill facts produce UNKNOWN items,
 not zero ability. NO_GAP requires complete coverage and all declared required

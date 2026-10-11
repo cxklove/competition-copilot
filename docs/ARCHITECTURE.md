@@ -147,7 +147,12 @@ Coverage COMPLETE/PARTIAL/MISSING is an explicit assessment with a note, not a
 consequence of item count or JSON loading. Empty requirements mean MISSING;
 they never prove preparedness. `SkillGapContext` validates target relationships
 and carries only detached student/competition/requirement snapshots, without
-P5/P6 decisions or services. `SkillGapItem` composes its requirement (identity,
+P5/P6 decisions or services. Its immutable `student_skill_evidence` snapshot
+uses canonical STUDENT_SKILL fields and values bound to existing profile facts.
+Each relevant known StudentSkill needs matching supplied provenance; missing or
+UNKNOWN skills need no fabricated evidence. Additional matching facts and multiple
+sources are allowed, but orphan or conflicting evidence is rejected.
+`SkillGapItem` composes its requirement (identity,
 level, type and source evidence), a known or unavailable student level, separate
 student evidence, SATISFIED/GAP/UNKNOWN status and a machine-readable reason.
 Missing student facts do not become zero ability or an assumed full gap.

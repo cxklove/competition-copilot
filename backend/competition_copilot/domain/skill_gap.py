@@ -225,6 +225,7 @@ class SkillGapContext(_SkillGapSnapshot):
     edition: _EditionSnapshot
     track: _TrackSnapshot | None = None
     requirements: SkillRequirementSet
+    student_skill_evidence: tuple[_EvidenceSnapshot, ...] = ()
 
     @model_validator(mode="after")
     def check_target(self) -> Self:
@@ -239,6 +240,34 @@ class SkillGapContext(_SkillGapSnapshot):
             self.track.id if self.track is not None else None,
         ):
             raise ValueError("requirement target does not match context")
+        return self
+
+    @model_validator(mode="after")
+    def check_student_evidence(self) -> Self:
+        """Require supplied provenance for relevant known facts, never invent it."""
+        skills_by_field = {
+            skill_fact_field(SkillFactRole.STUDENT_SKILL, skill.skill_id): skill
+            for skill in self.student_profile.skills
+        }
+        evidenced_ids = set()
+        for fact in self.student_skill_evidence:
+            skill = skills_by_field.get(fact.field)
+            if skill is None:
+                raise ValueError("student evidence must bind an existing STUDENT_SKILL fact")
+            if skill.level is SkillLevel.UNKNOWN:
+                raise ValueError("unknown student level must not carry known-level evidence")
+            _validate_skill_fact(
+                fact, SkillFactRole.STUDENT_SKILL, skill.skill_id, skill.level
+            )
+            evidenced_ids.add(skill.skill_id)
+        relevant_ids = {r.skill_id for r in self.requirements.requirements}
+        for skill in self.student_profile.skills:
+            if (
+                skill.skill_id in relevant_ids
+                and skill.level is not SkillLevel.UNKNOWN
+                and skill.skill_id not in evidenced_ids
+            ):
+                raise ValueError("known relevant student skill needs student evidence")
         return self
 
 

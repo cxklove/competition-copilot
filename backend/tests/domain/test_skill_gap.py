@@ -139,6 +139,7 @@ def context(track_id=None):
         track=CompetitionTrack(id=track_id, edition_id="edition-a", name="Synthetic")
         if track_id else None,
         requirements=requirement_set(track_id=track_id),
+        student_skill_evidence=item().student_evidence,
     )
 
 
@@ -427,6 +428,7 @@ def test_all_snapshots_collections_and_nested_inputs_are_immutable_detached():
     })
     ctx = SkillGapContext.model_validate(context().model_dump() | {
         "student_profile": original_profile, "requirements": requirements,
+        "student_skill_evidence": [],
     })
     result = decision(SkillRequirementCoverage.COMPLETE, SkillGapStatus.NO_GAP, [item()])
     before = ctx.model_dump_json(), result.model_dump_json(), fact.model_dump_json()
@@ -629,3 +631,126 @@ def test_fact_bindings_are_immutable_and_cannot_be_copy_updated():
 def test_canonical_value_requires_known_typed_level(level):
     with pytest.raises(ValueError, match="known SkillLevel"):
         skill_fact_value(level)
+
+
+def test_context_known_skill_evidence_roundtrip_and_output_reuse():
+    ctx = context()
+    assert ctx.student_skill_evidence == item().student_evidence
+    result = SkillGapItem(
+        requirement=ctx.requirements.requirements[0],
+        student_level=ctx.student_profile.skills[0].level,
+        status=SkillGapItemStatus.SATISFIED,
+        reason_code=SkillGapReasonCode.REQUIREMENT_SATISFIED,
+        student_evidence=ctx.student_skill_evidence,
+    )
+    assert result.student_evidence == ctx.student_skill_evidence
+    assert ctx.model_dump(mode="json") == json.loads(ctx.model_dump_json())
+    assert SkillGapContext.model_validate_json(ctx.model_dump_json()) == ctx
+
+
+def test_context_known_relevant_skill_without_evidence_rejected():
+    with pytest.raises(ValidationError, match="needs student evidence"):
+        SkillGapContext.model_validate(context().model_dump() | {
+            "student_skill_evidence": [],
+        })
+
+
+@pytest.mark.parametrize("bad_fact", [
+    {"field": "requirements.skill-a.required_level"},
+    {"field": "skills.skill-b.level"},
+    {"field": None},
+    {"value": "beginner"},
+    {"value": "INTERMEDIATE"},
+    {"value": None},
+])
+def test_context_rejects_wrong_role_skill_or_level(bad_fact):
+    data = context().model_dump()
+    data["student_skill_evidence"][0].update(bad_fact)
+    with pytest.raises(ValidationError):
+        SkillGapContext.model_validate(data)
+
+
+@pytest.mark.parametrize("skills", [[], [StudentSkill(skill_id="skill-a")]])
+def test_context_missing_or_unknown_student_skill_needs_no_fake_evidence(skills):
+    data = context().model_dump() | {
+        "student_profile": StudentProfile(id="student-a", skills=skills),
+        "student_skill_evidence": [],
+    }
+    ctx = SkillGapContext.model_validate(data)
+    assert not ctx.student_skill_evidence
+    with pytest.raises(ValidationError):
+        SkillGapContext.model_validate(data | {
+            "student_skill_evidence": item().student_evidence,
+        })
+
+
+@pytest.mark.parametrize("include_extra_evidence", [False, True])
+def test_context_irrelevant_skill_evidence_is_optional_but_validated(include_extra_evidence):
+    data = context().model_dump()
+    data["student_profile"]["skills"] += (
+        StudentSkill(skill_id="skill-b", level=SkillLevel.INTERMEDIATE).model_dump(),
+    )
+    extra = item(fact=requirement("skill-b")).student_evidence
+    if include_extra_evidence:
+        data["student_skill_evidence"] += tuple(e.model_dump() for e in extra)
+    ctx = SkillGapContext.model_validate(data)
+    assert len(ctx.student_skill_evidence) == 1 + include_extra_evidence
+    if include_extra_evidence:
+        data["student_skill_evidence"][-1]["value"] = "advanced"
+        with pytest.raises(ValidationError, match="fact value"):
+            SkillGapContext.model_validate(data)
+
+
+def test_context_multiple_matching_sources_preserved_conflict_rejected():
+    data = context().model_dump()
+    second = data["student_skill_evidence"][0] | {
+        "code": "SECOND_STUDENT_SOURCE",
+        "source": requirement().evidence[0].source.model_dump(),
+    }
+    data["student_skill_evidence"] += (second,)
+    ctx = SkillGapContext.model_validate(data)
+    assert len(ctx.student_skill_evidence) == 2
+    assert ctx.student_skill_evidence[1].source is not None
+    second["value"] = "beginner"
+    with pytest.raises(ValidationError, match="fact value"):
+        SkillGapContext.model_validate(data)
+
+
+def test_context_student_evidence_snapshot_is_detached_and_immutable():
+    original = Evidence.model_validate(item().student_evidence[0].model_dump())
+    supplied = [original]
+    ctx = SkillGapContext.model_validate(context().model_dump() | {
+        "student_skill_evidence": supplied,
+    })
+    before = ctx.model_dump_json()
+    original.value = "beginner"
+    supplied.clear()
+    with pytest.raises(ValidationError, match="frozen"):
+        ctx.student_skill_evidence[0].field = "skills.other.level"
+    with pytest.raises(ValidationError, match="frozen"):
+        ctx.student_skill_evidence = ()
+    with pytest.raises(AttributeError):
+        ctx.student_skill_evidence.append(None)
+    with pytest.raises(TypeError):
+        ctx.student_skill_evidence[0] = None
+    assert ctx.model_dump_json() == before
+
+
+@pytest.mark.parametrize("skill_id", ["skill-b", "data.science", "数学"])
+def test_context_student_fact_binding_uses_exact_dynamic_skill_identity(skill_id):
+    data = context().model_dump() | {
+        "student_profile": StudentProfile(id="s", skills=[
+            StudentSkill(skill_id=skill_id, level=SkillLevel.INTERMEDIATE),
+        ]),
+        "requirements": SkillRequirementSet(
+            target=target(), coverage=SkillRequirementCoverage.COMPLETE,
+            coverage_note="Synthetic coverage.", requirements=[requirement(skill_id)],
+        ),
+        "student_skill_evidence": item(fact=requirement(skill_id)).student_evidence,
+    }
+    ctx = SkillGapContext.model_validate(data)
+    assert ctx.student_skill_evidence[0].field == f"skills.{skill_id}.level"
+    with pytest.raises(ValidationError):
+        SkillGapContext.model_validate(data | {
+            "student_skill_evidence": item().student_evidence,
+        })

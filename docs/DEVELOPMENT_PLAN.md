@@ -88,10 +88,15 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 ## P5 — Deterministic Eligibility Engine
 
 - **Goal:** 对核验过的赛事规则执行硬资格判断。
-- **Current status:** P5 已启动；P5.1 Eligibility Domain & Contract 已建立三值资格状态、目标 Context、纯规则接口和可审计决策。P5.2 Deterministic Rule Engine 已实现顺序执行、完整审计与 `INELIGIBLE > UNKNOWN > ELIGIBLE` 聚合；空规则集为 `UNKNOWN / RULE_DATA_MISSING`，配置或执行错误不作为业务 UNKNOWN。P5.3 已通过独立的 P5 结构化 Policy、抽象 Provider 和 Application Evaluator 接入首批真实学历层级事实；两份真实 Policy 均为 partial，未覆盖条件继续返回 UNKNOWN。P5.4 Eligibility Integration Test — PASS，已验证真实 Repository、Policy Provider、Evaluator、Engine 与 JSON 决策链。P5 尚未完成，仍需 Final Review。
+- **Status:** **P5 Eligibility — COMPLETE**。P5.1 Eligibility Domain & Contract、P5.2 Deterministic Eligibility Rule Engine、P5.3 Real Competition Eligibility Evaluation、P5.4 Eligibility Integration Test 及 P5 Final Review 全部 PASS。下一阶段为 **P6 Recommendation**。
+- **正式能力：** `EligibilityStatus` 为 `ELIGIBLE`、`INELIGIBLE`、`UNKNOWN`；`EligibilityRule` / `RuleEvaluation` 保留逐条审计。`EligibilityRuleEngine` 顺序执行所有规则，按 `INELIGIBLE > UNKNOWN > ELIGIBLE` 聚合。独立的结构化 `EligibilityPolicy`、`EligibilityPolicyProvider` 与 `CompetitionEligibilityEvaluator` 已接入首批真实规则和真实集成测试。
+- **硬约束语义：** 缺画像必要事实为 `UNKNOWN / PROFILE_DATA_MISSING`；缺结构化规则或 Policy 为 `UNKNOWN / RULE_DATA_MISSING`；明确违反规则为 `INELIGIBLE`。只有全部适用硬规则明确满足且覆盖完整，才可判为 `ELIGIBLE`。`PARTIAL` Policy 的已知规则满足加覆盖缺口为 `UNKNOWN`，已知违反加覆盖缺口仍为 `INELIGIBLE`。
+- **数据与审计边界：** P5 Policy 位于独立的 `data/eligibility/`，与 Seed、Raw、Review Manifest 分离；Runtime 不读取 Raw 或 Manifest，Application 不直接读取 Seed。Decision 保留最终状态、规则 ID 与逐条状态、reason codes、画像和官方约束证据及系统覆盖缺口；系统覆盖评估不冒充官方来源。当前验收快照为 12 份 Seed、12 个 Competition、12 个 Edition、33 个 Track，2 份 Policy（0 COMPLETE、2 PARTIAL）；数量不是永久 Contract。
+- **冻结范围与 P6 交接：** **P5 Eligibility scope is frozen.** P5 仅判断官方硬资格约束，包括学生身份、学历、院校、团队、地区/国籍及官方资质要求；技能、兴趣、经验、获奖概率、偏好、学习成本和排名属于 P6 及后续软匹配能力。Recommendation、Skill Gap、Planning、Agent 和 MCP 不得重新实现 P5 状态、硬规则、聚合优先级、缺失数据或覆盖语义；仅真正的 Eligibility contract / semantic defect 可重新打开 P5。P6 必须消费 P5 结果：`INELIGIBLE` 不能被高推荐分数改为可参加，`UNKNOWN` 不能伪装成确认合格，`ELIGIBLE` 可进入正常软匹配。
+- **后续数据 / Domain 需求：** 研究生入学状态、全日制/在读状态、Team Context、团队人数与构成、同校/跨校条件、更多赛事 Policy 和规则类型均属未来能力；现有未确认资格保守返回 `UNKNOWN`，不是 P5 退出阻碍。
 - **Inputs:** 学生画像、已验证赛事事实、规则版本。
-- **Main Deliverables:** 可复现的资格规则、缺失信息处理、Eligibility DecisionResult 及资格 Tool。
-- **Files/Modules Expected:** `backend/domain/eligibility/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/eligibility/`。
+- **Main Deliverables:** 可复现的资格规则、缺失信息处理、结构化 Policy、可审计 EligibilityDecision 和真实集成测试；Eligibility Tool 留待后续能力阶段。
+- **Files/Modules:** `backend/competition_copilot/domain/eligibility*.py`、`backend/competition_copilot/application/eligibility.py`、`backend/competition_copilot/infrastructure/eligibility_policy_json.py`、`data/eligibility/` 与对应 Domain、Application、Integration tests。
 - **Tests Required:** 满足、不满足、边界值、缺失/冲突事实、规则版本与相同输入同结果测试。
 - **Acceptance Criteria:** 每项资格结论都有稳定 `reason_code` 和来源可追溯的 `evidence`；LLM 不判定硬规则。
 - **Explicitly Out of Scope:** 个性化排序、技能诊断和自然语言猜测资格。

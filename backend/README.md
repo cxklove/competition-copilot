@@ -1,6 +1,6 @@
 # Backend
 
-**Stage status: P2, P3, and P4 COMPLETE; next: P5 Eligibility.** The current ingestion
+**Stage status: P2, P3, P4, and P5 COMPLETE; next: P6 Recommendation.** The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -80,6 +80,31 @@ P5 policies through `EligibilityPolicyProvider`; it never parses Raw or review
 manifests. The first two real policies are partial: they support a confirmed
 education-level rule while unmodeled enrollment and team conditions keep a
 positive overall decision `UNKNOWN`. Missing policy is also `UNKNOWN`.
+
+P5.4 real integration and P5 Final Review passed. The current acceptance snapshot
+has 12 Verified Seeds, 12 Competitions, 12 Editions, 33 Tracks, and two P5
+policies (zero complete, two partial); these counts are not contract invariants.
+`EligibilityDecision` preserves target, final status, ordered rule evaluations,
+machine-readable reason codes, profile and official constraint evidence, and
+system coverage gaps. A coverage assessment never claims official provenance.
+Missing profile facts yield `UNKNOWN / PROFILE_DATA_MISSING`; missing structured
+rules or policy yield `UNKNOWN / RULE_DATA_MISSING`. A confirmed hard-rule
+violation yields `INELIGIBLE`; `ELIGIBLE` requires every applicable hard rule
+to be satisfied and policy coverage to be complete. Known satisfaction plus a
+partial-policy gap remains `UNKNOWN`, while a known violation remains
+`INELIGIBLE`. Runtime reads neither Raw nor review manifests; Application
+accesses Seed only through the abstract Competition Repository.
+
+**P5 Eligibility scope is frozen.** P5 handles official hard participation
+constraints, not skill fit, interests, experience, winning probability,
+preferences, learning cost, or ranking. P6 consumes P5 eligibility before
+soft suitability and recommendation: a high score cannot override
+`INELIGIBLE`, and `UNKNOWN` must remain visibly unconfirmed. Recommendation,
+Skill Gap, Planning, Agent, and MCP must not reimplement P5 status, hard rules,
+aggregation, missing-data, or policy-coverage semantics. Only a genuine
+eligibility contract or semantic defect reopens P5. Graduate admission,
+full-time/enrollment status, team context and rules, and more competition
+policies remain future data/domain work; uncertainty remains `UNKNOWN`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

@@ -71,6 +71,10 @@ P5.2 的 `domain/eligibility_engine.py` 接收已准备好的 Context 与适用�
 
 P5.3 引入独立于 P2 Seed 的 `data/eligibility/` 结构化 Policy：每项硬约束保留正式来源，Policy 明示 complete/partial 覆盖状态。Application 使用抽象 `CompetitionRepository` 和 `EligibilityPolicyProvider` 准备目标与规则，再委托 P5.2 Engine；JSON Policy Adapter 仅在 Infrastructure 层读取 P5 Artifact。缺 Policy 为 `UNKNOWN / RULE_DATA_MISSING`；partial Policy 会保留未结构化条件的 UNKNOWN，因此已满足某项学历限制不等于确认整届合格。Runtime 不解析 Raw 或 Manifest。当前首批仅覆盖两个已核验通知中的学历层级事实；在读、全日制、团队及例外资格仍需后续数据模型与结构化规则。
 
+P5.4 已通过真实 Verified Seed → `JsonSeedCompetitionRepository` → `CompetitionRepository`，以及独立 P5 Policy → `JsonEligibilityPolicyProvider` → `EligibilityPolicyProvider` 的集成测试，验证 `CompetitionEligibilityEvaluator`、P5.2 Engine 和可序列化的 `EligibilityDecision` 全链路；P5 Final Review PASS。Decision 保留目标、最终状态、逐条规则 ID/状态、reason codes、画像事实证据、官方约束来源及系统覆盖缺口。系统 coverage assessment 不附官方来源。`PARTIAL` Policy 的已知规则满足加覆盖缺口为 `UNKNOWN`；明确违反加覆盖缺口仍为 `INELIGIBLE`。缺画像信息为 `UNKNOWN / PROFILE_DATA_MISSING`，缺结构化规则或 Policy 为 `UNKNOWN / RULE_DATA_MISSING`；只有全部适用硬规则明确满足且覆盖完整才可判 `ELIGIBLE`。
+
+**P5 Eligibility scope is frozen.** P5 判断官方硬资格约束；技能、兴趣、经验、获奖概率、偏好、学习成本和排名属于 P6 及后续软匹配能力。P6 按 `Eligibility → Soft Suitability → Recommendation / Ranking` 消费 P5 结果，不得重做资格判断：`INELIGIBLE` 不因高分变为可参加，`UNKNOWN` 不伪装成确认合格。Recommendation、Skill Gap、Planning、Agent 和 MCP 不得重新实现 P5 三值状态、硬规则、聚合优先级、缺失数据或 Policy coverage 语义；仅真正的 Eligibility contract / semantic defect 可重新打开 P5。研究生入学状态、全日制/在读状态、Team Context、团队规则及更多 Policy 属未来数据和 Domain 需求，当前保持保守 `UNKNOWN`。
+
 ## 8. Planning Architecture
 
 ```text

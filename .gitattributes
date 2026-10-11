@@ -1,0 +1,3 @@
+# P2 Raw fixtures are byte-bound by Human Review Manifest SHA256.
+# Do not apply line-ending conversion.
+data/raw/*.json -text

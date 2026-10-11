@@ -104,11 +104,12 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 ## P6 — Competition Matching / Recommendation Engine
 
 - **Goal:** 在资格过滤后给出可解释的个性化排序。
-- **Current status:** **P6 started; P6.1 Recommendation Domain & Contract implemented, pending review.** 当前只定义单候选的 `RecommendationContext`、稳定 Candidate target、`RecommendationStatus`、基础 reason codes、可选的 0–1 软适配度分数与分项证据、可审计 `RecommendationEvaluation`；尚无评分公式、权重、排序、Top-K 或真实推荐。
+- **Current status:** **P6 underway; P6.1 PASS and frozen; P6.2 deterministic single-candidate scoring implemented, pending review.** Active-weight average, explicit missing-signal audit, and heuristic threshold 0.5 preserve P5 eligibility. Current tests use synthetic scorers because real competition skill mapping is unavailable. Ranking and Top-K remain P6.3; P6 is not COMPLETE.
 - **P5 边界：** Recommendation 显式携带 P5 `EligibilityDecision` 并校验目标一致。`INELIGIBLE` 只能是 eligibility blocked，不能用高分覆盖；`UNKNOWN` 只能保留资格不确定性；`ELIGIBLE` 才允许正常软适配度结果，但并不自动等于推荐。缺少软画像信息不等于资格不合格。P6 处理技能、兴趣、经验和偏好等软信号，不能重新判断硬资格。
 - **Inputs:** P5 资格结果、学生偏好、已验证赛事事实、评分规则版本。
 - **Main Deliverables:** `Hard Constraints → Candidate Filtering → Matching Score → Ranking → DecisionResult`；评分拆解与推荐 Tool。
-- **Files/Modules:** P6.1 契约位于 `backend/competition_copilot/domain/recommendation.py`，合成测试位于 `backend/tests/domain/test_recommendation.py`；Application、Tool、评分与排序模块留待后续 P6 阶段确定。
+- **Files/Modules:** P6.1 契约位于 `backend/competition_copilot/domain/recommendation.py`，合成测试位于 `backend/tests/domain/test_recommendation.py`；Application、Tool、排序模块留待后续 P6 阶段确定。
+- **P6.2 modules:** `backend/competition_copilot/domain/recommendation_scoring.py` and `backend/tests/domain/test_recommendation_scoring.py`. Application, Tool and ranking remain future work.
 - **Tests Required:** 资格排除、并列排序、权重边界、缺失偏好、稳定性及理由证据测试。
 - **Acceptance Criteria:** 不合资格项不进入可报名推荐；相同版本化输入排序相同，返回 `reason_code` 和 `evidence`。
 - **Explicitly Out of Scope:** Agent 自行评分、未经验证的赛事推荐和备赛计划。

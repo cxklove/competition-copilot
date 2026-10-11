@@ -79,6 +79,8 @@ P6.1 在 `domain/recommendation.py` 建立单候选纯 Domain 契约：`Recommen
 
 P6.1 的 Context、Candidate、ScoreComponent 和 Evaluation 为不可变快照，P6 自有集合采用 tuple。共享 Domain 输入会转换为经过校验的独立冻结视图；资格视图继承 P5 原有字段、三值状态及校验，并保留完整审计，不重做资格语义。原始 P5 决策、赛事或画像对象的后续修改不会改变已经验证的 P6 快照；不同结果须重新构造合法快照，未验证的 copy update 被拒绝。
 
+P6.2 adds the pure Domain `RecommendationScoringEngine` in `domain/recommendation_scoring.py`. It accepts one prepared context and ordered `SuitabilityScorer` components with finite nonnegative weights (default 1.0). INELIGIBLE bypasses scorers; UNKNOWN remains eligibility uncertain even with a high soft score. Available positive-weight components use `sum(score * weight) / sum(active weight)`. None signals are unavailable, excluded rather than zero-scored; zero-weight results are still audited. No active signals yields undetermined suitability for ELIGIBLE. Evidence records configured weights, missing component IDs, component facts, scoring version `weighted-average-v1`, and threshold. The default threshold 0.5 is a deterministic MVP heuristic; equality recommends only eligible candidates. Duplicate IDs, invalid results and scorer exceptions fail as engine errors. Competition Domain has no structured skill requirements yet: tests inject synthetic scorers, with no guessed real skill mapping. No ranking, Top-K, repository orchestration, LLM or network is introduced. P6.1 and P5 contracts remain unchanged.
+
 ## 8. Planning Architecture
 
 ```text

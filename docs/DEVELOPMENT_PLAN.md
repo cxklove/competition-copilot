@@ -73,7 +73,12 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 
 - **Goal:** 为未来 Agent/MCP 建立稳定、可独立调用的业务能力入口。
 - **Inputs:** P1 模型、P3 Repository Interface、Application 用例边界。
-- **Current State:** P4.1 定义 `Tool` Protocol、输入/输出模型、元数据与 `INVALID_INPUT` / `NOT_FOUND` / `INTERNAL_ERROR` 错误契约；P4.2 已实现六个 Competition / Edition / Track 只读 Tool。P4.3 已验证结构化结果、错误边界、JSON 序列化与往返及 Schema；P4.4 Tool Integration Test：PASS。P4 Final Review 尚待重新执行。
+- **Status:** **P4 Tool Layer — COMPLETE**。P4.1 Tool Contract、P4.2 Competition Read Tools、P4.3 Error & Serialization Semantics、P4.4 Tool Integration Test 和 P4 Final Review 全部 PASS。下一阶段为 **P5 Eligibility**。
+- **正式只读 Tool：** `ListCompetitionsTool`、`GetCompetitionTool`、`ListCompetitionEditionsTool`、`GetCompetitionEditionTool`、`ListEditionTracksTool`、`GetCompetitionTrackTool`。未来 Application / Agent / MCP 通过 Tool 调用抽象 `CompetitionRepository`，获取正式 Domain；Tool 不依赖 JSON Adapter、Seed Envelope、Raw 或 Manifest。
+- **稳定契约：** metadata、经验证的输入、结构化 `ToolResult`、机器可判断的错误码、JSON 序列化与 Schema、Repository 构造注入、只读及确定性语义。无效输入返回 `INVALID_INPUT`；Repository 未找到实体或父实体返回 `NOT_FOUND`；已存在父实体的空子集合成功返回 `[]`。JSON 测试覆盖 aware datetime、partial `TimeWindow`、`SourceMetadata`、空列表、顺序与 Artifact 隔离。
+- **真实集成：** `Verified Seed → JsonSeedCompetitionRepository → CompetitionRepository → Competition Read Tools → ToolResult → JSON`；P4.4 PASS，数据集数量不是 Tool Contract。
+- **冻结范围：** **P4 Competition Read Tool scope is frozen.** 不得为 Eligibility、Recommendation、Search、Skill Gap、Planning、Agent 或 MCP 随意修改六个 Read Tool 的基础 Contract；仅真正的 Tool boundary defect 可以重新打开 P4。Search、模糊名称解析、年份/状态筛选、截止时间查询、Eligibility、Recommendation、Skill Gap、Planner、Agent 编排及 MCP/API 传输均为未来能力，不是 P4 未完成项。
+- **P5 交接：** Eligibility 建立独立的 Domain/Application 业务能力；硬约束判断须 deterministic、auditable、explainable、testable，不由 LLM 判定，也不塞入当前 Competition Read Tools。
 - **Main Deliverables:** Tool 请求/响应契约和已审核赛事检索入口；后续功能阶段扩展对应 Tool。
 - **Files/Modules:** 当前 Tool Contract 位于 `backend/competition_copilot/tools/`，测试位于 `backend/tests/tools/`；未来 Application 用例按需要新增。
 - **Tests Required:** 参数、错误、抽象依赖、独立调用和无具体基础设施依赖测试。

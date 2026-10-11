@@ -1,6 +1,6 @@
 # Backend
 
-**Stage status: P2 and P3 COMPLETE; next: P4 Tool Layer.** The current ingestion
+**Stage status: P2, P3, and P4 COMPLETE; next: P5 Eligibility.** The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -51,8 +51,10 @@ wrap formal Domain models without copying Domain fields. Run focused tests from
 P4.3 tests confirm that all six Tool results and errors have stable JSON
 serialization, concrete input/output schemas, and round-trip behavior, including
 nested Domain timestamps and source metadata. P4.4 integration tests the real
-Verified Seed to Repository to six Tool to JSON path; P4 Final Review remains
-pending.
+Verified Seed to Repository to six Tool to JSON path. P4 Integration Test and
+Final Review passed. The six Competition Read Tool contracts are frozen unless
+a genuine Tool boundary defect is found; P5 eligibility rules belong in a
+separate deterministic Domain/Application capability.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

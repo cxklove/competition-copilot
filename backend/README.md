@@ -61,7 +61,15 @@ deterministic hard eligibility constraints. It defines explicit student/target
 context, pure rule evaluations, reusable decision evidence, and three outcomes:
 `ELIGIBLE`, `INELIGIBLE`, and `UNKNOWN`. Missing profile or official rule data
 remains `UNKNOWN`; rule aggregation and real structured eligibility data are
-later P5 work. No existing Competition Read Tool performs eligibility checks.
+separate P5 work. No existing Competition Read Tool performs eligibility checks.
+
+P5.2 adds `competition_copilot.domain.eligibility_engine`. It evaluates each
+supplied applicable rule once in caller order, preserves the full audit trail,
+and aggregates `INELIGIBLE > UNKNOWN > ELIGIBLE`. An empty rule set yields
+`UNKNOWN / RULE_DATA_MISSING`; duplicate IDs, mismatched rule targets, and rule
+exceptions fail as evaluation errors. The caller remains responsible for
+supplying a complete applicable rule set. Real rules and data integration remain
+later P5 work.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

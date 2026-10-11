@@ -1,6 +1,7 @@
 # Backend
 
-**Stage status: P2, P3, P4, and P5 COMPLETE; P6.1/P6.2/P6.3 PASS; P6.4 Integration PASS.** The current ingestion
+**Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
+Next: P7 Skill Gap. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -107,16 +108,17 @@ full-time/enrollment status, team context and rules, and more competition
 policies remain future data/domain work; uncertainty remains `UNKNOWN`.
 
 P6.1 starts `competition_copilot.domain.recommendation`, a pure, single-candidate
-contract reviewed and frozen; P6 is not complete. `RecommendationContext` verifies
+contract reviewed and frozen. `RecommendationContext` verifies
 Competition/Edition/optional Track relationships and requires a matching P5
 `EligibilityDecision`. `RecommendationEvaluation` reuses `DecisionResult` and
 `Evidence`, preserves the P5 result, and separates recommendation status from
 eligibility status. An ineligible target is blocked without a soft score; an
-unknown eligibility result remains explicitly uncertain, even if a future
+unknown eligibility result remains explicitly uncertain, even if its
 soft score is high. Eligible targets can be recommended, not recommended, or
 left without a suitability conclusion when soft profile data is missing.
 Optional scores and score components are limited to 0–1 soft suitability, not
-eligibility probability. P6.1 defines no scoring formula, weights, ranking,
+eligibility confidence, winning probability, or competition success probability.
+P6.1 defines no scoring formula, weights, ranking,
 Top-K, repository access, Tool, network, or LLM use. Domain tests use only
 synthetic models; scoring and ranking are separate P6 capabilities described below.
 
@@ -158,7 +160,7 @@ Result validation rejects misplaced buckets, inconsistent ranks, invalid order,
 and duplicate targets. The engine rejects duplicate targets before sorting;
 empty input returns a valid empty result. It preserves input evaluations and
 does not rescore, re-evaluate eligibility, discover candidates, query repositories,
-truncate Top-K, or use LLM/network. P6 remains incomplete. From the repository root:
+truncate Top-K, or use LLM/network. From the repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_recommendation_ranking.py`.
 
 P6.4 tests the full real Repository + Policy + P5 eligibility + P6 scoring/ranking
@@ -168,8 +170,32 @@ exercise normal recommendation without claiming official confirmed eligibility.
 Real partial/missing policies remain uncertain; real violations remain blocked.
 Tests dynamically discover artifacts and verify mixed buckets, complete audit,
 JSON, target integrity, determinism, and read-only Raw/Manifest-independent execution.
-P6 is not COMPLETE until P6 Final Review. From the repository root:
+P6.4 and P6 Final Review passed. From the repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p6_recommendation_integration.py`.
+
+**P6 Recommendation scope is frozen.** P5 hard eligibility answers whether a
+student may participate; P6 soft suitability answers whether the target suits
+the student when eligibility permits or remains uncertain. INELIGIBLE cannot be
+overridden by a score; UNKNOWN is not confirmed eligible; ELIGIBLE is not
+automatically recommended. Uncertain ranks are provisional within their bucket,
+never confirmed recommendation ranks. P6 Domain has no Repository,
+Infrastructure, Tool, Seed, Raw, Manifest, filesystem, network, or LLM dependency.
+Evaluation, RankingResult and RankedRecommendation are validated immutable
+snapshots; changes require a newly validated result.
+
+Skill Gap, Planner, Agent, MCP and Frontend must not reimplement or override P5
+eligibility or P6 recommendation status, scoring, missing-signal and ranking-bucket
+semantics. Only a genuine P6 contract / semantic defect reopens P6. Real skill
+mapping, interest/goal/experience signals, resource cost, additional components,
+candidate discovery, Top-K UI views and learned ranking are deferred capabilities.
+
+P7 compares student skills with formal required/desired skills after target
+selection, without recalculating eligibility, recommendation scores or ranking.
+Competition currently lacks complete structured skill requirements. P7 must
+establish a Skill Requirement / Expected Skill data contract or explicitly report
+that missing required-skill data prevents a fully determined gap; competition
+names and descriptions must not be used to guess skills. The conceptual flow is
+`Eligibility → Recommendation → Selected Competition Target → Skill Gap → Learning / Planning`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

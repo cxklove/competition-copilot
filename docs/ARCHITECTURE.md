@@ -102,7 +102,35 @@ production P6 scoring and ranking engines. Soft scores are test-only target-ID
 fixtures; synthetic ELIGIBLE decisions test normal paths without changing real
 partial policies. Tests preserve nested audit and JSON, verify target integrity,
 determinism and read-only execution, and require no Raw/Manifest runtime reads.
-No production orchestration or real skill mapping is added. P6 Final Review remains.
+No production orchestration or real skill mapping is added. P6.1, P6.2, P6.3,
+P6.4 and P6 Final Review all passed; **P6 Recommendation — COMPLETE**.
+
+**P6 Recommendation scope is frozen.** P5 hard eligibility answers whether the
+student may participate; P6 soft recommendation evaluates suitability when
+eligibility permits or remains uncertain. INELIGIBLE remains blocked, UNKNOWN
+cannot become confirmed recommended even with a high score, and ELIGIBLE is not
+automatically recommended. Suitability scores express neither eligibility
+confidence nor winning / competition success probability. Uncertain bucket ranks
+are conditional ordering, not confirmed recommendation ranks.
+
+P6 Evaluation, RankingResult and RankedRecommendation are validated immutable
+snapshots; different results require new validated snapshots. P6 Domain depends
+on no Repository, Infrastructure, Tool, filesystem, Seed, Raw, Manifest, network
+or LLM. Skill Gap, Planner, Agent, MCP and Frontend must not reimplement or
+override P5 eligibility semantics or P6 RecommendationStatus, scoring,
+missing-signal and ranking-bucket semantics. Only a genuine P6 contract / semantic
+defect reopens P6.
+
+Real competition skill mapping, interest/goal/experience signals, resource cost,
+additional components, candidate discovery, Top-K UI views and learned ranking
+are deferred capabilities, not P6 exit blockers. Next is P7 Skill Gap, comparing
+student skills with formal required/desired skills for a selected target; P7
+does not recalculate eligibility, recommendation scores or ranking. The flow is
+`Eligibility → Recommendation → Selected Competition Target → Skill Gap → Learning / Planning`.
+Competition Domain currently lacks complete structured skill requirements. P7
+must first establish a Skill Requirement / Expected Skill data contract or
+explicitly express that missing required-skill data prevents full gap determination;
+competition names and descriptions must not be used to guess required skills.
 
 ## 8. Planning Architecture
 

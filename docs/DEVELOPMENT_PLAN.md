@@ -104,20 +104,24 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 ## P6 — Competition Matching / Recommendation Engine
 
 - **Goal:** 在资格过滤后给出可解释的个性化排序。
-- **Current status:** **P6 underway; P6.1/P6.2/P6.3 PASS and frozen; P6.4 Recommendation Integration Test — PASS.** The real Repository, Policy Provider and P5 evaluator feed the production P6 scoring/ranking engines. Test-only soft signals verify unknown and blocked cases; explicitly synthetic ELIGIBLE decisions for real targets verify normal scoring and confirmed ranking. No real skill mapping or candidate discovery is introduced. P6 is not COMPLETE; P6 Final Review remains required.
+- **Current status:** **P6 Recommendation — COMPLETE.** P6.1 Recommendation Domain & Contract — PASS; P6.2 Soft Suitability Scoring Engine — PASS; P6.3 Competition Candidate Ranking — PASS; P6.4 Recommendation Integration Test — PASS; P6 Final Review — PASS. 下一阶段：**P7 Skill Gap**。
 - **P5 边界：** Recommendation 显式携带 P5 `EligibilityDecision` 并校验目标一致。`INELIGIBLE` 只能是 eligibility blocked，不能用高分覆盖；`UNKNOWN` 只能保留资格不确定性；`ELIGIBLE` 才允许正常软适配度结果，但并不自动等于推荐。缺少软画像信息不等于资格不合格。P6 处理技能、兴趣、经验和偏好等软信号，不能重新判断硬资格。
 - **Inputs:** P5 资格结果、学生偏好、已验证赛事事实、评分规则版本。
-- **Main Deliverables:** `Hard Constraints → Candidate Filtering → Matching Score → Ranking → DecisionResult`；评分拆解与推荐 Tool。
+- **Main Deliverables:** Recommendation Domain Contract、`RecommendationContext`、`RecommendationEvaluation`、`RecommendationStatus` / `RecommendationReasonCode`、validated immutable snapshots、确定性分项软评分、可用分项加权聚合、缺失软信号语义、资格感知三桶排序及真实集成测试。Application 编排、candidate discovery 和推荐 Tool 留待后续阶段。
 - **Files/Modules:** P6.1 契约位于 `backend/competition_copilot/domain/recommendation.py`，合成测试位于 `backend/tests/domain/test_recommendation.py`；Application、Tool 模块留待后续阶段确定。
 - **P6.2 modules:** `backend/competition_copilot/domain/recommendation_scoring.py` and `backend/tests/domain/test_recommendation_scoring.py`.
 - **P6.3 modules:** `backend/competition_copilot/domain/recommendation_ranking.py` and `backend/tests/domain/test_recommendation_ranking.py`. Empty input is valid; duplicate targets fail-fast before sorting. Ranking contracts are immutable and preserve existing eligibility, scores and audit. Application, Tool and optional Top-K read views remain future work.
 - **P6.4 acceptance:** `backend/tests/integration/test_p6_recommendation_integration.py` dynamically loads real Seed/Policy artifacts. It verifies real INELIGIBLE, partial/missing-policy UNKNOWN, synthetic eligible high/low/unavailable soft scoring, separated ranking buckets, cross-target rejection, duplicate rejection, full audit/JSON, repeatability and read-only Raw/Manifest-independent execution. Current real policies are partial, so synthetic confirmed eligibility is explicitly test-only and never persisted.
 - **Tests Required:** 资格排除、并列排序、权重边界、缺失偏好、稳定性及理由证据测试。
+- **冻结范围：** **P6 Recommendation scope is frozen.** Skill Gap、Planner、Agent、MCP 和 Frontend 不得重新实现或覆盖 P5 eligibility semantics、P6 RecommendationStatus、scoring、missing signal 或 ranking bucket semantics；仅真正的 P6 contract / semantic defect 可重新打开 P6。
+- **Deferred capabilities:** real competition skill mapping、interest / goal / experience signals、resource cost、更多评分 component、candidate discovery service、Top-K UI view 和 learned ranking 属未来能力，不是 P6 未完成 blocker；任何后续评分或排序仍须遵守冻结语义。
 - **Acceptance Criteria:** 不合资格项不进入可报名推荐；相同版本化输入排序相同，返回 `reason_code` 和 `evidence`。
 - **Explicitly Out of Scope:** Agent 自行评分、未经验证的赛事推荐和备赛计划。
 
 ## P7 — Student Profile + Skill Gap
 
+- **P6 handoff:** 目标 Competition / Track 确定后，比较 Student skills 与正式 Competition required / desired skills，产生 `SkillGap`。P7 不重新判断 eligibility、计算 recommendation score 或排列 candidates。概念链：`Eligibility → Recommendation → Selected Competition Target → Skill Gap → Learning / Planning`。
+- **Data risk:** 当前 Competition Domain 尚无完整 structured skill requirements。P7 必须先建立正式 Skill Requirement / Expected Skill 数据 Contract，或明确表达缺少 required skill data 时 gap cannot be fully determined；禁止从 competition name / description 猜测所需技能。
 - **Goal:** 描述学生能力与赛事要求的差距，并匹配可核验学习资源。
 - **Inputs:** 学生画像、技能体系、赛事技能要求、学习资源来源。
 - **Main Deliverables:** 画像更新、技能差距结果、资源建议及相应 Tool。

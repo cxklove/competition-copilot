@@ -50,7 +50,9 @@ wrap formal Domain models without copying Domain fields. Run focused tests from
 
 P4.3 tests confirm that all six Tool results and errors have stable JSON
 serialization, concrete input/output schemas, and round-trip behavior, including
-nested Domain timestamps and source metadata. P4.4 integration remains pending.
+nested Domain timestamps and source metadata. P4.4 integration tests the real
+Verified Seed to Repository to six Tool to JSON path; P4 Final Review remains
+pending.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

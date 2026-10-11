@@ -73,7 +73,7 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 
 - **Goal:** 为未来 Agent/MCP 建立稳定、可独立调用的业务能力入口。
 - **Inputs:** P1 模型、P3 Repository Interface、Application 用例边界。
-- **Current State:** P4.1 定义 `Tool` Protocol、输入/输出模型、元数据与 `INVALID_INPUT` / `NOT_FOUND` / `INTERNAL_ERROR` 错误契约；P4.2 已实现六个 Competition / Edition / Track 只读 Tool。P4.3 已验证结构化结果、错误边界、JSON 序列化与往返及 Schema；P4.4 Tool 集成测试仍待完成。
+- **Current State:** P4.1 定义 `Tool` Protocol、输入/输出模型、元数据与 `INVALID_INPUT` / `NOT_FOUND` / `INTERNAL_ERROR` 错误契约；P4.2 已实现六个 Competition / Edition / Track 只读 Tool。P4.3 已验证结构化结果、错误边界、JSON 序列化与往返及 Schema；P4.4 Tool Integration Test：PASS。P4 Final Review 尚待重新执行。
 - **Main Deliverables:** Tool 请求/响应契约和已审核赛事检索入口；后续功能阶段扩展对应 Tool。
 - **Files/Modules:** 当前 Tool Contract 位于 `backend/competition_copilot/tools/`，测试位于 `backend/tests/tools/`；未来 Application 用例按需要新增。
 - **Tests Required:** 参数、错误、抽象依赖、独立调用和无具体基础设施依赖测试。

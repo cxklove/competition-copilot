@@ -1,6 +1,6 @@
 # Backend
 
-**Stage status: P2, P3, P4, and P5 COMPLETE; P6.1 Contract PASS; P6.2 Scoring underway.** The current ingestion
+**Stage status: P2, P3, P4, and P5 COMPLETE; P6.1/P6.2 PASS; P6.3 Ranking underway.** The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -118,7 +118,7 @@ left without a suitability conclusion when soft profile data is missing.
 Optional scores and score components are limited to 0–1 soft suitability, not
 eligibility probability. P6.1 defines no scoring formula, weights, ranking,
 Top-K, repository access, Tool, network, or LLM use. Domain tests use only
-synthetic models; P6.3 ranking remains future work.
+synthetic models; scoring and ranking are separate P6 capabilities described below.
 
 P6 recommendation models are immutable snapshots with tuple collections. Shared
 Domain inputs are validated into detached, frozen P6 views; the eligibility view
@@ -144,6 +144,22 @@ no structured competition skill requirements, so tests inject synthetic scorers;
 no real skill mapping is guessed. No repository, ranking, Top-K, LLM, or network
 is introduced, and P6.1/P5 contracts remain unchanged. From the repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_recommendation_scoring.py`.
+
+P6.3 adds `competition_copilot.domain.recommendation_ranking` with
+`RecommendationRankingEngine.rank(evaluations)`. The frozen
+`RecommendationRankingResult` contains tuple fields `confirmed`, `uncertain`,
+and `blocked`. Confirmed and uncertain entries compose the full existing
+evaluation with bucket-local ranks starting at 1. Numeric scores sort descending,
+None scores follow all numeric scores, and exact ties use ascending competition,
+edition, and optional track IDs (None track is an empty string for ordering).
+Blocked candidates only have target-ID reporting order and no normal rank.
+The stable policy ID is `eligibility_buckets_score_desc_target_id_v1`.
+Result validation rejects misplaced buckets, inconsistent ranks, invalid order,
+and duplicate targets. The engine rejects duplicate targets before sorting;
+empty input returns a valid empty result. It preserves input evaluations and
+does not rescore, re-evaluate eligibility, discover candidates, query repositories,
+truncate Top-K, or use LLM/network. P6 remains incomplete. From the repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_recommendation_ranking.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

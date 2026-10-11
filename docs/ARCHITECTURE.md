@@ -81,6 +81,21 @@ P6.1 的 Context、Candidate、ScoreComponent 和 Evaluation 为不可变快照�
 
 P6.2 adds the pure Domain `RecommendationScoringEngine` in `domain/recommendation_scoring.py`. It accepts one prepared context and ordered `SuitabilityScorer` components with finite nonnegative weights (default 1.0). INELIGIBLE bypasses scorers; UNKNOWN remains eligibility uncertain even with a high soft score. Available positive-weight components use `sum(score * weight) / sum(active weight)`. None signals are unavailable, excluded rather than zero-scored; zero-weight results are still audited. No active signals yields undetermined suitability for ELIGIBLE. Evidence records configured weights, missing component IDs, component facts, scoring version `weighted-average-v1`, and threshold. The default threshold 0.5 is a deterministic MVP heuristic; equality recommends only eligible candidates. Duplicate IDs, invalid results and scorer exceptions fail as engine errors. Competition Domain has no structured skill requirements yet: tests inject synthetic scorers, with no guessed real skill mapping. No ranking, Top-K, repository orchestration, LLM or network is introduced. P6.1 and P5 contracts remain unchanged.
 
+P6.3 adds `domain/recommendation_ranking.py`: a pure `RecommendationRankingEngine`
+consuming already scored `RecommendationEvaluation` snapshots. The immutable
+`RecommendationRankingResult` separates confirmed eligible rankings, eligibility
+uncertain rankings, and blocked reporting. Confirmed and uncertain ranks each
+start at 1 and are continuous within their bucket. Available scores sort descending;
+unavailable scores follow all numeric scores, including zero. Exact ties use
+ascending `(competition_id, edition_id, track_id or "")`; scores are never rounded.
+Blocked candidates have target-ID order only, without a recommendation rank.
+Duplicate targets fail before sorting; empty input returns three empty tuples.
+The result validates bucket membership, rank continuity, ordering and uniqueness,
+preserves full evaluations without rewriting them, and records stable policy
+`eligibility_buckets_score_desc_target_id_v1`. There is no global mixed rank,
+rescoring, eligibility re-evaluation, candidate discovery, Top-K truncation,
+Repository access, LLM or network. P6.1/P6.2 and frozen earlier contracts stay unchanged.
+
 ## 8. Planning Architecture
 
 ```text

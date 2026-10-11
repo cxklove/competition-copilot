@@ -41,10 +41,11 @@ the same interface without changing the upper-layer read contract. Search,
 filtering, pagination, refresh, and write APIs remain future requirements.
 
 P4.1 adds `competition_copilot/tools/`: a `Tool` Protocol with Pydantic input
-and result schemas, stable metadata, and structured error codes. The example
-`ListEditionTracksTool` accepts an injected `CompetitionRepository`; it has no
-JSON Adapter, Seed, Raw, Manifest, network, or LLM dependency. Its output wraps
-formal Domain tracks without copying Domain fields. Run its focused tests from
+and result schemas, stable metadata, and structured error codes. P4.2 provides
+six read-only Competition, Edition, and Track tools, including the original
+`ListEditionTracksTool`. Each accepts an injected `CompetitionRepository` and
+has no JSON Adapter, Seed, Raw, Manifest, network, or LLM dependency. Outputs
+wrap formal Domain models without copying Domain fields. Run focused tests from
 `backend/` with `.\.venv\Scripts\python -m pytest tests/tools`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs

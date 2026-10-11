@@ -1,6 +1,21 @@
 """Tool contracts and read-only competition capabilities."""
 
 from competition_copilot.tools.competition import (
+    GetCompetitionEditionInput,
+    GetCompetitionEditionOutput,
+    GetCompetitionEditionTool,
+    GetCompetitionInput,
+    GetCompetitionOutput,
+    GetCompetitionTool,
+    GetCompetitionTrackInput,
+    GetCompetitionTrackOutput,
+    GetCompetitionTrackTool,
+    ListCompetitionEditionsInput,
+    ListCompetitionEditionsOutput,
+    ListCompetitionEditionsTool,
+    ListCompetitionsInput,
+    ListCompetitionsOutput,
+    ListCompetitionsTool,
     ListEditionTracksInput,
     ListEditionTracksOutput,
     ListEditionTracksTool,
@@ -14,6 +29,21 @@ from competition_copilot.tools.contracts import (
 )
 
 __all__ = [
+    "GetCompetitionEditionInput",
+    "GetCompetitionEditionOutput",
+    "GetCompetitionEditionTool",
+    "GetCompetitionInput",
+    "GetCompetitionOutput",
+    "GetCompetitionTool",
+    "GetCompetitionTrackInput",
+    "GetCompetitionTrackOutput",
+    "GetCompetitionTrackTool",
+    "ListCompetitionEditionsInput",
+    "ListCompetitionEditionsOutput",
+    "ListCompetitionEditionsTool",
+    "ListCompetitionsInput",
+    "ListCompetitionsOutput",
+    "ListCompetitionsTool",
     "ListEditionTracksInput",
     "ListEditionTracksOutput",
     "ListEditionTracksTool",

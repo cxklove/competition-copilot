@@ -1,7 +1,8 @@
 # Backend
 
 **Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
-Next: P7 Skill Gap. The current ingestion
+P7 started: P7.1 Skill Requirement & Skill Gap Contract implemented, pending review;
+P7 is not COMPLETE. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -196,6 +197,28 @@ establish a Skill Requirement / Expected Skill data contract or explicitly repor
 that missing required-skill data prevents a fully determined gap; competition
 names and descriptions must not be used to guess skills. The conceptual flow is
 `Eligibility → Recommendation → Selected Competition Target → Skill Gap → Learning / Planning`.
+
+P7.1 adds pure contracts in `competition_copilot.domain.skill_gap`: exact
+Edition/Track `SkillRequirementTarget`, REQUIRED/DESIRED `SkillRequirement`,
+`SkillRequirementSet`, `SkillGapContext`, `SkillGapItem` and `SkillGapDecision`.
+Skill identity and ordinal proficiency reuse `Skill.id` / `SkillLevel`; there is
+no numeric gap or overall readiness score. Verified requirement source evidence
+is separate from student evidence and system analysis audit. Coverage is explicit
+COMPLETE/PARTIAL/MISSING, retained in the decision's requirement set. Empty data
+means MISSING, not no gap. Missing student skill facts produce UNKNOWN items,
+not zero ability. NO_GAP requires complete coverage and all declared required
+and desired skills known satisfied; a known gap can retain partial coverage or
+other unknown student facts. Duplicate skills and cross-target data are rejected.
+
+P7 snapshots and tuple collections are immutable and detach shared inputs,
+including frozen views of reused Evidence. Construct new validated snapshots
+for changed results. Validators reject inconsistent supplied conclusions; P7.1
+does not compute gaps, run eligibility/recommendation, match learning resources
+or build plans. It adds no Repository, provider, real requirement artifact,
+filesystem, network or LLM dependency. Structured requirements must not be
+guessed from competition names/descriptions. P7.2 engine and P7.3 real data/provider
+remain future stages. Synthetic contract tests run from the repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_gap.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

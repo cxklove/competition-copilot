@@ -132,6 +132,43 @@ must first establish a Skill Requirement / Expected Skill data contract or
 explicitly express that missing required-skill data prevents full gap determination;
 competition names and descriptions must not be used to guess required skills.
 
+## 7.1. Skill Requirement & Skill Gap Contract
+
+P7.1 starts the independent skill diagnosis contracts in `domain/skill_gap.py`.
+`SkillRequirementSet` binds an exact Edition/Track target, without inherited
+requirements. REQUIRED denotes core task skills, not P5 eligibility; DESIRED
+denotes beneficial skills. Requirements reference existing `Skill.id` and use
+the ordinal `StudentSkill.level` scale (BEGINNER, INTERMEDIATE, ADVANCED).
+UNKNOWN cannot serve as a known required level. Each requirement carries reused
+`Evidence` with a verified `SourceMetadata`; duplicates for the same skill at
+one target, including across types, fail rather than resolve ambiguously.
+
+Coverage COMPLETE/PARTIAL/MISSING is an explicit assessment with a note, not a
+consequence of item count or JSON loading. Empty requirements mean MISSING;
+they never prove preparedness. `SkillGapContext` validates target relationships
+and carries only detached student/competition/requirement snapshots, without
+P5/P6 decisions or services. `SkillGapItem` composes its requirement (identity,
+level, type and source evidence), a known or unavailable student level, separate
+student evidence, SATISFIED/GAP/UNKNOWN status and a machine-readable reason.
+Missing student facts do not become zero ability or an assumed full gap.
+
+`SkillGapDecision` separates NO_GAP/GAP_IDENTIFIED/UNDETERMINED from coverage
+retained in its RequirementSet, and audits every known requirement exactly once.
+NO_GAP requires COMPLETE and all declared REQUIRED and DESIRED skills known
+satisfied. A known gap, including a desired-skill gap, remains GAP_IDENTIFIED
+with PARTIAL coverage or unknown facts about other skills. System analysis audit
+is kept separate from requirement provenance and student evidence. All P7-owned
+models and collections are frozen snapshots; evidence reuses shared fields in
+a detached frozen view. Supplied conclusions are validated for consistency;
+no engine calculates gaps or aggregates results in P7.1. No numeric gap,
+readiness score, learning schedule or resource matching is defined.
+
+P7 has started, not completed. Real requirements must come from structured,
+reviewed data, never target names/descriptions or LLM inference. P7.1 has no
+Repository, Infrastructure, Tool, filesystem, network, LLM, eligibility or
+recommendation dependency; tests use synthetic data only. P7.2 implements the
+future gap engine; P7.3 supplies real requirement data and its provider.
+
 ## 8. Planning Architecture
 
 ```text

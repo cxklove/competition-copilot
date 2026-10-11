@@ -69,6 +69,8 @@ P5.1 的 `domain/eligibility.py` 定义独立的硬资格契约：`EligibilityCo
 
 P5.2 的 `domain/eligibility_engine.py` 接收已准备好的 Context 与适用规则序列，按输入顺序逐条执行且不提前结束，保留全部逐条结论及原始证据顺序；最终状态按 `INELIGIBLE > UNKNOWN > ELIGIBLE` 聚合。空规则集返回 `UNKNOWN / RULE_DATA_MISSING`。重复规则 ID、规则返回 ID/scope/目标不一致或规则程序异常均为评估错误，不伪装为业务 `UNKNOWN`。调用方仍须保证规则集覆盖正式适用规则；真实规则发现和数据接入不属于 P5.2。
 
+P5.3 引入独立于 P2 Seed 的 `data/eligibility/` 结构化 Policy：每项硬约束保留正式来源，Policy 明示 complete/partial 覆盖状态。Application 使用抽象 `CompetitionRepository` 和 `EligibilityPolicyProvider` 准备目标与规则，再委托 P5.2 Engine；JSON Policy Adapter 仅在 Infrastructure 层读取 P5 Artifact。缺 Policy 为 `UNKNOWN / RULE_DATA_MISSING`；partial Policy 会保留未结构化条件的 UNKNOWN，因此已满足某项学历限制不等于确认整届合格。Runtime 不解析 Raw 或 Manifest。当前首批仅覆盖两个已核验通知中的学历层级事实；在读、全日制、团队及例外资格仍需后续数据模型与结构化规则。
+
 ## 8. Planning Architecture
 
 ```text

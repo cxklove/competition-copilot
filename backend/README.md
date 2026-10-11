@@ -68,8 +68,18 @@ supplied applicable rule once in caller order, preserves the full audit trail,
 and aggregates `INELIGIBLE > UNKNOWN > ELIGIBLE`. An empty rule set yields
 `UNKNOWN / RULE_DATA_MISSING`; duplicate IDs, mismatched rule targets, and rule
 exceptions fail as evaluation errors. The caller remains responsible for
-supplying a complete applicable rule set. Real rules and data integration remain
-later P5 work.
+supplying a complete applicable rule set. Real rules and data integration are
+separate from the P5.2 engine.
+
+P5.3 adds `competition_copilot/application/` for eligibility orchestration,
+`competition_copilot.domain.eligibility_policy` for structured, source-backed
+facts, and a read-only JSON policy adapter in Infrastructure. P5 policies live
+in `../data/eligibility/`, separate from Verified Seeds. Runtime eligibility
+reads formal Competition Domain entities through `CompetitionRepository` and
+P5 policies through `EligibilityPolicyProvider`; it never parses Raw or review
+manifests. The first two real policies are partial: they support a confirmed
+education-level rule while unmodeled enrollment and team conditions keep a
+positive overall decision `UNKNOWN`. Missing policy is also `UNKNOWN`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

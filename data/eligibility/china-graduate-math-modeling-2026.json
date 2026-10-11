@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "eligibility_policy",
+  "policy": {
+    "competition_id": "china-graduate-math-modeling",
+    "edition_id": "china-graduate-math-modeling-2026",
+    "track_id": null,
+    "coverage": "partial",
+    "coverage_note": "现有 StudentProfile 不含在读状态、2026 年秋季研究生入学资格及三人团队/跨校情况；仅研究生学历层级事实可直接判断，不能据此确认整届参赛资格。",
+    "source": {
+      "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314",
+      "source_type": "official",
+      "observed_at": "2026-10-09T17:42:51+08:00",
+      "verification_status": "verified"
+    },
+    "constraints": [
+      {
+        "rule_id": "china-graduate-math-modeling-2026-education-level",
+        "scope": "edition",
+        "target_id": "china-graduate-math-modeling-2026",
+        "allowed_levels": ["graduate"],
+        "alternative_profile_field": "graduate_admission_status",
+        "source": {
+          "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence_text": "参赛对象为中国（含港澳台地区）高校、科研院所的在读研究生（硕士生、博士生）和将于2026年秋季学期入学的研究生（硕士生、博士生），以及国外大学在读研究生和国内大学在读国际学生。"
+      }
+    ]
+  }
+}

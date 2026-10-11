@@ -16,6 +16,7 @@ dev = ["pytest", "ruff"]
 [tool.setuptools]
 packages = [
     "competition_copilot",
+    "competition_copilot.application",
     "competition_copilot.domain",
     "competition_copilot.ingestion",
     "competition_copilot.infrastructure",

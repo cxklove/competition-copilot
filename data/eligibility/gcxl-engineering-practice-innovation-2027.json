@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "eligibility_policy",
+  "policy": {
+    "competition_id": "gcxl-engineering-practice-innovation",
+    "edition_id": "gcxl-engineering-practice-innovation-2027",
+    "track_id": null,
+    "coverage": "partial",
+    "coverage_note": "现有 StudentProfile 不含普通高等教育本科院校在读、全日制及团队参赛信息；学历层级符合仍不能确认整届参赛资格。",
+    "source": {
+      "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+      "source_type": "official",
+      "observed_at": "2026-10-09T11:17:32+08:00",
+      "verification_status": "verified"
+    },
+    "constraints": [
+      {
+        "rule_id": "gcxl-engineering-practice-innovation-2027-education-level",
+        "scope": "edition",
+        "target_id": "gcxl-engineering-practice-innovation-2027",
+        "allowed_levels": ["undergraduate"],
+        "alternative_profile_field": null,
+        "source": {
+          "source_url": "http://www.gcxl.edu.cn/new/match_news.html?_=aWQjPTE1NQ==",
+          "source_type": "official",
+          "observed_at": "2026-10-09T11:17:32+08:00",
+          "verification_status": "verified"
+        },
+        "evidence_text": "参赛选手须为普通高等教育本科院校全日制在校本科生。每名参赛学生仅限参加一个赛项、加入一支参赛队。"
+      }
+    ]
+  }
+}

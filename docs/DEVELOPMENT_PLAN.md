@@ -88,7 +88,7 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 ## P5 — Deterministic Eligibility Engine
 
 - **Goal:** 对核验过的赛事规则执行硬资格判断。
-- **Current status:** P5 已启动；P5.1 Eligibility Domain & Contract 已建立三值资格状态、目标 Context、纯规则接口和可审计决策。P5.2 Deterministic Rule Engine 已实现顺序执行、完整审计与 `INELIGIBLE > UNKNOWN > ELIGIBLE` 聚合；空规则集为 `UNKNOWN / RULE_DATA_MISSING`，配置或执行错误不作为业务 UNKNOWN。P5.3 再接入真实结构化资格数据；P5 尚未完成。
+- **Current status:** P5 已启动；P5.1 Eligibility Domain & Contract 已建立三值资格状态、目标 Context、纯规则接口和可审计决策。P5.2 Deterministic Rule Engine 已实现顺序执行、完整审计与 `INELIGIBLE > UNKNOWN > ELIGIBLE` 聚合；空规则集为 `UNKNOWN / RULE_DATA_MISSING`，配置或执行错误不作为业务 UNKNOWN。P5.3 已开始以独立的 P5 结构化 Policy、抽象 Provider 和 Application Evaluator 接入首批真实学历层级事实；两份真实 Policy 均为 partial，未覆盖条件继续返回 UNKNOWN。P5 尚未完成。
 - **Inputs:** 学生画像、已验证赛事事实、规则版本。
 - **Main Deliverables:** 可复现的资格规则、缺失信息处理、Eligibility DecisionResult 及资格 Tool。
 - **Files/Modules Expected:** `backend/domain/eligibility/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/eligibility/`。

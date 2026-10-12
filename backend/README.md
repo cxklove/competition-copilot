@@ -9,8 +9,8 @@ evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
-P9.5 Monitor is IN PROGRESS: P9.5.1/P9.5.2 Review PASS; P9.5.3 official-source
-adapter implemented, awaiting Review. No scheduler/polling yet. The current ingestion
+P9.5 Monitor is IN PROGRESS: P9.5.1/P9.5.2/P9.5.3 Review PASS; P9.5.4 real Monitor
+integration implemented, awaiting Review. No scheduler/polling yet. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -806,8 +806,32 @@ Fetch and parse failures are typed CHECK_FAILED, not UNKNOWN facts. Known facts
 retain P9 validation; verification is preserved, not upgraded. The adapter returns
 SourceObservationResult only; no Snapshot/Diff/Event, scheduling or Replanning.
 Tests use a documented minimal synthetic fixture and block network. P9.5.4 real
-monitor integration remains pending; P9.5 is not complete.
+monitor integration is described below; P9.5 is not complete.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/infrastructure/test_comap_observation.py
+```
+
+## P9.5.4 Real Competition Monitor Integration
+
+The integration suite runs real JsonSeedCompetitionRepository and SnapshotBuilder
+for COMAP MCM 2027, then the concrete COMAP Adapter, OneShot Monitor and formal P9
+Diff Engine. Only HTTP transport is replaced with deterministic synthetic HTML.
+Default pytest is offline; no live smoke command/test is added. A manual live
+smoke remains optional, outside mandatory CI.
+
+Repository track membership is KNOWN empty, while the Adapter reports UNKNOWN.
+First check correctly records coverage loss. The same-state zero-Diff case uses
+that Monitor output as the next baseline: success + zero Diff is not failure.
+All fixture changes are CONTROLLED OFFLINE FIXTURES, not official historical or
+current website claims. Missing optional facts remain successful UNKNOWN; fetch/
+parse failure returns no Snapshot and no Diff. Success returns Snapshot + Diff.
+
+Tests cover value changes, provenance/verification, target/time safety,
+determinism, serialization, immutable outputs and read-only Repository/data.
+No production code changes, persistence, scheduler/polling, Event, impact,
+notification or Replanning. Diff != Event; P9.5 Final Review/Closure are pending.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_5_real_monitor_integration.py
 ```

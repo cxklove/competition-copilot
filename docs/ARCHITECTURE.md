@@ -806,7 +806,7 @@ immutability and stable JSON. No storage, scheduling, retry, HTTP, parser, Event
 notification, impact, Replanning, LLM or Agent is implemented by orchestration.
 P9.5.3 is described below; P9.5 is still in progress.
 
-### P9.5.3 COMAP Official Observation Adapter — IMPLEMENTED, awaiting Review
+### P9.5.3 COMAP Official Observation Adapter — Review PASS, committed
 
 `infrastructure/comap_observation.py` implements the abstract ObservationSource
 for the reviewed COMAP MCM 2027 instructions URL, using injected ComapPageFetcher.
@@ -829,7 +829,31 @@ unchanged configured verification status. Existing P9 known-fact validation is
 retained; HTTP success does not grant verification. Unit tests are offline with
 minimal synthetic fixture data, and cover fetch/parser separately. No universal
 scraper, Snapshot/Diff/orchestration, storage, scheduler, Event, impact, Replanning
-or LLM parsing is added. P9.5.4 integration is pending; P9.5 is not complete.
+or LLM parsing is added. P9.5.4 integration is described below; P9.5 is not complete.
+
+### P9.5.4 Real Competition Monitor Integration — IMPLEMENTED, awaiting Review
+
+`tests/integration/test_p9_5_real_monitor_integration.py` composes the real
+JsonSeedCompetitionRepository -> CompetitionSnapshotBuilder baseline with the
+concrete COMAP Adapter -> OneShotCompetitionMonitor -> formal P9 Diff Engine.
+Only the HTTP transport/body is replaced by the approved minimal synthetic fixture;
+the parser, source mapping, Snapshot construction and Diff all execute unchanged.
+Default tests block network and permit only read-only Seed access under data/.
+
+The real COMAP baseline has KNOWN empty track membership; the Adapter has UNKNOWN
+membership because the page is not a track inventory. The first fixture check
+therefore correctly reports observation loss, never member removal. Same-state
+zero Diff is tested using that production Monitor output as the next baseline.
+This is a CONTROLLED OFFLINE FIXTURE case, not a claim about live official state
+or historical changes. Controlled missing-window/value fixtures exercise typed
+knowledge/value changes. Fetch/parse failures produce no Snapshot and no Diff.
+
+The suite also covers wrong target, reverse time, provenance/verification safety,
+determinism, serialization, immutability and unchanged inputs/Repository entities.
+No production code, frozen contracts or data are changed. Manual live smoke is
+optional and not added; no CI/default test depends on the official site. Diff !=
+Event; no persistence, scheduler/polling, impact, notification, Replanning or LLM/
+Agent is added. P9.5 Final Review/Closure remain pending; P9.5 is IN PROGRESS.
 
 ## 9. Replanning Architecture
 

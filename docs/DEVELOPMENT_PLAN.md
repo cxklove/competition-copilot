@@ -536,7 +536,7 @@ Agent, MCP and Frontend. These do not block P9 closure.
 
 ## P9.5 — Competition Monitor
 
-**Status: IN PROGRESS. P9.5.1/P9.5.2 Review PASS / committed; P9.5.3 Official Adapter IMPLEMENTED, awaiting Review.**
+**Status: IN PROGRESS. P9.5.1/P9.5.2/P9.5.3 Review PASS / committed; P9.5.4 Real Monitor Integration IMPLEMENTED, awaiting Review.**
 Monitor observes official sources, produces
 structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
 UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
@@ -598,7 +598,7 @@ writes, persistence, retry, scheduler, loop, HTTP/parser, Event, notification,
 impact, Replanning, LLM/Agent/MCP is added. P9/P9.5.1 remain unchanged.
 P9.5.3 source adapter is described below; P9.5 is not complete.
 
-### P9.5.3 — Official Source Observation Adapter (IMPLEMENTED, awaiting Review)
+### P9.5.3 — Official Source Observation Adapter (Review PASS, committed)
 
 Candidate audit used reviewed Repository Edition.source, not remembered/search URLs:
 
@@ -633,7 +633,32 @@ HTTP failures, date/zone/absence safety, unsupported target/URL, redirects, boun
 responses, provenance and deterministic JSON. No default live smoke test is added.
 No Snapshot/Diff/Monitor result construction, Repository write, universal crawler,
 scheduler, Event/impact/Replanning or LLM parsing is added. Frozen P9/P9.5.1/P9.5.2
-remain unchanged. P9.5.4 integration and Final Review remain; P9.5 is not complete.
+remain unchanged. P9.5.4 integration is described below; Final Review remains.
+
+### P9.5.4 — Real Competition Monitor Integration (IMPLEMENTED, awaiting Review)
+
+Offline integration tests use the real Repository/Builder for COMAP MCM 2027,
+the concrete official Adapter with fixture-only HTTP transport, OneShot Monitor
+and its formal P9 Diff Engine. No Fake ObservationSource or duplicated parser/
+Monitor logic is used; production code and real data remain unchanged.
+
+The real known-empty track baseline differs from the Adapter's UNKNOWN track
+coverage. First check must report observation-state loss, never track removal.
+Case A uses the first production Monitor output as the next baseline for repeated
+same-fixture success + zero Diff. This is explicitly a controlled offline state
+case, not a live no-change claim. Further cases cover successful missing optional
+window, controlled boundary VALUE_CHANGED, timeout/connection failure, parse
+failure, unsupported real target, reverse time and deterministic immutable JSON.
+Track changes are NOT_APPLICABLE; the Adapter scope is not expanded.
+
+Source failures return no Snapshot/Diff; successful observations return both.
+Real baseline provenance is preserved and fixture observation source mapping
+retains verification policy without automatic upgrade. Fixtures are test-only,
+not official historical evidence. Default tests block network and protect data
+from writes. Optional manual live smoke is not added and is never a required CI
+path. No persistence, scheduler/polling, Event, impact, notification, Replanning,
+LLM or Agent. P9/P9.5.1/P9.5.2/P9.5.3 and earlier phases remain frozen.
+P9.5 Final Review and Closure have not run; P9.5 is not CLOSED.
 
 - **Goal:** 定期观察可信来源并发现潜在状态变化。
 - **Inputs:** 已有 Competition、监控来源、当前 Snapshot、抓取/轮询策略。

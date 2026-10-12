@@ -347,7 +347,9 @@ is implemented by this Closure.
 
 ## P9 — Competition Digital Twin
 
-**Status: IN PROGRESS. P9.1/P9.1.1/P9.2/P9.3 Review PASS / committed; P9.4 Real Integration IMPLEMENTED, awaiting Review.**
+**Status: FROZEN.** P9 deterministic Digital Twin core is finished.
+P9.1, P9.1.1, P9.2, P9.3 and P9.4 passed Review and are committed;
+P9 Final Review PASS. Next: P9.5 — Competition Monitor.
 P9 answers what changed in Competition/Edition/Track
 dynamic state, using Snapshot/Diff/version concepts; it does not enhance
 Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
@@ -403,8 +405,8 @@ algorithm, Network, LLM, Event, impact or Plan/Replanning capability is implemen
 P2–P8 remain frozen.
 
 P9.2 implements baseline Snapshot creation; P9.3 implements Diff computation
-below. Later P9 integration/review, P9.5 Monitor, P10 Event and P11
-Replanning remain. P9 is not complete. Text/rules semantic diff and additional
+below. P9 integration and Final Review passed; P9.5 Monitor, P10 Event and P11
+Replanning remain future work. Text/rules semantic diff and additional
 structured facts are deferred.
 
 ### P9.2 — Competition Snapshot Builder (Review PASS, committed)
@@ -439,8 +441,8 @@ dataset counts.
 
 P9.2 is a repository-backed baseline observation. Production code does not read
 Seed files directly, use Network/LLM/Agent/MCP, choose status/deadlines, compare
-snapshots, generate Diff/Event, monitor sources or replan. Later P9 integration,
-P9.5 Monitor, P10 Event and P11 Replanning remain future work. P9 is not complete.
+snapshots, generate Diff/Event, monitor sources or replan. P9 integration passed;
+P9.5 Monitor, P10 Event and P11 Replanning remain future work. P9 is FROZEN.
 
 ### P9.3 — Deterministic Snapshot Diff (Review PASS, committed)
 
@@ -469,10 +471,10 @@ SnapshotDiff has no diff_id field; identity remains its directed references.
 
 Diff is low-level structural change only: Diff != Event, Diff != Impact and
 Diff != Replanning. No Repository/Builder, Network, Monitor, LLM, Agent, MCP,
-planning or business impact is used. P9.4 integration is described below; Final Review remains;
-P9 is not complete.
+planning or business impact is used. P9.4 integration is described below;
+P9 Final Review PASS and P9 is FROZEN.
 
-### P9.4 — Real Digital Twin Integration (IMPLEMENTED, awaiting Review)
+### P9.4 — Real Digital Twin Integration (Review PASS, committed)
 
 `tests/integration/test_p9_real_digital_twin_integration.py` exercises real
 Verified Seed -> JsonSeedCompetitionRepository -> Snapshot Builder -> baseline
@@ -492,9 +494,52 @@ reverse time, cross-target rejection, audit preservation and JSON/immutability.
 Network and non-Seed data access are blocked; Repository/data remain read-only.
 Production code and frozen phases are unchanged. P9 can represent, build and
 compare structured observations; live refresh/Monitor, Event, impact and
-Replanning remain future work. P9 Final Review is pending; P9 is not complete.
+Replanning remain future work. P9 Final Review PASS; P9 is FROZEN.
+
+### P9 Closure — FROZEN
+
+P9 freezes the typed CompetitionSnapshot, SnapshotReference, target, dynamic
+state and per-field provenance contracts; ObservationState KNOWN_VALUE,
+KNOWN_ABSENT and UNKNOWN; and UNKNOWN != KNOWN_ABSENT. P9.1.1 freezes identical
+reference + empty changes as valid; same ID with conflicting metadata or same
+snapshot with nonempty changes is invalid. Distinct observations of equal state
+also yield zero Diff; observed_at alone is not a factual change.
+
+P9.2 freezes Repository None -> UNKNOWN, never KNOWN_ABSENT; known [] tracks ->
+known empty immutable set; explicit aware snapshot observed_at separate from
+source observed_at; deterministic machine-based Snapshot identity; and read-only
+Repository baseline construction. Whole-field UNKNOWN differs from a known
+partial TimeWindow: missing start/end boundaries are endpoint uncertainty.
+Known empty membership differs from UNKNOWN; only known/known sets support
+member add/remove. Track-level building remains deferred without independent facts.
+
+P9.3 freezes knowledge-state versus fact-state transitions, whole-window versus
+endpoint changes, canonical field identity and deterministic change order.
+UNKNOWN -> known means observation gained; known -> UNKNOWN means observation
+lost. Different known values mean structured VALUE_CHANGED. Known tracks ->
+UNKNOWN never means all removed; UNKNOWN -> known tracks never means all added.
+SnapshotDiff is low-level only, without Event/impact/urgency/notification/replan
+semantics. P9.4 completed the real Seed -> Repository -> Builder -> Snapshot ->
+Diff chain with explicitly test-only later fixtures, not official historical updates.
+Real provenance is preserved; P9 neither verifies websites nor fabricates sources
+or changes verification status. No Network, Monitor, LLM, Agent or planning runs.
+
+These semantics and implementation contracts are frozen. Future defects require
+explicitly reopening P9, then separate Implementation -> Review -> commit.
+Closure-time validation snapshot: 1335 passed, 0 skipped; Ruff and diff check PASS.
+This test count is not a permanent invariant.
+
+Deferred: live source monitoring, HTTP/crawler, scheduler/periodic polling,
+content freshness policy, retry/backoff, semantic rule-text diff, provenance-only
+diff, CompetitionEvent, Impact Analysis, notification, Adaptive Replanning,
+Agent, MCP and Frontend. These do not block P9 closure.
 
 ## P9.5 — Competition Monitor
+
+**Status: NEXT, NOT STARTED.** Monitor observes official sources, produces
+structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
+UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
+to P10; impact and Adaptive Replanning belong to P11.
 
 - **Goal:** 定期观察可信来源并发现潜在状态变化。
 - **Inputs:** 已有 Competition、监控来源、当前 Snapshot、抓取/轮询策略。

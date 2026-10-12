@@ -614,7 +614,7 @@ All new contracts and nested collections are frozen, extra fields are rejected,
 and JSON serialization is stable. P9.1 tests cover targets, explicit aware times,
 observation combinations, unknown/absent/empty distinctions, partial windows,
 verified per-field sources, canonical membership, typed directional changes,
-target/time safety, immutability and serialization. P9 is not complete; the
+target/time safety, immutability and serialization. P9 is FROZEN; the
 Snapshot Builder and Diff Engine are described below. Event, impact and
 Replanning remain unimplemented.
 
@@ -654,7 +654,7 @@ not enter identity. No clock or random default is used. Repository state is read
 only; outputs retain P9.1 immutability and JSON serialization. This is a
 repository-backed baseline snapshot, not a live website observation. P9.2 does
 not implement comparison, Diff, Event, Monitor, impact, Replanning, Network,
-LLM or Agent. P9 is still in progress.
+LLM or Agent. P9 is FROZEN.
 
 ### P9.3 Deterministic Snapshot Diff — Review PASS, committed
 
@@ -684,9 +684,9 @@ Snapshot ID and observation time are reference metadata, not fact changes.
 Outputs remain immutable and JSON serializable; SnapshotDiff has no diff_id.
 Diff != Event, Diff != Impact, Diff != Replanning. P9.3 performs no monitoring,
 Network, LLM, Agent, notification or planning. P9.4 integration is described below;
-P9 is not complete.
+P9 Final Review PASS; P9 is FROZEN.
 
-### P9.4 Real Digital Twin Integration — IMPLEMENTED, awaiting Review
+### P9.4 Real Digital Twin Integration — Review PASS, committed
 
 The integration test runs Verified Seed -> real JsonSeedCompetitionRepository
 -> P9.2 Builder -> real baseline Snapshot -> P9.3 Diff Engine. COMAP MCM 2027
@@ -705,7 +705,52 @@ changes, unknown versus empty, deterministic JSON, immutable results and rejecti
 of reverse time/cross-target comparison; Network and non-Seed data reads are blocked.
 Production code is unchanged. P9 now represents, builds and compares observed
 state; live refresh/Monitor, CompetitionEvent, impact and Replanning remain
-unimplemented. P9 Final Review is pending; P9 is not complete.
+unimplemented. P9 Final Review PASS; P9 is FROZEN.
+
+### P9 Closure — FROZEN
+
+P9 is the completed deterministic Digital Twin core. Frozen contracts include
+Snapshot target, CompetitionSnapshot/Reference, typed dynamic state, per-field
+provenance, observation state/time/identity, Repository mapping, TimeWindow and
+track observation semantics, zero Diff, fact/knowledge transitions, change order
+and the low-level Diff boundary. Future defects require explicit P9 reopening
+with independent Implementation -> Review -> commit.
+
+- UNKNOWN != KNOWN_ABSENT; Repository null remains UNKNOWN, never confirmed absence.
+- Known empty tracks remain known; only known/known membership supports add/remove.
+- Whole-window UNKNOWN differs from KNOWN_VALUE(partial TimeWindow). Internal
+  start/end None means uncertain boundary, not whole-field UNKNOWN.
+- Snapshot observed_at is explicit and aware, separate from source observation
+  time. IDs use canonical machine target/time/state/provenance, without clock,
+  random or display text identity. P9.2 builds Repository baseline observations.
+- Same identical reference + empty changes is valid; same ID with inconsistent
+  metadata or nonempty changes is invalid. Distinct observations of equal fact
+  state also yield zero Diff; observation time alone is not a fact change.
+- UNKNOWN -> known and known -> UNKNOWN are knowledge transitions. Different
+  known values are structured value changes. Unknown track membership never
+  implies member addition/removal. Ordering and typed audit remain deterministic.
+
+P9 preserves supplied real source metadata; it does not verify website truth,
+fabricate provenance or change verification status. Real integration uses COMAP
+MCM 2027/Huawei ICT 2026 as the current baseline fixtures and explicitly test-only
+later observations, not official historical updates. No fixture/data count is
+frozen. Snapshot/changes remain immutable and JSON serializable.
+
+```text
+Verified Competition State -> CompetitionSnapshotBuilder -> Snapshot(t1)
+Snapshot(t1) + Snapshot(t2) -> Deterministic Snapshot Diff -> SnapshotDiff
+
+Future: Official Sources -> P9.5 Monitor -> new Snapshot
+        SnapshotDiff -> P10 Event Engine -> CompetitionEvent
+        CompetitionEvent -> P11 Impact / Adaptive Replanning
+```
+
+P9 implements no source fetch/polling, scheduler or periodic refresh (P9.5),
+CompetitionEvent/business event interpretation (P10), impact/notification or
+Plan/PlanDiff/Replanning (P11). LLM = NO; Agent = NO; Network = NO. Monitor must
+reuse frozen UNKNOWN/KNOWN_ABSENT, Snapshot identity and Diff semantics.
+HTTP/crawler, freshness/retry/backoff policy, semantic rule-text and provenance
+diff, notification, Agent/MCP/Frontend remain deferred.
 
 ## 9. Replanning Architecture
 

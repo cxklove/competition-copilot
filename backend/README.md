@@ -8,8 +8,8 @@ StudentProfile Domain already exists and supplies input. P7 finished requirement
 evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
-**P9 is IN PROGRESS; P9.1/P9.1.1/P9.2/P9.3 Review PASS; P9.4 Real Integration IMPLEMENTED, awaiting Review.**
-P9 Final Review is pending. The current ingestion
+**P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
+Next is P9.5 Monitor (not implemented). The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -612,7 +612,7 @@ There is no application start command yet. To build a wheel:
 
 ## P9.1 Digital Twin Domain Contract
 
-P9.1 passed Review and is committed; P9 is still in progress. The
+P9.1 passed Review and is committed; P9 is FROZEN. The
 `competition_copilot.domain.digital_twin` module defines an immutable generic
 competition/edition/optional-track target, explicit timezone-aware observation
 snapshots, typed dynamic facts and a directed typed SnapshotDiff contract.
@@ -665,7 +665,7 @@ The stable snapshot ID hashes canonical machine target, UTC observation time and
 typed dynamic state including provenance. Display names are excluded. The
 builder neither modifies Repository data nor reads Seed files directly. This is
 a Repository baseline observation without live monitoring, Network, LLM,
-Diff, Event or Replanning. P9 remains in progress.
+Diff, Event or Replanning. P9 is FROZEN.
 
 Run the P9.2 tests from the repository root:
 
@@ -688,7 +688,7 @@ Known track set changes retain one typed before/after set record, preserving
 added/removed IDs. Known tracks -> UNKNOWN is not track removal, and unknown ->
 known tracks is not member addition. Fixed field order keeps output deterministic.
 Diff != Event, Diff != Impact and Diff != Replanning. No Repository, Monitor,
-Network, LLM or Agent is used. P9 remains in progress.
+Network, LLM or Agent is used. P9 is FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_snapshot_diff_engine.py
@@ -709,8 +709,33 @@ Tests use fixed aware times, validated constructors and deterministic case IDs;
 check serialization, audit, immutability and safety; block Network/non-Seed data
 reads and leave Repository/data unchanged. Production code is unchanged. P9
 represents/builds/compares observations, while live refresh, Monitor, Event,
-impact and Replanning remain future work. P9 Final Review is pending.
+impact and Replanning remain future work. P9 Final Review PASS; P9 is FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_real_digital_twin_integration.py
 ```
+
+## P9 Closure — FROZEN
+
+Snapshot/Reference, typed dynamic state/provenance, ObservationState, target/time/
+identity, Repository mapping and low-level Diff contracts are frozen. UNKNOWN !=
+KNOWN_ABSENT; Repository None -> UNKNOWN; known [] tracks -> known empty set.
+Whole-field UNKNOWN differs from a known partial TimeWindow. Explicit aware
+snapshot observation time does not rewrite source observed_at; Snapshot IDs are
+deterministic machine identities. Same identical reference + empty changes is
+valid; same ID with conflicting metadata or nonempty changes is invalid. Distinct
+observations of equal fact state also yield zero Diff; time alone is not a fact change.
+
+Unknown/known transitions are observation gained/lost, not fact additions/removals.
+Different known values are structured value changes. Only known/known track sets
+support member add/remove. P9.3 freezes canonical field/change order. P9.4 real
+baselines preserve official provenance; controlled later fixtures are test-only,
+not official historical updates. P9 does not verify websites, fabricate sources,
+alter verification, generate Events, inspect Plans or replan. LLM/Agent/Network = NO.
+
+Future defects require explicit P9 reopening and Implementation -> Review -> commit.
+P9.5 is next: official sources -> structured observation -> P9 Snapshot, reusing
+frozen observation/identity/Diff semantics. Fetch/polling/scheduler/refresh,
+freshness/retry/backoff, semantic rule-text/provenance diff, P10 Event, P11 impact/
+notification/Replanning, Agent/MCP/Frontend remain deferred. Closure-time snapshot:
+1335 passed, 0 skipped; Ruff/diff check PASS (not a permanent test-count invariant).

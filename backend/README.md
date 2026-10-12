@@ -9,7 +9,8 @@ evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
-Next is P9.5 Monitor (not implemented). The current ingestion
+P9.5 Monitor is IN PROGRESS: P9.5.1 Contract implemented, awaiting Review;
+no live source adapter or monitor runtime yet. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -739,3 +740,28 @@ frozen observation/identity/Diff semantics. Fetch/polling/scheduler/refresh,
 freshness/retry/backoff, semantic rule-text/provenance diff, P10 Event, P11 impact/
 notification/Replanning, Agent/MCP/Frontend remain deferred. Closure-time snapshot:
 1335 passed, 0 skipped; Ruff/diff check PASS (not a permanent test-count invariant).
+
+## P9.5.1 Monitor Contract
+
+`domain.monitoring` defines immutable MonitorCheckRequest, SourceObservationResult,
+MonitorCheckResult, MonitorCheckOutcome and SourceCheckError. The Application
+CompetitionObservationSource Protocol exposes one `observe(request)` capability,
+with stable P9 target, explicit aware observation time, source metadata and optional
+baseline Snapshot. It adds no HTTP/async framework or Repository write dependency.
+
+Source check failure != fact UNKNOWN. Failure requires a typed error and forbids
+state/new Snapshot/Diff; successful typed observation may contain UNKNOWN facts.
+Known absence must be explicitly sourced, never inferred from missing selectors,
+timeouts or HTTP errors. Source URL/type/verification policy is bound to the
+request; a check cannot upgrade verification. All P9 fact/provenance semantics
+remain frozen. Success requires a matching supplied Snapshot and a matching Diff
+when a baseline exists; zero changes are success. These are validators, not a
+Snapshot builder or Diff orchestration implementation.
+
+P9.5.2 orchestration and P9.5.3 source adapter are future work. No live network,
+parsing, retry/backoff, scheduling/polling, Repository mutation, Event, impact,
+notification, Replanning, LLM or Agent is added. P9.5 is not complete.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_monitoring.py
+```

@@ -536,10 +536,44 @@ Agent, MCP and Frontend. These do not block P9 closure.
 
 ## P9.5 — Competition Monitor
 
-**Status: NEXT, NOT STARTED.** Monitor observes official sources, produces
+**Status: IN PROGRESS. P9.5.1 Monitor Contract IMPLEMENTED, awaiting Review.**
+Monitor observes official sources, produces
 structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
 UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
 to P10; impact and Adaptive Replanning belong to P11.
+
+### P9.5.1 — Monitor Contract (IMPLEMENTED, awaiting Review)
+
+`domain/monitoring.py` defines immutable MonitorCheckRequest, SourceObservationResult,
+SourceCheckError and MonitorCheckResult. `application/monitoring.py` exposes the
+sync execution-model-neutral CompetitionObservationSource Protocol; it has only
+`observe(request)`, without Repository writes, transport or scheduling methods.
+P9 Target, typed dynamic state, Snapshot/Reference/Diff and SourceMetadata are
+reused; P2 source approval is separate from operational source-check outcome.
+
+Request supplies target, explicit aware observed_at, configured source metadata
+and optional previous Snapshot. One timestamp suffices; no start/end lifecycle
+or clock defaults are added. CHECK_SUCCEEDED requires typed state and no error;
+CHECK_FAILED requires a machine-coded error and forbids state. Failure != UNKNOWN
+facts. Successful observation may contain UNKNOWN, including all fields unknown.
+KNOWN_ABSENT remains an explicit sourced assertion under P9, never inferred from
+missing data, selector failure, timeout or HTTP status. FETCH_FAILED, PARSE_FAILED,
+SOURCE_UNAVAILABLE and INVALID_OBSERVATION are operational errors, not events.
+
+The single-source observation binds fact sources to declared URL/type/verification
+policy. A result must match request target/time/source policy; HTTP success cannot
+upgrade verification. Known facts still satisfy frozen P9 provenance validation.
+MonitorCheckResult retains request/observation audit without duplicate outcome
+fields: outcome derives from observation. Success requires the supplied matching
+Snapshot and, when baseline exists, a Diff with matching references. Initial checks
+have no Diff; failed checks have neither new Snapshot nor Diff. Zero-change and
+reflexive Diff are successful checks. These validators do not build or compare.
+
+Only contracts and synthetic/fake-source tests are implemented. P9.5.2 will
+orchestrate observation -> Snapshot/Diff -> result; P9.5.3 will provide a source
+adapter. No network/HTTP parsing, retry/timeout, scheduler/poll loop, Repository
+mutation, Event, notification, impact, Replanning, LLM/Agent/MCP is implemented.
+P9 and P2–P8 remain frozen; P9.5 is not complete.
 
 - **Goal:** 定期观察可信来源并发现潜在状态变化。
 - **Inputs:** 已有 Competition、监控来源、当前 Snapshot、抓取/轮询策略。

@@ -752,6 +752,39 @@ reuse frozen UNKNOWN/KNOWN_ABSENT, Snapshot identity and Diff semantics.
 HTTP/crawler, freshness/retry/backoff policy, semantic rule-text and provenance
 diff, notification, Agent/MCP/Frontend remain deferred.
 
+### P9.5.1 Monitor Contract — IMPLEMENTED, awaiting Review
+
+P9.5 is IN PROGRESS. `domain/monitoring.py` contains one-shot immutable contracts;
+`application/monitoring.py` defines CompetitionObservationSource.observe(request)
+as a Protocol. It exposes stable target, explicit aware time, configured source
+and optional baseline context, without transport/schedule/write capabilities.
+Domain depends only on P9 contracts and SourceMetadata, not Repository or adapters.
+
+```text
+Official Source -> Observation Source Adapter (future P9.5.3)
+                -> typed SourceObservationResult
+                -> Snapshot + Diff (future P9.5.2 orchestration)
+                -> MonitorCheckResult
+```
+
+CHECK_FAILED carries a stable SourceCheckError and no structured state, new
+Snapshot or Diff. It cannot fabricate UNKNOWN facts or observation-coverage loss.
+CHECK_SUCCEEDED requires typed CompetitionDynamicState but may contain UNKNOWN
+facts; those facts describe a successful observation with incomplete information.
+Explicit KNOWN_ABSENT retains P9 sourced-absence semantics. Normal external
+failure is typed; programmer/contract errors may raise. No retry policy is defined.
+
+Successful single-source observation preserves declared provenance URL/type/
+verification policy and aware times. Monitor result validators bind request,
+observation, Snapshot and Diff references, and prohibit source-policy upgrades.
+HTTP 200 is not verification. SourceMetadata time remains separate from snapshot
+observation time. Successful checks with zero-change/reflexive Diff remain success;
+outcome derives from observation, without duplicate flags or event classification.
+
+Only contracts/tests exist. No live adapter, network, parser, scheduler, polling,
+Snapshot/Diff orchestration, Repository/data mutation, Event/impact/notification,
+Replanning or LLM/Agent/MCP is implemented. P9 remains FROZEN; P9.5 is not complete.
+
 ## 9. Replanning Architecture
 
 ```text

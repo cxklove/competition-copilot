@@ -742,8 +742,8 @@ P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. NEXT: P10 Event Engine.
 
 ## P10 — Competition Event Engine
 
-- **Status:** IN PROGRESS. P10.1 Event Domain Contract IMPLEMENTED, awaiting Review.
-  No Diff -> Event Engine, aggregation or dedup behavior is implemented yet.
+- **Status:** IN PROGRESS. P10.1 Review PASS / committed; P10.2 deterministic
+  Diff -> Event Engine IMPLEMENTED, awaiting Review. No aggregation/dedup yet.
 - **Goal:** 将已核验 Diff 分类为可供下游处理的赛事事件。
 - **Inputs:** P9/P9.5 已产生的 SnapshotDiff、必要 target/source context、核验状态及赛事规则；不重新抓网页、构造 Snapshot 或计算 Diff。
 - **Main Deliverables:** Event 类型、触发条件、去重/幂等、事件证据与订阅接口。
@@ -752,7 +752,7 @@ P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. NEXT: P10 Event Engine.
 - **Acceptance Criteria:** 每个被接受的状态变化有对应 CompetitionEvent，事件引用来源、Diff、版本与稳定标识。
 - **Explicitly Out of Scope:** 自动生成新计划、Agent 解释和通知渠道。
 
-### P10.1 — Competition Event Domain Contract (IMPLEMENTED, awaiting Review)
+### P10.1 — Competition Event Domain Contract (Review PASS, committed)
 
 Audit found `domain/event.py` CompetitionEvent with P1 id, competition_id,
 edition_id, event_type, optional occurred_at, required aware observed_at/source,
@@ -790,8 +790,40 @@ P9/P9.5 produce SnapshotDiff; P10 will interpret it as business CompetitionEvent
 Event != Diff != Impact/Replanning. P10.1 only defines Contract. Offline tests cover
 legacy compatibility, four types, presence/knowledge separation, multiple selected
 changes, identity/time/provenance safety, immutability and stable JSON. Frozen P9,
-P9.5 and P2–P8 code/tests are unchanged. P10.2 mapping and P10.3 aggregation/dedup
-remain deferred; no Repository/network/LLM/Agent or P11 logic is added.
+P9.5 and P2–P8 code/tests are unchanged. P10.2 mapping is described below;
+P10.3 aggregation/dedup remain deferred; no Repository/network/LLM/Agent or P11
+logic is added by the Contract.
+
+### P10.2 — Deterministic Diff to Event Engine (IMPLEMENTED, awaiting Review)
+
+`domain/event_engine.py` CompetitionEventEngine.interpret(source_diff,
+detected_at=<explicit aware datetime>) is a pure Domain Service. Input is validated
+SnapshotDiff only; output is immutable tuple[CompetitionEvent, ...]. It never
+recomputes Diff, reads Repository/Monitor or fetches sources. Zero Diff -> zero Events.
+
+Exact canonical field mapping uses P9's actual start_at/end_at paths. VALUE_CHANGED
+and PRESENCE_CHANGED map registration fields -> REGISTRATION_WINDOW_CHANGED,
+competition fields -> COMPETITION_WINDOW_CHANGED, membership -> TRACK_MEMBERSHIP_CHANGED.
+OBSERVATION_STATE_CHANGED always maps OBSERVATION_COVERAGE_CHANGED, including
+partial endpoints, UNKNOWN <-> known sets and UNKNOWN <-> known absence. No false
+fact addition/removal. Unrecognized field/kind fails; frozen P9 currently prevents
+such values at construction. Iteration follows fixed P9 window/start/end/membership
+order, also normalizing manually supplied unordered valid changes without mutation.
+
+One low-level change -> one Event. Two registration boundaries produce two events
+with the same type but distinct deterministic IDs/selected fields; no cross-change
+grouping. Event reuses full input Diff and exactly one source_change_fields entry,
+P10.1 identity helper/validated constructor/target. Representative source is the
+first after source, otherwise first before source; all evidence remains in Diff.
+No new provenance or verification claim. detected_at cannot precede after observation;
+occurred_at remains None. No system clock. P10.1 excludes detection time from ID.
+
+Tests cover zero/reflexive Diff, factual window/membership/presence transitions,
+knowledge transitions, lineage, ordering, identity, time, immutable input/output
+and JSON. Frozen P10.1/P9/P9.5/P2–P8 code/tests are unchanged. No aggregation,
+cross-call duplicate suppression, Repository/persistence, network, severity,
+impact, notification, Replanning, LLM or Agent. P10.3 aggregation/dedup semantics
+are next but not implemented; P10 is not complete.
 
 ## P11 — Event-driven Replanning
 

@@ -924,14 +924,14 @@ Event; no persistence, scheduler/polling, impact, notification, Replanning or LL
 Agent is added. P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. Closure-time
 validation: 1434 passed, 0 skipped; Ruff/diff check PASS. NEXT: P10 Event Engine.
 
-### P10.1 Competition Event Domain Contract — IMPLEMENTED, awaiting Review
+### P10.1 Competition Event Domain Contract — Review PASS, committed
 
-P10 is IN PROGRESS. It evolves the existing `domain/event.py` CompetitionEvent;
-no parallel model or Event Engine exists. Current architecture is:
+P10 is IN PROGRESS. P10.1 evolves the existing `domain/event.py` CompetitionEvent;
+no parallel model is added. The pure P10.2 Engine is described below. Architecture:
 
 ```text
 Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 Diff -> SnapshotDiff
-Future P10.2 Event Engine -> CompetitionEvent -> Future P11 Impact / Replanning
+P10.2 Event Engine -> CompetitionEvent -> Future P11 Impact / Replanning
 ```
 
 Four new coarse types cover the frozen dynamic scope: registration/competition
@@ -958,8 +958,34 @@ records; old types do not gain P10 lineage/category semantics. Evolution intenti
 freezes Event mutation and rejects model_copy(update=...), with no mutation consumer
 found. New four types require valid lineage and deterministic IDs. No severity,
 student/plan binding, action/status/notification, Event aggregation/dedup, Repository,
-network, LLM or Agent. P10.1 defines Contract only; P10.2 has not started.
+network, LLM or Agent is added by the Contract. P10.1 defines Contract only;
+P10.2 mapping is described below.
 Event != Diff; Event != Impact; Event != Replanning. Frozen P9/P9.5 remain unchanged.
+
+### P10.2 Deterministic Competition Event Engine — IMPLEMENTED, awaiting Review
+
+`domain/event_engine.py` supplies CompetitionEventEngine.interpret(SnapshotDiff,
+detected_at=<required aware datetime>) -> immutable Event tuple. It revalidates
+typed input and maps each change independently in fixed P9 canonical field order.
+Exact field table includes registration/competition window and start_at/end_at,
+plus track_membership. Value/presence changes map their factual business type;
+all observation-state changes map OBSERVATION_COVERAGE_CHANGED, never fact removal/
+addition. Partial-boundary knowledge and unknown membership follow the same rule.
+Unknown fields/kinds fail explicitly; closed P9 contracts already reject them.
+
+Zero Diff -> zero Events. One low-level change -> one Event: registration start/end
+produce two distinct IDs, not an aggregated Event. Full source Diff plus one selected
+canonical field preserves lineage; target comes from Diff. Representative source
+uses first after source, falling back to first before source for coverage loss;
+the complete original evidence remains embedded. No fetching/verification/provenance
+fabrication. P10.1's identity primitive and Event validators are reused unchanged.
+detected_at is explicit, aware and >= after observation; no business occurred_at.
+
+Engine has no state, duplicate suppression, Repository/storage, network, Monitor
+dependency, severity, impact, notification, Replanning, LLM or Agent. It does not
+compute Diff or group changes. Offline tests lock deterministic ordering/IDs/JSON,
+lineage, transition matrix, time and immutability. P10.3 aggregation/dedup semantics
+are next, not implemented; P10 remains IN PROGRESS. Event != Impact/Replanning.
 
 ## 9. Replanning Architecture
 

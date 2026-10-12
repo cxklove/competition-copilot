@@ -266,6 +266,43 @@ def test_snapshot_nested_immutability_and_serialization():
     )
 
 
+def test_same_snapshot_zero_diff_is_serializable_and_immutable():
+    ref = reference()
+    diff = SnapshotDiff(before=ref, after=ref, changes=())
+    assert diff.before == diff.after == ref
+    assert diff.changes == ()
+    assert diff.model_dump(mode="json")["changes"] == []
+    assert SnapshotDiff.model_validate_json(diff.model_dump_json()) == diff
+    assert diff.model_dump_json() == SnapshotDiff(
+        before=reference(), after=reference(), changes=()
+    ).model_dump_json()
+    with pytest.raises(ValidationError):
+        diff.before.snapshot_id = "other"
+    with pytest.raises(ValidationError):
+        diff.changes = ()
+
+
+def test_same_snapshot_id_with_different_time_is_rejected():
+    with pytest.raises(ValidationError, match="identical reference metadata"):
+        SnapshotDiff(before=reference(), after=reference(observed_at=LATER))
+
+
+def test_same_snapshot_id_with_different_target_is_rejected():
+    with pytest.raises(ValidationError):
+        SnapshotDiff(before=reference(), after=reference(track_id="track-a"))
+
+
+def test_same_snapshot_reference_with_valid_change_is_rejected():
+    change = WindowEndpointChange(
+        field="registration_window.end_at",
+        kind="value_changed",
+        before=instant(value=NOW),
+        after=instant(value=LATER),
+    )
+    with pytest.raises(ValidationError, match="empty changes"):
+        SnapshotDiff(before=reference(), after=reference(), changes=(change,))
+
+
 def test_diff_references_direction_and_unchanged_state():
     diff = SnapshotDiff(before=reference(), after=reference("snapshot-b", LATER))
     assert (
@@ -277,8 +314,6 @@ def test_diff_references_direction_and_unchanged_state():
     assert same_time.before.observed_at == same_time.after.observed_at
     with pytest.raises(ValidationError):
         SnapshotDiff(before=diff.after, after=diff.before)
-    with pytest.raises(ValidationError):
-        SnapshotDiff(before=reference(), after=reference())
     for mismatched in (
         target("track-a"),
         CompetitionTarget(competition_id="other", edition_id="edition-a"),

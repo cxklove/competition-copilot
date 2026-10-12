@@ -11,7 +11,8 @@ Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
 **P9.5 — Competition Monitor: CLOSED / FROZEN; P9.5.1–P9.5.4 completed,
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
-resolved the earlier blocker. NEXT: P10 — Competition Event Engine (not started).
+resolved the earlier blocker. **P10 IN PROGRESS: P10.1 Event Domain Contract
+implemented, awaiting Review; no Event Engine yet.**
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -640,7 +641,8 @@ are invalid; distinct snapshots can still have empty changes.
 P9.2 constructs baseline snapshots and validates ID-only target relationships
 using Repository facts. P9.3 computes deterministic Diff. P9.5 Monitor is implemented
 below; P10 Event interpretation and P11 Replanning remain future work. `CompetitionEvent` is
-unchanged. P9.1 uses no Repository, Network, LLM, Agent or Plan logic.
+unchanged by P9.1; its controlled P10.1 evolution is documented below. P9.1 uses
+no Repository, Network, LLM, Agent or Plan logic.
 
 Run its synthetic contract tests from the repository root:
 
@@ -747,7 +749,7 @@ notification/Replanning, Agent/MCP/Frontend remain deferred. Closure-time snapsh
 ## P9.5 Monitor Core — CLOSED / FROZEN
 
 P9.5.1–P9.5.4 are COMPLETED / Review PASS / committed; Final Review re-run PASS.
-Closure freezes the deterministic one-shot Monitor core. NEXT: P10 (not started).
+Closure freezes the deterministic one-shot Monitor core. P10 Contract status is below.
 
 ```text
 Approved Official Source -> Official Source Observation Adapter
@@ -773,7 +775,7 @@ invokes the one-shot Monitor and preserves its semantics. Deferred: second
 competition adapter, multi-source monitor, periodic scheduler/polling, distributed
 jobs, retry/backoff runtime policy, monitor rate limiting policy, Snapshot history persistence, notification,
 CompetitionEvent (P10), Impact Analysis/Adaptive Replanning (P11), Agent, MCP,
-Frontend. P10 has not started.
+Frontend. P10.1 Contract is documented below; P10.2 has not started.
 
 ### P9.5 Closure — Frozen Scope
 
@@ -906,4 +908,43 @@ notification or Replanning. Diff != Event; P9.5 Final Review PASS; CLOSED / FROZ
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_5_real_monitor_integration.py
+```
+
+## P10.1 Competition Event Domain Contract
+
+P10 IN PROGRESS; P10.1 implemented, awaiting Review. Existing `domain.event`
+CompetitionEvent is evolved rather than duplicated. P1 id/target IDs/event_type,
+occurred_at/observed_at/source/description and eight legacy enums remain supported;
+legacy JSON shape is preserved. Existing usages were Contract/model integration
+tests only. Event is now frozen; assignment and model_copy(update=...) no longer
+work. Normal legacy construction/serialization remains compatible.
+
+New types: REGISTRATION_WINDOW_CHANGED, COMPETITION_WINDOW_CHANGED,
+TRACK_MEMBERSHIP_CHANGED, OBSERVATION_COVERAGE_CHANGED. Derived category is
+FACT_CHANGE or OBSERVATION_CHANGE; legacy category remains None. P10 types require
+source_diff and nonempty source_change_fields, validated against typed changes,
+target and event classification. Existing IDs plus track_id expose P9 typed target.
+The embedded Diff carries before/after references and full source evidence; selected
+canonical fields support one or multiple underlying changes. source must be reused
+from those records, never freshly fabricated. No Diff/change IDs are added to P9.
+
+`competition_event_identity(type, diff, fields)` computes the Contract SHA256 ID
+from canonical directed references/target/selected typed changes; validators check
+it. Identity excludes detection time/display description. P10 observed_at is explicit
+aware detection time, not earlier than after; occurred_at remains None for P10.
+Nested values/collections are immutable and stable JSON. No severity, impact,
+affected plans/student, status workflow or required summary. Legacy broad enums
+are compatibility-only; P10 scope does not expand into rule/award/eligibility facts.
+
+```text
+Official Source -> P9.5 Monitor -> Snapshot -> P9 Diff -> SnapshotDiff
+-> future P10.2 Event Engine -> CompetitionEvent -> future P11 Impact/Replanning
+```
+
+Event != Diff, Event != Impact, Event != Replanning. P10.1 defines Contract only;
+no Diff mapping, aggregation/dedup engine, Repository access, network, notification,
+LLM or Agent. P9/P9.5/P2–P8 remain frozen. P10.2 has not started.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event.py backend/tests/domain/test_p10_event_contract.py
 ```

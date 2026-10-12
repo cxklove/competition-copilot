@@ -551,7 +551,8 @@ retain identity/source authority. No generic Target existed before P9.1; the new
 generic `CompetitionTarget` contains stable competition/edition IDs and optional
 track ID, without depending on P8 planning or P7 requirement contracts. Parent
 relationship/existence checks belong to P9.2 since snapshots carry IDs only.
-P1 CompetitionEvent is unchanged and is reserved for P10.
+P1 CompetitionEvent was reserved for P10; its controlled Contract evolution is
+documented in P10.1 below, without changing P9/P9.5 semantics.
 
 ```text
 Competition identity + explicitly observed dynamic state
@@ -766,8 +767,8 @@ diff, notification, Agent/MCP/Frontend remain deferred.
 
 P9.5 CLOSED / FROZEN. P9.5.1–P9.5.4 are completed, Review PASS and committed.
 Documentation follow-up resolved the earlier blocker; Final Review re-run PASS.
-Closure freezes deterministic observation infrastructure. NEXT: P10 — Competition
-Event Engine; implementation has not started. P9 and earlier phases remain frozen.
+Closure freezes deterministic observation infrastructure. P10 follows; its current
+Contract-only status is recorded below. P9 and earlier phases remain frozen.
 
 Completed core: immutable stable Contract, explicit aware time/provenance, source
 failure != successful UNKNOWN, failure -> no Snapshot/Diff, successful UNKNOWN
@@ -922,6 +923,43 @@ optional and not added; no CI/default test depends on the official site. Diff !=
 Event; no persistence, scheduler/polling, impact, notification, Replanning or LLM/
 Agent is added. P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. Closure-time
 validation: 1434 passed, 0 skipped; Ruff/diff check PASS. NEXT: P10 Event Engine.
+
+### P10.1 Competition Event Domain Contract — IMPLEMENTED, awaiting Review
+
+P10 is IN PROGRESS. It evolves the existing `domain/event.py` CompetitionEvent;
+no parallel model or Event Engine exists. Current architecture is:
+
+```text
+Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 Diff -> SnapshotDiff
+Future P10.2 Event Engine -> CompetitionEvent -> Future P11 Impact / Replanning
+```
+
+Four new coarse types cover the frozen dynamic scope: registration/competition
+window changes, track membership changes, observation coverage changes. Category
+is derived from type (FACT_CHANGE versus OBSERVATION_CHANGE); UNKNOWN transitions
+cannot be mislabeled factual window/membership events. Known presence changes
+can be carried by factual types. Validators check supplied classification only.
+
+P10 events reuse P9 target and typed Diff: source_diff embeds directed Snapshot
+references and original changes; nonempty source_change_fields selects canonical
+records, supporting multiple changes without aggregation logic. P9 has no Diff/
+change ID, so no random reference ID is invented. Full evidence is retained;
+legacy source is a representative source already present in selected provenance.
+No new SourceMetadata authority, fetching or verification action is added.
+
+Contract identity is SHA256 over type/directed references/target/selected typed
+changes, UTC-normalized; observed_at detection time and optional display text do
+not affect identity. P10 observed_at is required/aware and cannot precede after;
+occurred_at is None because observed Diff cannot establish business effective time.
+Event and nested typed collections are immutable, canonically ordered and JSON stable.
+
+P1 fields/eight legacy enums and old JSON shape remain compatible for historical
+records; old types do not gain P10 lineage/category semantics. Evolution intentionally
+freezes Event mutation and rejects model_copy(update=...), with no mutation consumer
+found. New four types require valid lineage and deterministic IDs. No severity,
+student/plan binding, action/status/notification, Event aggregation/dedup, Repository,
+network, LLM or Agent. P10.1 defines Contract only; P10.2 has not started.
+Event != Diff; Event != Impact; Event != Replanning. Frozen P9/P9.5 remain unchanged.
 
 ## 9. Replanning Architecture
 

@@ -4,7 +4,11 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from pydantic import ValidationError
 
-from competition_copilot.domain.event import CompetitionEvent, CompetitionEventType
+from competition_copilot.domain.event import (
+    P10_EVENT_TYPES,
+    CompetitionEvent,
+    CompetitionEventType,
+)
 from competition_copilot.domain.source_metadata import (
     SourceMetadata,
     SourceType,
@@ -61,8 +65,10 @@ def test_valid_complete_event() -> None:
     assert event.description == "Rules were updated."
 
 
-@pytest.mark.parametrize("event_type", list(CompetitionEventType))
-def test_every_event_type_is_accepted(event_type: CompetitionEventType) -> None:
+@pytest.mark.parametrize(
+    "event_type", [kind for kind in CompetitionEventType if kind not in P10_EVENT_TYPES]
+)
+def test_every_legacy_event_type_is_accepted(event_type: CompetitionEventType) -> None:
     event = CompetitionEvent(**{**MINIMAL_EVENT, "event_type": event_type})
 
     assert event.event_type is event_type

@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "skill_requirement_set",
+  "requirement_version": "1.0",
+  "review_note": "P7.3B.4 HUMAN DECISION: APPROVE. mathematical-modeling is the human-reviewed stable Skill identity. REQUIRED is Competition Copilot's HUMAN-REVIEWED STRUCTURED_INTERPRETATION of a core task capability, not a COMAP official enum or P5 hard eligibility constraint. required_level=null because the official rules provide no grounded ordinal threshold. Coverage is PARTIAL: only this approved Skill is structured, with no claim of a complete requirement set. P7.3B.5 re-observed the official 2027 MCM rules and confirmed the presence fact; no proficiency evidence is asserted.",
+  "requirement_set": {
+    "target": {
+      "competition_id": "comap-mcm",
+      "edition_id": "comap-mcm-2027",
+      "track_id": null,
+      "scope": "edition"
+    },
+    "coverage": "partial",
+    "coverage_note": "System assessment: this artifact structures only the human-approved mathematical-modeling capability. It does not establish the complete MCM skill requirement set; unspecified proficiency is a separate dimension.",
+    "requirements": [
+      {
+        "skill_id": "mathematical-modeling",
+        "required_level": null,
+        "requirement_type": "required",
+        "presence_evidence": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+            "source": {
+              "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+              "source_type": "official",
+              "observed_at": "2026-10-12T03:08:52Z",
+              "verification_status": "verified"
+            },
+            "field": "requirements.mathematical-modeling.present",
+            "value": true
+          }
+        ],
+        "evidence": []
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "mathematical-modeling",
+      "name": "Mathematical Modeling",
+      "description": "使用数学模型表达现实问题，建立并解释求解方案的能力",
+      "aliases": []
+    }
+  ]
+}

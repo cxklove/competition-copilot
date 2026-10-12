@@ -3,8 +3,8 @@
 **Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
 P7 started: P7.1 Skill Requirement & Skill Gap Contract PASS;
 P7.2 Deterministic Skill Gap Engine PASS;
-P7.3 schema/Provider implemented; real data BLOCKED BY REAL SKILL REQUIREMENT SOURCE GAP;
-P7.3B.2 unspecified-proficiency follow-up implemented, pending review;
+P7.3 schema/Provider implemented; P7.3B.5 first reviewed COMAP MCM 2027 artifact authored;
+P7.3B.2 unspecified-proficiency follow-up reviewed and frozen;
 P7 is not COMPLETE. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -244,17 +244,20 @@ Engine tests: `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/tes
 P7.3 adds `domain.skill_requirement_artifact.SkillRequirementSetEnvelope`, the
 `application.skill_requirements.SkillRequirementProvider` abstraction and
 `infrastructure.skill_requirement_json.JsonSkillRequirementProvider`. Storage is
-`data/skill_requirements/`; it currently contains documentation only, no real JSON.
-Reviewed project facts do not establish exact skill/type/proficiency requirements.
-Official source URLs and track names are insufficient; no level or skill was guessed.
-P7.3 remains blocked; P7.4 and P7 completion are not claimed.
+`data/skill_requirements/`; `comap-mcm-2027.json` is the first reviewed real artifact,
+authorized by P7.3B.4 human approval and authored in P7.3B.5 after official source
+re-verification. Only mathematical-modeling is included, with unspecified threshold
+and PARTIAL coverage. REQUIRED is human-reviewed structured interpretation, not an
+official enum or P5 eligibility rule. No level or skill was guessed.
+P7.3/P7 completion and P7.4 implementation are not claimed.
 
 Envelopes version the unchanged P7.1 RequirementSet and resolve IDs through a
 minimal embedded catalog of immutable views of existing Skill models. Evidence
 must retain canonical REQUIREMENT binding and verified official provenance.
 Coverage is explicit; completeness needs source review, never successful parsing.
 Review/coverage notes are system assessments. Source review must separately prove
-the skill, requirement type and exact level; schema validation cannot do that.
+skill membership, type interpretation and any specified level; schema validation
+cannot do that. Unspecified thresholds have presence evidence only.
 Provider loads atomically in filename order, rejects duplicates/conflicts/invalid
 artifacts and reads only local requirement JSON. `get_requirements(c, e, track)`
 returns an immutable RequirementSet or None for no exact artifact, with no fallback.
@@ -266,8 +269,9 @@ network, Tool or planning are added to Provider.
 
 P7.3 tests from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_requirement_artifact.py backend/tests/infrastructure/test_skill_requirement_json.py backend/tests/integration/test_p7_skill_requirement_data.py`.
-Real provenance/target smoke is explicitly skipped while no reviewed artifacts
-exist; directory load and real Repository missing-target checks still run.
+Real provenance/target smoke now executes against the reviewed COMAP artifact;
+directory load and real Repository missing-target checks also run. A dedicated
+test guards the exact approved one-skill scope, null threshold and empty level evidence.
 
 P7.3B.2 resolves the audited known-requirement/unspecified-threshold Domain mismatch.
 `SkillRequirement.required_level` explicitly accepts null for unspecified threshold,
@@ -285,8 +289,9 @@ when the threshold is unspecified; student provenance is not relaxed. Only both
 known levels are compared. Known GAP wins over uncertainty; otherwise unspecified
 threshold means UNDETERMINED. NO_GAP requires COMPLETE, every threshold specified
 and every student fact known satisfied. System audit version is SKILL_GAP_ANALYSIS_V2.
-The tenth/eleventh-edition and subtrack target gaps remain unresolved; no real
-artifact, skill guessing, proficiency guessing or P7.4 implementation is added.
+The tenth/eleventh-edition and subtrack target gaps remain unresolved. P7.3B.2
+added no real artifact; P7.3B.5 separately authors the approved COMAP artifact.
+No skill guessing, proficiency guessing or P7.4 implementation is added.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

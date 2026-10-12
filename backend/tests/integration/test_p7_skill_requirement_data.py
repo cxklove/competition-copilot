@@ -6,9 +6,15 @@ import pytest
 
 from competition_copilot.domain.skill_gap import (
     SkillFactRole,
+    SkillRequirementCoverage,
+    SkillRequirementScope,
+    SkillRequirementType,
     requirement_presence_field,
     skill_fact_field,
     skill_fact_value,
+)
+from competition_copilot.domain.skill_requirement_artifact import (
+    SkillRequirementSetEnvelope,
 )
 from competition_copilot.infrastructure.repositories.json_seed import (
     JsonSeedCompetitionRepository,
@@ -20,6 +26,49 @@ from competition_copilot.infrastructure.skill_requirement_json import (
 ROOT = Path(__file__).resolve().parents[3]
 REQUIREMENT_DIR = ROOT / "data" / "skill_requirements"
 SEED_DIR = ROOT / "data" / "seed"
+
+
+def test_reviewed_comap_2027_matches_human_approved_scope():
+    artifact = SkillRequirementSetEnvelope.model_validate_json(
+        (REQUIREMENT_DIR / "comap-mcm-2027.json").read_bytes()
+    )
+    requirement_set = artifact.requirement_set
+    target = requirement_set.target
+    assert (target.competition_id, target.edition_id, target.track_id) == (
+        "comap-mcm", "comap-mcm-2027", None
+    )
+    assert target.scope is SkillRequirementScope.EDITION
+    assert requirement_set.coverage is SkillRequirementCoverage.PARTIAL
+    assert len(requirement_set.requirements) == 1
+    requirement = requirement_set.requirements[0]
+    assert requirement.skill_id == "mathematical-modeling"
+    assert requirement.requirement_type is SkillRequirementType.REQUIRED
+    assert requirement.required_level is None
+    assert requirement.evidence == ()
+    assert len(artifact.skills) == 1
+    skill = artifact.skills[0]
+    assert skill.id == requirement.skill_id
+    assert skill.name == "Mathematical Modeling"
+    assert skill.description == "使用数学模型表达现实问题，建立并解释求解方案的能力"
+    assert skill.aliases == ()
+    for evidence in requirement.presence_evidence:
+        assert evidence.field == requirement_presence_field(skill.id)
+        assert evidence.value is True
+        assert str(evidence.source.source_url) == (
+            "https://contest.comap.com/undergraduate/contests/mcm/instructions.php"
+        )
+        assert evidence.source.observed_at.utcoffset() is not None
+        assert evidence.source.source_type.value == "official"
+        assert evidence.source.verification_status.value == "verified"
+    assert "P7.3B.4 HUMAN DECISION: APPROVE" in artifact.review_note
+    assert "HUMAN-REVIEWED STRUCTURED_INTERPRETATION" in artifact.review_note
+    assert "not a COMAP official enum or P5 hard eligibility constraint" in artifact.review_note
+    assert SkillRequirementSetEnvelope.model_validate_json(artifact.model_dump_json()) == artifact
+    assert artifact.model_dump(mode="json")["requirement_set"]["requirements"][0][
+        "required_level"
+    ] is None
+    provider = JsonSkillRequirementProvider(REQUIREMENT_DIR)
+    assert provider.get_requirements("comap-mcm", "comap-mcm-2027", None) == requirement_set
 
 
 def test_reviewed_data_provider_load_is_read_only_and_deterministic():

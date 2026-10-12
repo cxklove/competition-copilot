@@ -201,7 +201,8 @@ minimal catalog of existing Skill snapshots. It rejects unresolved/duplicate ski
 IDs and requires verified official fact evidence in canonical REQUIREMENT bindings.
 Version, review note and explicit coverage assessment are preserved. Review and
 coverage notes are system assessment, not attributed official statements. Authoring
-must prove skill, type, exact proficiency and any COMPLETE claim; validation alone
+must ground skill membership, review type interpretation, support any specified
+proficiency and justify any COMPLETE claim; validation alone
 cannot prove semantic source support.
 
 `application/skill_requirements.py` defines the read-only SkillRequirementProvider
@@ -215,12 +216,14 @@ target existence and relationships in smoke tests and future orchestration. Doma
 and Provider do not run SkillGapEngine or access student data; Provider does not
 read Seed, Raw, Manifest, network or LLM and never writes artifacts.
 
-P7.3 infrastructure is implemented, but real data is BLOCKED BY REAL SKILL
-REQUIREMENT SOURCE GAP. Current reviewed Seed facts and education policies do not
-establish exact skill/proficiency requirements; there is no production Skill catalog
-yet. Storage has zero real requirement artifacts. Synthetic tests cover schema and
-Provider; real provenance/target smoke explicitly skips on zero artifacts rather
-than claiming validation. No skill/level is inferred from names or descriptions.
+P7.3B.5 authors the first reviewed real artifact, `comap-mcm-2027.json`, after
+P7.3B.4 human approval and re-observation of official 2027 MCM rules. Its exact
+Edition target has only mathematical-modeling, unspecified threshold and PARTIAL
+coverage. REQUIRED is a human-reviewed structured interpretation, not an official
+enum or P5 hard eligibility. Presence provenance is official; review/coverage notes
+remain system assessment, and no proficiency evidence is created. Real provenance
+and Repository target smoke now run. Other targets need independent source review.
+No skill/level is inferred from names or descriptions.
 P7.4 and P7 COMPLETE are not implemented or claimed.
 
 ### P7.3B.2 Unspecified Proficiency Follow-up
@@ -247,7 +250,7 @@ specified and all skills known satisfied. Empty/MISSING semantics are unchanged.
 
 P7.3A Provider architecture is unchanged; the envelope's official provenance gate
 also checks the new presence channel. This is an authorized P7 contract/engine
-evolution, pending review, not real artifact authoring. No target/subtrack/edition
+evolution, reviewed and frozen before P7.3B.5 artifact authoring. No target/subtrack/edition
 changes are made. The audited tenth/eleventh-edition mismatch and subtrack gaps
 remain separate blockers; P7.3 is not COMPLETE and P7.4 is not started.
 

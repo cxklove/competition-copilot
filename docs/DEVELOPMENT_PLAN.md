@@ -347,7 +347,7 @@ is implemented by this Closure.
 
 ## P9 — Competition Digital Twin
 
-**Status: IN PROGRESS. P9.1/P9.1.1/P9.2 Review PASS / committed; P9.3 Diff Engine IMPLEMENTED, awaiting Review.**
+**Status: IN PROGRESS. P9.1/P9.1.1/P9.2/P9.3 Review PASS / committed; P9.4 Real Integration IMPLEMENTED, awaiting Review.**
 P9 answers what changed in Competition/Edition/Track
 dynamic state, using Snapshot/Diff/version concepts; it does not enhance
 Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
@@ -442,7 +442,7 @@ Seed files directly, use Network/LLM/Agent/MCP, choose status/deadlines, compare
 snapshots, generate Diff/Event, monitor sources or replan. Later P9 integration,
 P9.5 Monitor, P10 Event and P11 Replanning remain future work. P9 is not complete.
 
-### P9.3 — Deterministic Snapshot Diff (IMPLEMENTED, awaiting Review)
+### P9.3 — Deterministic Snapshot Diff (Review PASS, committed)
 
 `domain/snapshot_diff_engine.py` provides the pure `SnapshotDiffEngine.compare`
 service, consuming only two validated CompetitionSnapshots. P9.1/P9.1.1 and
@@ -469,8 +469,30 @@ SnapshotDiff has no diff_id field; identity remains its directed references.
 
 Diff is low-level structural change only: Diff != Event, Diff != Impact and
 Diff != Replanning. No Repository/Builder, Network, Monitor, LLM, Agent, MCP,
-planning or business impact is used. P9.4 integration and later review remain;
+planning or business impact is used. P9.4 integration is described below; Final Review remains;
 P9 is not complete.
+
+### P9.4 — Real Digital Twin Integration (IMPLEMENTED, awaiting Review)
+
+`tests/integration/test_p9_real_digital_twin_integration.py` exercises real
+Verified Seed -> JsonSeedCompetitionRepository -> Snapshot Builder -> baseline
+Snapshot -> SnapshotDiffEngine. COMAP MCM 2027 is the explicit baseline fixture;
+Huawei ICT 2026 supplies known nonempty membership. Fixed aware times keep the
+pipeline deterministic. Real same-state observations at two times have different
+snapshot IDs and zero Diff; a real snapshot compared with itself also has zero Diff.
+
+Later modified observations are explicitly TEST-ONLY CONTROLLED fixtures, not
+official historical updates or live monitoring. Window/membership observation
+loss yields observation-state changes, not fact/member removal. Optional known
+window-value and membership modifications use verified manual test-fixture
+metadata at example.invalid, never rewritten official provenance. Controlled IDs
+are fixed test-case references tied to the baseline ID, not a second production
+identity algorithm. Tests also cover known empty versus unknown membership,
+reverse time, cross-target rejection, audit preservation and JSON/immutability.
+Network and non-Seed data access are blocked; Repository/data remain read-only.
+Production code and frozen phases are unchanged. P9 can represent, build and
+compare structured observations; live refresh/Monitor, Event, impact and
+Replanning remain future work. P9 Final Review is pending; P9 is not complete.
 
 ## P9.5 — Competition Monitor
 

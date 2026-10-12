@@ -8,8 +8,8 @@ StudentProfile Domain already exists and supplies input. P7 finished requirement
 evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
-**P9 is IN PROGRESS; P9.1/P9.1.1/P9.2 Review PASS; P9.3 Diff Engine IMPLEMENTED, awaiting Review.**
-P9.4 integration is pending. The current ingestion
+**P9 is IN PROGRESS; P9.1/P9.1.1/P9.2/P9.3 Review PASS; P9.4 Real Integration IMPLEMENTED, awaiting Review.**
+P9 Final Review is pending. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -692,4 +692,25 @@ Network, LLM or Agent is used. P9 remains in progress.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_snapshot_diff_engine.py
+```
+
+## P9.4 Real Digital Twin Integration
+
+The real chain uses Verified Seed -> JsonSeedCompetitionRepository -> Snapshot
+Builder -> baseline Snapshot -> Diff Engine. Explicit COMAP MCM 2027 fixtures
+verify two real same-state observations and reflexive comparison both yield zero
+Diff. Huawei ICT 2026 covers real known membership. Later modified observations
+are TEST-ONLY CONTROLLED fixtures, not official historical updates or Monitor
+output. Known synthetic value/set changes have explicit manual fixture provenance
+at example.invalid; official source metadata is never rewritten to support them.
+Observation loss remains knowledge loss, not fact/member removal.
+
+Tests use fixed aware times, validated constructors and deterministic case IDs;
+check serialization, audit, immutability and safety; block Network/non-Seed data
+reads and leave Repository/data unchanged. Production code is unchanged. P9
+represents/builds/compares observations, while live refresh, Monitor, Event,
+impact and Replanning remain future work. P9 Final Review is pending.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_real_digital_twin_integration.py
 ```

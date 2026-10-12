@@ -551,7 +551,7 @@ Competition identity + explicitly observed dynamic state
         |  Snapshot creation: P9.2 Repository baseline implemented
         v
 CompetitionSnapshot(t1) + CompetitionSnapshot(t2)
-        |  Diff computation: P9.3 implemented, awaiting Review
+        |  Diff computation: P9.3 Review PASS
         v
 SnapshotDiff
         |  Event interpretation: P10 (future)
@@ -656,7 +656,7 @@ repository-backed baseline snapshot, not a live website observation. P9.2 does
 not implement comparison, Diff, Event, Monitor, impact, Replanning, Network,
 LLM or Agent. P9 is still in progress.
 
-### P9.3 Deterministic Snapshot Diff — IMPLEMENTED, awaiting Review
+### P9.3 Deterministic Snapshot Diff — Review PASS, committed
 
 `domain/snapshot_diff_engine.py` compares validated snapshots without Repository,
 Snapshot Builder or external dependencies. It preserves directed references,
@@ -683,8 +683,29 @@ the actual source metadata from each input. Provenance-change diff is deferred.
 Snapshot ID and observation time are reference metadata, not fact changes.
 Outputs remain immutable and JSON serializable; SnapshotDiff has no diff_id.
 Diff != Event, Diff != Impact, Diff != Replanning. P9.3 performs no monitoring,
-Network, LLM, Agent, notification or planning. P9.4 integration is still pending;
+Network, LLM, Agent, notification or planning. P9.4 integration is described below;
 P9 is not complete.
+
+### P9.4 Real Digital Twin Integration — IMPLEMENTED, awaiting Review
+
+The integration test runs Verified Seed -> real JsonSeedCompetitionRepository
+-> P9.2 Builder -> real baseline Snapshot -> P9.3 Diff Engine. COMAP MCM 2027
+observed at two fixed aware times produces distinct IDs and zero factual changes;
+reflexive comparison also produces a valid zero Diff. Huawei ICT 2026 provides
+a real known nonempty track set. Repository null windows and known empty
+membership retain P9.2 semantics and actual source metadata.
+
+Changed later snapshots are TEST-ONLY CONTROLLED observations, not official
+historical updates. Observation-loss cases use UNKNOWN. Synthetic known value/set
+changes use explicit MANUAL test-fixture provenance at example.invalid, never
+official source metadata for the changed fact. Public validated constructors and
+fixed case/baseline IDs avoid validation bypass or a second production ID algorithm.
+The real baselines keep official provenance unchanged. Tests verify low-level
+changes, unknown versus empty, deterministic JSON, immutable results and rejection
+of reverse time/cross-target comparison; Network and non-Seed data reads are blocked.
+Production code is unchanged. P9 now represents, builds and compares observed
+state; live refresh/Monitor, CompetitionEvent, impact and Replanning remain
+unimplemented. P9 Final Review is pending; P9 is not complete.
 
 ## 9. Replanning Architecture
 

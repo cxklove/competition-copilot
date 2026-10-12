@@ -171,8 +171,7 @@ readiness score, learning schedule or resource matching is defined.
 P7 has started, not completed. Real requirements must come from structured,
 reviewed data, never target names/descriptions or LLM inference. P7.1 has no
 Repository, Infrastructure, Tool, filesystem, network, LLM, eligibility or
-recommendation dependency; tests use synthetic data only. P7.3 supplies future
-real requirement data and its provider.
+recommendation dependency; tests use synthetic data only.
 
 ### P7.2 Deterministic Skill Gap Engine
 
@@ -193,6 +192,36 @@ source-free system audit `SKILL_GAP_ANALYSIS_V1`. Errors propagate atomically.
 The engine is read-only, deterministic and has no readiness score, skill guessing,
 eligibility/recommendation logic, provider, Repository, filesystem, network, LLM
 or planning dependency. P7 is not COMPLETE.
+
+### P7.3 Reviewed Skill Requirement Data
+
+`domain/skill_requirement_artifact.py` defines a strict, versioned immutable
+`SkillRequirementSetEnvelope` composing the unchanged P7.1 RequirementSet plus a
+minimal catalog of existing Skill snapshots. It rejects unresolved/duplicate skill
+IDs and requires verified official fact evidence in canonical REQUIREMENT bindings.
+Version, review note and explicit coverage assessment are preserved. Review and
+coverage notes are system assessment, not attributed official statements. Authoring
+must prove skill, type, exact proficiency and any COMPLETE claim; validation alone
+cannot prove semantic source support.
+
+`application/skill_requirements.py` defines the read-only SkillRequirementProvider
+abstraction; `infrastructure/skill_requirement_json.py` implements it. This adapter
+reads `data/skill_requirements/*.json` in filename order, publishes a snapshot only
+after full validation and rejects duplicate targets even across versions, malformed
+files and conflicting catalog identities. Missing directory is configuration error;
+an existing empty directory is valid. Exact queries return RequirementSet or None,
+never fuzzy/edition/track/year fallback or empty COMPLETE. Repository validates
+target existence and relationships in smoke tests and future orchestration. Domain
+and Provider do not run SkillGapEngine or access student data; Provider does not
+read Seed, Raw, Manifest, network or LLM and never writes artifacts.
+
+P7.3 infrastructure is implemented, but real data is BLOCKED BY REAL SKILL
+REQUIREMENT SOURCE GAP. Current reviewed Seed facts and education policies do not
+establish exact skill/proficiency requirements; there is no production Skill catalog
+yet. Storage has zero real requirement artifacts. Synthetic tests cover schema and
+Provider; real provenance/target smoke explicitly skips on zero artifacts rather
+than claiming validation. No skill/level is inferred from names or descriptions.
+P7.4 and P7 COMPLETE are not implemented or claimed.
 
 ## 8. Planning Architecture
 

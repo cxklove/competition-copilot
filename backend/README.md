@@ -2,7 +2,8 @@
 
 **Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
 P7 started: P7.1 Skill Requirement & Skill Gap Contract PASS;
-P7.2 Deterministic Skill Gap Engine implemented, pending review;
+P7.2 Deterministic Skill Gap Engine PASS;
+P7.3 schema/Provider implemented; real data BLOCKED BY REAL SKILL REQUIREMENT SOURCE GAP;
 P7 is not COMPLETE. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -222,8 +223,7 @@ for changed results. Validators reject inconsistent supplied conclusions; P7.1
 does not compute gaps, run eligibility/recommendation, match learning resources
 or build plans. It adds no Repository, provider, real requirement artifact,
 filesystem, network or LLM dependency. Structured requirements must not be
-guessed from competition names/descriptions. P7.3 real data/provider remains a
-future stage. Synthetic contract tests run from the repository root:
+guessed from competition names/descriptions. Synthetic contract tests run from the repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_gap.py`.
 
 P7.2 `domain.skill_gap_engine.SkillGapEngine.evaluate(SkillGapContext)` returns a
@@ -239,6 +239,34 @@ analysis audit are retained. Contract errors fail atomically rather than becomin
 business uncertainty. There is no skill guessing, readiness score, provider,
 Repository, planning, eligibility/recommendation, network or LLM dependency.
 Engine tests: `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_gap_engine.py`.
+
+P7.3 adds `domain.skill_requirement_artifact.SkillRequirementSetEnvelope`, the
+`application.skill_requirements.SkillRequirementProvider` abstraction and
+`infrastructure.skill_requirement_json.JsonSkillRequirementProvider`. Storage is
+`data/skill_requirements/`; it currently contains documentation only, no real JSON.
+Reviewed project facts do not establish exact skill/type/proficiency requirements.
+Official source URLs and track names are insufficient; no level or skill was guessed.
+P7.3 remains blocked; P7.4 and P7 completion are not claimed.
+
+Envelopes version the unchanged P7.1 RequirementSet and resolve IDs through a
+minimal embedded catalog of immutable views of existing Skill models. Evidence
+must retain canonical REQUIREMENT binding and verified official provenance.
+Coverage is explicit; completeness needs source review, never successful parsing.
+Review/coverage notes are system assessments. Source review must separately prove
+the skill, requirement type and exact level; schema validation cannot do that.
+Provider loads atomically in filename order, rejects duplicates/conflicts/invalid
+artifacts and reads only local requirement JSON. `get_requirements(c, e, track)`
+returns an immutable RequirementSet or None for no exact artifact, with no fallback.
+None is missing data, never empty COMPLETE. Target existence and parent relationships
+are validated against Repository by smoke tests/future orchestration, not Provider.
+`list_artifacts()` exposes immutable version/catalog/review audit snapshots.
+No students, gap computation, Raw/Manifest/Seed reads, Repository coupling, LLM,
+network, Tool or planning are added to Provider.
+
+P7.3 tests from repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_requirement_artifact.py backend/tests/infrastructure/test_skill_requirement_json.py backend/tests/integration/test_p7_skill_requirement_data.py`.
+Real provenance/target smoke is explicitly skipped while no reviewed artifacts
+exist; directory load and real Repository missing-target checks still run.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

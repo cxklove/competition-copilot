@@ -551,7 +551,7 @@ Competition identity + explicitly observed dynamic state
         |  Snapshot creation: P9.2 Repository baseline implemented
         v
 CompetitionSnapshot(t1) + CompetitionSnapshot(t2)
-        |  Diff computation: P9.3 (not implemented)
+        |  Diff computation: P9.3 implemented, awaiting Review
         v
 SnapshotDiff
         |  Event interpretation: P10 (future)
@@ -615,10 +615,10 @@ and JSON serialization is stable. P9.1 tests cover targets, explicit aware times
 observation combinations, unknown/absent/empty distinctions, partial windows,
 verified per-field sources, canonical membership, typed directional changes,
 target/time safety, immutability and serialization. P9 is not complete; the
-Snapshot Builder is described below. Diff Engine, Event, impact and Replanning
-remain unimplemented.
+Snapshot Builder and Diff Engine are described below. Event, impact and
+Replanning remain unimplemented.
 
-### P9.2 Competition Snapshot Builder — IMPLEMENTED, awaiting Review
+### P9.2 Competition Snapshot Builder — Review PASS, committed
 
 P9.1 Domain contracts remain frozen. The P9.2 Application service in
 `application/competition_snapshots.py` depends on the abstract P3
@@ -632,7 +632,7 @@ Verified Seed -> CompetitionRepository interface
               -> CompetitionSnapshotBuilder
               -> CompetitionSnapshot
 
-Future: Snapshot(t1) + Snapshot(t2) -> P9.3 deterministic Diff Engine
+Snapshot(t1) + Snapshot(t2) -> P9.3 deterministic Diff Engine
 ```
 
 This builder supports edition-level targets. It verifies target existence and
@@ -655,6 +655,36 @@ only; outputs retain P9.1 immutability and JSON serialization. This is a
 repository-backed baseline snapshot, not a live website observation. P9.2 does
 not implement comparison, Diff, Event, Monitor, impact, Replanning, Network,
 LLM or Agent. P9 is still in progress.
+
+### P9.3 Deterministic Snapshot Diff — IMPLEMENTED, awaiting Review
+
+`domain/snapshot_diff_engine.py` compares validated snapshots without Repository,
+Snapshot Builder or external dependencies. It preserves directed references,
+requires the same target and before time <= after time, and supports reflexive
+same-snapshot zero Diff per P9.1.1. Same ID with inconsistent metadata/content is
+invalid. Different observation IDs/times can yield zero changes when facts match.
+
+The Engine compares observation states before values. Any transition involving
+UNKNOWN is OBSERVATION_STATE_CHANGED, never a fact addition/removal. Known value
+<-> known absence uses PRESENCE_CHANGED. Whole-window transitions do not expand
+into endpoint changes. Only two known windows compare start_at/end_at separately:
+None -> datetime and datetime -> None are endpoint observation transitions;
+different known dates use VALUE_CHANGED with no business direction interpretation.
+
+For two known track sets, the frozen Contract represents differences as one
+TrackMembershipChange VALUE_CHANGED carrying canonical before/after ID tuples.
+Those tuples identify added/removed members exactly. Unknown membership on either
+side yields only an observation-state change, including UNKNOWN <-> known empty;
+known tracks -> UNKNOWN does not mean tracks were removed. Output order is fixed:
+registration whole/start/end, competition whole/start/end, then membership.
+
+Fact comparison ignores provenance-only differences while emitted changes retain
+the actual source metadata from each input. Provenance-change diff is deferred.
+Snapshot ID and observation time are reference metadata, not fact changes.
+Outputs remain immutable and JSON serializable; SnapshotDiff has no diff_id.
+Diff != Event, Diff != Impact, Diff != Replanning. P9.3 performs no monitoring,
+Network, LLM, Agent, notification or planning. P9.4 integration is still pending;
+P9 is not complete.
 
 ## 9. Replanning Architecture
 

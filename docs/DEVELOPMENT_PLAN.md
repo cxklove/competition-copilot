@@ -347,7 +347,7 @@ is implemented by this Closure.
 
 ## P9 — Competition Digital Twin
 
-**Status: IN PROGRESS. P9.1 Review PASS / committed; P9.2 Snapshot Builder IMPLEMENTED, awaiting Review.**
+**Status: IN PROGRESS. P9.1/P9.1.1/P9.2 Review PASS / committed; P9.3 Diff Engine IMPLEMENTED, awaiting Review.**
 P9 answers what changed in Competition/Edition/Track
 dynamic state, using Snapshot/Diff/version concepts; it does not enhance
 Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
@@ -384,7 +384,7 @@ observed competition/registration dates and must not precede source observation.
 `SnapshotDiff` retains directed before/after ID/target/time references and typed
 whole-window, window-endpoint and membership changes. Same target,
 chronological references and unique changed fields are validated. P9.1.1 Contract
-Follow-up is implemented, awaiting Review: reflexive same-snapshot zero-change
+Follow-up passed Review and is committed: reflexive same-snapshot zero-change
 comparison is valid only for identical reference metadata and empty changes.
 The same ID with conflicting metadata or nonempty changes is invalid; distinct
 snapshot IDs may still have empty changes. VALUE_CHANGED requires
@@ -402,12 +402,12 @@ no current-time or random defaults are present. No Repository access, comparison
 algorithm, Network, LLM, Event, impact or Plan/Replanning capability is implemented.
 P2–P8 remain frozen.
 
-P9.2 implements baseline Snapshot creation below. P9.3 deterministic Diff
-computation, later P9 integration/review, P9.5 Monitor, P10 Event and P11
+P9.2 implements baseline Snapshot creation; P9.3 implements Diff computation
+below. Later P9 integration/review, P9.5 Monitor, P10 Event and P11
 Replanning remain. P9 is not complete. Text/rules semantic diff and additional
 structured facts are deferred.
 
-### P9.2 — Competition Snapshot Builder (IMPLEMENTED, awaiting Review)
+### P9.2 — Competition Snapshot Builder (Review PASS, committed)
 
 `application/competition_snapshots.py` consumes only the P3
 `CompetitionRepository` interface and P9.1 Domain Contract. The caller supplies
@@ -439,8 +439,38 @@ dataset counts.
 
 P9.2 is a repository-backed baseline observation. Production code does not read
 Seed files directly, use Network/LLM/Agent/MCP, choose status/deadlines, compare
-snapshots, generate Diff/Event, monitor sources or replan. P9.3 Diff computation,
+snapshots, generate Diff/Event, monitor sources or replan. Later P9 integration,
 P9.5 Monitor, P10 Event and P11 Replanning remain future work. P9 is not complete.
+
+### P9.3 — Deterministic Snapshot Diff (IMPLEMENTED, awaiting Review)
+
+`domain/snapshot_diff_engine.py` provides the pure `SnapshotDiffEngine.compare`
+service, consuming only two validated CompetitionSnapshots. P9.1/P9.1.1 and
+P9.2 production contracts are unchanged. Same target and chronological references
+are required. Same exact snapshot returns a valid zero-change Diff; same ID with
+inconsistent metadata or content is rejected. Distinct snapshots with the same
+fact state also produce empty changes; capture time, ID and provenance-only
+differences are not competition fact changes. Provenance-change diff is deferred.
+
+UNKNOWN -> known value/absence and known -> UNKNOWN use OBSERVATION_STATE_CHANGED;
+known value <-> explicitly absent uses PRESENCE_CHANGED. Whole-window observation
+transitions produce only a whole-field record. Two known windows compare start/end
+individually: missing boundaries become unknown endpoint observations, known
+datetime changes use VALUE_CHANGED. There is no earlier/later business meaning.
+
+Two known track sets use one frozen TrackMembershipChange VALUE_CHANGED record
+with canonical before/after IDs, preserving exactly which members were added or
+removed. No per-member enum or duplicate field records are added. Unknown ->
+known tracks and known tracks -> UNKNOWN produce one observation change, never
+member additions/removals. Known empty sets retain their distinct semantics.
+Order is registration start/end (or whole field), competition start/end (or whole
+field), then membership. Outputs are immutable, audit-preserving and JSON stable.
+SnapshotDiff has no diff_id field; identity remains its directed references.
+
+Diff is low-level structural change only: Diff != Event, Diff != Impact and
+Diff != Replanning. No Repository/Builder, Network, Monitor, LLM, Agent, MCP,
+planning or business impact is used. P9.4 integration and later review remain;
+P9 is not complete.
 
 ## P9.5 — Competition Monitor
 

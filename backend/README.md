@@ -8,8 +8,8 @@ StudentProfile Domain already exists and supplies input. P7 finished requirement
 evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
-**P9 is IN PROGRESS; P9.1 Review PASS, P9.2 Snapshot Builder IMPLEMENTED, awaiting Review.**
-The Diff Engine is not implemented. The current ingestion
+**P9 is IN PROGRESS; P9.1/P9.1.1/P9.2 Review PASS; P9.3 Diff Engine IMPLEMENTED, awaiting Review.**
+P9.4 integration is pending. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -635,7 +635,7 @@ and empty changes. Conflicting metadata or nonempty changes under the same ID
 are invalid; distinct snapshots can still have empty changes.
 
 P9.2 constructs baseline snapshots and validates ID-only target relationships
-using Repository facts. P9.3 will compute deterministic Diff. P9.5 Monitor, P10 Event
+using Repository facts. P9.3 computes deterministic Diff. P9.5 Monitor, P10 Event
 interpretation and P11 Replanning remain future work. `CompetitionEvent` is
 unchanged. P9.1 uses no Repository, Network, LLM, Agent or Plan logic.
 
@@ -671,4 +671,25 @@ Run the P9.2 tests from the repository root:
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/application/test_competition_snapshot_builder.py backend/tests/integration/test_p9_snapshot_builder_smoke.py
+```
+
+## P9.3 Deterministic Snapshot Diff
+
+`domain.snapshot_diff_engine.SnapshotDiffEngine.compare(before, after)` consumes
+validated snapshots only. Same exact snapshot returns a valid empty Diff; distinct
+observations of the same fact state also yield zero changes. Target mismatch,
+reverse time and same-ID metadata/content conflicts are rejected. Observation
+time, snapshot ID and provenance-only changes do not create fact changes;
+provenance-change diff is deferred.
+
+UNKNOWN -> known and known -> UNKNOWN are observation changes. Whole-window
+transitions remain one record; two known windows compare start/end boundaries.
+Known track set changes retain one typed before/after set record, preserving
+added/removed IDs. Known tracks -> UNKNOWN is not track removal, and unknown ->
+known tracks is not member addition. Fixed field order keeps output deterministic.
+Diff != Event, Diff != Impact and Diff != Replanning. No Repository, Monitor,
+Network, LLM or Agent is used. P9 remains in progress.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_snapshot_diff_engine.py
 ```

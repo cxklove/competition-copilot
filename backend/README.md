@@ -9,10 +9,9 @@ evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
-P9.5 Monitor IMPLEMENTATION COMPLETE, not CLOSED/FROZEN: P9.5.1–P9.5.4 completed,
-Review PASS and committed. Final Review passed functional gates but was blocked
-only by documentation consistency. This follow-up repairs that blocker; Final
-Review is pending re-run, Closure has not executed and P10 has not started.
+**P9.5 — Competition Monitor: CLOSED / FROZEN; P9.5.1–P9.5.4 completed,
+Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
+resolved the earlier blocker. NEXT: P10 — Competition Event Engine (not started).
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -745,10 +744,10 @@ freshness/retry/backoff, semantic rule-text/provenance diff, P10 Event, P11 impa
 notification/Replanning, Agent/MCP/Frontend remain deferred. Closure-time snapshot:
 1335 passed, 0 skipped; Ruff/diff check PASS (not a permanent test-count invariant).
 
-## P9.5 Monitor Core — Implementation Complete
+## P9.5 Monitor Core — CLOSED / FROZEN
 
-P9.5.1–P9.5.4 are COMPLETED / Review PASS / committed. Final Review is pending
-re-run after this documentation follow-up; Closure is not executed.
+P9.5.1–P9.5.4 are COMPLETED / Review PASS / committed; Final Review re-run PASS.
+Closure freezes the deterministic one-shot Monitor core. NEXT: P10 (not started).
 
 ```text
 Approved Official Source -> Official Source Observation Adapter
@@ -772,9 +771,47 @@ Snapshots or recomputing Diff. P11 owns Event -> Impact / Adaptive Replanning.
 Scheduler/polling loop: NOT IMPLEMENTED, NOT P9.5 EXIT BLOCKERS. Future scheduler
 invokes the one-shot Monitor and preserves its semantics. Deferred: second
 competition adapter, multi-source monitor, periodic scheduler/polling, distributed
-jobs, retry/backoff runtime policy, Snapshot history persistence, notification,
+jobs, retry/backoff runtime policy, monitor rate limiting policy, Snapshot history persistence, notification,
 CompetitionEvent (P10), Impact Analysis/Adaptive Replanning (P11), Agent, MCP,
 Frontend. P10 has not started.
+
+### P9.5 Closure — Frozen Scope
+
+- Frozen: Monitor Request target/context, outcome, SourceObservationResult,
+  MonitorCheckResult, typed failures, explicit aware observation time and provenance.
+- Fetch/parse/source-unavailable failure != successful UNKNOWN. Failed check has
+  no authoritative new Snapshot and no Diff; successful observation may contain
+  UNKNOWN facts. Missing selector/empty field/timeout/404/parse failure never means
+  KNOWN_ABSENT, which remains an explicit sourced assertion under frozen P9.
+- One call -> one source observation -> optional Snapshot/Diff -> MonitorCheckResult.
+  With a baseline, unchanged state is SUCCESS + valid Snapshot + zero Diff; changed
+  state is SUCCESS + low-level Diff. Initial success has no Diff; failure has neither
+  output. No infinite loop, scheduler or daemon.
+- Adapter maps approved source to typed observation only, without Snapshot Diff,
+  Event, impact or Replanning. Fixed official URL/host, no arbitrary URL fetch,
+  redirects rejected, no secrets. Network failures remain typed check failures.
+- Same body/target/explicit time -> same result. No LLM parsing, invented clock
+  times or timezone guessing; frozen temporal policy is retained. Official source
+  provenance is preserved; HTTP success never upgrades verification.
+- Monitor is read-only: no Repository/Seed mutation, auto-approval or auto-verification.
+  It reuses P9 Snapshot, ObservationState, identity, SnapshotDiff and formal Diff Engine;
+  no Monitor-specific Snapshot/Diff semantics.
+- Real Repository + Builder + concrete Adapter + Monitor + Diff composition is proven
+  by P9.5.4. Default tests stay offline/deterministic. Controlled fixtures are not
+  official historical changes. No live smoke is added; future smoke must be optional/
+  manual and outside default pytest/mandatory CI.
+- Scheduler/polling is absent; future trigger invokes the one-shot Monitor without
+  changing semantics. Snapshot history persistence is absent; future storage needs
+  a separate storage/Repository contract, not Monitor Domain fields.
+- SnapshotDiff and MonitorCheckResult are not CompetitionEvent. P10 owns business
+  event mapping; P11 owns impact/severity/affected plans/user actions, PlanDiff,
+  milestone updates and Adaptive Replanning. P9.5 has no notification, LLM or Agent.
+
+All listed scope/security/interface/failure/parser/provenance/one-shot semantics
+are FROZEN. Defects require explicit P9.5 reopen -> Implementation -> Review ->
+commit. Multi-source merge and distributed monitor jobs remain deferred too.
+Closure-time validation: 1434 passed, 0 skipped; Ruff/diff check PASS (historical
+validation count, not a permanent invariant).
 
 ## P9.5.1 Monitor Contract — Review PASS, committed
 
@@ -795,7 +832,7 @@ Snapshot builder or Diff orchestration implementation.
 
 P9.5.2 orchestration and P9.5.3 adapter are described below. The Contract adds no live network,
 parsing, retry/backoff, scheduling/polling, Repository mutation, Event, impact,
-notification, Replanning, LLM or Agent. P9.5 implementation is complete, pending Final Review re-run.
+notification, Replanning, LLM or Agent. P9.5 is CLOSED / FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_monitoring.py
@@ -815,7 +852,7 @@ Diff; changed state is success with low-level Diff. Provenance is taken from the
 source result without verification upgrade. Fake sources exist only in tests;
 orchestration adds no HTTP/parser, scheduler, polling/retry, persistence,
 Event, notification, impact or Replanning. The concrete source adapter is described
-below. Diff != Event; P9.5 implementation is complete, not closed.
+below. Diff != Event; P9.5 is CLOSED / FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/application/test_one_shot_monitor.py
@@ -841,7 +878,7 @@ Fetch and parse failures are typed CHECK_FAILED, not UNKNOWN facts. Known facts
 retain P9 validation; verification is preserved, not upgraded. The adapter returns
 SourceObservationResult only; no Snapshot/Diff/Event, scheduling or Replanning.
 Tests use a documented minimal synthetic fixture and block network. P9.5.4 real
-monitor integration is described below; P9.5 implementation is complete.
+monitor integration is described below; P9.5 is CLOSED / FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/infrastructure/test_comap_observation.py
@@ -865,8 +902,7 @@ parse failure returns no Snapshot and no Diff. Success returns Snapshot + Diff.
 Tests cover value changes, provenance/verification, target/time safety,
 determinism, serialization, immutable outputs and read-only Repository/data.
 No production code changes, persistence, scheduler/polling, Event, impact,
-notification or Replanning. Diff != Event; P9.5 Final Review is pending re-run
-after documentation follow-up; Closure has not executed.
+notification or Replanning. Diff != Event; P9.5 Final Review PASS; CLOSED / FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_5_real_monitor_integration.py

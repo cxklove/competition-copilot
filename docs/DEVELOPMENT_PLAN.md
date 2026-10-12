@@ -538,10 +538,10 @@ Agent, MCP and Frontend. These do not block P9 closure.
 
 ## P9.5 — Competition Monitor
 
-**Status: IMPLEMENTATION COMPLETE, not CLOSED/FROZEN. P9.5.1–P9.5.4 COMPLETED / Review PASS / committed.**
-Final Review passed all functional/architecture exit criteria but was blocked only
-by documentation consistency. This documentation follow-up repairs that blocker;
-Final Review is pending re-run. Closure has not executed. P10 has not started.
+**Status: CLOSED / FROZEN. P9.5.1–P9.5.4 COMPLETED / Review PASS / committed; P9.5 Final Review PASS — READY TO CLOSE.**
+The documentation consistency follow-up resolved the previous blocker; Final
+Review re-run passed. This Closure freezes the deterministic one-shot Monitor
+core. NEXT: P10 — Competition Event Engine (implementation not started).
 Monitor observes official sources, produces
 structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
 UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
@@ -573,8 +573,46 @@ Scheduler and polling loop are NOT IMPLEMENTED and NOT P9.5 EXIT BLOCKERS.
 Future scheduler -> invoke the one-shot Monitor; execution policy must preserve
 Monitor semantics. Deferred: second competition adapter, multi-source monitor,
 periodic scheduler/polling, distributed jobs, retry/backoff runtime policy,
-Snapshot history persistence, notification, CompetitionEvent (P10), Impact
+monitor rate limiting policy, Snapshot history persistence, notification, CompetitionEvent (P10), Impact
 Analysis/Adaptive Replanning (P11), Agent, MCP and Frontend.
+
+### P9.5 Closure — Frozen Scope
+
+- Monitor Request target/context, explicit aware observation time, check outcome,
+  SourceObservationResult, MonitorCheckResult, typed errors and provenance are frozen.
+- FETCH_FAILED, PARSE_FAILED and SOURCE_UNAVAILABLE are check failures, not successful
+  UNKNOWN observations. Whole check failure produces no authoritative new Snapshot
+  and no SnapshotDiff. Successful observations may contain UNKNOWN tracked facts.
+- Missing selector/empty field/timeout/404/parse failure never imply KNOWN_ABSENT;
+  confirmed absence remains an explicit sourced assertion under frozen P9.
+- One call performs one source observation, then optional current Snapshot/Diff and
+  MonitorCheckResult. Success with a baseline and unchanged state returns a valid
+  Snapshot plus zero Diff; no change is not failure. Changed state returns low-level
+  Diff only. Initial success without baseline has no Diff; failure has neither output.
+- The source interface/concrete Adapter returns typed structured observation only;
+  it performs no Snapshot comparison, Event interpretation, impact or Replanning.
+- Approved fixed official URL/host only, no arbitrary URL fetch, redirects rejected,
+  no secrets. Network failure maps to typed failure. Same body/target/explicit time
+  yields the same result; no LLM parsing, invented clock times or guessed timezones.
+  Temporal policy, source provenance and verification status behavior are frozen:
+  HTTP success does not grant verification. Monitor never auto-approves/verifies data.
+- Repository/data are read-only. P9 Snapshot, ObservationState, identity, SnapshotDiff
+  and formal Diff Engine are reused; no Monitor-specific Snapshot/Diff semantics.
+- P9.5.4 proved the real Repository/Builder + concrete Adapter + one-shot Monitor +
+  formal Diff chain with fixture HTTP transport. Default tests are offline and
+  deterministic; controlled fixtures are not official historical updates. No live
+  smoke was added; future smoke must be optional/manual, outside default pytest/CI.
+- Scheduler/polling loop is absent; future triggers only invoke the one-shot Monitor
+  and preserve its semantics. Snapshot history persistence is absent; future storage
+  requires a separate storage/Repository contract, not Monitor Domain fields.
+- SnapshotDiff and MonitorCheckResult are not CompetitionEvent. P10 owns Diff ->
+  business Event; P11 owns impact/severity/affected plans/user actions, PlanDiff,
+  milestone updates and Adaptive Replanning. P9.5 has no notification, LLM or Agent.
+
+These semantics are FROZEN. Defects require explicit P9.5 reopening and separate
+Implementation -> Review -> commit; Closure does not change production code/tests/data.
+Deferred also includes multi-source merge and distributed monitor jobs. Closure-time
+validation: 1434 passed, 0 skipped; Ruff/diff check PASS (not a permanent count gate).
 
 ### P9.5.1 — Monitor Contract (Review PASS, committed)
 
@@ -606,7 +644,7 @@ reflexive Diff are successful checks. These validators do not build or compare.
 P9.5.2 orchestration and P9.5.3 source adapter are described below. The Contract
 adds no network/HTTP parsing, retry/timeout, scheduler/poll loop, Repository
 mutation, Event, notification, impact, Replanning or LLM/Agent/MCP.
-P9 and P2–P8 remain frozen; P9.5 implementation is complete, pending Final Review re-run.
+P9 and P2–P8 remain frozen; P9.5 is CLOSED / FROZEN.
 
 ### P9.5.2 — One-shot Competition Monitor (Review PASS, committed)
 
@@ -630,7 +668,7 @@ Snapshot/ID or calls Diff, success/UNKNOWN/known-value/track cases, binding safe
 provenance, one-call behavior, deterministic JSON and immutability. No Repository
 writes, persistence, retry, scheduler, loop, HTTP/parser, Event, notification,
 impact, Replanning, LLM/Agent/MCP is added. P9/P9.5.1 remain unchanged.
-P9.5.3 source adapter is described below; P9.5 implementation is complete, not closed.
+P9.5.3 source adapter is described below; P9.5 is CLOSED / FROZEN.
 
 ### P9.5.3 — Official Source Observation Adapter (Review PASS, committed)
 
@@ -667,7 +705,7 @@ HTTP failures, date/zone/absence safety, unsupported target/URL, redirects, boun
 responses, provenance and deterministic JSON. No default live smoke test is added.
 No Snapshot/Diff/Monitor result construction, Repository write, universal crawler,
 scheduler, Event/impact/Replanning or LLM parsing is added. Frozen P9/P9.5.1/P9.5.2
-remain unchanged. P9.5.4 integration is described below; Final Review re-run remains.
+remain unchanged. P9.5.4 integration is described below; P9.5 Final Review PASS.
 
 ### P9.5.4 — Real Competition Monitor Integration (COMPLETED, Review PASS, committed)
 
@@ -692,8 +730,7 @@ not official historical evidence. Default tests block network and protect data
 from writes. Optional manual live smoke is not added and is never a required CI
 path. No persistence, scheduler/polling, Event, impact, notification, Replanning,
 LLM or Agent. P9/P9.5.1/P9.5.2/P9.5.3 and earlier phases remain frozen.
-P9.5 Final Review requires re-run after this documentation follow-up; Closure has
-not executed. P9.5 is not CLOSED.
+P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. NEXT: P10 Event Engine.
 
 - **Goal:** 一次显式调用完成确定性来源观察、Snapshot/Diff 和 MonitorCheckResult。
 - **Inputs:** 稳定 target、批准 source metadata、显式 aware observed_at、可选 previous Snapshot。
@@ -705,6 +742,7 @@ not executed. P9.5 is not CLOSED.
 
 ## P10 — Competition Event Engine
 
+- **Status:** NEXT; implementation not started. Reuse frozen P9/P9.5 outputs.
 - **Goal:** 将已核验 Diff 分类为可供下游处理的赛事事件。
 - **Inputs:** P9/P9.5 已产生的 SnapshotDiff、必要 target/source context、核验状态及赛事规则；不重新抓网页、构造 Snapshot 或计算 Diff。
 - **Main Deliverables:** Event 类型、触发条件、去重/幂等、事件证据与订阅接口。

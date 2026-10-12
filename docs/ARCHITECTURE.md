@@ -762,12 +762,12 @@ reuse frozen UNKNOWN/KNOWN_ABSENT, Snapshot identity and Diff semantics.
 Generic crawler, freshness/retry/backoff policy, semantic rule-text and provenance
 diff, notification, Agent/MCP/Frontend remain deferred.
 
-### P9.5 Monitor Core — Implementation Complete
+### P9.5 Monitor Core — CLOSED / FROZEN
 
-P9.5 IMPLEMENTATION COMPLETE, not CLOSED/FROZEN. P9.5.1–P9.5.4 are completed,
-Review PASS and committed. Final Review passed functional/architecture gates and
-was blocked only by documentation consistency; this follow-up repairs that blocker.
-Final Review is pending re-run; Closure has not executed; P10 has not started.
+P9.5 CLOSED / FROZEN. P9.5.1–P9.5.4 are completed, Review PASS and committed.
+Documentation follow-up resolved the earlier blocker; Final Review re-run PASS.
+Closure freezes deterministic observation infrastructure. NEXT: P10 — Competition
+Event Engine; implementation has not started. P9 and earlier phases remain frozen.
 
 Completed core: immutable stable Contract, explicit aware time/provenance, source
 failure != successful UNKNOWN, failure -> no Snapshot/Diff, successful UNKNOWN
@@ -778,8 +778,46 @@ Repository. No Event or Replanning is produced.
 
 Deferred: second competition adapter, multi-source monitor, periodic scheduler/
 polling (NOT IMPLEMENTED, NOT EXIT BLOCKERS), distributed jobs, retry/backoff
-runtime policy, Snapshot history persistence, notification, CompetitionEvent
+runtime policy, monitor rate limiting policy, Snapshot history persistence, notification, CompetitionEvent
 (P10), Impact Analysis/Adaptive Replanning (P11), Agent, MCP and Frontend.
+
+#### P9.5 Frozen Contracts and Boundaries
+
+- Frozen Monitor Request target/context and explicit aware time, check outcome,
+  SourceObservationResult, MonitorCheckResult, typed failure and provenance semantics.
+- Fetch/parse/source-unavailable failure differs from successful UNKNOWN facts.
+  Failed check creates no authoritative current Snapshot and no Diff. Successful
+  observation may contain UNKNOWN; missing selector/empty field/timeout/404/parser
+  failure never asserts KNOWN_ABSENT.
+- One-shot: one call -> one observation -> optional Snapshot/Diff -> Monitor result.
+  With a baseline, same-state success yields valid current Snapshot + zero Diff;
+  changed-state success yields low-level Diff. Initial success has no Diff; failure
+  has no Snapshot/Diff. There is no polling daemon.
+- The Adapter/source interface only maps approved source to typed observation.
+  Fixed official URL/host, redirect rejection, no arbitrary URLs/secrets; external
+  network failures are typed errors. Parser is deterministic for fixed body/target/
+  explicit observed_at; no LLM, invented times or implicit timezone guessing.
+- Source provenance is retained; HTTP success never upgrades verification.
+  Monitor is a read-only observer, without Repository/Seed mutation, auto-approval
+  or auto-verification. Reuse frozen P9 Snapshot/ObservationState/identity/Diff Engine;
+  no second Monitor-specific Snapshot or Diff contract.
+- Real P9.5.4 chain is proven with actual Repository/Builder/Adapter/Monitor/Diff
+  and fixture-only transport. Default tests are offline deterministic. Controlled
+  fixtures are not live/historical evidence. Live smoke is NOT_ADDED; any future
+  smoke is manual/optional and outside default pytest or mandatory CI.
+- Scheduler/polling is NOT IMPLEMENTED. Future trigger -> one-shot Monitor preserves
+  frozen semantics. Snapshot history persistence is NOT IMPLEMENTED; introducing it
+  needs a separate storage/Repository contract, outside Monitor Domain Contract.
+- MonitorCheckResult != CompetitionEvent; SnapshotDiff != CompetitionEvent. P10
+  consumes existing Diff + target/source context for business event semantics,
+  without website fetch, new Snapshot construction or Diff recomputation. P11 owns
+  impact level/severity/affected plans/user actions and PlanDiff/milestone updates/
+  Adaptive Replanning. P9.5 implements none of those, nor notification/LLM/Agent.
+
+Source security, interface, parser determinism, temporal/provenance behavior,
+failure handling, orchestration/no-change semantics and read-only boundaries are
+FROZEN. A defect requires explicit P9.5 reopen -> Implementation -> Review -> commit.
+Multi-source merge and distributed monitor jobs also remain deferred.
 
 ### P9.5.1 Monitor Contract — Review PASS, committed
 
@@ -813,7 +851,7 @@ outcome derives from observation, without duplicate flags or event classificatio
 P9.5.2 orchestration and P9.5.3 source adapter are described below. The Contract
 adds no network, parser, scheduler, polling, Repository/data mutation,
 Event/impact/notification, Replanning or LLM/Agent/MCP. P9 remains FROZEN;
-P9.5 implementation is complete, pending Final Review re-run.
+P9.5 is CLOSED / FROZEN.
 
 ### P9.5.2 One-shot Monitor Orchestrator — Review PASS, committed
 
@@ -833,7 +871,7 @@ Diff remains valid. Verification status is preserved, never upgraded by a check.
 Fake-source tests assert one call, failure short circuit, safety, input/output
 immutability and stable JSON. No storage, scheduling, retry, HTTP, parser, Event,
 notification, impact, Replanning, LLM or Agent is implemented by orchestration.
-P9.5.3 is described below; P9.5 implementation is complete, not closed.
+P9.5.3 is described below; P9.5 is CLOSED / FROZEN.
 
 ### P9.5.3 COMAP Official Observation Adapter — Review PASS, committed
 
@@ -858,7 +896,7 @@ unchanged configured verification status. Existing P9 known-fact validation is
 retained; HTTP success does not grant verification. Unit tests are offline with
 minimal synthetic fixture data, and cover fetch/parser separately. No universal
 scraper, Snapshot/Diff/orchestration, storage, scheduler, Event, impact, Replanning
-or LLM parsing is added. P9.5.4 integration is described below; P9.5 implementation is complete.
+or LLM parsing is added. P9.5.4 integration is described below; P9.5 is CLOSED / FROZEN.
 
 ### P9.5.4 Real Competition Monitor Integration — COMPLETED, Review PASS, committed
 
@@ -882,8 +920,8 @@ determinism, serialization, immutability and unchanged inputs/Repository entitie
 No production code, frozen contracts or data are changed. Manual live smoke is
 optional and not added; no CI/default test depends on the official site. Diff !=
 Event; no persistence, scheduler/polling, impact, notification, Replanning or LLM/
-Agent is added. P9.5 Final Review is pending re-run after documentation follow-up;
-Closure has not executed.
+Agent is added. P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. Closure-time
+validation: 1434 passed, 0 skipped; Ruff/diff check PASS. NEXT: P10 Event Engine.
 
 ## 9. Replanning Architecture
 

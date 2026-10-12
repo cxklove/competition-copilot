@@ -536,6 +536,84 @@ tool choice, orchestration, clarification and explanation without reimplementing
 Eligibility/Recommendation/Skill Gap/Planning rules. This Closure implements none
 of those future stages.
 
+### P9.1 Digital Twin Domain Contract — IMPLEMENTED, awaiting Review
+
+`domain/digital_twin.py` defines observations and low-level differences, not a
+second authoritative Competition model. Existing Competition/Edition/Track
+retain identity/source authority. No generic Target existed before P9.1; the new
+generic `CompetitionTarget` contains stable competition/edition IDs and optional
+track ID, without depending on P8 planning or P7 requirement contracts. Parent
+relationship/existence checks belong to P9.2 since snapshots carry IDs only.
+P1 CompetitionEvent is unchanged and is reserved for P10.
+
+```text
+Competition identity + explicitly observed dynamic state
+        |  Snapshot creation: P9.2 (not implemented)
+        v
+CompetitionSnapshot(t1) + CompetitionSnapshot(t2)
+        |  Diff computation: P9.3 (not implemented)
+        v
+SnapshotDiff
+        |  Event interpretation: P10 (future)
+        v
+CompetitionEvent -> Impact / Replanning: P11 (future)
+```
+
+Monitoring belongs to P9.5. **Snapshot != Event. Diff != Event.** P9.1 does not
+read Repository, fetch sources, monitor, interpret events, assess impact or
+reference/modify P8 Needs/Plans. Domain depends only on shared TimeWindow and
+SourceMetadata plus Pydantic/standard library; Network/LLM/Agent are absent.
+
+Snapshot requires an explicitly supplied stable snapshot ID and timezone-aware
+`observed_at` (capture time), separate from observed business dates and source
+observation metadata. Source observation must not be later than capture time.
+P9.2 will generate IDs from canonical machine data, including observation time;
+there is no ID builder, randomness or automatic clock default in P9.1. Equal
+dynamic facts at different observation times may have different snapshot IDs.
+
+Typed dynamic state is limited to existing edition registration/competition
+windows and edition-wide track membership, including for a track-level target.
+Static descriptions, full Competition objects, Eligibility, Recommendation,
+SkillGap and Plan results are excluded. Each fact has its own immutable sources
+and ObservationState, avoiding a redundant coverage model:
+
+- KNOWN_VALUE requires a typed value and verified SourceMetadata.
+- KNOWN_ABSENT requires no value and verified provenance of explicit absence.
+- UNKNOWN requires no value; sources may describe an incomplete observation.
+  Null, source silence and incomplete collection are unknown, never absent.
+
+Known absence is a supplied sourced assertion; this contract does not verify a
+webpage. Track membership is a sorted unique tuple of stable IDs. A known empty
+set means zero tracks, not unknown membership or absence of the membership fact.
+Existing TimeWindow is reused: partial or unspecified endpoints within a known
+window do not imply absent endpoints. Whole-window UNKNOWN is a different state.
+
+Directed SnapshotDiff contains compact before/after SnapshotReferences with
+ID, target and observed_at, and immutable typed TimeWindowChange,
+WindowEndpointChange and TrackMembershipChange. References must have the same
+target, distinct IDs and
+before time <= after time; duplicate changed fields are rejected. It stores
+supplied changes without computing them or embedding complete snapshots.
+P9.3 must check those supplied facts against the referenced snapshots.
+
+VALUE_CHANGED requires different KNOWN_VALUE payloads. PRESENCE_CHANGED requires
+known value <-> known absence. Any transition involving UNKNOWN is an
+OBSERVATION_STATE_CHANGED, not a fact addition/removal. Known set-to-set changes
+retain stable before/after IDs for later safe membership comparison; either side
+unknown cannot assert track removal/addition. Whole-window changes describe
+presence or field observation state; VALUE_CHANGED for a window endpoint requires
+different known datetime values. A missing endpoint in a known partial window is
+UNKNOWN, so unknown endpoint -> known endpoint is an observation change, never
+an added deadline. Observation time/provenance changes alone do not establish
+a competition fact change. Empty Diff is valid for unchanged dynamic state.
+
+All new contracts and nested collections are frozen, extra fields are rejected,
+and JSON serialization is stable. P9.1 tests cover targets, explicit aware times,
+observation combinations, unknown/absent/empty distinctions, partial windows,
+verified per-field sources, canonical membership, typed directional changes,
+target/time safety, immutability and serialization. P9 is not complete; no
+Snapshot Builder, Diff Engine, Event, impact or Replanning has been implemented.
+
 ## 9. Replanning Architecture
 
 ```text

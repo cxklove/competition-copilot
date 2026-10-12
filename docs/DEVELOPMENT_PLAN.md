@@ -341,14 +341,15 @@ action strategy / study plans; Digital Twin; Monitor; Event Engine; Impact Analy
 Replanning / Plan Diff; Agent / MCP / Frontend. Limited real data, PARTIAL coverage,
 unspecified thresholds and synthetic integration students are intentional inputs.
 
-Next phase: P9 — Competition Digital Twin (NOT STARTED), followed by P9.5 Monitor,
+Next phase: P9 — Competition Digital Twin, followed by P9.5 Monitor,
 P10 Event Engine, P11 Adaptive Replanning and P12 Agent. No future-stage capability
 is implemented by this Closure.
 
 ## P9 — Competition Digital Twin
 
-**Status: NOT STARTED.** P9 answers what changed in Competition/Edition/Track
-dynamic state, using future Snapshot/Diff/version concepts; it does not enhance
+**Status: IN PROGRESS. P9.1 Domain Contract IMPLEMENTED, awaiting Review.**
+P9 answers what changed in Competition/Edition/Track
+dynamic state, using Snapshot/Diff/version concepts; it does not enhance
 Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
 CompetitionPlan remains stable downstream state. Event -> Impact -> Replanning
 belongs to P10/P11. Future P12 Agent handles intent, tool selection, multi-step
@@ -356,12 +357,51 @@ orchestration, clarification and explanation; it must not reimplement Eligibilit
 Recommendation, Skill Gap or frozen Planning rules.
 
 - **Goal:** 分离赛事静态知识与动态状态，并建立状态版本链。
-- **Inputs:** 已审核赛事、现有状态、P1 事件模型及来源元数据。
-- **Main Deliverables:** 不可变 Snapshot、可比较 Diff、状态版本和手动确认的 CompetitionEvent 记录路径。
-- **Files/Modules Expected:** `backend/domain/digital_twin/`、Repository Interface/Adapter 扩展、`backend/tests/digital_twin/`。
+- **Inputs:** 已审核赛事 identity、结构化动态观察事实及来源元数据；P1 CompetitionEvent 保留给 P10。
+- **Main Deliverables:** 不可变 Snapshot、typed Diff 和可追溯观察版本；P9 Diff 不是 Event。
+- **Files/Modules:** `backend/competition_copilot/domain/digital_twin.py` 定义纯 Domain Contract；`backend/tests/domain/test_digital_twin.py` 覆盖模型 invariant。
 - **Tests Required:** 版本递增、快照不可变、Diff 准确、来源关联和静默覆盖拒绝测试。
-- **Acceptance Criteria:** 每次被接受的动态状态变化均保留 Snapshot、Diff 和对应 CompetitionEvent，可追溯与重放。
+- **Acceptance Criteria:** 观察版本及低层差异可追溯，不静默覆盖；后续接受动态状态变化时由 P10 关联 CompetitionEvent，保留 Snapshot / Diff / Event 完整审计链。
 - **Explicitly Out of Scope:** 自动抓取、定时监控和自动重规划。
+
+### P9.1 — Digital Twin Domain Contract (IMPLEMENTED, awaiting Review)
+
+Only contracts and synthetic Domain tests are implemented. Generic
+`CompetitionTarget` holds competition/edition IDs and optional track ID; existing
+phase-specific requirement/planning targets are not reused or modified.
+ID-only parent/existence validation belongs to P9.2.
+
+`CompetitionSnapshot` requires explicit snapshot ID and aware observation time,
+with typed `CompetitionDynamicState`: registration window, competition window
+and complete edition track membership (stable sorted unique ID tuple).
+Per-field observations distinguish KNOWN_VALUE, KNOWN_ABSENT and UNKNOWN.
+Unknown != known absent; missing/null/source silence must map to UNKNOWN.
+Known empty track membership differs from unknown membership. Known facts require
+verified per-field SourceMetadata. Existing TimeWindow permits partial bounds;
+missing endpoints remain unknown, not absent. Capture time is distinct from
+observed competition/registration dates and must not precede source observation.
+
+`SnapshotDiff` retains directed before/after ID/target/time references and typed
+whole-window, window-endpoint and membership changes. Same target,
+chronological references, distinct
+snapshot IDs and unique changed fields are validated. VALUE_CHANGED requires
+different known values; PRESENCE_CHANGED requires known presence/absence;
+transitions involving UNKNOWN are OBSERVATION_STATE_CHANGED, never fact addition
+or deletion. A missing endpoint within a known partial window remains UNKNOWN;
+endpoint discovery is also an observation change. Known set-to-set comparison
+can later identify added/removed IDs;
+unknown membership cannot assert either. Same dynamic state at different observed
+times can have different snapshot IDs and an empty Diff.
+
+Snapshots, references, observed facts and Diff collections are immutable and JSON
+serializable. Snapshot ID generation is deferred to P9.2 canonical machine input;
+no current-time or random defaults are present. No Repository access, comparison
+algorithm, Network, LLM, Event, impact or Plan/Replanning capability is implemented.
+P2–P8 remain frozen.
+
+Remaining stages: P9.2 Snapshot creation; P9.3 deterministic Diff computation;
+later P9 integration/review; P9.5 Monitor; P10 Event; P11 Replanning. P9 is not
+complete. Text/rules semantic diff and additional structured facts are deferred.
 
 ## P9.5 — Competition Monitor
 

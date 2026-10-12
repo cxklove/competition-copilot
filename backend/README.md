@@ -7,8 +7,9 @@ P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
 StudentProfile Domain already exists and supplies input. P7 finished requirements,
 evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
-Deterministic baseline planning scope is finished; next is P9 Competition Digital
-Twin, not implemented by this Closure. The current ingestion
+Deterministic baseline planning scope is finished.
+**P9 is IN PROGRESS; P9.1 Digital Twin Domain Contract IMPLEMENTED, awaiting Review.**
+Snapshot Builder and Diff Engine are not implemented. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -607,4 +608,34 @@ There is no application start command yet. To build a wheel:
 
 ```powershell
 .\.venv\Scripts\python -m pip wheel . --no-deps --wheel-dir dist
+```
+
+## P9.1 Digital Twin Domain Contract
+
+P9.1 is implemented and awaiting Review; P9 is still in progress. The new
+`competition_copilot.domain.digital_twin` module defines an immutable generic
+competition/edition/optional-track target, explicit timezone-aware observation
+snapshots, typed dynamic facts and a directed typed SnapshotDiff contract.
+Current observed fields are edition registration/competition windows and the
+complete edition track ID set. Existing `TimeWindow` and per-field
+`SourceMetadata` are reused. Verified known facts distinguish KNOWN_VALUE from
+explicit KNOWN_ABSENT; missing data is UNKNOWN. A known empty track set is not an
+unknown set. A partial known window retains unknown endpoints.
+
+Diff changes distinguish known value/presence changes from observation-state
+changes, including endpoints inside partial TimeWindow values. UNKNOWN becoming
+KNOWN_VALUE means information was obtained; it is not
+evidence that the competition added a fact. The supplied before/after references
+must identify the same target in observation order. The contract does not compute
+changes or validate them against stored snapshots; that belongs to P9.3.
+
+P9.2 will construct snapshots and validate ID-only target relationships using
+Repository facts. P9.3 will compute deterministic Diff. P9.5 Monitor, P10 Event
+interpretation and P11 Replanning remain future work. `CompetitionEvent` is
+unchanged. P9.1 uses no Repository, Network, LLM, Agent or Plan logic.
+
+Run its synthetic contract tests from the repository root:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_digital_twin.py
 ```

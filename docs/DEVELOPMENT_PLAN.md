@@ -203,8 +203,8 @@ later planning stages do not change the frozen P7 semantics.
 
 ## P8 — Competition Planner
 
-**Status: IN PROGRESS; P8.1/P8.2/P8.3 Review PASS; P8.4 IMPLEMENTED, pending review.** Consume the frozen P7
-SkillGapDecision uncertainty rules above. Suggested decomposition:
+**Status: FROZEN.** P8 deterministic baseline planning scope is finished.
+P8.1/P8.2/P8.3/P8.4 and P8 Final Review PASS. Delivered stages:
 
 1. P8.1 Plan Domain Contract
 2. P8.2 Deterministic Planning Inputs
@@ -234,9 +234,8 @@ known need references, source status/reason consistency and explicit timing boun
 
 `backend/tests/domain/test_planning_contract.py` covers synthetic contract semantics,
 audit, immutable snapshots and serialization. Existing P1 plan tests reflect tuple
-collections/new serialized fields; no P7 file changes. At the P8.1 milestone, P8.2 inputs, Planner Engine,
-resources, Replanning, P5/P6 execution, Tool/API/Agent/MCP/network/LLM are not implemented.
-P8 is not complete; implemented stages are documented below.
+collections/new serialized fields; no P7 file changes. The P8.1 Contract performs
+no mapping/building; the later stages below implement those capabilities.
 
 P8.2 adds pure `domain/planning_inputs.py` PlanningInputDeriver and synthetic
 `backend/tests/domain/test_planning_inputs.py`. derive accepts a validated P7
@@ -269,7 +268,7 @@ fail fast; real target existence/parent validation remains caller responsibility
 `backend/tests/domain/test_baseline_plan_builder.py` tests mixed/empty plans,
 identity/input changes, timing pass-through, source links, validation and immutable
 JSON snapshots. P8.1/P8.2/P7 contracts and real data are unchanged;
-P8 completion/adaptive planning is not claimed.
+P8 baseline scope is finished; adaptive planning remains future work.
 
 P8.4 adds `backend/tests/integration/test_p8_real_planning_integration.py` only,
 with docs. Real COMAP MCM 2027 is loaded through Repository and reviewed
@@ -285,17 +284,76 @@ full-pipeline determinism, cross-case isolation, immutable/read-only inputs and
 outputs, offline Seed/requirement-only reads and missing-target semantics.
 No production/model/artifact or earlier-phase changes. No P5/P6 execution,
 resources, priority/duration, LLM/Agent/MCP, Digital Twin/Event/Replanning.
-P8.4 is ready for review; P8 Final Review has not run; P8 is not complete.
+P8.4 Review and P8 Final Review PASS. P8 status is FROZEN.
 
-- **Goal:** 把赛事目标与技能差距转为有依赖和期限的任务计划。
-- **Inputs:** StudentProfile、已验证 Competition、SkillGapDecision、Deadline、可用时间；保留 GAP / UNKNOWN / NO_GAP 和 requirement coverage 的冻结语义。
-- **Main Deliverables:** 结构化 CompetitionPlan、里程碑/任务/依赖/截止时间、计划生成 Tool。
-- **Files/Modules Expected:** `backend/domain/planning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/planning/`。
-- **Tests Required:** 时间冲突、依赖顺序、不可行期限、缺失数据及稳定计划测试。
-- **Acceptance Criteria:** 计划可保存与复现，关键安排有 `reason_code` 和 `evidence`；官方截止日期优先于模型推断。
-- **Explicitly Out of Scope:** 自动监控、事件处理和重规划。
+### P8 Closure and frozen capabilities
+
+Frozen: Planning Domain Contract, exact Planning Target, PlanningNeed and its two
+types, need scope (source_item present = SKILL; absent = REQUIREMENT_SET), reused
+TimeWindow planning horizon, deterministic SkillGapDecision-to-Need mapping,
+coverage uncertainty mapping, baseline builder, one Need -> one Milestone policy,
+stable Need/Plan/Milestone IDs, timing non-invention and baseline service purity.
+PlanningNeed answers why an action is needed, not how to learn or resolve it.
+Milestones retain source_need_id and express only addressing confirmed improvement
+or uncertainty. They do not prescribe courses, checks, contacts or learning steps.
+
+P7 is the sole Skill Gap authority. P8 does not compare student/required levels or
+recompute gap conclusions. GAP -> SKILL_IMPROVEMENT; UNKNOWN ->
+UNCERTAINTY_RESOLUTION, never SKILL_IMPROVEMENT or SATISFIED; SATISFIED -> no
+remediation need. PARTIAL/MISSING remain requirement-set uncertainty, distinct
+from skill uncertainty and without fake skill IDs. COMPLETE itself adds no need.
+Dual item uncertainty stays in one skill need with both machine-readable reasons.
+
+Unknown, partial and full horizons are supported. No deadline selection, default
+duration, milestone dates, effort estimate or equal time splitting occurs. Empty
+needs allow zero milestones; no fake preparation is generated. P8 does not run
+P5 or alter eligibility; REQUIRED skill is not a hard eligibility condition.
+P8 does not score/rank/select competitions or alter P6. Selected target comes
+from upstream. P1 LearningResource remains independent: no resource selection,
+course/website/book/video recommendation, day/week plan, learning sequence,
+practice workload, course ordering, priority or time allocation is implemented.
+P8 is a deterministic planning core: LLM=NO, Agent=NO, Network=NO.
+
+Current reviewed integration snapshot: comap-mcm / comap-mcm-2027 / track=None,
+mathematical-modeling, REQUIRED human-reviewed structured interpretation,
+required_level=None, coverage=PARTIAL. This is not an official REQUIRED enum or
+complete COMAP requirement set. Synthetic validated Student A has a known level,
+but unknown threshold still gives UNKNOWN/UNDETERMINED. Student B lacks the skill
+and retains REQUIREMENT_PROFICIENCY_UNSPECIFIED + STUDENT_SKILL_DATA_MISSING.
+Both result in skill and requirement-set uncertainty milestones, no improvement.
+The integration fabricates no GAP, satisfaction, learning task, date or priority.
+Artifact counts and competition coverage are not frozen; more independently
+reviewed real inputs may be added. Closure-time snapshot: 1191 passed, 0 skipped,
+Ruff/diff check PASS; test counts are not architectural invariants.
+
+Runtime composition reads data/seed through Competition Repository and
+data/skill_requirements through Requirement Provider. No Raw, Review Manifest,
+Eligibility Policy, network or LLM is read by this P8 integration chain.
+Frozen semantics and identities must not be silently changed by later phases.
+A genuine defect requires explicit P8 reopening and independent Implementation /
+Review. P9 and P12 must consume these results without reinterpreting need semantics.
+
+### Deferred items (not P8 blockers)
+
+More real requirement data; real Student ingestion; Learning Resource mapping /
+resource recommendation; priority/deadline policy; duration estimation; detailed
+action strategy / study plans; Digital Twin; Monitor; Event Engine; Impact Analysis;
+Replanning / Plan Diff; Agent / MCP / Frontend. Limited real data, PARTIAL coverage,
+unspecified thresholds and synthetic integration students are intentional inputs.
+
+Next phase: P9 — Competition Digital Twin (NOT STARTED), followed by P9.5 Monitor,
+P10 Event Engine, P11 Adaptive Replanning and P12 Agent. No future-stage capability
+is implemented by this Closure.
 
 ## P9 — Competition Digital Twin
+
+**Status: NOT STARTED.** P9 answers what changed in Competition/Edition/Track
+dynamic state, using future Snapshot/Diff/version concepts; it does not enhance
+Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
+CompetitionPlan remains stable downstream state. Event -> Impact -> Replanning
+belongs to P10/P11. Future P12 Agent handles intent, tool selection, multi-step
+orchestration, clarification and explanation; it must not reimplement Eligibility,
+Recommendation, Skill Gap or frozen Planning rules.
 
 - **Goal:** 分离赛事静态知识与动态状态，并建立状态版本链。
 - **Inputs:** 已审核赛事、现有状态、P1 事件模型及来源元数据。

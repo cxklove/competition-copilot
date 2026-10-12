@@ -6,8 +6,9 @@ P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
 P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
 StudentProfile Domain already exists and supplies input. P7 finished requirements,
 evidence, deterministic diagnosis and real integration, not student ingestion.
-P8.1/P8.2/P8.3 Review PASS; P8.4 Real Planning Integration IMPLEMENTED, pending review.
-P8 is not complete. The current ingestion
+**P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
+Deterministic baseline planning scope is finished; next is P9 Competition Digital
+Twin, not implemented by this Closure. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -397,7 +398,7 @@ display labels/random/time/hash(). Source items, type, levels, reasons and evide
 are preserved; no provenance is invented. P8.1 and P7 contracts are unchanged.
 No Plan/Milestone, timing, learning content, resolution strategy, priority/score,
 resources, P5/P6 evaluation, Repository/Provider, network/LLM, Agent or Replanning
-is added by P8.2. Baseline building is documented below; P8 is not complete.
+is added by P8.2. Baseline building is documented below; P8 scope is FROZEN.
 
 Targeted command from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_planning_inputs.py`.
@@ -423,14 +424,14 @@ Target/audit and canonical P8.2 need target mismatch reject; general P8.1 IDs ha
 no embedded target and depend on the caller's matching audit. Output preserves
 all needs/evidence through normal frozen validation. P8.1/P8.2/P7 are unchanged.
 No scheduling/deadline/priority/duration/resource policy, P5/P6 logic, LLM/network,
-Agent, Digital Twin or Replanning is added. P8 is not complete.
+Agent, Digital Twin or Replanning is added. P8 baseline scope is FROZEN.
 
 Targeted command from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_baseline_plan_builder.py`.
 
 ### P8.4 Real Planning Integration
 
-IMPLEMENTED, pending review. `backend/tests/integration/test_p8_real_planning_integration.py`
+Review PASS. `backend/tests/integration/test_p8_real_planning_integration.py`
 loads COMAP MCM 2027 through real JsonSeedCompetitionRepository and its reviewed
 PARTIAL mathematical-modeling requirement through JsonSkillRequirementProvider.
 TEST-ONLY SYNTHETIC known/missing student profiles and canonical student evidence
@@ -451,10 +452,62 @@ data reads are limited to Seed and skill requirements; network connections rejec
 No Raw/Manifest/eligibility-policy reads, P5/P6 evaluation, LLM/Agent/MCP, resources,
 detailed study plan, priority/duration, Digital Twin/Event or Replanning is added.
 Production code, frozen contracts and real artifacts remain unchanged.
-P8 Final Review has not run; P8 is not complete.
+P8 Final Review PASS; P8 status is FROZEN.
 
 Targeted command from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p8_real_planning_integration.py`.
+
+### P8 Closure and frozen scope
+
+Frozen: Planning Domain Contract / exact target, PlanningNeed/PlanningNeedType,
+skill vs requirement-set scope, existing TimeWindow horizon, P7-to-Need mapping,
+coverage uncertainty mapping, Need identity, baseline builder, one Need -> one
+Milestone, Plan/Milestone identity, timing non-invention and service purity.
+Need scope uses source_item present/absent; milestone purpose follows its linked
+source_need_id. All snapshots remain immutable and JSON serializable.
+
+P7 is the sole gap authority; P8 never recomputes student vs required level.
+GAP -> SKILL_IMPROVEMENT; UNKNOWN -> UNCERTAINTY_RESOLUTION, never confirmed gap,
+improvement or satisfaction; SATISFIED -> no remediation. PARTIAL/MISSING are
+requirement-set uncertainty, distinct from skill uncertainty and never fake skill
+identities. COMPLETE itself adds none. Need describes why an action is needed;
+baseline milestone does not prescribe how to learn or resolve uncertainty.
+One need yields one milestone in input order; empty needs allow zero milestones.
+
+Unknown/partial/full horizons are allowed, but no automatic deadline/dates, duration,
+effort estimate or equal time splitting is performed. No resources, courses,
+websites/books/videos, day/week plans, learning sequence, practice workload,
+course ordering, time allocation, priority or detailed action strategy is generated.
+P8 does not run P5 or change eligibility. REQUIRED skill is not a hard eligibility
+condition. P8 does not rerun P6 scoring/ranking/target selection; target is already
+selected upstream.
+LLM=NO, Agent=NO, Network=NO; P8 is a deterministic planning core.
+
+Current reviewed real integration snapshot: comap-mcm / comap-mcm-2027 / track=None,
+mathematical-modeling, REQUIRED human-reviewed structured interpretation,
+required_level=None, coverage=PARTIAL. Known student A still yields UNKNOWN /
+UNDETERMINED; missing student B preserves threshold-unspecified and student-missing
+reasons in one skill need. Both retain a separate requirement-set need and linked
+uncertainty milestones, without fake improvement or timing. Synthetic profiles
+are test-only; source provenance and interpretation remain distinct. Data/competition
+counts are not frozen. Closure-time test snapshot: 1191 passed, 0 skipped, Ruff /
+diff check PASS; these counts are not permanent Architecture invariants.
+
+The real chain uses Repository -> data/seed and Requirement Provider ->
+data/skill_requirements; no Raw, Review Manifest, Eligibility Policy, network or
+LLM. Frozen P8 contracts/policies must not be silently changed for later stages;
+a real defect requires explicit reopening and independent Implementation/Review.
+
+Deferred: more real requirements/Student ingestion, resource mapping/recommendation,
+priority/deadline/duration policy, detailed strategy/study plans, Digital Twin,
+Monitor, Event Engine, Impact Analysis, Replanning/Plan Diff, Agent/MCP/Frontend.
+Next is P9 Digital Twin -> P9.5 Monitor -> P10 Event Engine -> P11 Adaptive
+Replanning -> P12 Agent. P9 observes competition dynamic state; it does not enhance
+Planner, reinterpret Needs/Plans, directly change Plan or Replan. CompetitionPlan
+stays stable downstream state; Event -> Impact -> Replanning belongs to P10/P11.
+P12 may handle intent, tool choice, orchestration, clarification and explanation,
+but cannot reimplement Eligibility/Recommendation/Skill Gap/Planning rules.
+This Closure implements no future-stage functionality.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

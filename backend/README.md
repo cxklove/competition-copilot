@@ -249,7 +249,7 @@ authorized by P7.3B.4 human approval and authored in P7.3B.5 after official sour
 re-verification. Only mathematical-modeling is included, with unspecified threshold
 and PARTIAL coverage. REQUIRED is human-reviewed structured interpretation, not an
 official enum or P5 eligibility rule. No level or skill was guessed.
-P7.3/P7 completion and P7.4 implementation are not claimed.
+P7.4 integration tests are described below; P7 completion is not claimed.
 
 Envelopes version the unchanged P7.1 RequirementSet and resolve IDs through a
 minimal embedded catalog of immutable views of existing Skill models. Evidence
@@ -291,7 +291,28 @@ threshold means UNDETERMINED. NO_GAP requires COMPLETE, every threshold specifie
 and every student fact known satisfied. System audit version is SKILL_GAP_ANALYSIS_V2.
 The tenth/eleventh-edition and subtrack target gaps remain unresolved. P7.3B.2
 added no real artifact; P7.3B.5 separately authors the approved COMAP artifact.
-No skill guessing, proficiency guessing or P7.4 implementation is added.
+No skill or proficiency guessing is added by these artifact stages.
+
+
+### P7.4 Real Skill Gap Integration
+
+`backend/tests/integration/test_p7_skill_gap_integration.py` loads exact COMAP MCM
+2027 Competition/Edition snapshots through the real Seed Repository and the
+reviewed requirement through JsonSkillRequirementProvider. Students are explicitly
+TEST-ONLY SYNTHETIC. Student A supplies ADVANCED mathematical-modeling and matching
+canonical evidence; Student B supplies no such record/evidence. Since the real
+threshold is null, both items are UNKNOWN; B retains both uncertainty reasons.
+Both overall decisions are UNDETERMINED with PARTIAL coverage, never a confirmed
+real gap or satisfaction. Official presence provenance and supplied student facts
+survive the complete Context/Engine/Decision chain and JSON round-trip.
+
+Run from repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p7_skill_gap_integration.py`.
+Tests check determinism, read-only models/artifacts, output immutability and a
+missing exact real target. Reads are restricted to Seed and skill requirements;
+no Raw/Manifest/eligibility-policy access, network, LLM, eligibility/recommendation
+execution or planner. Production code and real artifacts are unchanged.
+P7.4 is ready for review; P7 Final Review has not run. P7 is not COMPLETE.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

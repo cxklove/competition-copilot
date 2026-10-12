@@ -224,7 +224,7 @@ enum or P5 hard eligibility. Presence provenance is official; review/coverage no
 remain system assessment, and no proficiency evidence is created. Real provenance
 and Repository target smoke now run. Other targets need independent source review.
 No skill/level is inferred from names or descriptions.
-P7.4 and P7 COMPLETE are not implemented or claimed.
+P7.4 integration is documented below; P7 COMPLETE is not claimed.
 
 ### P7.3B.2 Unspecified Proficiency Follow-up
 
@@ -252,7 +252,28 @@ P7.3A Provider architecture is unchanged; the envelope's official provenance gat
 also checks the new presence channel. This is an authorized P7 contract/engine
 evolution, reviewed and frozen before P7.3B.5 artifact authoring. No target/subtrack/edition
 changes are made. The audited tenth/eleventh-edition mismatch and subtrack gaps
-remain separate blockers; P7.3 is not COMPLETE and P7.4 is not started.
+remain separate data gaps; neither P7.3 nor P7 is declared COMPLETE.
+
+
+### P7.4 Real Skill Gap Integration
+
+`backend/tests/integration/test_p7_skill_gap_integration.py` composes the real
+JsonSeedCompetitionRepository and JsonSkillRequirementProvider through their
+normal reads of Seed and reviewed requirement artifacts. Exact COMAP MCM 2027
+Edition snapshots and the unchanged PARTIAL mathematical-modeling requirement
+enter SkillGapContext with TEST-ONLY SYNTHETIC StudentProfile data and canonical
+student evidence. No production orchestration service or new semantics are added.
+
+Student A has ADVANCED mathematical-modeling with supplied synthetic evidence;
+the item remains UNKNOWN because the real threshold is unspecified. Student B
+has no skill record/evidence and retains both threshold-unspecified and
+student-data-missing reasons. Both overall decisions are UNDETERMINED, retaining
+PARTIAL coverage. Official presence provenance survives Provider, Context and
+Engine; student evidence survives where supplied. Tests verify full JSON audit,
+determinism, input/file read-only behavior, immutable output and another real
+target's None lookup. Data reads are restricted to Seed and skill requirements;
+no Raw, Manifest, eligibility policy, network, LLM, P5/P6 engine or planner runs.
+P7.4 is ready for review; P7 Final Review has not run and P7 is not COMPLETE.
 
 ## 8. Planning Architecture
 

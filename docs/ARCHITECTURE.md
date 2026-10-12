@@ -123,18 +123,18 @@ defect reopens P6.
 
 Real competition skill mapping, interest/goal/experience signals, resource cost,
 additional components, candidate discovery, Top-K UI views and learned ranking
-are deferred capabilities, not P6 exit blockers. Next is P7 Skill Gap, comparing
+are deferred capabilities, not P6 exit blockers. P7 Skill Gap compares
 student skills with formal required/desired skills for a selected target; P7
 does not recalculate eligibility, recommendation scores or ranking. The flow is
 `Eligibility → Recommendation → Selected Competition Target → Skill Gap → Learning / Planning`.
-Competition Domain currently lacks complete structured skill requirements. P7
-must first establish a Skill Requirement / Expected Skill data contract or
-explicitly express that missing required-skill data prevents full gap determination;
-competition names and descriptions must not be used to guess required skills.
+Competition Domain does not claim complete skill requirements for all targets.
+Frozen P7 provides an independent structured Requirement Contract and reviewed
+data, explicitly preserving uncertainty where requirements or thresholds are
+unavailable; competition names and descriptions must not be used to guess skills.
 
 ## 7.1. Skill Requirement & Skill Gap Contract
 
-P7.1 starts the independent skill diagnosis contracts in `domain/skill_gap.py`.
+P7.1 defines the frozen independent skill diagnosis contracts in `domain/skill_gap.py`.
 `SkillRequirementSet` binds an exact Edition/Track target, without inherited
 requirements. REQUIRED denotes core task skills, not P5 eligibility; DESIRED
 denotes beneficial skills. Requirements reference existing `Skill.id` and use
@@ -159,8 +159,9 @@ Missing student facts do not become zero ability or an assumed full gap.
 
 `SkillGapDecision` separates NO_GAP/GAP_IDENTIFIED/UNDETERMINED from coverage
 retained in its RequirementSet, and audits every known requirement exactly once.
-NO_GAP requires COMPLETE and all declared REQUIRED and DESIRED skills known
-satisfied. A known gap, including a desired-skill gap, remains GAP_IDENTIFIED
+NO_GAP requires COMPLETE, all thresholds specified, all relevant student skills
+known, and all declared REQUIRED and DESIRED requirements satisfied. A known gap,
+including a desired-skill gap, remains GAP_IDENTIFIED
 with PARTIAL coverage or unknown facts about other skills. System analysis audit
 is kept separate from requirement provenance and student evidence. All P7-owned
 models and collections are frozen snapshots; evidence reuses shared fields in
@@ -168,7 +169,7 @@ a detached frozen view. Supplied conclusions are validated for consistency;
 no engine calculates gaps or aggregates results in P7.1. No numeric gap,
 readiness score, learning schedule or resource matching is defined.
 
-P7 has started, not completed. Real requirements must come from structured,
+P7 status is FROZEN following Final Review PASS. Real requirements must come from structured,
 reviewed data, never target names/descriptions or LLM inference. P7.1 has no
 Repository, Infrastructure, Tool, filesystem, network, LLM, eligibility or
 recommendation dependency; tests use synthetic data only.
@@ -183,15 +184,15 @@ retaining requirement facts and every matching student evidence source. No stude
 provenance is generated from levels; missing facts remain UNKNOWN.
 
 Overall precedence is known gap (including DESIRED) → GAP_IDENTIFIED, otherwise
-incomplete coverage or unknown student facts → UNDETERMINED, otherwise COMPLETE
-and all declared requirements satisfied → NO_GAP. MISSING requirements produce
+incomplete coverage, unspecified thresholds or unknown student facts → UNDETERMINED, otherwise COMPLETE
+and all thresholds specified and declared requirements satisfied → NO_GAP. MISSING requirements produce
 empty items and UNDETERMINED; PARTIAL can identify a gap but cannot confirm no gap.
 Coverage remains in the RequirementSet alongside the qualitative gap status.
 Output uses normal validated immutable snapshots, item/coverage reason codes and
 source-free system audit `SKILL_GAP_ANALYSIS_V2`. Errors propagate atomically.
 The engine is read-only, deterministic and has no readiness score, skill guessing,
 eligibility/recommendation logic, provider, Repository, filesystem, network, LLM
-or planning dependency. P7 is not COMPLETE.
+or planning dependency. P7 status is FROZEN.
 
 ### P7.3 Reviewed Skill Requirement Data
 
@@ -224,7 +225,7 @@ enum or P5 hard eligibility. Presence provenance is official; review/coverage no
 remain system assessment, and no proficiency evidence is created. Real provenance
 and Repository target smoke now run. Other targets need independent source review.
 No skill/level is inferred from names or descriptions.
-P7.4 integration is documented below; P7 COMPLETE is not claimed.
+P7.4 integration and P7 Final Review passed; P7 status is FROZEN.
 
 ### P7.3B.2 Unspecified Proficiency Follow-up
 
@@ -252,7 +253,7 @@ P7.3A Provider architecture is unchanged; the envelope's official provenance gat
 also checks the new presence channel. This is an authorized P7 contract/engine
 evolution, reviewed and frozen before P7.3B.5 artifact authoring. No target/subtrack/edition
 changes are made. The audited tenth/eleventh-edition mismatch and subtrack gaps
-remain separate data gaps; neither P7.3 nor P7 is declared COMPLETE.
+remain deferred data/modeling items, not P7 blockers. P7 status is FROZEN.
 
 
 ### P7.4 Real Skill Gap Integration
@@ -273,7 +274,70 @@ Engine; student evidence survives where supplied. Tests verify full JSON audit,
 determinism, input/file read-only behavior, immutable output and another real
 target's None lookup. Data reads are restricted to Seed and skill requirements;
 no Raw, Manifest, eligibility policy, network, LLM, P5/P6 engine or planner runs.
-P7.4 is ready for review; P7 Final Review has not run and P7 is not COMPLETE.
+P7.4 Review and P7 Final Review passed. P7 status is FROZEN.
+
+
+### P7 Closure: FROZEN
+
+P7 Skill Gap scope is frozen after Final Review PASS. Existing StudentProfile
+Domain supplies input; P7 completed the requirement/evidence/gap/data/integration
+capabilities without introducing Student profile ingestion or planning.
+
+```mermaid
+flowchart TD
+    CR[CompetitionRepository] --> T[Competition / Edition / optional Track]
+    RP[SkillRequirementProvider] --> RS[SkillRequirementSet]
+    T --> C[SkillGapContext]
+    RS --> C
+    SP[StudentProfile] --> C
+    SE[Student Skill Evidence] --> C
+    C --> E[SkillGapEngine]
+    E --> D[Auditable SkillGapDecision]
+```
+
+Repository and Provider perform data access and do not compute Skill Gap. Engine
+uses only validated Context snapshots; it accesses no Repository, Provider,
+filesystem, network or LLM. Competition Repository reads data/seed and JSON
+Requirement Provider reads data/skill_requirements. Raw, review manifests and
+eligibility policies are outside this runtime chain. Synthetic student facts are
+explicit integration fixtures, not a real student data source.
+
+Frozen contracts include SkillRequirement / RequirementCoverage, specified and
+unspecified proficiency, all three evidence channels and canonical fact binding,
+SkillGapContext / SkillGapItem / SkillGapDecision, deterministic aggregation,
+Provider exact target lookup and JSON Provider None-for-missing semantics. Missing
+requirement data differs from known requirement / unspecified threshold;
+required_level=None never means student missing, zero or a default proficiency.
+Coverage completeness and threshold completeness are independent. Missing
+StudentSkill never means BEGINNER / zero. UNKNOWN is neither GAP nor SATISFIED.
+NO_GAP requires COMPLETE, all thresholds specified, all relevant students known
+and all requirements satisfied. Known GAP takes precedence over uncertainty.
+
+P5 remains the sole hard eligibility authority. REQUIRED denotes core skill
+capability and never directly yields INELIGIBLE. P7 does not recompute P6 scores,
+ranking or eligibility buckets. It creates no study plan, learning resource,
+milestone, schedule, priority or plan diff; these belong to P8.
+
+P8 may consume Decision facts without reinterpreting uncertainty: known GAP under
+GAP_IDENTIFIED can establish a learning need; UNKNOWN can establish only an
+uncertainty / information-acquisition need, not an automatic learning gap.
+NO_GAP cannot justify unsupported remedial tasks. PARTIAL remains visible even
+alongside known gaps. Future phases must not reinterpret UNKNOWN as GAP or
+SATISFIED, PARTIAL as COMPLETE, or REQUIRED as an Eligibility hard rule. Changes
+to frozen P7 semantics require a separate reopening and independent Review.
+
+The current snapshot includes at least one reviewed real artifact, COMAP MCM 2027
+mathematical-modeling: REQUIRED is human-reviewed structured interpretation,
+not an official enum; threshold unspecified, coverage PARTIAL. Official source
+facts and system interpretation stay separate. Real integration correctly yields
+UNKNOWN items / UNDETERMINED overall and does not claim a complete COMAP skill set
+or determined student gap. Artifact counts may grow through independent review.
+
+More competition data, full taxonomy, cross-artifact Skill governance, formal
+proficiency mapping and further official thresholds, Huawei child-target/subtrack
+modeling, real Student source / profile ingestion, Learning Resource mapping,
+Planner, Monitor / Event / Replanning, Agent / MCP / Frontend are deferred, not P7
+blockers. P8 implementation is not part of this Closure.
 
 ## 8. Planning Architecture
 

@@ -1,11 +1,12 @@
 # Backend
 
 **Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
-P7 started: P7.1 Skill Requirement & Skill Gap Contract PASS;
-P7.2 Deterministic Skill Gap Engine PASS;
-P7.3 schema/Provider implemented; P7.3B.5 first reviewed COMAP MCM 2027 artifact authored;
-P7.3B.2 unspecified-proficiency follow-up reviewed and frozen;
-P7 is not COMPLETE. The current ingestion
+**P7 — Student Profile & Skill Gap: FROZEN; P7 Final Review PASS.**
+P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
+P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
+StudentProfile Domain already exists and supplies input. P7 finished requirements,
+evidence, deterministic diagnosis and real integration, not student ingestion.
+Next is P8 — Competition Planner; P8 implementation has not started. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -249,7 +250,7 @@ authorized by P7.3B.4 human approval and authored in P7.3B.5 after official sour
 re-verification. Only mathematical-modeling is included, with unspecified threshold
 and PARTIAL coverage. REQUIRED is human-reviewed structured interpretation, not an
 official enum or P5 eligibility rule. No level or skill was guessed.
-P7.4 integration tests are described below; P7 completion is not claimed.
+P7.4 integration and P7 Final Review passed; P7 status is FROZEN.
 
 Envelopes version the unchanged P7.1 RequirementSet and resolve IDs through a
 minimal embedded catalog of immutable views of existing Skill models. Evidence
@@ -312,7 +313,49 @@ Tests check determinism, read-only models/artifacts, output immutability and a
 missing exact real target. Reads are restricted to Seed and skill requirements;
 no Raw/Manifest/eligibility-policy access, network, LLM, eligibility/recommendation
 execution or planner. Production code and real artifacts are unchanged.
-P7.4 is ready for review; P7 Final Review has not run. P7 is not COMPLETE.
+P7.4 Review and P7 Final Review passed. P7 status is FROZEN.
+
+### P7 Closure and frozen scope
+
+P7 Skill Gap scope is frozen. Frozen capabilities include SkillRequirement,
+REQUIRED/DESIRED type, MISSING/PARTIAL/COMPLETE coverage, specified/unspecified
+thresholds, requirement presence/proficiency and student evidence channels,
+canonical fact binding, multi-reason uncertainty, immutable Context/Item/Decision,
+deterministic SkillGapEngine aggregation, SkillRequirementProvider exact lookup
+and JsonSkillRequirementProvider None-for-missing semantics, reviewed artifacts
+and real integration. Runtime Repository/Provider perform data access only;
+Engine accesses neither adapter, filesystem, network nor LLM.
+
+Missing requirement data differs from a known requirement with unspecified
+threshold. required_level=None means the latter only. Missing StudentSkill is
+not BEGINNER / zero. UNKNOWN is neither GAP nor SATISFIED. PARTIAL cannot yield
+NO_GAP; NO_GAP needs COMPLETE, all thresholds specified, all relevant students
+known and all requirements satisfied. Known GAP takes precedence over uncertainty.
+
+P5 is the sole hard eligibility authority: P7 REQUIRED denotes core skill
+capability, not a participation restriction, and skill mismatch never directly
+yields INELIGIBLE. P7 does not recompute P6 score, ranking or eligibility buckets.
+It creates no resources, study plan, milestone, schedule, priority or plan diff.
+
+P8 can consume SkillGapDecision: known GAP under GAP_IDENTIFIED can be a learning
+need; UNKNOWN is only an uncertainty / information-acquisition need and cannot
+automatically become a learning gap. NO_GAP must not generate unsupported remedial
+tasks. Preserve PARTIAL and unknown items alongside any known gap. Future phases
+must not reinterpret UNKNOWN as GAP or SATISFIED, PARTIAL as COMPLETE or REQUIRED
+as an Eligibility hard rule. A real defect requires separate P7 reopening and Review.
+
+Current reviewed data includes at least one real COMAP MCM 2027 artifact:
+mathematical-modeling, REQUIRED human-reviewed structured interpretation,
+unspecified threshold, PARTIAL coverage. This is not a complete COMAP skill set
+or a determined student gap; neither limited data nor synthetic integration
+students are phase failures. Counts are not frozen. Closure baseline snapshot:
+1104 passed, 0 skipped; Ruff and diff check PASS, not permanent count invariants.
+
+Deferred: more competition data, full taxonomy, cross-artifact Skill governance,
+formal proficiency mapping / official threshold sources, Huawei child targets,
+real Student source and profile ingestion, Learning Resource mapping, Planner,
+Monitor / Event / Replanning, Agent / MCP / Frontend. See DEVELOPMENT_PLAN for
+P8.1–P8.4 and P8 Final Review; this Closure implements no P8 functionality.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

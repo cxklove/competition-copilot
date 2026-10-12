@@ -13,7 +13,9 @@ The checked-in reviewed Seeds support identity, editions, tracks and some dates;
 the current eligibility policies support education restrictions. None establishes
 exact skill identity, REQUIRED/DESIRED meaning and a grounded proficiency level.
 Track titles, competition names and source URLs alone cannot supply these facts.
-No Raw/Manifest parsing, web collection or guessed requirements were used.
+Runtime uses no Raw/Manifest parsing, web collection or guessed requirements.
+Authoring separately re-observed the official source before recording VERIFIED
+presence provenance; REQUIRED remains a human-reviewed system interpretation.
 
 Edition artifact filenames use the exact edition ID (`comap-mcm-2027.json`).
 `*.json` files use `SkillRequirementSetEnvelope`: schema_version `1.0`,
@@ -46,4 +48,10 @@ data/duplicate targets/conflicting identities, and never writes artifacts or
 accesses Repository, Raw, Manifest, Seed, students, SkillGapEngine, LLM or network.
 Real provenance/target smoke now executes against the reviewed artifact. Other
 targets remain unavailable unless independently reviewed; None remains missing
-data. P7.3 is not declared COMPLETE; P7.4 is not implemented.
+data. P7.4 real integration and P7 Final Review passed; P7 status is FROZEN.
+The current snapshot includes at least one reviewed real artifact; this does not
+freeze artifact counts or claim complete COMAP requirements. Future data additions
+need independent source/human review and must respect frozen exact-target,
+coverage, evidence and unspecified-threshold semantics. Unknown thresholds remain
+UNKNOWN diagnosis, not guessed gaps or satisfaction. See the phase documents for
+the frozen P7 scope and P8 input boundary; this Closure implements no P8 capability.

@@ -118,36 +118,103 @@ MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端�
 - **Acceptance Criteria:** 不合资格项不进入可报名推荐；相同版本化输入排序相同，返回 `reason_code` 和 `evidence`。
 - **Explicitly Out of Scope:** Agent 自行评分、未经验证的赛事推荐和备赛计划。
 
-## P7 — Student Profile + Skill Gap
+## P7 — Student Profile & Skill Gap
 
-- **P7.3B.2 follow-up (review PASS, frozen):** Authorized minimal evolution after real-source audit: a requirement can be known while `required_level=None` explicitly means unspecified threshold. Every fact requires verified canonical presence evidence; only specified thresholds carry proficiency evidence. Coverage completeness is independent of proficiency completeness. Item reason_codes are immutable, unique and canonically ordered, retaining both unspecified threshold and missing student facts. Engine compares only known thresholds/known students, preserves student provenance, and keeps known GAP precedence. NO_GAP requires COMPLETE plus all specified thresholds and known satisfied skills. P7.3A Provider architecture remains unchanged; envelope validation extends its official evidence gate to presence. No real artifacts or target changes; edition/subtrack/source-review blockers remain. No P7.4 or P7 COMPLETE claim.
+**Status: FROZEN.** P7 is finished. P7.1 and its student-evidence follow-up,
+P7.2, P7.3A, P7.3B.2, P7.3B.5 and P7.4 passed their reviews; the source audits,
+candidate scan and P7.3B.4 human approval are recorded. P7 Final Review PASS.
+StudentProfile Domain already exists and is consumed as Skill Gap input. This
+phase delivered Skill Requirement, Student Skill Evidence, deterministic gap
+evaluation and real integration; it did not implement profile ingestion.
 
-- **P7.1 evidence input follow-up:** `SkillGapContext.student_skill_evidence` is an immutable snapshot of supplied STUDENT_SKILL facts. Relevant known profile skills require matching canonical skill/level evidence. Missing or UNKNOWN skills need no fabricated evidence; unrelated profile skills do not require it. Every supplied extra or multiple-source fact must match an existing known profile skill. Shared StudentSkill/StudentProfile/Evidence remain unchanged; P7.2 engine and P7.3 provider are not implemented by this fix.
+### Frozen capabilities
 
-- **Current status:** **P7 started; P7.1 Contract and evidence-input follow-up PASS; P7.2 Deterministic Skill Gap Engine PASS. P7.3 schema/Provider PASS; P7.3B.5 first human-reviewed COMAP MCM 2027 artifact Review PASS; P7.4 real integration implemented, ready for review.** P7 is not COMPLETE; P7 Final Review has not run. Pure Domain contracts live in `backend/competition_copilot/domain/skill_gap.py`; synthetic tests live in `backend/tests/domain/test_skill_gap.py`.
-- **P7.3 deliverable / P7.3B.5:** The strict immutable SkillRequirementSetEnvelope, abstract SkillRequirementProvider and atomic read-only JsonSkillRequirementProvider remain unchanged. `data/skill_requirements/comap-mcm-2027.json` is the first real artifact, authorized by P7.3B.4 HUMAN DECISION: APPROVE and re-observed against official 2027 MCM rules. Exact Edition target: comap-mcm / comap-mcm-2027 / track null. Only mathematical-modeling is structured; REQUIRED is human-reviewed structured interpretation, not an official enum or P5 hard eligibility. required_level=null, proficiency evidence empty, coverage PARTIAL with no completeness claim. Review/coverage notes remain system assessment. Real provenance/Repository target smoke now runs; exact lookup, approved scope, serialization and missing-target semantics are tested. No Domain, Provider, P2-P6 or target hierarchy changes. Other targets require independent source review; edition/subtrack gaps remain separate future work. No runtime network/LLM, gap orchestration or P7.4 implementation; P7.3 and P7 are not declared COMPLETE.
-- **P7.4 integration (ready for review):** `backend/tests/integration/test_p7_skill_gap_integration.py` exercises real Seed Repository + reviewed COMAP MCM 2027 Requirement Provider + TEST-ONLY SYNTHETIC students + validated Context + SkillGapEngine. Student A has ADVANCED mathematical-modeling and canonical student evidence but remains UNKNOWN due to unspecified threshold. Student B has no skill/evidence and retains both uncertainty reasons. Both overall results are UNDETERMINED with PARTIAL coverage. Tests preserve official presence provenance/student evidence end to end, verify JSON audit, determinism, unchanged inputs/files, output immutability and another real target returning None. Reads are limited to Seed/skill requirements; no network, Raw, Manifest, eligibility policy, P5/P6 execution or planning. Production models, adapters, real artifacts and hierarchy remain unchanged. P7 Final Review remains outstanding; no P7 COMPLETE claim.
+- SkillRequirement Contract with REQUIRED / DESIRED and specified / unspecified proficiency.
+- RequirementCoverage MISSING / PARTIAL / COMPLETE, independent of threshold completeness.
+- Requirement Presence Evidence, optional Requirement Proficiency Evidence, and Student Skill Evidence.
+- Immutable SkillGapContext, SkillGapItem, multi-reason uncertainty and SkillGapDecision snapshots.
+- Pure deterministic SkillGapEngine, evaluating all requirements and retaining complete audit.
+- SkillRequirementProvider and read-only JsonSkillRequirementProvider with exact lookup.
+- Reviewed real SkillRequirementSetEnvelope artifact and real Skill Gap integration.
 
-- **P7.2 deliverable:** `backend/competition_copilot/domain/skill_gap_engine.py` implements `SkillGapEngine.evaluate(SkillGapContext) -> SkillGapDecision`; synthetic tests are in `backend/tests/domain/test_skill_gap_engine.py`. Exact skill ID matching, explicit ordinal ordering, all-requirement evaluation in supplied order and evidence preservation. Missing student skill != zero; missing requirement != no gap; PARTIAL cannot confirm NO_GAP, but known REQUIRED/DESIRED gaps remain GAP_IDENTIFIED with partial coverage or other unknown skills. Errors fail atomically; no readiness score, skill guessing, provider, Repository, planning, eligibility/recommendation logic, network or LLM is added.
-- **P7.1 semantics:** Exact Edition/Track targets, REQUIRED/DESIRED requirements referencing `Skill.id` and existing `SkillLevel`, verified source evidence, explicit COMPLETE/PARTIAL/MISSING coverage, separate per-item requirement/student evidence, and immutable Context/Item/Decision snapshots. Missing requirements != no gap; missing student skills != zero skill. NO_GAP requires COMPLETE and all declared skills known satisfied; GAP_IDENTIFIED can coexist with PARTIAL coverage or other unknown student skills. Coverage is retained in the nested RequirementSet. No numeric gap/readiness score, eligibility/recommendation logic, resource matching, planning or real artifacts are added.
-- **P6 handoff:** 目标 Competition / Track 确定后，比较 Student skills 与正式 Competition required / desired skills，产生 `SkillGap`。P7 不重新判断 eligibility、计算 recommendation score 或排列 candidates。概念链：`Eligibility → Recommendation → Selected Competition Target → Skill Gap → Learning / Planning`。
-- **Data risk:** 当前 Competition Domain 尚无完整 structured skill requirements。P7 必须先建立正式 Skill Requirement / Expected Skill 数据 Contract，或明确表达缺少 required skill data 时 gap cannot be fully determined；禁止从 competition name / description 猜测所需技能。
-- **Goal:** 描述学生能力与赛事要求的差距，并匹配可核验学习资源。
-- **Inputs:** 学生画像、技能体系、赛事技能要求、学习资源来源。
-- **Main Deliverables:** 画像更新、技能差距结果、资源建议及相应 Tool。
-- **Files/Modules Expected:** `backend/domain/profile/`、`backend/domain/skills/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/skills/`。
-- **Tests Required:** 画像缺项、技能映射、差距边界、资源来源和诊断理由测试。
-- **Acceptance Criteria:** 差距与资源建议可追溯到画像、赛事要求与来源；关键诊断提供 `reason_code` 和 `evidence`。
-- **Explicitly Out of Scope:** 自动规划、赛事监控和 Agent 对话。
+### Frozen semantics and boundaries
+
+- Missing Requirement data differs from a known Requirement with unspecified threshold.
+- required_level=None means known requirement, but proficiency threshold unspecified;
+  it is not missing requirement, optionality, a lowest level or SkillLevel.UNKNOWN.
+- Missing StudentSkill differs from BEGINNER / zero; UNKNOWN differs from GAP and SATISFIED.
+- PARTIAL cannot confirm NO_GAP. NO_GAP requires COMPLETE, all thresholds specified,
+  all relevant StudentSkill known, and every REQUIRED/DESIRED requirement satisfied.
+- Known GAP takes precedence over partial coverage, unknown thresholds and missing student data.
+- P7 REQUIRED denotes core capability, not hard participation eligibility. P5 is the
+  sole hard eligibility authority; skill mismatch never directly means INELIGIBLE.
+- P6 score, ranking and eligibility buckets remain frozen and are not recomputed by P7.
+- P7 generates no learning resources, study plans, milestones, schedules, priorities or plan diffs.
+- CompetitionRepository reads data/seed; SkillRequirementProvider reads data/skill_requirements.
+  P7 runtime does not read Raw, review manifests, eligibility policies, network or LLM.
+
+### Reviewed real data and integration
+
+The current snapshot includes at least one reviewed real artifact:
+`data/skill_requirements/comap-mcm-2027.json`, exact COMAP MCM 2027 Edition target,
+track=None, skill mathematical-modeling. REQUIRED is a human-reviewed structured
+interpretation, not a COMAP official enum. Official presence provenance is separate
+from system interpretation. required_level is unspecified, proficiency evidence is
+empty and coverage is PARTIAL; no complete COMAP requirement-set claim is made.
+Artifact counts are not frozen and further data may be independently reviewed.
+
+P7.4 verified real Repository + real Requirement Provider + reviewed artifact +
+synthetic validated StudentProfile / canonical Student Skill Evidence +
+SkillGapContext + SkillGapEngine -> auditable SkillGapDecision. Known ADVANCED
+student skill remains UNKNOWN because the threshold is unspecified; missing skill
+retains both uncertainty reasons. Both overall results are UNDETERMINED with
+PARTIAL coverage. These results, synthetic student fixtures and limited reviewed
+data are intentional, not phase blockers. Closure baseline snapshot: full suite
+1104 passed, 0 skipped; Ruff and diff check PASS. Counts are not lasting invariants.
+
+### Closure and next-phase input
+
+P7 Skill Gap scope is frozen. SkillRequirement / RequirementCoverage / unspecified
+proficiency semantics, evidence fact binding, Context / Item / Decision, engine
+aggregation, Provider exact lookup and JSON Provider missing semantics are frozen.
+Future phases must not silently change P7 for Planner convenience. A real defect
+requires a separate P7 reopening and independent Review.
+
+P8 may consume SkillGapDecision: known per-item GAP under GAP_IDENTIFIED can be an
+explicit learning need; UNKNOWN is an uncertainty / information-acquisition need,
+not automatically a learning gap or satisfied capability. NO_GAP must not create
+unsupported remedial tasks. Preserve PARTIAL coverage and unknown items even when
+other items establish a gap. Do not reinterpret UNKNOWN as GAP or SATISFIED,
+PARTIAL as COMPLETE, or REQUIRED as an Eligibility hard rule.
+
+### Deferred items (not P7 blockers)
+
+More competition requirements; full Skill taxonomy; cross-artifact Skill governance;
+formal proficiency mapping policy and additional official threshold sources;
+Huawei child-target/subtrack modeling; real Student data and profile ingestion;
+Learning Resource mapping; Planner; Monitor / Event / Replanning; Agent / MCP / Frontend.
+
+Next phase: P8 — Competition Planner. P8 implementation has not started.
 
 ## MVP 1 — 决策与诊断验收关口
 
 用一组可复核的学生画像和已审核种子赛事，经 Application/Tool 完成检索、资格检查、排序、技能差距与学习资源建议；核验硬规则可复现、候选隔离和所有关键结果的理由与证据。记录端到端场景测试结果及未覆盖风险。此关口不新增代码范围，也不要求 Web 或 Agent。
 
-## P8 — Structured Planner
+## P8 — Competition Planner
+
+**Status: NOT STARTED.** Consume the frozen P7 SkillGapDecision uncertainty rules
+above. Suggested decomposition:
+
+1. P8.1 Plan Domain Contract
+2. P8.2 Deterministic Planning Inputs
+3. P8.3 Baseline Plan Builder
+4. P8.4 Real Integration
+5. P8 Final Review
+
+This Closure implements no P8 capability.
 
 - **Goal:** 把赛事目标与技能差距转为有依赖和期限的任务计划。
-- **Inputs:** StudentProfile、已验证 Competition、SkillGap、Deadline、可用时间。
+- **Inputs:** StudentProfile、已验证 Competition、SkillGapDecision、Deadline、可用时间；保留 GAP / UNKNOWN / NO_GAP 和 requirement coverage 的冻结语义。
 - **Main Deliverables:** 结构化 CompetitionPlan、里程碑/任务/依赖/截止时间、计划生成 Tool。
 - **Files/Modules Expected:** `backend/domain/planning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/planning/`。
 - **Tests Required:** 时间冲突、依赖顺序、不可行期限、缺失数据及稳定计划测试。

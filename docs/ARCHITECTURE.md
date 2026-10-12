@@ -341,6 +341,36 @@ blockers. P8 implementation is not part of this Closure.
 
 ## 8. Planning Architecture
 
+### P8.1 Planning Domain Contract — IMPLEMENTED, pending review
+
+Existing `domain/plan.py` CompetitionPlan/PlanMilestone are evolved in place.
+P1 provided identities, status/version and aware creation/update timestamps;
+milestones provided title/description, optional start/due/effort, dependencies and
+status. P8.1 makes these models immutable, uses tuple collections, and adds exact
+optional track_id, planning_horizon using existing TimeWindow, planning_needs and
+a minimal supplied SkillGapPlanningAudit with target/coverage/overall status/reasons.
+Existing status enums are reused; no lifecycle transitions or replanning run.
+
+PlanningNeed retains a relevant validated P7 SkillGapItem including requirement
+type/levels, status, reasons and evidence. SKILL_IMPROVEMENT requires confirmed GAP;
+UNCERTAINTY_RESOLUTION requires UNKNOWN, or a missing/partial coverage reason
+without an item. P8 never compares levels or recomputes a P7 conclusion. Caller
+retains the original decision and supplies faithful source projections; the small
+audit is not a second SkillGapDecision or authenticated decision store.
+Coverage remains separate from threshold completeness. NO_GAP can have no action.
+
+Milestone purpose derives from its source_need_id and PlanningNeedType, avoiding
+a second type enum. No need reference means a general/manual P1 milestone, not
+a claimed skill action. Unknown references and duplicate need/milestone IDs fail.
+Plan IDs must exactly match the source audit target; caller validates real target
+existence and parent relationships during input preparation. TimeWindow accepts
+aware partial/unknown bounds; optional milestone timing must respect supplied
+bounds. No arbitrary duration or registration/competition deadline policy exists.
+
+P8.1 is contract-only. No Planner Engine, resources, P5/P6 logic, priority algorithm,
+LLM/network, Tool/API/Agent/MCP or Replanning is implemented. P7 remains frozen.
+Tests are synthetic Domain tests; P8.2 and P8 completion are not claimed.
+
 ```text
 StudentProfile + Competition + SkillGap + Deadline
 → Structured CompetitionPlan

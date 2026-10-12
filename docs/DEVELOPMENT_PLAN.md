@@ -194,7 +194,8 @@ formal proficiency mapping policy and additional official threshold sources;
 Huawei child-target/subtrack modeling; real Student data and profile ingestion;
 Learning Resource mapping; Planner; Monitor / Event / Replanning; Agent / MCP / Frontend.
 
-Next phase: P8 — Competition Planner. P8 implementation has not started.
+Next phase: P8 — Competition Planner. P8.1 Contract status is recorded below;
+later planning stages do not change the frozen P7 semantics.
 
 ## MVP 1 — 决策与诊断验收关口
 
@@ -202,8 +203,8 @@ Next phase: P8 — Competition Planner. P8 implementation has not started.
 
 ## P8 — Competition Planner
 
-**Status: NOT STARTED.** Consume the frozen P7 SkillGapDecision uncertainty rules
-above. Suggested decomposition:
+**Status: IN PROGRESS; P8.1 IMPLEMENTED, pending review.** Consume the frozen P7
+SkillGapDecision uncertainty rules above. Suggested decomposition:
 
 1. P8.1 Plan Domain Contract
 2. P8.2 Deterministic Planning Inputs
@@ -211,7 +212,31 @@ above. Suggested decomposition:
 4. P8.4 Real Integration
 5. P8 Final Review
 
-This Closure implements no P8 capability.
+P8.1 evolves existing `domain/plan.py` CompetitionPlan and PlanMilestone instead
+of creating replacements. Existing statuses/version/timestamps and milestone
+fields remain; snapshots and collections are now immutable. Plan gains exact
+optional track_id, optional TimeWindow planning_horizon, planning_needs and a
+small SkillGapPlanningAudit (target/coverage/status/reasons). PlanningNeed has
+only SKILL_IMPROVEMENT or UNCERTAINTY_RESOLUTION and retains the relevant validated
+P7 SkillGapItem/evidence, not an entire duplicated SkillGapDecision.
+
+Only a confirmed GAP item can justify improvement. UNKNOWN supports information
+acquisition, never skill deficiency; coverage uncertainty uses an item-free need
+with the explicit missing/partial reason. NO_GAP allows zero needs and milestones.
+Milestone purpose derives from source_need_id and the referenced need; no duplicate
+kind enum or priority policy. An absent source_need_id preserves general/manual
+P1 milestones without asserting a P7-backed skill action. Unknown deadlines and
+partial horizon bounds remain unknown; no deadline-selection/default policy.
+Caller retains the source decision and supplies faithful audit/item projections;
+target existence and Competition/Edition/Track parent checks belong to validated
+input preparation. Contract checks exact source target agreement, unique IDs,
+known need references, source status/reason consistency and explicit timing bounds.
+
+`backend/tests/domain/test_planning_contract.py` covers synthetic contract semantics,
+audit, immutable snapshots and serialization. Existing P1 plan tests reflect tuple
+collections/new serialized fields; no P7 file changes. P8.2 inputs, Planner Engine,
+resources, Replanning, P5/P6 execution, Tool/API/Agent/MCP/network/LLM are not implemented.
+P8 is not complete; P8.2 has not started.
 
 - **Goal:** 把赛事目标与技能差距转为有依赖和期限的任务计划。
 - **Inputs:** StudentProfile、已验证 Competition、SkillGapDecision、Deadline、可用时间；保留 GAP / UNKNOWN / NO_GAP 和 requirement coverage 的冻结语义。

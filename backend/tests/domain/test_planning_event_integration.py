@@ -100,7 +100,7 @@ def test_planning_event_and_decision_models_form_an_in_memory_scenario() -> None
         review_rules.id,
         prepare_proposal.id,
     ]
-    assert prepare_proposal.dependency_ids == [review_rules.id]
+    assert prepare_proposal.dependency_ids == (review_rules.id,)
     assert evidence.source is source
     assert decision.evidence == [evidence]
 

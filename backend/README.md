@@ -6,7 +6,8 @@ P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
 P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
 StudentProfile Domain already exists and supplies input. P7 finished requirements,
 evidence, deterministic diagnosis and real integration, not student ingestion.
-Next is P8 — Competition Planner; P8 implementation has not started. The current ingestion
+P8.1 Planning Domain Contract is IMPLEMENTED, pending review; P8.2 has not started.
+P8 is not complete. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -355,7 +356,30 @@ Deferred: more competition data, full taxonomy, cross-artifact Skill governance,
 formal proficiency mapping / official threshold sources, Huawei child targets,
 real Student source and profile ingestion, Learning Resource mapping, Planner,
 Monitor / Event / Replanning, Agent / MCP / Frontend. See DEVELOPMENT_PLAN for
-P8.1–P8.4 and P8 Final Review; this Closure implements no P8 functionality.
+P8.1–P8.4 and P8 Final Review; the P7 Closure added no P8 functionality.
+
+### P8.1 Planning Domain Contract
+
+IMPLEMENTED, pending review. Existing CompetitionPlan and PlanMilestone in
+`domain/plan.py` retain P1 identities/status/version/timestamps and optional
+milestone timing/effort. They now use immutable validated snapshots and tuple
+collections. Plan adds optional track_id, existing TimeWindow planning_horizon,
+PlanningNeed tuples and a small supplied SkillGapPlanningAudit projection.
+
+PlanningNeedType has SKILL_IMPROVEMENT (confirmed P7 GAP only) and
+UNCERTAINTY_RESOLUTION (UNKNOWN or explicit missing/partial coverage). Relevant
+SkillGapItem snapshots preserve reasons, levels, requirement type and provenance;
+the full Decision is not duplicated. Caller retains the original decision and
+supplies faithful projections. Milestones reference need IDs for purpose, without
+a second kind enum; general/manual P1 milestones remain possible with no need ID.
+NO_GAP allows an empty plan. No gap comparison, action generation, deadline
+selection/default, priorities, resources, P5/P6 logic, Replanning or LLM/network
+is added. Target existence/parent integrity remains a caller responsibility;
+the contract rejects disagreement with the supplied P7 target and invalid references.
+P7 semantics are unchanged. P8.2 and Planner Engine are not implemented.
+
+P8.1 tests from repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_planning_contract.py backend/tests/domain/test_plan.py backend/tests/domain/test_competition_plan.py backend/tests/domain/test_planning_event_integration.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

@@ -30,7 +30,7 @@ def test_minimal_plan_defaults_to_draft_version_one_and_no_milestones() -> None:
     assert plan.edition_id == "edition-1"
     assert plan.status is PlanStatus.DRAFT
     assert plan.version == 1
-    assert plan.milestones == []
+    assert plan.milestones == ()
     assert plan.created_at == MINIMAL_PLAN["created_at"]
     assert plan.updated_at == MINIMAL_PLAN["updated_at"]
 
@@ -67,7 +67,7 @@ def test_complete_plan() -> None:
     )
     assert plan.status is PlanStatus.ACTIVE
     assert plan.version == 2
-    assert plan.milestones == milestones
+    assert plan.milestones == tuple(milestones)
     assert plan.created_at == created_at
     assert plan.updated_at == updated_at
 
@@ -167,7 +167,7 @@ def test_references_and_dependencies_are_not_looked_up() -> None:
     )
 
     assert plan.student_id == "not-yet-stored"
-    assert plan.milestones[0].dependency_ids == ["unknown-task"]
+    assert plan.milestones[0].dependency_ids == ("unknown-task",)
 
 
 def test_status_and_version_are_not_changed_by_milestones() -> None:
@@ -190,9 +190,10 @@ def test_default_milestone_lists_are_independent() -> None:
     first = CompetitionPlan(**MINIMAL_PLAN)
     second = CompetitionPlan(**MINIMAL_PLAN)
 
-    first.milestones.append(PlanMilestone(id="task-1", title="Read the rules"))
+    with pytest.raises(AttributeError):
+        first.milestones.append(PlanMilestone(id="task-1", title="Read the rules"))
 
-    assert second.milestones == []
+    assert second.milestones == ()
 
 
 def test_plan_serialization() -> None:
@@ -207,6 +208,10 @@ def test_plan_serialization() -> None:
         "student_id": "student-1",
         "competition_id": "competition-1",
         "edition_id": "edition-1",
+        "track_id": None,
+        "planning_horizon": None,
+        "skill_gap_audit": None,
+        "planning_needs": [],
         "status": "draft",
         "version": 1,
         "milestones": [
@@ -219,6 +224,7 @@ def test_plan_serialization() -> None:
                 "estimated_hours": None,
                 "dependency_ids": [],
                 "status": "pending",
+                "source_need_id": None,
             }
         ],
         "created_at": "2026-10-08T09:00:00Z",

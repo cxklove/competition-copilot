@@ -16,7 +16,7 @@ def test_minimal_milestone() -> None:
     assert milestone.start_at is None
     assert milestone.due_at is None
     assert milestone.estimated_hours is None
-    assert milestone.dependency_ids == []
+    assert milestone.dependency_ids == ()
     assert milestone.status is MilestoneStatus.PENDING
 
 
@@ -38,7 +38,7 @@ def test_complete_milestone() -> None:
     assert milestone.start_at == start_at
     assert milestone.due_at == due_at
     assert milestone.estimated_hours == 12.5
-    assert milestone.dependency_ids == ["task-1"]
+    assert milestone.dependency_ids == ("task-1",)
     assert milestone.status is MilestoneStatus.IN_PROGRESS
 
 
@@ -116,7 +116,7 @@ def test_dependency_ids_are_trimmed_deduplicated_and_ordered() -> None:
         dependency_ids=["  task-1  ", "task-2", "task-1", "Task-1"],
     )
 
-    assert milestone.dependency_ids == ["task-1", "task-2", "Task-1"]
+    assert milestone.dependency_ids == ("task-1", "task-2", "Task-1")
 
 
 @pytest.mark.parametrize("dependency_id", ["", " \t\n "])
@@ -143,7 +143,7 @@ def test_dependency_existence_is_not_checked() -> None:
         id="task-2", title="Build prototype", dependency_ids=["not-yet-stored"]
     )
 
-    assert milestone.dependency_ids == ["not-yet-stored"]
+    assert milestone.dependency_ids == ("not-yet-stored",)
 
 
 @pytest.mark.parametrize("status", list(MilestoneStatus))
@@ -177,6 +177,7 @@ def test_serialization() -> None:
         "estimated_hours": 0.0,
         "dependency_ids": ["task-1"],
         "status": "completed",
+        "source_need_id": None,
     }
 
     assert milestone.model_dump(mode="json") == expected

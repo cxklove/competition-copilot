@@ -11,8 +11,8 @@ Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
 **P9.5 — Competition Monitor: CLOSED / FROZEN; P9.5.1–P9.5.4 completed,
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
-resolved the earlier blocker. **P10 IN PROGRESS: P10.1/P10.2 Review PASS / committed;
-P10.3 Event Aggregation / Canonical Dedup implemented, awaiting Review.**
+resolved the earlier blocker. **P10 IN PROGRESS: P10.1–P10.3 Review PASS / committed;
+P10.4 Real Event Integration implemented, awaiting Review.**
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -978,7 +978,7 @@ P10.3 normalization is described below; P10 is not complete. Frozen modules are 
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event_engine.py
 ```
 
-## P10.3 Event Aggregation / Canonical Dedup
+## P10.3 Event Aggregation / Canonical Dedup — Review PASS, committed
 
 `domain.event_aggregation.CompetitionEventAggregator().normalize(events)` accepts
 an immutable tuple of validated P10 Events and returns a canonical immutable tuple.
@@ -1002,9 +1002,37 @@ normalize too. Mixed-family and legacy inputs reject, without Event remapping.
 No Diff recalculation, Repository, EventRepository/history/persistence, stateful
 cross-run suppression, network, severity, impact, notification, Replanning, LLM
 or Agent. Same batch tomorrow still returns the same Events. Frozen P10.1/P10.2/
-P9/P9.5/P2–P8 are unchanged. P10.4 real integration is next, not started; P10 is
+P9/P9.5/P2–P8 are unchanged. P10.4 real integration is described below; P10 is
 not complete. Offline tests cover lineage, conflicts, permutations and stable JSON.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event_aggregation.py
+```
+
+## P10.4 Real Competition Event Integration
+
+The offline suite runs actual Repository/Builder, concrete COMAP Adapter,
+OneShot Monitor/P9 Diff, P10.2 Event Engine and P10.3 Aggregator. Only HTTP response
+transport/body is replaced. Minimal controlled fixture changes are not official
+historical updates or claims about the current website. Tests block network/DNS
+and protect Repository/data from writes; no production code changes.
+
+Initial real baseline known-empty tracks -> Adapter UNKNOWN remains observation
+loss. Next same-fixture check uses that production Monitor Snapshot as previous:
+zero Diff -> zero primitive -> zero canonical Events. Registration start+end and
+factual track cases are NOT_APPLICABLE because the frozen Adapter supports only
+registration end and no track inventory. End-only registration is tested; controlled
+competition start+end proves 2 primitive Events -> 1 canonical with both changes.
+
+Successful missing facts generate observation Events; different coverage families
+stay separate. Fetch/parse failure stops at Monitor, with no Diff and no P10 calls
+or Events. Full-chain repeat and reordered primitive inputs produce identical
+IDs/order/JSON. Typed lineage traces canonical Events through primitive changes,
+Diff and original Snapshot references; provenance and explicit detection time are
+preserved. No persistence, cross-run suppression, severity, impact, student/plan
+access, notification, Replanning, scheduler, live network, LLM or Agent. P10 Final
+Review is pending; P10 is IN PROGRESS, not CLOSED.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p10_real_event_integration.py
 ```

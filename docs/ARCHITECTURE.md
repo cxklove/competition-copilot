@@ -987,7 +987,7 @@ compute Diff or group changes. Offline tests lock deterministic ordering/IDs/JSO
 lineage, transition matrix, time and immutability. P10.3 normalization is described
 below; P10 remains IN PROGRESS. Event != Impact/Replanning.
 
-### P10.3 Event Aggregation / Canonical Dedup — IMPLEMENTED, awaiting Review
+### P10.3 Event Aggregation / Canonical Dedup — Review PASS, committed
 
 CompetitionEventAggregator in `domain/event_aggregation.py` accepts immutable
 validated P10 Event tuples, including canonical single-family Events, and emits
@@ -1017,8 +1017,42 @@ Single-family input validation avoids silently splitting mixed-scope Events.
 P10.1/P10.2/P9/P9.5 stay frozen. No cross-run seen-state, suppression, EventRepository,
 storage, severity, impact, notification, Replanning, LLM or Agent. Repeated calls
 return identical canonical Events, not an empty already-processed result. Tests
-are offline and deterministic. P10.4 integration is next, not implemented; P10
+are offline and deterministic. P10.4 integration is described below; P10
 remains IN PROGRESS, with Event != Impact/Replanning.
+
+### P10.4 Real Competition Event Integration — IMPLEMENTED, awaiting Review
+
+Offline `tests/integration/test_p10_real_event_integration.py` runs real components:
+
+```text
+JsonSeedCompetitionRepository -> CompetitionSnapshotBuilder -> real baseline
+fixture HTTP -> concrete COMAP Adapter -> OneShot Monitor -> production SnapshotDiff
+-> CompetitionEventEngine -> primitive Events -> CompetitionEventAggregator
+-> canonical Events
+```
+
+Only HTTP is replaced; no Fake ObservationSource, manual Diff or Event generation.
+Controlled minimal fixtures are not official historical changes. Network/DNS is
+blocked and Repository/data are read-only. No production/frozen code is changed.
+Known-empty Repository membership versus Adapter UNKNOWN is preserved in the first
+check; next same-fixture observation proves zero Diff -> zero primitive/canonical
+Events. This is controlled offline observation coverage, not a live no-change claim.
+
+COMAP registration start and track inventory are unsupported; registration start+
+end and factual track integration cases are NOT_APPLICABLE without expanding the
+frozen Adapter. Registration end-only is exercised. Competition start+end proves
+2 changes -> 2 primitives -> 1 canonical Event, with complete selected lineage.
+Successful UNKNOWN produces coverage Event, not fact change; registration and
+membership coverage remain separate families. Fetch/parse failure stops before
+P10 with no Snapshot/Diff/Events. Tests assert P10 is not called in either failure.
+
+Full-chain repeated results and reversed primitive order preserve deterministic
+IDs/JSON/order. Target, before/after Snapshot references, typed change lineage,
+source provenance, explicit aware detection time and immutable input/output are
+audited. Events reuse Monitor/Diff evidence; no website fetch or new Event source
+authority. No persistence, stateful suppression, severity, impact, notification,
+student/plan access, Replanning, scheduler, LLM or Agent. P10 Final Review remains
+pending; P10 is not CLOSED.
 
 ## 9. Replanning Architecture
 

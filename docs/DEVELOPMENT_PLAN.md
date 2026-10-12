@@ -742,8 +742,8 @@ P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. NEXT: P10 Event Engine.
 
 ## P10 — Competition Event Engine
 
-- **Status:** IN PROGRESS. P10.1/P10.2 Review PASS / committed; P10.3 Event
-  Aggregation / Canonical Dedup IMPLEMENTED, awaiting Review. No stateful suppression/storage.
+- **Status:** IN PROGRESS. P10.1–P10.3 Review PASS / committed; P10.4 Real Event
+  Integration IMPLEMENTED, awaiting Review. No stateful suppression/storage.
 - **Goal:** 将已核验 Diff 分类为可供下游处理的赛事事件。
 - **Inputs:** P9/P9.5 已产生的 SnapshotDiff、必要 target/source context、核验状态及赛事规则；不重新抓网页、构造 Snapshot 或计算 Diff。
 - **Main Deliverables:** Event 类型、触发条件、去重/幂等、事件证据与订阅接口。
@@ -825,7 +825,7 @@ cross-call duplicate suppression, Repository/persistence, network, severity,
 impact, notification, Replanning, LLM or Agent is added by this primitive Engine.
 P10.3 normalization is described below; P10 is not complete.
 
-### P10.3 — Event Aggregation / Canonical Dedup (IMPLEMENTED, awaiting Review)
+### P10.3 — Event Aggregation / Canonical Dedup (Review PASS, committed)
 
 `domain/event_aggregation.py` CompetitionEventAggregator.normalize(events) is a
 pure stateless Domain Service: immutable P10 Event tuple -> immutable canonical
@@ -862,8 +862,41 @@ determinism, metadata, immutable inputs/outputs and JSON. P10.1/P10.2/P9/P9.5 an
 earlier code/tests stay frozen. Dedup is supplied-batch only; repeated calls still
 return canonical Events. No EventRepository, history/persistence, cross-run
 suppression, network, severity, impact, notification, Replanning, LLM or Agent.
-P10.4 real Monitor Diff -> primitive -> canonical integration is next, not started;
+P10.4 real Monitor Diff -> primitive -> canonical integration is described below;
 P10 is not complete.
+
+### P10.4 — Real Competition Event Integration (IMPLEMENTED, awaiting Review)
+
+`tests/integration/test_p10_real_event_integration.py` composes actual production
+Repository -> SnapshotBuilder -> concrete COMAP Adapter -> OneShot Monitor -> P9
+Diff -> P10.2 primitive Events -> P10.3 canonical Events. Only HTTP transport/body
+is replaced with the approved minimal synthetic fixture and controlled variants.
+No manual baseline, Diff, Monitor result, Event mapping/grouping or lineage is
+used as integration authority. Default tests block network/DNS and guard read-only
+Seed access. Controlled fixtures are not official historical/current website claims.
+
+Real baseline has known-empty tracks; Adapter has UNKNOWN track coverage. First
+check retains that observation change. A second same-fixture check uses the actual
+Monitor output as previous observation and proves SUCCESS + zero Diff -> zero
+primitive/canonical Events. The real baseline is never altered to force zero Diff.
+Registration start+end and factual track cases are NOT_APPLICABLE: frozen Adapter
+supports registration end only and no track inventory. Additional registration
+end-only test verifies its supported fact event. Competition start+end fixture
+proves two low-level changes -> two primitive -> one canonical Event with both
+source changes. Adapter scope is not expanded.
+
+Successful missing registration produces observation coverage, not factual removal.
+Registration/track coverage from real baseline remains two separate canonical
+Events. Fetch/parse failures return no Snapshot/Diff and stop before P10 calls,
+with no Events. Repeated complete chains verify IDs/order/JSON and unchanged
+Repository/Snapshot inputs; reversed primitive order gives identical canonical
+output. Tests audit stable target, before/after references, selected typed changes,
+source provenance, explicit aware detection time, immutability and serialization.
+
+Production code and frozen P10.1/P10.2/P10.3/P9/P9.5/P2–P8 tests/data are unchanged.
+No live smoke/network, Event persistence, stateful dedup, severity/impact, student/
+plan dependency, notification, Replanning, scheduler, LLM or Agent. P10 Final
+Review has not executed; P10 is IN PROGRESS, not CLOSED.
 
 ## P11 — Event-driven Replanning
 

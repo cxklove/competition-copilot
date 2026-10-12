@@ -347,7 +347,7 @@ is implemented by this Closure.
 
 ## P9 — Competition Digital Twin
 
-**Status: IN PROGRESS. P9.1 Domain Contract IMPLEMENTED, awaiting Review.**
+**Status: IN PROGRESS. P9.1 Review PASS / committed; P9.2 Snapshot Builder IMPLEMENTED, awaiting Review.**
 P9 answers what changed in Competition/Edition/Track
 dynamic state, using Snapshot/Diff/version concepts; it does not enhance
 Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
@@ -364,7 +364,7 @@ Recommendation, Skill Gap or frozen Planning rules.
 - **Acceptance Criteria:** 观察版本及低层差异可追溯，不静默覆盖；后续接受动态状态变化时由 P10 关联 CompetitionEvent，保留 Snapshot / Diff / Event 完整审计链。
 - **Explicitly Out of Scope:** 自动抓取、定时监控和自动重规划。
 
-### P9.1 — Digital Twin Domain Contract (IMPLEMENTED, awaiting Review)
+### P9.1 — Digital Twin Domain Contract (Review PASS, committed)
 
 Only contracts and synthetic Domain tests are implemented. Generic
 `CompetitionTarget` holds competition/edition IDs and optional track ID; existing
@@ -399,9 +399,45 @@ no current-time or random defaults are present. No Repository access, comparison
 algorithm, Network, LLM, Event, impact or Plan/Replanning capability is implemented.
 P2–P8 remain frozen.
 
-Remaining stages: P9.2 Snapshot creation; P9.3 deterministic Diff computation;
-later P9 integration/review; P9.5 Monitor; P10 Event; P11 Replanning. P9 is not
-complete. Text/rules semantic diff and additional structured facts are deferred.
+P9.2 implements baseline Snapshot creation below. P9.3 deterministic Diff
+computation, later P9 integration/review, P9.5 Monitor, P10 Event and P11
+Replanning remain. P9 is not complete. Text/rules semantic diff and additional
+structured facts are deferred.
+
+### P9.2 — Competition Snapshot Builder (IMPLEMENTED, awaiting Review)
+
+`application/competition_snapshots.py` consumes only the P3
+`CompetitionRepository` interface and P9.1 Domain Contract. The caller supplies
+an edition-level target and explicit timezone-aware `observed_at`. Repository
+not-found errors remain target errors; an edition with a different competition ID
+fails fast. Track-level building is deferred because current `CompetitionTrack`
+has no independent structured dynamic facts. The P9.1 track target remains valid
+for later independently observed track state.
+
+The builder maps non-null Edition registration/competition `TimeWindow` values to
+KNOWN_VALUE, including partial windows; `None` maps to UNKNOWN, never
+KNOWN_ABSENT. P3 `list_tracks(edition_id)` is a complete child query: an empty
+result maps to KNOWN_VALUE(empty tuple), not UNKNOWN. Membership uses only stable
+track IDs; the P9.1 Contract sorts them and rejects duplicates. Known window
+facts retain verified Edition `SourceMetadata`. Known membership retains verified
+Edition and Track sources; missing/unverified provenance causes an explicit
+error, never a fabricated source. Source `observed_at` is preserved separately
+from the caller's snapshot time. There is no repository representation of an
+explicitly absent window, so the builder does not emit KNOWN_ABSENT.
+
+The snapshot ID uses SHA-256 over canonical machine target, UTC observation time
+and typed dynamic state JSON (including actual source metadata). Equal inputs
+produce equal IDs/JSON; a changed observation time or dynamic state changes ID.
+Names/descriptions and other static display fields are excluded. Builder output
+is immutable and JSON serializable; Repository inputs remain unchanged.
+Synthetic Application tests and a read-only real Seed Repository smoke test
+cover COMAP MCM 2027 and a verified zero-track Edition without freezing global
+dataset counts.
+
+P9.2 is a repository-backed baseline observation. Production code does not read
+Seed files directly, use Network/LLM/Agent/MCP, choose status/deadlines, compare
+snapshots, generate Diff/Event, monitor sources or replan. P9.3 Diff computation,
+P9.5 Monitor, P10 Event and P11 Replanning remain future work. P9 is not complete.
 
 ## P9.5 — Competition Monitor
 

@@ -536,7 +536,7 @@ tool choice, orchestration, clarification and explanation without reimplementing
 Eligibility/Recommendation/Skill Gap/Planning rules. This Closure implements none
 of those future stages.
 
-### P9.1 Digital Twin Domain Contract — IMPLEMENTED, awaiting Review
+### P9.1 Digital Twin Domain Contract — Review PASS, committed
 
 `domain/digital_twin.py` defines observations and low-level differences, not a
 second authoritative Competition model. Existing Competition/Edition/Track
@@ -548,7 +548,7 @@ P1 CompetitionEvent is unchanged and is reserved for P10.
 
 ```text
 Competition identity + explicitly observed dynamic state
-        |  Snapshot creation: P9.2 (not implemented)
+        |  Snapshot creation: P9.2 Repository baseline implemented
         v
 CompetitionSnapshot(t1) + CompetitionSnapshot(t2)
         |  Diff computation: P9.3 (not implemented)
@@ -567,7 +567,7 @@ SourceMetadata plus Pydantic/standard library; Network/LLM/Agent are absent.
 Snapshot requires an explicitly supplied stable snapshot ID and timezone-aware
 `observed_at` (capture time), separate from observed business dates and source
 observation metadata. Source observation must not be later than capture time.
-P9.2 will generate IDs from canonical machine data, including observation time;
+P9.2 generates IDs from canonical machine data, including observation time;
 there is no ID builder, randomness or automatic clock default in P9.1. Equal
 dynamic facts at different observation times may have different snapshot IDs.
 
@@ -611,8 +611,47 @@ All new contracts and nested collections are frozen, extra fields are rejected,
 and JSON serialization is stable. P9.1 tests cover targets, explicit aware times,
 observation combinations, unknown/absent/empty distinctions, partial windows,
 verified per-field sources, canonical membership, typed directional changes,
-target/time safety, immutability and serialization. P9 is not complete; no
-Snapshot Builder, Diff Engine, Event, impact or Replanning has been implemented.
+target/time safety, immutability and serialization. P9 is not complete; the
+Snapshot Builder is described below. Diff Engine, Event, impact and Replanning
+remain unimplemented.
+
+### P9.2 Competition Snapshot Builder — IMPLEMENTED, awaiting Review
+
+P9.1 Domain contracts remain frozen. The P9.2 Application service in
+`application/competition_snapshots.py` depends on the abstract P3
+`CompetitionRepository`, not its JSON Seed adapter. The adapter appears only in
+the read-only integration smoke test. No P8 or earlier business service runs.
+
+```text
+Verified Seed -> CompetitionRepository interface
+              -> Competition / Edition / Tracks
+                 + caller-supplied aware observed_at
+              -> CompetitionSnapshotBuilder
+              -> CompetitionSnapshot
+
+Future: Snapshot(t1) + Snapshot(t2) -> P9.3 deterministic Diff Engine
+```
+
+This builder supports edition-level targets. It verifies target existence and
+Edition/Competition ID relationship; track-level building awaits independently
+observed track dynamic facts. Edition `None` windows become whole-field UNKNOWN;
+existing full or partial `TimeWindow` values become KNOWN_VALUE. A known Edition
+whose `list_tracks` returns `[]` has a known empty membership tuple. Stable track
+IDs are canonicalized by P9.1. Source silence is never KNOWN_ABSENT.
+
+Verified Edition source metadata anchors known windows and the complete track
+query; known nonempty membership also carries each Track's verified source.
+Missing/unverified provenance for a known fact fails explicitly. No source URL,
+verification status or source observation time is synthesized. Snapshot
+`observed_at` is caller supplied and checked against source observation times.
+
+`snapshot_id` is a SHA-256 digest of canonical machine target, UTC observation
+time and typed dynamic state including source metadata. Names/descriptions do
+not enter identity. No clock or random default is used. Repository state is read
+only; outputs retain P9.1 immutability and JSON serialization. This is a
+repository-backed baseline snapshot, not a live website observation. P9.2 does
+not implement comparison, Diff, Event, Monitor, impact, Replanning, Network,
+LLM or Agent. P9 is still in progress.
 
 ## 9. Replanning Architecture
 

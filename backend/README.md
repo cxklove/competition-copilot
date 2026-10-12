@@ -8,8 +8,8 @@ StudentProfile Domain already exists and supplies input. P7 finished requirement
 evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
-**P9 is IN PROGRESS; P9.1 Digital Twin Domain Contract IMPLEMENTED, awaiting Review.**
-Snapshot Builder and Diff Engine are not implemented. The current ingestion
+**P9 is IN PROGRESS; P9.1 Review PASS, P9.2 Snapshot Builder IMPLEMENTED, awaiting Review.**
+The Diff Engine is not implemented. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -612,7 +612,7 @@ There is no application start command yet. To build a wheel:
 
 ## P9.1 Digital Twin Domain Contract
 
-P9.1 is implemented and awaiting Review; P9 is still in progress. The new
+P9.1 passed Review and is committed; P9 is still in progress. The
 `competition_copilot.domain.digital_twin` module defines an immutable generic
 competition/edition/optional-track target, explicit timezone-aware observation
 snapshots, typed dynamic facts and a directed typed SnapshotDiff contract.
@@ -629,8 +629,8 @@ evidence that the competition added a fact. The supplied before/after references
 must identify the same target in observation order. The contract does not compute
 changes or validate them against stored snapshots; that belongs to P9.3.
 
-P9.2 will construct snapshots and validate ID-only target relationships using
-Repository facts. P9.3 will compute deterministic Diff. P9.5 Monitor, P10 Event
+P9.2 constructs baseline snapshots and validates ID-only target relationships
+using Repository facts. P9.3 will compute deterministic Diff. P9.5 Monitor, P10 Event
 interpretation and P11 Replanning remain future work. `CompetitionEvent` is
 unchanged. P9.1 uses no Repository, Network, LLM, Agent or Plan logic.
 
@@ -638,4 +638,32 @@ Run its synthetic contract tests from the repository root:
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_digital_twin.py
+```
+
+## P9.2 Repository-backed Snapshot Builder
+
+`competition_copilot.application.competition_snapshots.CompetitionSnapshotBuilder`
+reads a verified Competition, Edition and complete Track list through the P3
+`CompetitionRepository` interface. The caller supplies an edition-level
+`CompetitionTarget` and timezone-aware `observed_at`. Missing targets and wrong
+parent relationships fail explicitly. Track-level building is deferred until
+independent track dynamic facts are available; P9.1 still supports track targets.
+
+Edition `None` windows map to UNKNOWN; an existing full or partial `TimeWindow`
+maps to KNOWN_VALUE. `list_tracks(edition_id) == []` maps to a known empty track
+set. The builder emits no KNOWN_ABSENT because the Repository has no explicit
+absence fact. Known fields require actual verified Edition/Track source metadata;
+missing provenance fails instead of being invented. Snapshot time does not
+overwrite source `observed_at`.
+
+The stable snapshot ID hashes canonical machine target, UTC observation time and
+typed dynamic state including provenance. Display names are excluded. The
+builder neither modifies Repository data nor reads Seed files directly. This is
+a Repository baseline observation without live monitoring, Network, LLM,
+Diff, Event or Replanning. P9 remains in progress.
+
+Run the P9.2 tests from the repository root:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/application/test_competition_snapshot_builder.py backend/tests/integration/test_p9_snapshot_builder_smoke.py
 ```

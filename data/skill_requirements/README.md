@@ -16,14 +16,20 @@ requirement_set (the unchanged P7.1 model), and a minimal `skills` catalog reusi
 Skill fields. Every requirement ID must resolve to the catalog. Shared IDs across
 artifacts must have consistent Skill snapshots; this is not a Skill Repository.
 
-Each requirement needs reviewed official source evidence for its skill, type and
-exact level; its canonical field is `requirements.<skill_id>.required_level` and
-value is the known SkillLevel serialized value. Evidence.message records the
+Each requirement needs reviewed official source evidence for its skill membership
+and type interpretation. `presence_evidence` asserts the canonical fact
+`requirements.<skill_id>.present = true`. `required_level` must explicitly be a
+known SkillLevel or null (known requirement, unspecified threshold). For a known
+threshold, `evidence` must prove `requirements.<skill_id>.required_level` with the
+canonical serialized level; for null, that channel must be empty. No fake level
+proof or automatic default is allowed. Evidence.message records the
 supporting source text/interpretation; review must establish that it actually
 supports the declared fact. JSON validation does not perform semantic source review.
 Do not default an unspecified proficiency to INTERMEDIATE or ADVANCED.
 
 Coverage is explicitly assessed: PARTIAL unless completeness can be supported.
+Requirement-set completeness is independent of threshold completeness; COMPLETE
+does not imply every official proficiency threshold was specified.
 coverage_note and review_note are system assessments without official-source
 attribution. Empty requirements are MISSING only. No artifact lookup returns None,
 which a future caller may map to MISSING after validating the target in Repository.

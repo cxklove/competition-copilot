@@ -23,6 +23,7 @@ from competition_copilot.domain.skill_gap import (
     SkillRequirementSet,
     SkillRequirementTarget,
     SkillRequirementType,
+    requirement_presence_field,
     skill_fact_field,
     skill_fact_value,
 )
@@ -42,7 +43,11 @@ def make_context(rows, coverage=SkillRequirementCoverage.COMPLETE):
     for skill_id, required, student, kind in rows:
         requirements.append(SkillRequirement(
             skill_id=skill_id, required_level=required, requirement_type=kind,
-            evidence=[Evidence(
+            presence_evidence=[Evidence(
+                code="SYNTHETIC_REQUIREMENT_PRESENCE", message="Test-only reviewed presence.",
+                field=requirement_presence_field(skill_id), value=True, source=source,
+            )],
+            evidence=[] if required is None else [Evidence(
                 code="SYNTHETIC_REQUIREMENT", message="Test-only reviewed skill fact.",
                 field=skill_fact_field(SkillFactRole.REQUIREMENT, skill_id),
                 value=skill_fact_value(required), source=source,
@@ -90,9 +95,9 @@ def test_all_known_ordinal_pairs_and_fact_preservation(required, student, expect
     assert item.requirement == ctx.requirements.requirements[0]
     assert item.requirement.evidence == ctx.requirements.requirements[0].evidence
     assert item.student_evidence == ctx.student_skill_evidence
-    assert item.reason_code is (
+    assert item.reason_codes == (
         SkillGapReasonCode.REQUIREMENT_SATISFIED if expected == "satisfied"
-        else SkillGapReasonCode.SKILL_BELOW_REQUIREMENT
+        else SkillGapReasonCode.SKILL_BELOW_REQUIREMENT,
     )
 
 
@@ -111,7 +116,7 @@ def test_missing_or_unknown_student_is_not_lowest_known_level(student):
     assert item.status is SkillGapItemStatus.UNKNOWN
     assert item.student_level is student
     assert item.student_evidence == ()
-    assert item.reason_code is SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING
+    assert item.reason_codes == (SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING,)
     assert result.gap_status is SkillGapStatus.UNDETERMINED
     assert "gap_value" not in item.model_dump()
 
@@ -135,7 +140,7 @@ def test_coverage_aggregation_and_roundtrip(coverage, students, expected):
     assert result.requirements == ctx.requirements
     assert len(result.items) == 2
     assert result.items[1].requirement.requirement_type is DESIRED
-    expected_reasons = {item.reason_code for item in result.items}
+    expected_reasons = {reason for item in result.items for reason in item.reason_codes}
     if coverage == "partial":
         expected_reasons.add(SkillGapReasonCode.PARTIAL_REQUIREMENT_COVERAGE)
     assert set(result.reason_codes) == expected_reasons
@@ -264,3 +269,50 @@ def test_domain_imports_are_pure_and_no_validation_bypass():
         isinstance(n, ast.Attribute) and n.attr in ("model_construct", "__setattr__")
         for n in ast.walk(tree)
     )
+
+
+@pytest.mark.parametrize("student", [None, SkillLevel.UNKNOWN, ADVANCED])
+def test_unspecified_threshold_never_compared_and_preserves_student_evidence(student):
+    ctx = make_context([("skill-a", None, student, REQUIRED)])
+    result = SkillGapEngine().evaluate(ctx)
+    item = result.items[0]
+    assert item.status is SkillGapItemStatus.UNKNOWN
+    assert item.requirement.required_level is None
+    assert item.requirement.presence_evidence == ctx.requirements.requirements[0].presence_evidence
+    assert item.requirement.evidence == ()
+    assert item.student_level is student
+    assert item.student_evidence == ctx.student_skill_evidence
+    expected = (SkillGapReasonCode.REQUIREMENT_PROFICIENCY_UNSPECIFIED,)
+    if student in (None, SkillLevel.UNKNOWN):
+        expected += (SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING,)
+    assert item.reason_codes == expected
+    assert result.reason_codes == expected
+    assert result.gap_status is SkillGapStatus.UNDETERMINED
+
+
+@pytest.mark.parametrize("coverage, known_student, unknown_student, expected", [
+    ("complete", INTERMEDIATE, ADVANCED, "undetermined"),
+    ("complete", BEGINNER, ADVANCED, "gap_identified"),
+    ("complete", INTERMEDIATE, None, "undetermined"),
+    ("complete", BEGINNER, None, "gap_identified"),
+    ("partial", BEGINNER, ADVANCED, "gap_identified"),
+    ("partial", INTERMEDIATE, ADVANCED, "undetermined"),
+    ("partial", BEGINNER, None, "gap_identified"),
+])
+def test_unspecified_threshold_coverage_and_gap_precedence(coverage, known_student, unknown_student, expected):
+    ctx = make_context([
+        ("known", INTERMEDIATE, known_student, REQUIRED),
+        ("unspecified", None, unknown_student, DESIRED),
+    ], SkillRequirementCoverage(coverage))
+    before = ctx.model_dump_json()
+    result = SkillGapEngine().evaluate(ctx)
+    assert result.gap_status.value == expected
+    assert result.requirements.coverage.value == coverage
+    assert len(result.items) == 2
+    assert result.items[1].requirement.requirement_type is DESIRED
+    assert result.items[1].status is SkillGapItemStatus.UNKNOWN
+    assert SkillGapReasonCode.REQUIREMENT_PROFICIENCY_UNSPECIFIED in result.reason_codes
+    assert ctx.model_dump_json() == before
+    assert SkillGapEngine().evaluate(ctx).model_dump_json() == result.model_dump_json()
+    assert SkillGapDecision.model_validate_json(result.model_dump_json()) == result
+    assert result.model_dump(mode="json") == json.loads(result.model_dump_json())

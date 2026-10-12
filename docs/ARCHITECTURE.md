@@ -154,7 +154,7 @@ UNKNOWN skills need no fabricated evidence. Additional matching facts and multip
 sources are allowed, but orphan or conflicting evidence is rejected.
 `SkillGapItem` composes its requirement (identity,
 level, type and source evidence), a known or unavailable student level, separate
-student evidence, SATISFIED/GAP/UNKNOWN status and a machine-readable reason.
+student evidence, SATISFIED/GAP/UNKNOWN status and machine-readable reason codes.
 Missing student facts do not become zero ability or an assumed full gap.
 
 `SkillGapDecision` separates NO_GAP/GAP_IDENTIFIED/UNDETERMINED from coverage
@@ -188,7 +188,7 @@ and all declared requirements satisfied → NO_GAP. MISSING requirements produce
 empty items and UNDETERMINED; PARTIAL can identify a gap but cannot confirm no gap.
 Coverage remains in the RequirementSet alongside the qualitative gap status.
 Output uses normal validated immutable snapshots, item/coverage reason codes and
-source-free system audit `SKILL_GAP_ANALYSIS_V1`. Errors propagate atomically.
+source-free system audit `SKILL_GAP_ANALYSIS_V2`. Errors propagate atomically.
 The engine is read-only, deterministic and has no readiness score, skill guessing,
 eligibility/recommendation logic, provider, Repository, filesystem, network, LLM
 or planning dependency. P7 is not COMPLETE.
@@ -222,6 +222,34 @@ yet. Storage has zero real requirement artifacts. Synthetic tests cover schema a
 Provider; real provenance/target smoke explicitly skips on zero artifacts rather
 than claiming validation. No skill/level is inferred from names or descriptions.
 P7.4 and P7 COMPLETE are not implemented or claimed.
+
+### P7.3B.2 Unspecified Proficiency Follow-up
+
+Real-source audit exposed a known-skill/unspecified-threshold mismatch. P7.1 now
+requires explicit `required_level: SkillLevel | None`: null means a known skill
+requirement whose proficiency threshold is unspecified, never missing requirement
+data or SkillLevel.UNKNOWN. Every requirement has `presence_evidence` asserting
+`requirements.<skill_id>.present = true` with verified provenance. Existing
+`evidence` remains the proficiency channel: known threshold requires matching
+`requirements.<skill_id>.required_level`; null requires an empty proficiency
+channel. Presence asserts reviewed membership, not that official wording used
+the REQUIRED enum; source facts and type interpretation still need author review.
+
+Coverage completeness and proficiency completeness are independent: COMPLETE may
+contain unspecified thresholds and is never downgraded automatically. Item
+`reason_codes` is a unique immutable tuple in canonical order: requirement
+proficiency unspecified, then student skill data missing, when both apply. Known
+student levels/evidence are preserved even for UNKNOWN caused by missing threshold;
+student provenance requirements are unchanged. SATISFIED/GAP require both levels
+known. Any known gap still yields GAP_IDENTIFIED; otherwise any missing threshold
+or student fact yields UNDETERMINED. NO_GAP requires COMPLETE, all thresholds
+specified and all skills known satisfied. Empty/MISSING semantics are unchanged.
+
+P7.3A Provider architecture is unchanged; the envelope's official provenance gate
+also checks the new presence channel. This is an authorized P7 contract/engine
+evolution, pending review, not real artifact authoring. No target/subtrack/edition
+changes are made. The audited tenth/eleventh-edition mismatch and subtrack gaps
+remain separate blockers; P7.3 is not COMPLETE and P7.4 is not started.
 
 ## 8. Planning Architecture
 

@@ -52,7 +52,7 @@ class SkillRequirementSetEnvelope(_SkillGapSnapshot):
         if set(ids) != required_ids:
             raise ValueError("artifact Skill catalog must resolve exactly all requirement IDs")
         for requirement in self.requirement_set.requirements:
-            for evidence in requirement.evidence:
+            for evidence in requirement.presence_evidence + requirement.evidence:
                 if (
                     evidence.source is None
                     or evidence.source.source_type is not SourceType.OFFICIAL

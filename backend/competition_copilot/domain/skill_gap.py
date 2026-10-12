@@ -74,6 +74,13 @@ def skill_fact_value(level: SkillLevel) -> str:
     return level.value
 
 
+def requirement_presence_field(skill_id: str) -> str:
+    """Canonical REQUIREMENT presence fact, distinct from any threshold fact."""
+    if not isinstance(skill_id, str) or not skill_id.strip():
+        raise ValueError("skill fact requires a nonblank skill_id")
+    return f"requirements.{skill_id.strip()}.present"
+
+
 def _validate_skill_fact(
     evidence: Evidence, role: SkillFactRole, skill_id: str, level: SkillLevel
 ) -> None:
@@ -155,13 +162,15 @@ class SkillRequirement(_SkillGapSnapshot):
     """Structured skill fact; target/scope belongs to its requirement set.
 
     Skill identity references the existing Skill.id vocabulary. Required
-    proficiency uses StudentSkill.level; UNKNOWN is not a known requirement.
+    proficiency uses StudentSkill.level. None means a known requirement with
+    unspecified threshold, never missing requirement data or SkillLevel.UNKNOWN.
     """
 
     skill_id: str = Field(strict=True, min_length=1)
-    required_level: SkillLevel
+    required_level: SkillLevel | None
     requirement_type: SkillRequirementType
-    evidence: tuple[_EvidenceSnapshot, ...] = Field(min_length=1)
+    presence_evidence: tuple[_EvidenceSnapshot, ...] = Field(min_length=1)
+    evidence: tuple[_EvidenceSnapshot, ...] = ()
 
     @field_validator("skill_id")
     @classmethod
@@ -175,6 +184,23 @@ class SkillRequirement(_SkillGapSnapshot):
     def check_requirement(self) -> Self:
         if self.required_level is SkillLevel.UNKNOWN:
             raise ValueError("requirement level must be known")
+        for fact in self.presence_evidence:
+            if fact.field != requirement_presence_field(self.skill_id):
+                raise ValueError("presence evidence fact role or skill identity does not match")
+            if type(fact.value) is not bool or fact.value is not True:
+                raise ValueError("requirement presence evidence must assert true")
+        if not any(
+            e.source is not None
+            and e.source.verification_status is VerificationStatus.VERIFIED
+            for e in self.presence_evidence
+        ):
+            raise ValueError("requirement presence needs verified source evidence")
+        if self.required_level is None:
+            if self.evidence:
+                raise ValueError("unspecified threshold must not carry level evidence")
+            return self
+        if not self.evidence:
+            raise ValueError("specified threshold needs level evidence")
         for fact in self.evidence:
             _validate_skill_fact(
                 fact, SkillFactRole.REQUIREMENT, self.skill_id, self.required_level
@@ -289,6 +315,7 @@ class SkillGapReasonCode(str, Enum):
     STUDENT_SKILL_DATA_MISSING = "STUDENT_SKILL_DATA_MISSING"
     REQUIREMENT_DATA_MISSING = "REQUIREMENT_DATA_MISSING"
     PARTIAL_REQUIREMENT_COVERAGE = "PARTIAL_REQUIREMENT_COVERAGE"
+    REQUIREMENT_PROFICIENCY_UNSPECIFIED = "REQUIREMENT_PROFICIENCY_UNSPECIFIED"
 
 
 class SkillGapItem(_SkillGapSnapshot):
@@ -301,21 +328,26 @@ class SkillGapItem(_SkillGapSnapshot):
     requirement: SkillRequirement
     student_level: SkillLevel | None = None
     status: SkillGapItemStatus
-    reason_code: SkillGapReasonCode
+    reason_codes: tuple[SkillGapReasonCode, ...] = Field(min_length=1)
     student_evidence: tuple[_EvidenceSnapshot, ...] = ()
 
     @model_validator(mode="after")
     def check_item(self) -> Self:
-        expected = {
-            SkillGapItemStatus.SATISFIED: SkillGapReasonCode.REQUIREMENT_SATISFIED,
-            SkillGapItemStatus.GAP: SkillGapReasonCode.SKILL_BELOW_REQUIREMENT,
-            SkillGapItemStatus.UNKNOWN: SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING,
-        }
-        if self.reason_code is not expected[self.status]:
-            raise ValueError("item reason conflicts with status")
         unavailable = self.student_level in (None, SkillLevel.UNKNOWN)
-        if (self.status is SkillGapItemStatus.UNKNOWN) != unavailable:
-            raise ValueError("unknown student skill must remain UNKNOWN")
+        unspecified = self.requirement.required_level is None
+        if (self.status is SkillGapItemStatus.UNKNOWN) != (unavailable or unspecified):
+            raise ValueError("unknown student skill or threshold must remain UNKNOWN")
+        if self.status is SkillGapItemStatus.UNKNOWN:
+            expected = (
+                (SkillGapReasonCode.REQUIREMENT_PROFICIENCY_UNSPECIFIED,) if unspecified else ()
+            ) + ((SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING,) if unavailable else ())
+        else:
+            expected = ({
+                SkillGapItemStatus.SATISFIED: SkillGapReasonCode.REQUIREMENT_SATISFIED,
+                SkillGapItemStatus.GAP: SkillGapReasonCode.SKILL_BELOW_REQUIREMENT,
+            }[self.status],)
+        if self.reason_codes != expected:
+            raise ValueError("item reasons conflict with facts/status or canonical order")
         if unavailable and self.student_evidence:
             raise ValueError("unknown student level must not carry known-level evidence")
         if not unavailable:
@@ -326,6 +358,7 @@ class SkillGapItem(_SkillGapSnapshot):
                     fact, SkillFactRole.STUDENT_SKILL,
                     self.requirement.skill_id, self.student_level,
                 )
+        if not unavailable and not unspecified:
             satisfied_levels = {
                 SkillLevel.BEGINNER: {
                     SkillLevel.BEGINNER, SkillLevel.INTERMEDIATE, SkillLevel.ADVANCED,
@@ -342,9 +375,9 @@ class SkillGapItem(_SkillGapSnapshot):
 class SkillGapDecision(_SkillGapSnapshot):
     """Gap existence and requirement coverage remain independent facts.
 
-    NO_GAP confirms all declared skills (REQUIRED and DESIRED) are satisfied,
-    with COMPLETE coverage. GAP_IDENTIFIED can retain PARTIAL coverage or unknown
-    student facts for other skills. Validators reject contradictions only; an
+    NO_GAP confirms all declared skills (REQUIRED and DESIRED) have specified
+    thresholds and are satisfied, with COMPLETE coverage. GAP_IDENTIFIED can retain
+    PARTIAL coverage or unknown student/threshold facts for other skills. An
     engine must later compute the supplied status and individual conclusions.
     """
 
@@ -366,7 +399,7 @@ class SkillGapDecision(_SkillGapSnapshot):
         for item in self.items:
             if item.requirement != facts[item.requirement.skill_id]:
                 raise ValueError("gap item does not match structured requirement")
-            if item.reason_code not in self.reason_codes:
+            if not set(item.reason_codes).issubset(self.reason_codes):
                 raise ValueError("item reason is missing from decision")
         coverage_reason = {
             SkillRequirementCoverage.MISSING: SkillGapReasonCode.REQUIREMENT_DATA_MISSING,
@@ -374,7 +407,7 @@ class SkillGapDecision(_SkillGapSnapshot):
         }.get(self.requirements.coverage)
         if coverage_reason is not None and coverage_reason not in self.reason_codes:
             raise ValueError("coverage reason is missing from decision")
-        expected_reasons = {item.reason_code for item in self.items}
+        expected_reasons = {reason for item in self.items for reason in item.reason_codes}
         if coverage_reason is not None:
             expected_reasons.add(coverage_reason)
         if (
@@ -388,6 +421,7 @@ class SkillGapDecision(_SkillGapSnapshot):
         fully_satisfied = (
             self.requirements.coverage is SkillRequirementCoverage.COMPLETE
             and bool(self.items)
+            and all(i.requirement.required_level is not None for i in self.items)
             and all(i.status is SkillGapItemStatus.SATISFIED for i in self.items)
         )
         if (self.gap_status is SkillGapStatus.GAP_IDENTIFIED) != has_gap:

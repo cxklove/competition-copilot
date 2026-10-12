@@ -131,3 +131,16 @@ def test_io_failure_aborts_load_preserving_original_cause(tmp_path, monkeypatch)
         JsonSkillRequirementProvider(tmp_path)
     assert caught.value.artifact_path == path
     assert isinstance(caught.value.__cause__, PermissionError)
+
+
+def test_provider_compatibility_with_unspecified_threshold(tmp_path):
+    data = artifact_data(coverage="complete")
+    data["requirement_set"]["requirements"][0].update(required_level=None, evidence=[])
+    write_artifact(tmp_path, "synthetic.json", data)
+    provider = JsonSkillRequirementProvider(tmp_path)
+    result = provider.get_requirements("synthetic-competition", "synthetic-edition")
+    assert result.coverage.value == "complete"
+    assert result.requirements[0].required_level is None
+    assert result.requirements[0].evidence == ()
+    assert result.requirements[0].presence_evidence[0].value is True
+    assert provider.get_requirements("synthetic-competition", "synthetic-edition", "child") is None

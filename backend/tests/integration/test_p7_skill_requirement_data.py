@@ -6,6 +6,7 @@ import pytest
 
 from competition_copilot.domain.skill_gap import (
     SkillFactRole,
+    requirement_presence_field,
     skill_fact_field,
     skill_fact_value,
 )
@@ -52,6 +53,11 @@ def test_real_artifact_target_identity_provenance_and_coverage():
         skills = {s.id for s in artifact.skills}
         for requirement in requirement_set.requirements:
             assert requirement.skill_id in skills
+            for evidence in requirement.presence_evidence:
+                assert evidence.field == requirement_presence_field(requirement.skill_id)
+                assert evidence.value is True
+                assert evidence.source.source_type.value == "official"
+                assert evidence.source.verification_status.value == "verified"
             for evidence in requirement.evidence:
                 assert evidence.field == skill_fact_field(SkillFactRole.REQUIREMENT, requirement.skill_id)
                 assert evidence.value == skill_fact_value(requirement.required_level)

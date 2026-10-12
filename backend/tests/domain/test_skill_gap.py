@@ -29,6 +29,7 @@ from competition_copilot.domain.skill_gap import (
     SkillRequirementSet,
     SkillRequirementTarget,
     SkillRequirementType,
+    requirement_presence_field,
     skill_fact_field,
     skill_fact_value,
 )
@@ -49,11 +50,19 @@ def requirement(
     skill_id="skill-a", kind=SkillRequirementType.REQUIRED,
     *, level=SkillLevel.INTERMEDIATE,
 ):
+    source = SourceMetadata(
+        source_url="https://example.org/synthetic-task", source_type="manual",
+        observed_at="2026-01-01T00:00:00Z", verification_status="verified",
+    )
     return SkillRequirement(
         skill_id=skill_id,
         required_level=level,
         requirement_type=kind,
-        evidence=[
+        presence_evidence=[Evidence(
+            code="SYNTHETIC_REQUIREMENT_PRESENCE", message="Synthetic reviewed presence.",
+            field=requirement_presence_field(skill_id), value=True, source=source,
+        )],
+        evidence=[] if level is None else [
             Evidence(
                 code="SYNTHETIC_REQUIREMENT",
                 message="Synthetic reviewed requirement, not a real competition fact.",
@@ -95,7 +104,7 @@ def item(status=SkillGapItemStatus.SATISFIED, *, fact=None):
         requirement=fact,
         student_level=level,
         status=status,
-        reason_code=reason,
+        reason_codes=(reason,),
         student_evidence=[] if level is None else [
             Evidence(
                 code="STUDENT_SKILL_FACT",
@@ -109,7 +118,7 @@ def item(status=SkillGapItemStatus.SATISFIED, *, fact=None):
 
 def decision(coverage, status, items):
     requirements = requirement_set(coverage)
-    reasons = list(dict.fromkeys(i.reason_code for i in items))
+    reasons = list(dict.fromkeys(reason for i in items for reason in i.reason_codes))
     if coverage is SkillRequirementCoverage.PARTIAL:
         reasons.append(SkillGapReasonCode.PARTIAL_REQUIREMENT_COVERAGE)
     if coverage is SkillRequirementCoverage.MISSING:
@@ -283,7 +292,7 @@ def test_explicit_unknown_level_stays_unknown_without_zero_assumption():
     (SkillGapItemStatus.SATISFIED, {"student_level": None}),
     (SkillGapItemStatus.GAP, {"student_level": "unknown"}),
     (SkillGapItemStatus.SATISFIED, {"student_evidence": []}),
-    (SkillGapItemStatus.GAP, {"reason_code": "REQUIREMENT_SATISFIED"}),
+    (SkillGapItemStatus.GAP, {"reason_codes": ["REQUIREMENT_SATISFIED"]}),
 ])
 def test_contradictory_item_snapshots_rejected(status, invalid):
     with pytest.raises(ValidationError):
@@ -640,7 +649,7 @@ def test_context_known_skill_evidence_roundtrip_and_output_reuse():
         requirement=ctx.requirements.requirements[0],
         student_level=ctx.student_profile.skills[0].level,
         status=SkillGapItemStatus.SATISFIED,
-        reason_code=SkillGapReasonCode.REQUIREMENT_SATISFIED,
+        reason_codes=(SkillGapReasonCode.REQUIREMENT_SATISFIED,),
         student_evidence=ctx.student_skill_evidence,
     )
     assert result.student_evidence == ctx.student_skill_evidence
@@ -754,3 +763,154 @@ def test_context_student_fact_binding_uses_exact_dynamic_skill_identity(skill_id
         SkillGapContext.model_validate(data | {
             "student_skill_evidence": item().student_evidence,
         })
+
+
+@pytest.mark.parametrize("kind", list(SkillRequirementType))
+@pytest.mark.parametrize("level", [None, SkillLevel.INTERMEDIATE])
+def test_presence_and_threshold_are_independent_validated_channels(kind, level):
+    fact = requirement("skill-b", kind, level=level)
+    assert fact.required_level is level
+    assert fact.presence_evidence[0].field == "requirements.skill-b.present"
+    assert fact.presence_evidence[0].value is True
+    assert bool(fact.evidence) == (level is not None)
+    assert SkillRequirement.model_validate_json(fact.model_dump_json()) == fact
+    if level is None:
+        assert fact.model_dump(mode="json")["required_level"] is None
+        requirements = SkillRequirementSet(
+            target=target(), coverage=SkillRequirementCoverage.COMPLETE,
+            coverage_note="Synthetic complete requirement set; no threshold specified.",
+            requirements=(fact,),
+        )
+        assert requirements.coverage is SkillRequirementCoverage.COMPLETE
+
+
+@pytest.mark.parametrize("level", [None, SkillLevel.INTERMEDIATE])
+def test_requirement_presence_is_always_mandatory(level):
+    data = requirement(level=level).model_dump()
+    for invalid in ({"presence_evidence": []}, {"presence_evidence": requirement().evidence}):
+        with pytest.raises(ValidationError):
+            SkillRequirement.model_validate(data | invalid)
+    del data["presence_evidence"]
+    with pytest.raises(ValidationError):
+        SkillRequirement.model_validate(data)
+
+
+@pytest.mark.parametrize("field, value", [
+    ("field", "requirements.other.present"), ("field", "skills.skill-a.level"),
+    ("value", False), ("value", 1), ("value", "true"), ("value", None),
+    ("source", None),
+])
+def test_presence_fact_rejects_wrong_role_skill_value_or_provenance(field, value):
+    data = requirement(level=None).model_dump()
+    data["presence_evidence"][0][field] = value
+    with pytest.raises(ValidationError):
+        SkillRequirement.model_validate(data)
+
+
+@pytest.mark.parametrize("value", [None, "unknown", "intermediate"])
+def test_unspecified_threshold_rejects_any_level_evidence(value):
+    data = requirement(level=None).model_dump()
+    data["evidence"] = [requirement().evidence[0].model_dump() | {"value": value}]
+    with pytest.raises(ValidationError, match="must not carry level evidence"):
+        SkillRequirement.model_validate(data)
+
+
+def test_specified_threshold_still_requires_exact_level_evidence():
+    data = requirement().model_dump()
+    with pytest.raises(ValidationError, match="needs level evidence"):
+        SkillRequirement.model_validate(data | {"evidence": []})
+    with pytest.raises(ValidationError, match="fact role or skill identity"):
+        SkillRequirement.model_validate(data | {"evidence": requirement().presence_evidence})
+
+
+def unspecified_item(student_level=None):
+    reasons = (SkillGapReasonCode.REQUIREMENT_PROFICIENCY_UNSPECIFIED,)
+    if student_level in (None, SkillLevel.UNKNOWN):
+        reasons += (SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING,)
+        evidence = ()
+    else:
+        evidence = (Evidence(
+            code="SYNTHETIC_STUDENT", message="Explicit synthetic student fact.",
+            field=skill_fact_field(SkillFactRole.STUDENT_SKILL, "skill-b"),
+            value=skill_fact_value(student_level),
+        ),)
+    return SkillGapItem(
+        requirement=requirement("skill-b", level=None), student_level=student_level,
+        status=SkillGapItemStatus.UNKNOWN, reason_codes=reasons, student_evidence=evidence,
+    )
+
+
+@pytest.mark.parametrize("student_level", [None, SkillLevel.UNKNOWN, SkillLevel.ADVANCED])
+def test_unspecified_threshold_keeps_student_facts_and_all_uncertainty(student_level):
+    result = unspecified_item(student_level)
+    assert result.student_level is student_level
+    assert result.status is SkillGapItemStatus.UNKNOWN
+    assert result.reason_codes[0] is SkillGapReasonCode.REQUIREMENT_PROFICIENCY_UNSPECIFIED
+    assert len(result.reason_codes) == (2 if student_level in (None, SkillLevel.UNKNOWN) else 1)
+    assert bool(result.student_evidence) == (student_level is SkillLevel.ADVANCED)
+    assert SkillGapItem.model_validate_json(result.model_dump_json()) == result
+    with pytest.raises(ValidationError):
+        SkillGapItem.model_validate(result.model_dump() | {"status": "satisfied"})
+    if student_level is SkillLevel.ADVANCED:
+        with pytest.raises(ValidationError, match="needs student evidence"):
+            SkillGapItem.model_validate(result.model_dump() | {"student_evidence": []})
+
+
+@pytest.mark.parametrize("reasons", [
+    [], ["STUDENT_SKILL_DATA_MISSING"], ["REQUIREMENT_PROFICIENCY_UNSPECIFIED"],
+    ["STUDENT_SKILL_DATA_MISSING", "REQUIREMENT_PROFICIENCY_UNSPECIFIED"],
+    ["REQUIREMENT_PROFICIENCY_UNSPECIFIED", "STUDENT_SKILL_DATA_MISSING", "STUDENT_SKILL_DATA_MISSING"],
+    ["REQUIREMENT_SATISFIED"],
+])
+def test_item_uncertainty_reasons_are_exact_unique_and_canonically_ordered(reasons):
+    with pytest.raises(ValidationError):
+        SkillGapItem.model_validate(unspecified_item().model_dump() | {"reason_codes": reasons})
+
+
+def test_unspecified_presence_and_reason_collections_are_immutable():
+    result = unspecified_item(SkillLevel.ADVANCED)
+    before = result.model_dump_json()
+    for collection in (result.reason_codes, result.requirement.presence_evidence, result.requirement.evidence):
+        with pytest.raises(AttributeError):
+            collection.append(None)
+        if collection:
+            with pytest.raises(TypeError):
+                collection[0] = None
+    with pytest.raises(ValidationError, match="frozen"):
+        result.requirement.presence_evidence[0].value = False
+    assert result.model_dump_json() == before
+
+
+def test_complete_unspecified_threshold_cannot_claim_no_gap_or_drop_reason():
+    gap_item = unspecified_item(SkillLevel.ADVANCED)
+    requirements = SkillRequirementSet(
+        target=target(), coverage="complete", coverage_note="Synthetic complete set.",
+        requirements=(gap_item.requirement,),
+    )
+    data = dict(
+        target=target(), requirements=requirements, gap_status="undetermined", items=(gap_item,),
+        reason_codes=gap_item.reason_codes,
+        audit_evidence=(Evidence(code="AUDIT", message="Synthetic analysis."),),
+    )
+    result = SkillGapDecision(**data)
+    assert result.requirements.coverage is SkillRequirementCoverage.COMPLETE
+    with pytest.raises(ValidationError, match="NO_GAP"):
+        SkillGapDecision(**(data | {"gap_status": "no_gap"}))
+    with pytest.raises(ValidationError):
+        SkillGapDecision(**(data | {"reason_codes": (SkillGapReasonCode.REQUIREMENT_SATISFIED,)}))
+
+
+def test_unspecified_is_explicit_null_not_unknown_enum_or_omitted_field():
+    data = requirement(level=None).model_dump()
+    with pytest.raises(ValidationError):
+        SkillRequirement.model_validate(data | {"required_level": SkillLevel.UNKNOWN})
+    del data["required_level"]
+    with pytest.raises(ValidationError):
+        SkillRequirement.model_validate(data)
+
+
+def test_pending_presence_source_cannot_assert_known_requirement():
+    data = requirement(level=None).model_dump()
+    data["presence_evidence"][0]["source"]["verification_status"] = "pending"
+    with pytest.raises(ValidationError, match="verified"):
+        SkillRequirement.model_validate(data)

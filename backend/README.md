@@ -4,6 +4,7 @@
 P7 started: P7.1 Skill Requirement & Skill Gap Contract PASS;
 P7.2 Deterministic Skill Gap Engine PASS;
 P7.3 schema/Provider implemented; real data BLOCKED BY REAL SKILL REQUIREMENT SOURCE GAP;
+P7.3B.2 unspecified-proficiency follow-up implemented, pending review;
 P7 is not COMPLETE. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -267,6 +268,25 @@ P7.3 tests from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_skill_requirement_artifact.py backend/tests/infrastructure/test_skill_requirement_json.py backend/tests/integration/test_p7_skill_requirement_data.py`.
 Real provenance/target smoke is explicitly skipped while no reviewed artifacts
 exist; directory load and real Repository missing-target checks still run.
+
+P7.3B.2 resolves the audited known-requirement/unspecified-threshold Domain mismatch.
+`SkillRequirement.required_level` explicitly accepts null for unspecified threshold,
+distinct from missing requirements and StudentSkill.UNKNOWN. Mandatory
+`presence_evidence` binds `requirements.<skill_id>.present = true`; `evidence`
+remains threshold provenance and must be empty for null, matching and nonempty for
+known level. Both channels reuse shared Evidence and verified source semantics.
+Envelope validation keeps official provenance on both; Provider architecture is
+unchanged. No legacy level fact is silently converted into a presence assertion.
+
+Coverage COMPLETE can coexist with unspecified threshold. SkillGapItem now uses
+immutable `reason_codes`, with requirement uncertainty before student uncertainty
+when both apply. UNKNOWN can retain a known student level and its supplied evidence
+when the threshold is unspecified; student provenance is not relaxed. Only both
+known levels are compared. Known GAP wins over uncertainty; otherwise unspecified
+threshold means UNDETERMINED. NO_GAP requires COMPLETE, every threshold specified
+and every student fact known satisfied. System audit version is SKILL_GAP_ANALYSIS_V2.
+The tenth/eleventh-edition and subtrack target gaps remain unresolved; no real
+artifact, skill guessing, proficiency guessing or P7.4 implementation is added.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

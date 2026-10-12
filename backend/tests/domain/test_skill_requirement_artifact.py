@@ -13,7 +13,7 @@ from competition_copilot.domain.skill_requirement_artifact import (
 
 def artifact_data(*, edition_id="synthetic-edition", track_id=None, coverage="partial"):
     """Explicitly synthetic reviewed facts, never production competition data."""
-    return {
+    data = {
         "schema_version": "1.0", "artifact_type": "skill_requirement_set",
         "requirement_version": "synthetic-v1", "review_note": "Test-only review assessment.",
         "skills": [Skill(id="synthetic-skill", name="Synthetic Skill").model_dump()],
@@ -37,6 +37,12 @@ def artifact_data(*, edition_id="synthetic-edition", track_id=None, coverage="pa
             }],
         },
     }
+    requirement = data["requirement_set"]["requirements"][0]
+    requirement["presence_evidence"] = [requirement["evidence"][0] | {
+        "code": "SYNTHETIC_REQUIREMENT_PRESENCE",
+        "field": "requirements.synthetic-skill.present", "value": True,
+    }]
+    return data
 
 
 @pytest.mark.parametrize("coverage", ["partial", "complete", "missing"])
@@ -149,3 +155,22 @@ def test_catalog_and_requirement_inputs_detached():
     data["requirement_set"]["requirements"][0]["evidence"][0]["message"] = "Changed"
     assert before.skills[0].aliases == ("Synthetic Alias",)
     assert before.requirement_set.requirements[0].evidence[0].message != "Changed"
+
+
+@pytest.mark.parametrize("coverage", ["complete", "partial"])
+def test_envelope_supports_known_requirement_unspecified_threshold(coverage):
+    data = artifact_data(coverage=coverage)
+    data["requirement_set"]["requirements"][0].update(required_level=None, evidence=[])
+    artifact = SkillRequirementSetEnvelope.model_validate(data)
+    assert artifact.requirement_set.coverage.value == coverage
+    assert artifact.requirement_set.requirements[0].required_level is None
+    assert SkillRequirementSetEnvelope.model_validate_json(artifact.model_dump_json()) == artifact
+
+
+def test_unspecified_presence_keeps_official_provenance_gate():
+    data = artifact_data()
+    requirement = data["requirement_set"]["requirements"][0]
+    requirement.update(required_level=None, evidence=[])
+    requirement["presence_evidence"][0]["source"]["source_type"] = "manual"
+    with pytest.raises(ValidationError, match="official"):
+        SkillRequirementSetEnvelope.model_validate(data)

@@ -31,7 +31,7 @@ class SkillGapEngine:
     """Evaluate every requirement in supplied order; preserve all matching evidence.
 
     Any required or desired known gap proves GAP_IDENTIFIED. NO_GAP requires
-    COMPLETE coverage and every declared requirement known satisfied.
+    COMPLETE coverage, specified thresholds and every declared requirement satisfied.
     Contract errors propagate; no partial result or fallback uncertainty is returned.
     """
 
@@ -48,25 +48,28 @@ class SkillGapEngine:
         for requirement in context.requirements.requirements:
             student = skills.get(requirement.skill_id)
             level = student.level if student is not None else None
-            if level in (None, SkillLevel.UNKNOWN):
+            missing_student = level in (None, SkillLevel.UNKNOWN)
+            unspecified = requirement.required_level is None
+            student_evidence = () if missing_student else tuple(evidence_by_field[
+                skill_fact_field(SkillFactRole.STUDENT_SKILL, requirement.skill_id)
+            ])
+            if missing_student or unspecified:
                 status = SkillGapItemStatus.UNKNOWN
-                reason = SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING
-                student_evidence = ()
+                reasons = (
+                    (SkillGapReasonCode.REQUIREMENT_PROFICIENCY_UNSPECIFIED,) if unspecified else ()
+                ) + ((SkillGapReasonCode.STUDENT_SKILL_DATA_MISSING,) if missing_student else ())
             else:
                 satisfied = LEVEL_ORDER[level] >= LEVEL_ORDER[requirement.required_level]
                 status = SkillGapItemStatus.SATISFIED if satisfied else SkillGapItemStatus.GAP
-                reason = (
+                reasons = (
                     SkillGapReasonCode.REQUIREMENT_SATISFIED if satisfied
-                    else SkillGapReasonCode.SKILL_BELOW_REQUIREMENT
+                    else SkillGapReasonCode.SKILL_BELOW_REQUIREMENT,
                 )
-                student_evidence = tuple(evidence_by_field[
-                    skill_fact_field(SkillFactRole.STUDENT_SKILL, requirement.skill_id)
-                ])
             items.append(SkillGapItem(
                 requirement=requirement,
                 student_level=level,
                 status=status,
-                reason_code=reason,
+                reason_codes=reasons,
                 student_evidence=student_evidence,
             ))
 
@@ -76,13 +79,14 @@ class SkillGapEngine:
         elif (
             coverage is SkillRequirementCoverage.COMPLETE
             and items
+            and all(item.requirement.required_level is not None for item in items)
             and all(item.status is SkillGapItemStatus.SATISFIED for item in items)
         ):
             gap_status = SkillGapStatus.NO_GAP
         else:
             gap_status = SkillGapStatus.UNDETERMINED
 
-        reasons = list(dict.fromkeys(item.reason_code for item in items))
+        reasons = list(dict.fromkeys(reason for item in items for reason in item.reason_codes))
         if coverage is SkillRequirementCoverage.PARTIAL:
             reasons.append(SkillGapReasonCode.PARTIAL_REQUIREMENT_COVERAGE)
         elif coverage is SkillRequirementCoverage.MISSING:
@@ -94,8 +98,8 @@ class SkillGapEngine:
             items=tuple(items),
             reason_codes=tuple(reasons),
             audit_evidence=(Evidence(
-                code="SKILL_GAP_ANALYSIS_V1",
-                message="Known gap takes precedence; no gap requires complete known satisfaction.",
+                code="SKILL_GAP_ANALYSIS_V2",
+                message="Known gap takes precedence; no gap requires COMPLETE, specified thresholds and known satisfaction.",
                 field="gap_status",
                 value=gap_status.value,
             ),),

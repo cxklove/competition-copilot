@@ -536,7 +536,7 @@ Agent, MCP and Frontend. These do not block P9 closure.
 
 ## P9.5 — Competition Monitor
 
-**Status: IN PROGRESS. P9.5.1 Review PASS / committed; P9.5.2 One-shot Orchestrator IMPLEMENTED, awaiting Review.**
+**Status: IN PROGRESS. P9.5.1/P9.5.2 Review PASS / committed; P9.5.3 Official Adapter IMPLEMENTED, awaiting Review.**
 Monitor observes official sources, produces
 structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
 UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
@@ -569,12 +569,12 @@ Snapshot and, when baseline exists, a Diff with matching references. Initial che
 have no Diff; failed checks have neither new Snapshot nor Diff. Zero-change and
 reflexive Diff are successful checks. These validators do not build or compare.
 
-P9.5.2 orchestrates observation -> Snapshot/Diff -> result below; P9.5.3 will
-provide a source adapter. No network/HTTP parsing, retry/timeout, scheduler/poll loop, Repository
-mutation, Event, notification, impact, Replanning, LLM/Agent/MCP is implemented.
+P9.5.2 orchestration and P9.5.3 source adapter are described below. The Contract
+adds no network/HTTP parsing, retry/timeout, scheduler/poll loop, Repository
+mutation, Event, notification, impact, Replanning or LLM/Agent/MCP.
 P9 and P2–P8 remain frozen; P9.5 is not complete.
 
-### P9.5.2 — One-shot Competition Monitor (IMPLEMENTED, awaiting Review)
+### P9.5.2 — One-shot Competition Monitor (Review PASS, committed)
 
 `application/monitor_checks.py` provides OneShotCompetitionMonitor.check(request).
 It calls the injected CompetitionObservationSource exactly once and validates
@@ -596,7 +596,44 @@ Snapshot/ID or calls Diff, success/UNKNOWN/known-value/track cases, binding safe
 provenance, one-call behavior, deterministic JSON and immutability. No Repository
 writes, persistence, retry, scheduler, loop, HTTP/parser, Event, notification,
 impact, Replanning, LLM/Agent/MCP is added. P9/P9.5.1 remain unchanged.
-P9.5.3 source adapter is future work; P9.5 is not complete.
+P9.5.3 source adapter is described below; P9.5 is not complete.
+
+### P9.5.3 — Official Source Observation Adapter (IMPLEMENTED, awaiting Review)
+
+Candidate audit used reviewed Repository Edition.source, not remembered/search URLs:
+
+| Target | Approved URL/host | Available reviewed dynamic scope |
+| --- | --- | --- |
+| comap-mcm / comap-mcm-2027 | contest.comap.com/undergraduate/contests/mcm/instructions.php | Partial registration and full contest window; source-explicit EST |
+| c4-big-data-challenge / c4-big-data-challenge-2026 | nercbds.tsinghua.edu.cn/bdc/szsm.html | Registration window; reviewed jurisdiction policy needed |
+| china-graduate-math-modeling / china-graduate-math-modeling-2026 | cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314 | Registration/contest windows; notification text and jurisdiction policy |
+| huawei-ict / huawei-ict-2026 | e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018 | Known tracks; reviewed windows remain unknown; fragment-based source route |
+
+COMAP was selected: its approved official instructions expose a bounded 2027
+dates-and-times list with explicit EST, matching the reviewed fixed UTC-05:00
+policy. `infrastructure/comap_observation.py` implements CompetitionObservationSource
+for exactly comap-mcm-2027, track=None, and the exact HTTPS URL. An injected
+ComapPageFetcher separates HTTP from deterministic parsing. The default stdlib
+fetcher performs one bounded HTTPS read with redirects/proxies disabled; no URL
+argument, secrets, retry or third-party dependency is introduced.
+
+Parser recognizes the instructions title and exact schedule heading/list, then
+parses only Registration Deadline, Contest Starts and Contest Ends. Registration
+start and track inventory are unsupported/UNKNOWN; problem labels are not tracks.
+Missing optional facts, date-only facts and omitted/unreviewed zones remain UNKNOWN.
+Malformed/wrong-year/root/duplicate/unsupported labeled structures fail parsing.
+EST clocks are source-explicit fixed UTC-05:00, never guessed DST/jurisdiction.
+HTTP failure yields typed check failure, not unknown facts or known absence.
+Provenance uses supplied check time and preserves configured verification status;
+unverified known facts fail INVALID_OBSERVATION, without verification upgrade.
+
+Offline tests use a minimal synthetic HTML fragment whose DOM shape/date facts
+match the audited source/reviewed Seed. Tests block network and cover parser,
+HTTP failures, date/zone/absence safety, unsupported target/URL, redirects, bounded
+responses, provenance and deterministic JSON. No default live smoke test is added.
+No Snapshot/Diff/Monitor result construction, Repository write, universal crawler,
+scheduler, Event/impact/Replanning or LLM parsing is added. Frozen P9/P9.5.1/P9.5.2
+remain unchanged. P9.5.4 integration and Final Review remain; P9.5 is not complete.
 
 - **Goal:** 定期观察可信来源并发现潜在状态变化。
 - **Inputs:** 已有 Competition、监控来源、当前 Snapshot、抓取/轮询策略。

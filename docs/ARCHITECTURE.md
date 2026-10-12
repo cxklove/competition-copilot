@@ -761,7 +761,7 @@ and optional baseline context, without transport/schedule/write capabilities.
 Domain depends only on P9 contracts and SourceMetadata, not Repository or adapters.
 
 ```text
-Official Source -> Observation Source Adapter (future P9.5.3)
+Official Source -> Observation Source Adapter (P9.5.3 COMAP adapter)
                 -> typed SourceObservationResult
                 -> Snapshot + Diff (P9.5.2 one-shot orchestration)
                 -> MonitorCheckResult
@@ -781,11 +781,12 @@ HTTP 200 is not verification. SourceMetadata time remains separate from snapshot
 observation time. Successful checks with zero-change/reflexive Diff remain success;
 outcome derives from observation, without duplicate flags or event classification.
 
-P9.5.2 orchestration is described below. No live adapter, network, parser,
-scheduler, polling, Repository/data mutation, Event/impact/notification,
-Replanning or LLM/Agent/MCP is implemented. P9 remains FROZEN; P9.5 is not complete.
+P9.5.2 orchestration and P9.5.3 source adapter are described below. The Contract
+adds no network, parser, scheduler, polling, Repository/data mutation,
+Event/impact/notification, Replanning or LLM/Agent/MCP. P9 remains FROZEN;
+P9.5 is not complete.
 
-### P9.5.2 One-shot Monitor Orchestrator — IMPLEMENTED, awaiting Review
+### P9.5.2 One-shot Monitor Orchestrator — Review PASS, committed
 
 `application/monitor_checks.py` composes the ObservationSource Protocol, a normal
 P9 Snapshot constructor and the formal SnapshotDiffEngine. The source is injected;
@@ -802,8 +803,33 @@ No-change is success; changes remain low-level P9 Diff. P9.1.1 reflexive zero
 Diff remains valid. Verification status is preserved, never upgraded by a check.
 Fake-source tests assert one call, failure short circuit, safety, input/output
 immutability and stable JSON. No storage, scheduling, retry, HTTP, parser, Event,
-notification, impact, Replanning, LLM or Agent is implemented. P9.5.3 remains
-future work; P9.5 is still in progress.
+notification, impact, Replanning, LLM or Agent is implemented by orchestration.
+P9.5.3 is described below; P9.5 is still in progress.
+
+### P9.5.3 COMAP Official Observation Adapter — IMPLEMENTED, awaiting Review
+
+`infrastructure/comap_observation.py` implements the abstract ObservationSource
+for the reviewed COMAP MCM 2027 instructions URL, using injected ComapPageFetcher.
+Transport is stdlib HTTPS, one bounded read, no redirect/proxy/retry and no caller
+URL. Only the exact approved target/path/host is accepted; wrong bindings fail
+before fetch. No HTTP dependency enters Application/Domain or frozen P9 modules.
+
+Deterministic HTMLParser reads the ul following the exact 2027 schedule heading,
+guarded by instructions title, recognized labels and closed list structure. Only
+three explicitly labeled time facts are parsed. The source/reviewed Seed specifies
+EST = UTC-05:00, so no timezone is inferred. Date-only, missing zone and optional
+facts remain UNKNOWN; unrecognized structure/text is PARSE_FAILED. Windows reuse
+P9 TimeWindow, including partial bounds. Track membership is UNKNOWN because this
+page is not an approved track inventory; problem choices are never Track IDs.
+
+Timeout/connection/status/invalid response failures yield typed check errors,
+not successful UNKNOWN state. Ordinary missing selectors never imply KNOWN_ABSENT.
+SourceMetadata records explicit supplied observation time, official URL/type and
+unchanged configured verification status. Existing P9 known-fact validation is
+retained; HTTP success does not grant verification. Unit tests are offline with
+minimal synthetic fixture data, and cover fetch/parser separately. No universal
+scraper, Snapshot/Diff/orchestration, storage, scheduler, Event, impact, Replanning
+or LLM parsing is added. P9.5.4 integration is pending; P9.5 is not complete.
 
 ## 9. Replanning Architecture
 

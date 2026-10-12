@@ -9,8 +9,8 @@ evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
-P9.5 Monitor is IN PROGRESS: P9.5.1 Review PASS; P9.5.2 one-shot orchestration
-implemented, awaiting Review. No live source adapter yet. The current ingestion
+P9.5 Monitor is IN PROGRESS: P9.5.1/P9.5.2 Review PASS; P9.5.3 official-source
+adapter implemented, awaiting Review. No scheduler/polling yet. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -758,9 +758,9 @@ remain frozen. Success requires a matching supplied Snapshot and a matching Diff
 when a baseline exists; zero changes are success. These are validators, not a
 Snapshot builder or Diff orchestration implementation.
 
-P9.5.2 orchestration is described below; P9.5.3 source adapter is future work. No live network,
+P9.5.2 orchestration and P9.5.3 adapter are described below. The Contract adds no live network,
 parsing, retry/backoff, scheduling/polling, Repository mutation, Event, impact,
-notification, Replanning, LLM or Agent is added. P9.5 is not complete.
+notification, Replanning, LLM or Agent. P9.5 is not complete.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_monitoring.py
@@ -778,9 +778,36 @@ queries Repository nor duplicates Diff/identity rules. Initial checks have no Di
 Successful UNKNOWN observations are supported. Same state is success with zero
 Diff; changed state is success with low-level Diff. Provenance is taken from the
 source result without verification upgrade. Fake sources exist only in tests;
-there is no real HTTP adapter, parser, scheduler, polling/retry, persistence,
-Event, notification, impact or Replanning. Diff != Event; P9.5 is not complete.
+orchestration adds no HTTP/parser, scheduler, polling/retry, persistence,
+Event, notification, impact or Replanning. The concrete source adapter is described
+below. Diff != Event; P9.5 is not complete.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/application/test_one_shot_monitor.py
+```
+
+## P9.5.3 COMAP Official Observation Adapter
+
+`infrastructure.comap_observation.ComapOfficialObservationAdapter` implements
+CompetitionObservationSource for comap-mcm / comap-mcm-2027 / track=None and
+https://contest.comap.com/undergraduate/contests/mcm/instructions.php only.
+The URL comes from reviewed Repository metadata. Its bounded schedule list has
+explicit EST clocks; this is preferable to jurisdiction inference or SPA parsing.
+
+Injected ComapPageFetcher separates parsing from HTTP. The default stdlib client
+fetches only that fixed HTTPS URL, rejects redirects, disables environment proxies,
+limits body size and performs no retry. No new dependencies or secrets are needed.
+Parser uses the instructions title and exact 2027 heading/list, then labeled
+registration-end/contest-start/end values. EST is fixed UTC-05:00 under the existing
+reviewed policy. Date-only/unknown-zone/optional values stay UNKNOWN without invented
+times. Track membership stays UNKNOWN; no label/track inference is implemented.
+
+Fetch and parse failures are typed CHECK_FAILED, not UNKNOWN facts. Known facts
+retain P9 validation; verification is preserved, not upgraded. The adapter returns
+SourceObservationResult only; no Snapshot/Diff/Event, scheduling or Replanning.
+Tests use a documented minimal synthetic fixture and block network. P9.5.4 real
+monitor integration remains pending; P9.5 is not complete.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/infrastructure/test_comap_observation.py
 ```

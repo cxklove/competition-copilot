@@ -927,7 +927,7 @@ validation: 1434 passed, 0 skipped; Ruff/diff check PASS. NEXT: P10 Event Engine
 
 ### P10.1 Competition Event Domain Contract — Review PASS, committed
 
-P10 implementation is COMPLETE. P10.1 evolves the existing `domain/event.py` CompetitionEvent;
+P10 is CLOSED / FROZEN. P10.1 evolves the existing `domain/event.py` CompetitionEvent;
 no parallel model is added. The pure P10.2 Engine is described below. Architecture:
 
 ```text
@@ -1054,9 +1054,9 @@ audited. Events reuse Monitor/Diff evidence; no website fetch or new Event sourc
 authority. No persistence, stateful suppression, severity, impact, notification,
 student/plan access, Replanning, scheduler, LLM or Agent.
 
-P10.1–P10.4 are COMPLETE / REVIEW PASS / COMMITTED. Final Review found 19/19
-functional exit criteria PASS and only documentation inconsistency. Final Review
-is pending re-run after documentation follow-up; Closure has not executed.
+P10.1–P10.4 are COMPLETE / REVIEW PASS / COMMITTED. Documentation follow-up Review
+PASS; P10 Final Review re-run PASS, with all 19 exit criteria PASS. P10 is CLOSED /
+FROZEN. Closure changes documentation only.
 
 Current P10 output types are REGISTRATION_WINDOW_CHANGED, COMPETITION_WINDOW_CHANGED,
 TRACK_MEMBERSHIP_CHANGED and OBSERVATION_COVERAGE_CHANGED. Legacy material/rule types
@@ -1078,10 +1078,51 @@ Adaptive Replanning (P11), Agent, MCP and Frontend. Dedup is stateless/batch-loc
 Event != Diff; Event != Impact; Event != Replanning. P10 only consumes supplied
 SnapshotDiff and never refetches sources, rebuilds Snapshots or recomputes Diff.
 
-NEXT after Final Review re-run / Closure: P11, NOT STARTED. Its inputs are canonical
+NEXT: P11 — Adaptive Replanning, NOT STARTED. Its inputs are canonical
 CompetitionEvent + StudentProfile + existing CompetitionPlan + necessary planning
 context. P11 owns severity/risk, student/plan impact, affected milestones and Adaptive
 Replanning. It must not refetch sources, rebuild Snapshots, recompute Diff or regenerate Events.
+
+### P10 Closure — Frozen Contracts and Boundaries
+
+Frozen: CompetitionEvent / CompetitionEventType, stable target, source Diff/change
+lineage, explicit aware event time, deterministic identity, immutable values and
+serialization. Scope is the four current types above; eligibility rules, awards,
+quota, judging, mentor rules and material/rule changes remain outside current
+structured SnapshotDiff/Event mapping.
+
+Frozen semantics: factual changes produce factual Events; knowledge changes produce
+OBSERVATION_COVERAGE_CHANGED. Zero Diff produces zero Events. P10.2 one change →
+one primitive Event; P10.3 canonical grouping requires same target, full source Diff,
+EventType/category and canonical field family. Different targets, Diffs/cycles,
+families and fact/observation Events never merge. Dedup is stateless/batch-local;
+no cross-run suppression. Canonical ordering and all unique selected lineage are
+preserved. Same-ID content conflicts and group time conflicts reject.
+Identity uses all canonical selected lineage, not random UUID/Python hash/wall-clock/
+human text. Time is detection/observation context, not unproven business occurrence.
+
+Canonical CompetitionEvent → SnapshotDiff → selected low-level Changes → before/after
+Snapshot references remains auditable. P10 consumes Diff, never fetches sources,
+builds Snapshots or recalculates Diff. Competition-level Events are student-independent
+and contain no severity/risk/affected student/plan. Event != Impact/Replanning;
+no CompetitionPlan mutation, PlanDiff generation or Planner invocation.
+No EventRepository/DB/history persistence; future storage requires independent design.
+Deferred: persistence, EventRepository, cross-run dedup, subscription, notification,
+severity, Impact Analysis, plan impact, Adaptive Replanning (P11), Agent, MCP and Frontend.
+No Network/LLM/Agent. Future defects require explicit reopen P10 → Implementation →
+Review → commit; P9/P9.5 and earlier Contracts stay frozen.
+
+```text
+Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
+-> P10.2 Primitive Events -> P10.3 Canonical Events (CompetitionEvent)
+-> future P11 Impact / Replanning
+```
+
+P11 will consume Events + StudentProfile + existing CompetitionPlan + necessary
+planning context, producing Impact Analysis, Affected Plan scope, Replanning Decision
+and Plan Diff. P11 must not repeat website fetch, Snapshot construction, Diff or
+Event generation; P11 implementation is NOT STARTED.
+Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
 ## 9. Replanning Architecture
 

@@ -11,9 +11,9 @@ Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
 **P9.5 — Competition Monitor: CLOSED / FROZEN; P9.5.1–P9.5.4 completed,
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
-resolved the earlier blocker. **P10 implementation COMPLETE: P10.1–P10.4
-COMPLETE / REVIEW PASS / COMMITTED.** Final Review is pending re-run after the
-documentation follow-up; Closure has not executed. P11 is next, not started.
+resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZEN;
+P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
+and P10 Final Review re-run PASS.** NEXT: P11 — Adaptive Replanning, NOT STARTED.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -915,7 +915,7 @@ notification or Replanning. Diff != Event; P9.5 Final Review PASS; CLOSED / FROZ
 
 ## P10.1 Competition Event Domain Contract — Review PASS, committed
 
-P10 implementation COMPLETE; P10.1 COMPLETE / Review PASS / committed. Existing `domain.event`
+P10 CLOSED / FROZEN; P10.1 COMPLETE / Review PASS / committed. Existing `domain.event`
 CompetitionEvent is evolved rather than duplicated. P1 id/target IDs/event_type,
 occurred_at/observed_at/source/description and eight legacy enums remain supported;
 legacy JSON shape is preserved. Existing usages were Contract/model integration
@@ -1034,8 +1034,8 @@ IDs/order/JSON. Typed lineage traces canonical Events through primitive changes,
 Diff and original Snapshot references; provenance and explicit detection time are
 preserved. No persistence, cross-run suppression, severity, impact, student/plan
 access, notification, Replanning, scheduler, live network, LLM or Agent. P10 Final
-Review found all 19 functional exit criteria PASS and only documentation inconsistency.
-Final Review is pending re-run after documentation follow-up; Closure has not executed.
+Review re-run passed after documentation follow-up; all 19 exit criteria PASS.
+P10 is CLOSED / FROZEN. Closure changes documentation only.
 
 P10 input is SnapshotDiff; output is canonical CompetitionEvent[]. Current mapping
 supports REGISTRATION_WINDOW_CHANGED, COMPETITION_WINDOW_CHANGED,
@@ -1059,11 +1059,35 @@ plan impact, Adaptive Replanning (P11), Agent, MCP and Frontend. Current dedup i
 stateless and batch-local only. P10 does not refetch websites, build Snapshots or
 recompute Diff.
 
-NEXT after Final Review re-run / Closure: P11, not started. Future P11 inputs are
+NEXT: P11 — Adaptive Replanning, NOT STARTED. Future P11 inputs are
 canonical CompetitionEvent + StudentProfile + existing CompetitionPlan + necessary
 planning context. P11 owns severity/risk, student/plan impact, affected milestones
 and Adaptive Replanning; it must not refetch sources, rebuild Snapshots, recompute
 Diff or regenerate Events.
+
+### P10 Closure — Frozen Scope
+
+Frozen: CompetitionEvent / CompetitionEventType, target, Diff/change lineage,
+aware observation/detection time, deterministic identity, immutability and JSON;
+four supported EventTypes above; fact/observation classification; one-change
+primitive mapping; canonical aggregation key/field-family separation; batch-local
+dedup; Event ordering; full unique lineage; Event != Impact/Replanning.
+Same-ID content conflicts and incompatible group detection times reject.
+Future defects require explicit reopen P10 → Implementation → Review → commit.
+
+P10 only consumes SnapshotDiff. Events are competition-level, not student-specific;
+no severity/risk, affected student/plan, Plan mutation, PlanDiff or Planner trigger.
+No EventRepository, Event DB or history persistence; future storage needs independent
+design. P11 will produce Impact Analysis, Affected Plan scope, Replanning Decision
+and Plan Diff from Events and planning context. No P11 code is implemented here.
+
+```text
+Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
+-> P10.2 Primitive Events -> P10.3 Canonical Events (CompetitionEvent)
+-> future P11 Impact / Replanning
+```
+
+Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p10_real_event_integration.py

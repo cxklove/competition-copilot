@@ -962,7 +962,7 @@ network, LLM or Agent is added by the Contract. P10.1 defines Contract only;
 P10.2 mapping is described below.
 Event != Diff; Event != Impact; Event != Replanning. Frozen P9/P9.5 remain unchanged.
 
-### P10.2 Deterministic Competition Event Engine — IMPLEMENTED, awaiting Review
+### P10.2 Deterministic Competition Event Engine — Review PASS, committed
 
 `domain/event_engine.py` supplies CompetitionEventEngine.interpret(SnapshotDiff,
 detected_at=<required aware datetime>) -> immutable Event tuple. It revalidates
@@ -984,8 +984,41 @@ detected_at is explicit, aware and >= after observation; no business occurred_at
 Engine has no state, duplicate suppression, Repository/storage, network, Monitor
 dependency, severity, impact, notification, Replanning, LLM or Agent. It does not
 compute Diff or group changes. Offline tests lock deterministic ordering/IDs/JSON,
-lineage, transition matrix, time and immutability. P10.3 aggregation/dedup semantics
-are next, not implemented; P10 remains IN PROGRESS. Event != Impact/Replanning.
+lineage, transition matrix, time and immutability. P10.3 normalization is described
+below; P10 remains IN PROGRESS. Event != Impact/Replanning.
+
+### P10.3 Event Aggregation / Canonical Dedup — IMPLEMENTED, awaiting Review
+
+CompetitionEventAggregator in `domain/event_aggregation.py` accepts immutable
+validated P10 Event tuples, including canonical single-family Events, and emits
+an immutable canonical tuple. No Repository, network, Monitor, Planner or mapping
+Engine dependency. It reads embedded Diff metadata/selected lineage only; it does
+not recompute Diff or remap business types. Empty input is legal.
+
+Aggregation key explicitly includes target, full source Diff, EventType and exact
+field family. Same-family window start/end aggregate; coverage Events stay scoped
+to registration/competition/membership. Fact and observation never merge. Distinct
+targets, source Diffs and observation cycles remain separate. Under frozen P9,
+track add/remove share one membership before/after record; no duplicate track
+field/change identities are invented for aggregation.
+
+Same-ID content conflict or group detection-time conflict rejects. Exact duplicates
+collapse only in this batch; generated canonical ID conflicts reject too.
+Selected source fields are unique/canonically ordered;
+overlapping lineages also normalize safely. Aware instants serialize as UTC with
+the same meaning; no input is mutated. Groups sort by target and directed Diff
+times/references/complete lineage, then family order registration/competition/
+membership, fact before observation, then type. Output order never uses random ID.
+P10.1 identity is rebuilt over combined lineage, not copied from a primitive ID.
+Representative display/source metadata uses the earliest selected-field tuple;
+all original evidence remains embedded. No source fetch or verification upgrade.
+
+Single-family input validation avoids silently splitting mixed-scope Events.
+P10.1/P10.2/P9/P9.5 stay frozen. No cross-run seen-state, suppression, EventRepository,
+storage, severity, impact, notification, Replanning, LLM or Agent. Repeated calls
+return identical canonical Events, not an empty already-processed result. Tests
+are offline and deterministic. P10.4 integration is next, not implemented; P10
+remains IN PROGRESS, with Event != Impact/Replanning.
 
 ## 9. Replanning Architecture
 

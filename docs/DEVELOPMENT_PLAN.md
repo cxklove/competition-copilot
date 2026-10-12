@@ -742,8 +742,8 @@ P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. NEXT: P10 Event Engine.
 
 ## P10 — Competition Event Engine
 
-- **Status:** IN PROGRESS. P10.1 Review PASS / committed; P10.2 deterministic
-  Diff -> Event Engine IMPLEMENTED, awaiting Review. No aggregation/dedup yet.
+- **Status:** IN PROGRESS. P10.1/P10.2 Review PASS / committed; P10.3 Event
+  Aggregation / Canonical Dedup IMPLEMENTED, awaiting Review. No stateful suppression/storage.
 - **Goal:** 将已核验 Diff 分类为可供下游处理的赛事事件。
 - **Inputs:** P9/P9.5 已产生的 SnapshotDiff、必要 target/source context、核验状态及赛事规则；不重新抓网页、构造 Snapshot 或计算 Diff。
 - **Main Deliverables:** Event 类型、触发条件、去重/幂等、事件证据与订阅接口。
@@ -791,10 +791,10 @@ Event != Diff != Impact/Replanning. P10.1 only defines Contract. Offline tests c
 legacy compatibility, four types, presence/knowledge separation, multiple selected
 changes, identity/time/provenance safety, immutability and stable JSON. Frozen P9,
 P9.5 and P2–P8 code/tests are unchanged. P10.2 mapping is described below;
-P10.3 aggregation/dedup remain deferred; no Repository/network/LLM/Agent or P11
+P10.3 batch aggregation/dedup is described below; no Repository/network/LLM/Agent or P11
 logic is added by the Contract.
 
-### P10.2 — Deterministic Diff to Event Engine (IMPLEMENTED, awaiting Review)
+### P10.2 — Deterministic Diff to Event Engine (Review PASS, committed)
 
 `domain/event_engine.py` CompetitionEventEngine.interpret(source_diff,
 detected_at=<explicit aware datetime>) is a pure Domain Service. Input is validated
@@ -822,8 +822,48 @@ Tests cover zero/reflexive Diff, factual window/membership/presence transitions,
 knowledge transitions, lineage, ordering, identity, time, immutable input/output
 and JSON. Frozen P10.1/P9/P9.5/P2–P8 code/tests are unchanged. No aggregation,
 cross-call duplicate suppression, Repository/persistence, network, severity,
-impact, notification, Replanning, LLM or Agent. P10.3 aggregation/dedup semantics
-are next but not implemented; P10 is not complete.
+impact, notification, Replanning, LLM or Agent is added by this primitive Engine.
+P10.3 normalization is described below; P10 is not complete.
+
+### P10.3 — Event Aggregation / Canonical Dedup (IMPLEMENTED, awaiting Review)
+
+`domain/event_aggregation.py` CompetitionEventAggregator.normalize(events) is a
+pure stateless Domain Service: immutable P10 Event tuple -> immutable canonical
+Event tuple. P10.2 remains one low-level change -> one primitive Event; P10.3
+groups related Events without remapping ChangeKind/EventType or recalculating Diff.
+Empty input returns empty; a single Event preserves its semantics/identity/time.
+Already canonical single-family P10 Events are also supported for normalization.
+
+Key: stable target + full canonical source Diff lineage + EventType + exact
+top-level field family. Registration and competition start/end merge within their
+family. Observation coverage merges within a family only; registration versus
+membership coverage stays separate, as do fact/observation types, targets and
+different Diffs/cycles. P9 carries track addition/removal together in one immutable
+membership before/after record and rejects duplicate field records. The track
+test preserves both set differences in one Event, not two invented source changes.
+
+Exact batch duplicates collapse; same ID with different content is rejected.
+Generated canonical ID conflicts across distinct groups are also rejected.
+Overlapping selected lineage is unioned uniquely in P10.1 canonical field order.
+Differing detection times within a group are rejected, never resolved by min/max.
+Equivalent aware instants normalize to UTC representation without changing meaning
+or inputs. Output orders target, directed Diff times/references/full lineage,
+registration/competition/membership family, FACT_CHANGE before OBSERVATION_CHANGE,
+then type. Human text and random IDs never determine grouping or output order.
+
+Aggregated IDs reuse P10.1 identity over all selected fields; start-only and
+start+end differ. Representative display/source metadata comes from the member
+with earliest canonical selected-field tuple, while all evidence remains in Diff.
+No new provenance/verification claims. Mixed-family input Events are rejected;
+normalization does not split/reinterpret them. Legacy P1 Events are not inputs.
+
+Tests cover grouping/separation, duplicates/overlap/conflicts, permutations,
+determinism, metadata, immutable inputs/outputs and JSON. P10.1/P10.2/P9/P9.5 and
+earlier code/tests stay frozen. Dedup is supplied-batch only; repeated calls still
+return canonical Events. No EventRepository, history/persistence, cross-run
+suppression, network, severity, impact, notification, Replanning, LLM or Agent.
+P10.4 real Monitor Diff -> primitive -> canonical integration is next, not started;
+P10 is not complete.
 
 ## P11 — Event-driven Replanning
 

@@ -11,8 +11,8 @@ Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
 **P9.5 — Competition Monitor: CLOSED / FROZEN; P9.5.1–P9.5.4 completed,
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
-resolved the earlier blocker. **P10 IN PROGRESS: P10.1 Review PASS / committed;
-P10.2 deterministic Diff -> Event Engine implemented, awaiting Review.**
+resolved the earlier blocker. **P10 IN PROGRESS: P10.1/P10.2 Review PASS / committed;
+P10.3 Event Aggregation / Canonical Dedup implemented, awaiting Review.**
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -949,7 +949,7 @@ notification, LLM or Agent. P9/P9.5/P2–P8 remain frozen. P10.2 is described be
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event.py backend/tests/domain/test_p10_event_contract.py
 ```
 
-## P10.2 Deterministic SnapshotDiff to Event Engine
+## P10.2 Deterministic SnapshotDiff to Event Engine — Review PASS, committed
 
 `domain.event_engine.CompetitionEventEngine().interpret(diff, detected_at=...)`
 accepts only validated SnapshotDiff and explicit aware detection time >= after
@@ -971,9 +971,40 @@ No verification upgrade. Closed P9 field/kind types reject unsupported inputs.
 Tests are offline and cover transitions, ordering, lineage, identity, explicit
 time, serialization and immutable inputs/outputs. No aggregation, cross-call
 dedup, persistence, severity, impact, notification, Replanning, network, LLM or
-Agent. Event != Impact; Event != Replanning. P10.3 aggregation/dedup semantics are
-next, not implemented; P10 is not complete. Frozen Contract/modules are unchanged.
+Agent is added by the primitive Engine. Event != Impact; Event != Replanning.
+P10.3 normalization is described below; P10 is not complete. Frozen modules are unchanged.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event_engine.py
+```
+
+## P10.3 Event Aggregation / Canonical Dedup
+
+`domain.event_aggregation.CompetitionEventAggregator().normalize(events)` accepts
+an immutable tuple of validated P10 Events and returns a canonical immutable tuple.
+P10.2 still produces one primitive Event per low-level change. P10.3 groups related
+Events by target/full Diff lineage/type/exact field family. Same-family window
+start/end combine; observation families and fact/observation types remain separate.
+Different targets/Diffs/cycles never merge. Track add/remove are already captured
+by one P9 membership before/after change, preserved without inventing extra records.
+
+Exact duplicates collapse within the supplied batch; same-ID different content
+and incompatible group detection times reject. Overlapping selected fields are
+unique; generated canonical ID conflicts across groups reject as well. Fields are
+canonically ordered. UTC representation normalizes equivalent aware
+instants without mutating inputs. Aggregated identity reuses P10.1's helper for
+all selected lineage. Representative display/source metadata comes from earliest
+canonical field tuple; full evidence is retained. Output sorts target/directed
+Diff times/references/full lineage, family, fact before observation, then type.
+
+Empty/single Events are supported; already canonical single-family P10 Events
+normalize too. Mixed-family and legacy inputs reject, without Event remapping.
+No Diff recalculation, Repository, EventRepository/history/persistence, stateful
+cross-run suppression, network, severity, impact, notification, Replanning, LLM
+or Agent. Same batch tomorrow still returns the same Events. Frozen P10.1/P10.2/
+P9/P9.5/P2–P8 are unchanged. P10.4 real integration is next, not started; P10 is
+not complete. Offline tests cover lineage, conflicts, permutations and stable JSON.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event_aggregation.py
 ```

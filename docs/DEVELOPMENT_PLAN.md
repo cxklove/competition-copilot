@@ -536,13 +536,13 @@ Agent, MCP and Frontend. These do not block P9 closure.
 
 ## P9.5 — Competition Monitor
 
-**Status: IN PROGRESS. P9.5.1 Monitor Contract IMPLEMENTED, awaiting Review.**
+**Status: IN PROGRESS. P9.5.1 Review PASS / committed; P9.5.2 One-shot Orchestrator IMPLEMENTED, awaiting Review.**
 Monitor observes official sources, produces
 structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
 UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
 to P10; impact and Adaptive Replanning belong to P11.
 
-### P9.5.1 — Monitor Contract (IMPLEMENTED, awaiting Review)
+### P9.5.1 — Monitor Contract (Review PASS, committed)
 
 `domain/monitoring.py` defines immutable MonitorCheckRequest, SourceObservationResult,
 SourceCheckError and MonitorCheckResult. `application/monitoring.py` exposes the
@@ -569,11 +569,34 @@ Snapshot and, when baseline exists, a Diff with matching references. Initial che
 have no Diff; failed checks have neither new Snapshot nor Diff. Zero-change and
 reflexive Diff are successful checks. These validators do not build or compare.
 
-Only contracts and synthetic/fake-source tests are implemented. P9.5.2 will
-orchestrate observation -> Snapshot/Diff -> result; P9.5.3 will provide a source
-adapter. No network/HTTP parsing, retry/timeout, scheduler/poll loop, Repository
+P9.5.2 orchestrates observation -> Snapshot/Diff -> result below; P9.5.3 will
+provide a source adapter. No network/HTTP parsing, retry/timeout, scheduler/poll loop, Repository
 mutation, Event, notification, impact, Replanning, LLM/Agent/MCP is implemented.
 P9 and P2–P8 remain frozen; P9.5 is not complete.
+
+### P9.5.2 — One-shot Competition Monitor (IMPLEMENTED, awaiting Review)
+
+`application/monitor_checks.py` provides OneShotCompetitionMonitor.check(request).
+It calls the injected CompetitionObservationSource exactly once and validates
+the typed result. Source failure returns MonitorCheckResult with the original
+error, no new Snapshot and no Diff. Successful observation is bound to request
+target/time/source policy before Snapshot construction; contract violations raise.
+Success may contain partial or fully UNKNOWN state, without being fetch failure.
+
+The current Snapshot uses the public P9 validated constructor and the existing
+pure P9.2 `_snapshot_id` helper to preserve canonical identity. No Repository
+builder/query is invoked and no ID algorithm is duplicated or modified. Snapshot
+time/provenance come from the successful observation, not from baseline metadata.
+The formal P9.3 Diff Engine performs all fact comparison. Same-state success
+returns zero Diff; changed state returns typed low-level Diff; same exact identity
+also follows P9.1.1 zero-diff semantics. Initial checks without baseline have no Diff.
+
+Only deterministic fake-source tests are used. They verify failure never constructs
+Snapshot/ID or calls Diff, success/UNKNOWN/known-value/track cases, binding safety,
+provenance, one-call behavior, deterministic JSON and immutability. No Repository
+writes, persistence, retry, scheduler, loop, HTTP/parser, Event, notification,
+impact, Replanning, LLM/Agent/MCP is added. P9/P9.5.1 remain unchanged.
+P9.5.3 source adapter is future work; P9.5 is not complete.
 
 - **Goal:** 定期观察可信来源并发现潜在状态变化。
 - **Inputs:** 已有 Competition、监控来源、当前 Snapshot、抓取/轮询策略。

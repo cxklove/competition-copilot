@@ -752,7 +752,7 @@ reuse frozen UNKNOWN/KNOWN_ABSENT, Snapshot identity and Diff semantics.
 HTTP/crawler, freshness/retry/backoff policy, semantic rule-text and provenance
 diff, notification, Agent/MCP/Frontend remain deferred.
 
-### P9.5.1 Monitor Contract — IMPLEMENTED, awaiting Review
+### P9.5.1 Monitor Contract — Review PASS, committed
 
 P9.5 is IN PROGRESS. `domain/monitoring.py` contains one-shot immutable contracts;
 `application/monitoring.py` defines CompetitionObservationSource.observe(request)
@@ -763,7 +763,7 @@ Domain depends only on P9 contracts and SourceMetadata, not Repository or adapte
 ```text
 Official Source -> Observation Source Adapter (future P9.5.3)
                 -> typed SourceObservationResult
-                -> Snapshot + Diff (future P9.5.2 orchestration)
+                -> Snapshot + Diff (P9.5.2 one-shot orchestration)
                 -> MonitorCheckResult
 ```
 
@@ -781,9 +781,29 @@ HTTP 200 is not verification. SourceMetadata time remains separate from snapshot
 observation time. Successful checks with zero-change/reflexive Diff remain success;
 outcome derives from observation, without duplicate flags or event classification.
 
-Only contracts/tests exist. No live adapter, network, parser, scheduler, polling,
-Snapshot/Diff orchestration, Repository/data mutation, Event/impact/notification,
+P9.5.2 orchestration is described below. No live adapter, network, parser,
+scheduler, polling, Repository/data mutation, Event/impact/notification,
 Replanning or LLM/Agent/MCP is implemented. P9 remains FROZEN; P9.5 is not complete.
+
+### P9.5.2 One-shot Monitor Orchestrator — IMPLEMENTED, awaiting Review
+
+`application/monitor_checks.py` composes the ObservationSource Protocol, a normal
+P9 Snapshot constructor and the formal SnapshotDiffEngine. The source is injected;
+production has no default fake or transport adapter. A check calls source.observe
+once. CHECK_FAILED returns the typed error with no new Snapshot/ID and no Diff
+call. CHECK_SUCCEEDED may contain UNKNOWN facts; it constructs a Snapshot from
+that observation's explicit aware time/state/provenance and invokes Diff when a
+baseline exists. Contract mismatches fail before Snapshot creation; initial
+checks have no Diff. There is no fact comparison logic in the orchestrator.
+
+Identity reuses P9.2's pure `_snapshot_id` helper without invoking its Repository
+builder or modifying frozen code. This preserves the existing canonical algorithm.
+No-change is success; changes remain low-level P9 Diff. P9.1.1 reflexive zero
+Diff remains valid. Verification status is preserved, never upgraded by a check.
+Fake-source tests assert one call, failure short circuit, safety, input/output
+immutability and stable JSON. No storage, scheduling, retry, HTTP, parser, Event,
+notification, impact, Replanning, LLM or Agent is implemented. P9.5.3 remains
+future work; P9.5 is still in progress.
 
 ## 9. Replanning Architecture
 

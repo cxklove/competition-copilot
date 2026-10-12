@@ -354,7 +354,7 @@ P9 answers what changed in Competition/Edition/Track
 dynamic state, using Snapshot/Diff/version concepts; it does not enhance
 Planner, reinterpret P8 Needs/Plans, directly modify CompetitionPlan or Replan.
 CompetitionPlan remains stable downstream state. Event -> Impact -> Replanning
-belongs to P10/P11. Future P12 Agent handles intent, tool selection, multi-step
+belongs to P11; P10 owns Diff -> Event. Future P12 Agent handles intent, tool selection, multi-step
 orchestration, clarification and explanation; it must not reimplement Eligibility,
 Recommendation, Skill Gap or frozen Planning rules.
 
@@ -406,7 +406,7 @@ P2–P8 remain frozen.
 
 P9.2 implements baseline Snapshot creation; P9.3 implements Diff computation
 below. P9 integration and Final Review passed; P9.5 Monitor implementation is
-complete below. P10 Event and P11 Replanning remain future work. Text/rules semantic diff and additional
+complete below. P10 Event interpretation is implemented below; P11 Replanning remains future work. Text/rules semantic diff and additional
 structured facts are deferred.
 
 ### P9.2 — Competition Snapshot Builder (Review PASS, committed)
@@ -442,7 +442,7 @@ dataset counts.
 P9.2 is a repository-backed baseline observation. Production code does not read
 Seed files directly, use Network/LLM/Agent/MCP, choose status/deadlines, compare
 snapshots, generate Diff/Event, monitor sources or replan. P9 integration passed;
-P9.5 Monitor implementation is complete below; P10 Event and P11 Replanning remain future work. P9 is FROZEN.
+P9.5 Monitor and P10 Event interpretation are implemented below; P11 Replanning remains future work. P9 is FROZEN.
 
 ### P9.3 — Deterministic Snapshot Diff (Review PASS, committed)
 
@@ -541,7 +541,7 @@ Agent, MCP and Frontend. These do not block P9 closure.
 **Status: CLOSED / FROZEN. P9.5.1–P9.5.4 COMPLETED / Review PASS / committed; P9.5 Final Review PASS — READY TO CLOSE.**
 The documentation consistency follow-up resolved the previous blocker; Final
 Review re-run passed. This Closure freezes the deterministic one-shot Monitor
-core. P10 followed Closure; its current Contract-only status is recorded below.
+core. P10 followed Closure; its completed implementation status is recorded below.
 Monitor observes official sources, produces
 structured observations and new P9 Snapshots. It must reuse frozen Snapshot,
 UNKNOWN/KNOWN_ABSENT, identity and Diff semantics. Event interpretation belongs
@@ -573,8 +573,9 @@ Scheduler and polling loop are NOT IMPLEMENTED and NOT P9.5 EXIT BLOCKERS.
 Future scheduler -> invoke the one-shot Monitor; execution policy must preserve
 Monitor semantics. Deferred: second competition adapter, multi-source monitor,
 periodic scheduler/polling, distributed jobs, retry/backoff runtime policy,
-monitor rate limiting policy, Snapshot history persistence, notification, CompetitionEvent (P10), Impact
-Analysis/Adaptive Replanning (P11), Agent, MCP and Frontend.
+monitor rate limiting policy, Snapshot history persistence, notification, Impact
+Analysis/Adaptive Replanning (P11), Agent, MCP and Frontend. P10 CompetitionEvent
+interpretation is implemented below and remains outside the P9.5 Monitor boundary.
 
 ### P9.5 Closure — Frozen Scope
 
@@ -742,15 +743,39 @@ P9.5 Final Review PASS; P9.5 is CLOSED / FROZEN. NEXT: P10 Event Engine.
 
 ## P10 — Competition Event Engine
 
-- **Status:** IN PROGRESS. P10.1–P10.3 Review PASS / committed; P10.4 Real Event
-  Integration IMPLEMENTED, awaiting Review. No stateful suppression/storage.
-- **Goal:** 将已核验 Diff 分类为可供下游处理的赛事事件。
-- **Inputs:** P9/P9.5 已产生的 SnapshotDiff、必要 target/source context、核验状态及赛事规则；不重新抓网页、构造 Snapshot 或计算 Diff。
-- **Main Deliverables:** Event 类型、触发条件、去重/幂等、事件证据与订阅接口。
-- **Files/Modules Expected:** `backend/domain/events/`、`backend/application/events/`、`backend/tests/events/`。
-- **Tests Required:** 截止日期/材料/规则变化、重复事件、无效变化、乱序观察和重放测试。
-- **Acceptance Criteria:** 每个被接受的状态变化有对应 CompetitionEvent，事件引用来源、Diff、版本与稳定标识。
-- **Explicitly Out of Scope:** 自动生成新计划、Agent 解释和通知渠道。
+- **Status:** Implementation COMPLETE. P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED.
+  Final Review: pending re-run after documentation follow-up; Closure: not yet executed.
+- **Goal:** SnapshotDiff → primitive CompetitionEvent[] → canonical CompetitionEvent[]。
+- **Inputs:** P9/P9.5 已产生的 validated SnapshotDiff、必要 target/source context 和显式 aware detection time；不重新抓网页、构造 Snapshot 或计算 Diff。
+- **Main Deliverables:** 受控演进的 Event Contract、确定性 primitive mapping、batch-local canonical aggregation/dedup、完整 lineage 和 offline real-component integration。
+- **Files/Modules:** `backend/competition_copilot/domain/event.py`、`event_engine.py`、`event_aggregation.py`，对应 domain tests 和 `backend/tests/integration/test_p10_real_event_integration.py`。
+- **Tests Required:** registration/competition window、track membership、observation coverage、zero Diff、fact/observation separation、aggregation/dedup、target/source-Diff separation、time/identity/lineage、顺序无关性和失败集成测试。
+- **Acceptance Criteria:** P10.2 one low-level change → one primitive Event；P10.3 related primitives → canonical Events；identity deterministic、lineage complete，dedup 仅在 supplied batch 内。
+- **Explicitly Out of Scope:** subscription/notification/delivery、EventRepository/history persistence、cross-run suppression、severity/Impact/Replanning、Agent/LLM。
+
+Current generated EventTypes are REGISTRATION_WINDOW_CHANGED,
+COMPETITION_WINDOW_CHANGED, TRACK_MEMBERSHIP_CHANGED and OBSERVATION_COVERAGE_CHANGED.
+Legacy material/rule Event enums remain compatibility-only, not current mapping scope
+or exit requirements. Future factual expansion must first evolve the corresponding
+Snapshot/Diff Contract, then separately extend Event mapping; P10 cannot exceed P9 authority.
+
+Subscription = NOT IMPLEMENTED; Notification = NOT IMPLEMENTED. Neither is a P10
+exit blocker. Deferred: EventRepository, event history persistence, cross-run duplicate
+suppression, subscription, notification, severity, Impact Analysis, plan impact,
+Adaptive Replanning (P11), Agent, MCP and Frontend.
+
+SnapshotDiff changes=() → primitive Events=() → canonical Events=(); no NO_CHANGE_EVENT
+or heartbeat. FACT CHANGE produces factual Events; knowledge changes produce
+OBSERVATION_COVERAGE_CHANGED. KNOWN → UNKNOWN is coverage loss, not fact removal.
+Aggregation requires the same target, full source Diff, EventType/category and canonical
+field family. Unique source changes remain auditable through Diff and before/after
+Snapshot references. Identity uses canonical lineage, never random UUID, Python hash,
+wall-clock-only identity or human summary. Time is observation/detection context,
+not an unproven business occurrence time. Event != Diff; Event != Impact/Replanning.
+
+NEXT after Final Review re-run and Closure: P11. Its inputs are canonical CompetitionEvent,
+StudentProfile, existing CompetitionPlan and necessary planning context. P11 must not
+refetch sources, rebuild Snapshots, recompute Diff or regenerate Events. P11 is not started.
 
 ### P10.1 — Competition Event Domain Contract (Review PASS, committed)
 
@@ -763,7 +788,7 @@ integration test; no production consumer or Event Engine was found.
 Controlled evolution reuses that model, adding registration_window_changed,
 competition_window_changed, track_membership_changed and
 observation_coverage_changed. Legacy enums/construction/JSON shape are retained
-for historical records, not generated by future P10. New Event objects are frozen;
+for historical records, not generated by current P10. New Event objects are frozen;
 assignment/model_copy(update=...) is deliberately unsupported. No current consumer
 mutated Events. No parallel Event model or severity/impact/student/workflow is added.
 
@@ -786,7 +811,7 @@ Engine or dedup service. Supplied P10 id must match it. observed_at means explic
 aware detection time >= after observation; occurred_at must be None for P10 because
 Diff cannot establish business effective time. Legacy time meanings remain intact.
 
-P9/P9.5 produce SnapshotDiff; P10 will interpret it as business CompetitionEvent;
+P9/P9.5 produce SnapshotDiff; P10 interprets it as business CompetitionEvent;
 Event != Diff != Impact/Replanning. P10.1 only defines Contract. Offline tests cover
 legacy compatibility, four types, presence/knowledge separation, multiple selected
 changes, identity/time/provenance safety, immutability and stable JSON. Frozen P9,
@@ -823,7 +848,7 @@ knowledge transitions, lineage, ordering, identity, time, immutable input/output
 and JSON. Frozen P10.1/P9/P9.5/P2–P8 code/tests are unchanged. No aggregation,
 cross-call duplicate suppression, Repository/persistence, network, severity,
 impact, notification, Replanning, LLM or Agent is added by this primitive Engine.
-P10.3 normalization is described below; P10 is not complete.
+P10.3 normalization is described below; P10 implementation is complete, pending Final Review re-run.
 
 ### P10.3 — Event Aggregation / Canonical Dedup (Review PASS, committed)
 
@@ -863,9 +888,9 @@ earlier code/tests stay frozen. Dedup is supplied-batch only; repeated calls sti
 return canonical Events. No EventRepository, history/persistence, cross-run
 suppression, network, severity, impact, notification, Replanning, LLM or Agent.
 P10.4 real Monitor Diff -> primitive -> canonical integration is described below;
-P10 is not complete.
+P10 implementation is complete; Closure has not executed.
 
-### P10.4 — Real Competition Event Integration (IMPLEMENTED, awaiting Review)
+### P10.4 — Real Competition Event Integration (COMPLETE, Review PASS, committed)
 
 `tests/integration/test_p10_real_event_integration.py` composes actual production
 Repository -> SnapshotBuilder -> concrete COMAP Adapter -> OneShot Monitor -> P9
@@ -896,12 +921,14 @@ source provenance, explicit aware detection time, immutability and serialization
 Production code and frozen P10.1/P10.2/P10.3/P9/P9.5/P2–P8 tests/data are unchanged.
 No live smoke/network, Event persistence, stateful dedup, severity/impact, student/
 plan dependency, notification, Replanning, scheduler, LLM or Agent. P10 Final
-Review has not executed; P10 is IN PROGRESS, not CLOSED.
+Review found 19/19 functional exit criteria PASS and only documentation inconsistency.
+Final Review is pending re-run after this documentation follow-up; Closure has not executed.
 
 ## P11 — Event-driven Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Inputs:** CompetitionEvent、受影响的 CompetitionPlan、StudentProfile、最新核验事实。
+- **Status:** NEXT after P10 Final Review re-run / Closure; NOT STARTED。
+- **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
 - **Tests Required:** 无影响、多计划影响、时间冲突、重复事件幂等、前后版本与证据链测试。

@@ -203,7 +203,7 @@ later planning stages do not change the frozen P7 semantics.
 
 ## P8 — Competition Planner
 
-**Status: IN PROGRESS; P8.1 Review PASS; P8.2 IMPLEMENTED, pending review.** Consume the frozen P7
+**Status: IN PROGRESS; P8.1/P8.2 Review PASS; P8.3 IMPLEMENTED, pending review.** Consume the frozen P7
 SkillGapDecision uncertainty rules above. Suggested decomposition:
 
 1. P8.1 Plan Domain Contract
@@ -234,9 +234,9 @@ known need references, source status/reason consistency and explicit timing boun
 
 `backend/tests/domain/test_planning_contract.py` covers synthetic contract semantics,
 audit, immutable snapshots and serialization. Existing P1 plan tests reflect tuple
-collections/new serialized fields; no P7 file changes. P8.2 inputs, Planner Engine,
+collections/new serialized fields; no P7 file changes. At the P8.1 milestone, P8.2 inputs, Planner Engine,
 resources, Replanning, P5/P6 execution, Tool/API/Agent/MCP/network/LLM are not implemented.
-P8 is not complete; P8.3 has not started.
+P8 is not complete; implemented stages are documented below.
 
 P8.2 adds pure `domain/planning_inputs.py` PlanningInputDeriver and synthetic
 `backend/tests/domain/test_planning_inputs.py`. derive accepts a validated P7
@@ -252,6 +252,24 @@ source_audit returns a faithful existing SkillGapPlanningAudit projection.
 No Plan/Milestone, timing policy, content/strategy, score, LLM/network, resources,
 Repository/Provider, P5/P6 logic or Replanning is implemented. P8.1 and P7 models
 remain unchanged; real integration remains a future P8.4 task.
+
+P8.3 adds pure `domain/baseline_plan_builder.py` BaselineCompetitionPlanBuilder:
+target + PlanningNeed tuple + optional horizon + explicit student/creation metadata
++ supplied P8.2 audit -> CompetitionPlan. Nonempty needs require the source audit;
+empty plans may omit it as allowed by P8.1. One need produces one unscheduled
+milestone with a source_need_id and deterministic template, retaining type/scope,
+input order, source facts and audit. All three need cases are represented without
+learning content, resources, uncertainty strategy, timing or duration estimates.
+Horizon bounds pass through; existing DRAFT/version 1 and PENDING defaults apply.
+No priority scoring, P7 reinterpretation, P5/P6 logic, LLM/network, Agent,
+Digital Twin or Replanning. Stable canonical SHA-256 IDs include machine facts,
+ordered needs, horizon and explicit metadata, excluding evidence display prose;
+milestone IDs are plan-scoped. Target/audit and canonical P8.2 need target mismatch
+fail fast; real target existence/parent validation remains caller responsibility.
+`backend/tests/domain/test_baseline_plan_builder.py` tests mixed/empty plans,
+identity/input changes, timing pass-through, source links, validation and immutable
+JSON snapshots. P8.1/P8.2/P7 contracts and real data are unchanged. P8.4 has not
+started; P8 completion/adaptive planning is not claimed.
 
 - **Goal:** 把赛事目标与技能差距转为有依赖和期限的任务计划。
 - **Inputs:** StudentProfile、已验证 Competition、SkillGapDecision、Deadline、可用时间；保留 GAP / UNKNOWN / NO_GAP 和 requirement coverage 的冻结语义。

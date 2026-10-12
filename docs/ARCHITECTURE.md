@@ -371,7 +371,7 @@ P8.1 is contract-only. No Planner Engine, resources, P5/P6 logic, priority algor
 LLM/network, Tool/API/Agent/MCP or Replanning is implemented. P7 remains frozen.
 Tests are synthetic Domain tests; P8 completion is not claimed.
 
-### P8.2 Deterministic Planning Input Derivation — IMPLEMENTED, pending review
+### P8.2 Deterministic Planning Input Derivation — Review PASS
 
 `domain/planning_inputs.py` defines pure PlanningInputDeriver:
 `derive(SkillGapDecision) -> tuple[PlanningNeed, ...]`. It revalidates the supplied
@@ -396,8 +396,41 @@ identity even when IDs contain punctuation; no labels, random UUIDs, current
 time or process hash are used. Repeated derivation yields identical ordered JSON.
 No Plan/Milestone, timing, learning content, uncertainty-resolution strategy,
 priority/readiness score, resource, P5/P6 logic, Repository/Provider, network/LLM,
-Agent or Replanning is added. P8.1 and P7 contracts remain unchanged; P8.3 has not
-started. Synthetic tests live in `backend/tests/domain/test_planning_inputs.py`.
+Agent or Replanning is added. P8.1 and P7 contracts remain unchanged.
+Synthetic tests live in `backend/tests/domain/test_planning_inputs.py`.
+
+### P8.3 Baseline Competition Plan Builder — IMPLEMENTED, pending review
+
+`domain/baseline_plan_builder.py` is a pure Domain Service. It consumes the
+existing planning target, immutable PlanningNeed tuple, optional TimeWindow,
+explicit student_id / aware created_at and the P8.2 source audit required for
+nonempty needs by CompetitionPlan. No SkillGapDecision or P7 service is accepted.
+The target type is reused through P8.1 plan.py; P7 audit facts are retained, not
+interpreted by builder logic. Matching audit/target and P8.2 canonical need target
+bindings fail fast on mismatch; general P8.1 IDs rely on supplied audit binding.
+
+One need produces exactly one milestone, following input order. Its purpose is
+the unchanged referenced need type/scope, accessed through source_need_id.
+Deterministic English templates distinguish improvement, skill uncertainty and
+requirement-set uncertainty, without generating learning content or a resolution
+strategy. Empty needs produce an empty plan, never generic preparation. Baseline
+uses the existing DRAFT/version 1 and PENDING defaults. Horizon is retained;
+milestone start/due/effort remain None even with a complete horizon. No deadline,
+duration, priority or resource policy is implemented.
+
+Plan ID is a versioned SHA-256 of canonical machine input: target, student ID,
+explicit created_at, ordered need facts, source audit and optional horizon. Need
+evidence message prose is excluded from identity; all facts/evidence are still
+preserved in the output. Material fact/need/order/horizon changes change the ID.
+Milestone IDs are plan-scoped digests of plan ID + source need ID. No current
+time, randomness or process hash is used. created_at is supplied metadata, and
+updated_at equals it for this initial plan. No prior plan, event or diff is read.
+
+P8.1/P8.2/P7 and earlier phases remain unchanged. The builder reuses normal
+validation and immutable snapshots, without Repository/Provider, network/LLM,
+Agent, eligibility/recommendation execution, Digital Twin or Replanning.
+Tests are synthetic in `backend/tests/domain/test_baseline_plan_builder.py`.
+P8.4 and adaptive planning are not implemented; P8 is not complete.
 
 ```text
 StudentProfile + Competition + SkillGap + Deadline

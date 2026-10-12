@@ -6,7 +6,7 @@ P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
 P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
 StudentProfile Domain already exists and supplies input. P7 finished requirements,
 evidence, deterministic diagnosis and real integration, not student ingestion.
-P8.1 Planning Domain Contract Review PASS; P8.2 Planning Inputs IMPLEMENTED, pending review.
+P8.1/P8.2 Review PASS; P8.3 Baseline Plan Builder IMPLEMENTED, pending review.
 P8 is not complete. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -383,7 +383,7 @@ P8.1 tests from repository root:
 
 ### P8.2 Deterministic Planning Inputs
 
-IMPLEMENTED, pending review. `domain/planning_inputs.PlanningInputDeriver.derive`
+Review PASS. `domain/planning_inputs.PlanningInputDeriver.derive`
 accepts only validated SkillGapDecision and returns tuple[PlanningNeed, ...].
 GAP -> SKILL_IMPROVEMENT; UNKNOWN -> UNCERTAINTY_RESOLUTION; SATISFIED -> no item
 need. Dual uncertainty preserves both reasons in one need; overall GAP_IDENTIFIED
@@ -397,10 +397,36 @@ display labels/random/time/hash(). Source items, type, levels, reasons and evide
 are preserved; no provenance is invented. P8.1 and P7 contracts are unchanged.
 No Plan/Milestone, timing, learning content, resolution strategy, priority/score,
 resources, P5/P6 evaluation, Repository/Provider, network/LLM, Agent or Replanning
-is added. P8.3 and Planner Engine are not implemented; P8 is not complete.
+is added by P8.2. Baseline building is documented below; P8 is not complete.
 
 Targeted command from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_planning_inputs.py`.
+
+### P8.3 Baseline Competition Plan Builder
+
+IMPLEMENTED, pending review. `domain/baseline_plan_builder.BaselineCompetitionPlanBuilder`
+consumes validated planning target, PlanningNeed tuple, optional TimeWindow and
+explicit student_id/aware created_at. Pass the matching P8.2 source_audit for
+nonempty needs, as required by CompetitionPlan. No P7 Decision is consumed.
+One need becomes one milestone, preserving need order and source_need_id.
+Purpose follows the referenced need; titles use deterministic templates for
+improvement, skill uncertainty and requirement-set uncertainty. No concrete
+learning content or resolution strategy is generated. Empty needs produce zero
+milestones. Existing DRAFT/version 1 and PENDING defaults are reused.
+
+Horizon is preserved; milestone start/due/estimated_hours remain None. Plan IDs
+are versioned SHA-256 of canonical machine inputs, including ordered need facts,
+target/student, explicitly supplied created_at, audit and horizon, excluding
+evidence display prose. Material input changes change identity; milestone IDs
+are plan-scoped (plan ID + need ID). No clock/random/hash() identity is used.
+Target/audit and canonical P8.2 need target mismatch reject; general P8.1 IDs have
+no embedded target and depend on the caller's matching audit. Output preserves
+all needs/evidence through normal frozen validation. P8.1/P8.2/P7 are unchanged.
+No scheduling/deadline/priority/duration/resource policy, P5/P6 logic, LLM/network,
+Agent, Digital Twin or Replanning is added. P8.4 has not started; P8 is not complete.
+
+Targeted command from repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_baseline_plan_builder.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

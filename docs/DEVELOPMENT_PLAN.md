@@ -203,7 +203,7 @@ later planning stages do not change the frozen P7 semantics.
 
 ## P8 — Competition Planner
 
-**Status: IN PROGRESS; P8.1/P8.2 Review PASS; P8.3 IMPLEMENTED, pending review.** Consume the frozen P7
+**Status: IN PROGRESS; P8.1/P8.2/P8.3 Review PASS; P8.4 IMPLEMENTED, pending review.** Consume the frozen P7
 SkillGapDecision uncertainty rules above. Suggested decomposition:
 
 1. P8.1 Plan Domain Contract
@@ -251,7 +251,7 @@ Stable IDs encode exact target/scope/skill/type without random/time/hash identit
 source_audit returns a faithful existing SkillGapPlanningAudit projection.
 No Plan/Milestone, timing policy, content/strategy, score, LLM/network, resources,
 Repository/Provider, P5/P6 logic or Replanning is implemented. P8.1 and P7 models
-remain unchanged; real integration remains a future P8.4 task.
+remain unchanged; real integration is documented in P8.4 below.
 
 P8.3 adds pure `domain/baseline_plan_builder.py` BaselineCompetitionPlanBuilder:
 target + PlanningNeed tuple + optional horizon + explicit student/creation metadata
@@ -268,8 +268,24 @@ milestone IDs are plan-scoped. Target/audit and canonical P8.2 need target misma
 fail fast; real target existence/parent validation remains caller responsibility.
 `backend/tests/domain/test_baseline_plan_builder.py` tests mixed/empty plans,
 identity/input changes, timing pass-through, source links, validation and immutable
-JSON snapshots. P8.1/P8.2/P7 contracts and real data are unchanged. P8.4 has not
-started; P8 completion/adaptive planning is not claimed.
+JSON snapshots. P8.1/P8.2/P7 contracts and real data are unchanged;
+P8 completion/adaptive planning is not claimed.
+
+P8.4 adds `backend/tests/integration/test_p8_real_planning_integration.py` only,
+with docs. Real COMAP MCM 2027 is loaded through Repository and reviewed
+mathematical-modeling requirements through Provider. TEST-ONLY SYNTHETIC known
+and missing student cases pass through actual SkillGapEngine, PlanningInputDeriver
+and BaselineCompetitionPlanBuilder. Unknown threshold + PARTIAL coverage remains
+visible end to end as skill and requirement-set uncertainty needs/milestones;
+missing student adds a second reason in the same skill need. No fake improvement,
+satisfaction, timing or study content is introduced. The integration dynamically
+checks need/milestone counts without fixing total artifact count, preserves real
+provenance and supplied student evidence, and checks serialization, stable IDs,
+full-pipeline determinism, cross-case isolation, immutable/read-only inputs and
+outputs, offline Seed/requirement-only reads and missing-target semantics.
+No production/model/artifact or earlier-phase changes. No P5/P6 execution,
+resources, priority/duration, LLM/Agent/MCP, Digital Twin/Event/Replanning.
+P8.4 is ready for review; P8 Final Review has not run; P8 is not complete.
 
 - **Goal:** 把赛事目标与技能差距转为有依赖和期限的任务计划。
 - **Inputs:** StudentProfile、已验证 Competition、SkillGapDecision、Deadline、可用时间；保留 GAP / UNKNOWN / NO_GAP 和 requirement coverage 的冻结语义。

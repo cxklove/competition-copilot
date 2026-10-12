@@ -399,7 +399,7 @@ priority/readiness score, resource, P5/P6 logic, Repository/Provider, network/LL
 Agent or Replanning is added. P8.1 and P7 contracts remain unchanged.
 Synthetic tests live in `backend/tests/domain/test_planning_inputs.py`.
 
-### P8.3 Baseline Competition Plan Builder — IMPLEMENTED, pending review
+### P8.3 Baseline Competition Plan Builder — Review PASS
 
 `domain/baseline_plan_builder.py` is a pure Domain Service. It consumes the
 existing planning target, immutable PlanningNeed tuple, optional TimeWindow,
@@ -430,7 +430,36 @@ P8.1/P8.2/P7 and earlier phases remain unchanged. The builder reuses normal
 validation and immutable snapshots, without Repository/Provider, network/LLM,
 Agent, eligibility/recommendation execution, Digital Twin or Replanning.
 Tests are synthetic in `backend/tests/domain/test_baseline_plan_builder.py`.
-P8.4 and adaptive planning are not implemented; P8 is not complete.
+Adaptive planning is not implemented; P8 is not complete.
+
+### P8.4 Real Planning Integration — IMPLEMENTED, pending review
+
+`backend/tests/integration/test_p8_real_planning_integration.py` executes the full
+real chain: JsonSeedCompetitionRepository -> COMAP MCM 2027 Competition/Edition;
+JsonSkillRequirementProvider -> reviewed PARTIAL requirement with unspecified
+mathematical-modeling threshold; synthetic validated StudentProfile/canonical
+student evidence -> SkillGapContext -> SkillGapEngine -> SkillGapDecision ->
+PlanningInputDeriver needs/source audit -> BaselineCompetitionPlanBuilder -> Plan.
+No requirements, needs or plans are manually substituted in the integration.
+
+Student A supplies ADVANCED mathematical-modeling evidence; Student B supplies no
+such record/evidence. Both P7 items remain UNKNOWN and overall UNDETERMINED. A
+retains threshold uncertainty; B retains threshold and student-data uncertainty
+in one skill need. Both retain a separate PARTIAL requirement-set uncertainty
+need. Linked milestones resolve those uncertainties, never imply confirmed skill
+deficiency or satisfaction. One need produces one milestone in supplied order;
+no global artifact/need count is frozen. Official provenance and student evidence
+survive through the unchanged source snapshots in Decision, Need and Plan.
+
+Horizon is explicitly None; creation metadata is fixed test input, not a deadline
+or current-time identity. All milestones remain unscheduled without effort,
+learning content/resource, priority or resolution strategy. Tests verify JSON,
+stable IDs, full-pipeline repeatability, cross-student service isolation, model/
+artifact read-only behavior, output immutability and missing/wrong exact queries.
+Runtime data reads are restricted to Seed/skill requirements; network connections
+are rejected. No Raw/Manifest/eligibility policy, P5/P6 execution, Agent/LLM/MCP,
+Digital Twin/Event/Replanning runs. Production code and real data are unchanged.
+P8.4 is ready for review; P8 Final Review has not run and P8 is not complete.
 
 ```text
 StudentProfile + Competition + SkillGap + Deadline

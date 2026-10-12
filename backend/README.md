@@ -6,7 +6,7 @@ P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
 P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
 StudentProfile Domain already exists and supplies input. P7 finished requirements,
 evidence, deterministic diagnosis and real integration, not student ingestion.
-P8.1/P8.2 Review PASS; P8.3 Baseline Plan Builder IMPLEMENTED, pending review.
+P8.1/P8.2/P8.3 Review PASS; P8.4 Real Planning Integration IMPLEMENTED, pending review.
 P8 is not complete. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -404,7 +404,7 @@ Targeted command from repository root:
 
 ### P8.3 Baseline Competition Plan Builder
 
-IMPLEMENTED, pending review. `domain/baseline_plan_builder.BaselineCompetitionPlanBuilder`
+Review PASS. `domain/baseline_plan_builder.BaselineCompetitionPlanBuilder`
 consumes validated planning target, PlanningNeed tuple, optional TimeWindow and
 explicit student_id/aware created_at. Pass the matching P8.2 source_audit for
 nonempty needs, as required by CompetitionPlan. No P7 Decision is consumed.
@@ -423,10 +423,38 @@ Target/audit and canonical P8.2 need target mismatch reject; general P8.1 IDs ha
 no embedded target and depend on the caller's matching audit. Output preserves
 all needs/evidence through normal frozen validation. P8.1/P8.2/P7 are unchanged.
 No scheduling/deadline/priority/duration/resource policy, P5/P6 logic, LLM/network,
-Agent, Digital Twin or Replanning is added. P8.4 has not started; P8 is not complete.
+Agent, Digital Twin or Replanning is added. P8 is not complete.
 
 Targeted command from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_baseline_plan_builder.py`.
+
+### P8.4 Real Planning Integration
+
+IMPLEMENTED, pending review. `backend/tests/integration/test_p8_real_planning_integration.py`
+loads COMAP MCM 2027 through real JsonSeedCompetitionRepository and its reviewed
+PARTIAL mathematical-modeling requirement through JsonSkillRequirementProvider.
+TEST-ONLY SYNTHETIC known/missing student profiles and canonical student evidence
+enter SkillGapContext -> SkillGapEngine -> PlanningInputDeriver -> baseline Builder.
+Needs/plans are actual service outputs, not manually constructed substitutes.
+
+The official threshold remains unspecified. Known ADVANCED skill still gives
+UNKNOWN item / UNDETERMINED overall; missing skill retains both uncertainty reasons.
+Both cases produce a skill uncertainty need and a separate requirement-set
+uncertainty need, preserved as linked uncertainty milestones. No confirmed real
+gap, satisfaction or improvement is invented. Horizon=None; fixed aware test
+creation metadata keeps IDs stable, and milestones have no dates/effort/content.
+Official provenance and supplied student facts survive Decision/Need/Plan audit.
+
+Tests cover full-pipeline repeatability, cross-student isolation, JSON/immutability,
+input/artifact read-only behavior and missing/wrong exact target lookups. Project
+data reads are limited to Seed and skill requirements; network connections reject.
+No Raw/Manifest/eligibility-policy reads, P5/P6 evaluation, LLM/Agent/MCP, resources,
+detailed study plan, priority/duration, Digital Twin/Event or Replanning is added.
+Production code, frozen contracts and real artifacts remain unchanged.
+P8 Final Review has not run; P8 is not complete.
+
+Targeted command from repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p8_real_planning_integration.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

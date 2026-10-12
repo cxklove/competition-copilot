@@ -9,8 +9,11 @@ evidence, deterministic diagnosis and real integration, not student ingestion.
 **P8 — Competition Planner: FROZEN; P8.1–P8.4 and P8 Final Review PASS.**
 Deterministic baseline planning scope is finished.
 **P9 — Competition Digital Twin: FROZEN; P9.1/P9.1.1/P9.2/P9.3/P9.4 and P9 Final Review PASS.**
-P9.5 Monitor is IN PROGRESS: P9.5.1/P9.5.2/P9.5.3 Review PASS; P9.5.4 real Monitor
-integration implemented, awaiting Review. No scheduler/polling yet. The current ingestion
+P9.5 Monitor IMPLEMENTATION COMPLETE, not CLOSED/FROZEN: P9.5.1–P9.5.4 completed,
+Review PASS and committed. Final Review passed functional gates but was blocked
+only by documentation consistency. This follow-up repairs that blocker; Final
+Review is pending re-run, Closure has not executed and P10 has not started.
+Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
 Normal competition reads in P3 need neither Raw payloads nor Human Review
@@ -636,8 +639,8 @@ and empty changes. Conflicting metadata or nonempty changes under the same ID
 are invalid; distinct snapshots can still have empty changes.
 
 P9.2 constructs baseline snapshots and validates ID-only target relationships
-using Repository facts. P9.3 computes deterministic Diff. P9.5 Monitor, P10 Event
-interpretation and P11 Replanning remain future work. `CompetitionEvent` is
+using Repository facts. P9.3 computes deterministic Diff. P9.5 Monitor is implemented
+below; P10 Event interpretation and P11 Replanning remain future work. `CompetitionEvent` is
 unchanged. P9.1 uses no Repository, Network, LLM, Agent or Plan logic.
 
 Run its synthetic contract tests from the repository root:
@@ -709,8 +712,9 @@ Observation loss remains knowledge loss, not fact/member removal.
 Tests use fixed aware times, validated constructors and deterministic case IDs;
 check serialization, audit, immutability and safety; block Network/non-Seed data
 reads and leave Repository/data unchanged. Production code is unchanged. P9
-represents/builds/compares observations, while live refresh, Monitor, Event,
-impact and Replanning remain future work. P9 Final Review PASS; P9 is FROZEN.
+represents/builds/compares observations. Source observation/Monitor is implemented
+in P9.5 below; Event, impact and Replanning remain future work. P9 Final Review
+PASS; P9 is FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_real_digital_twin_integration.py
@@ -735,13 +739,44 @@ not official historical updates. P9 does not verify websites, fabricate sources,
 alter verification, generate Events, inspect Plans or replan. LLM/Agent/Network = NO.
 
 Future defects require explicit P9 reopening and Implementation -> Review -> commit.
-P9.5 is next: official sources -> structured observation -> P9 Snapshot, reusing
-frozen observation/identity/Diff semantics. Fetch/polling/scheduler/refresh,
+At P9 closure P9.5 was next; its implemented core is documented below, reusing
+frozen observation/identity/Diff semantics. Periodic polling/scheduler/refresh,
 freshness/retry/backoff, semantic rule-text/provenance diff, P10 Event, P11 impact/
 notification/Replanning, Agent/MCP/Frontend remain deferred. Closure-time snapshot:
 1335 passed, 0 skipped; Ruff/diff check PASS (not a permanent test-count invariant).
 
-## P9.5.1 Monitor Contract
+## P9.5 Monitor Core — Implementation Complete
+
+P9.5.1–P9.5.4 are COMPLETED / Review PASS / committed. Final Review is pending
+re-run after this documentation follow-up; Closure is not executed.
+
+```text
+Approved Official Source -> Official Source Observation Adapter
+-> SourceObservationResult -> One-shot Monitor -> CompetitionSnapshot
+-> P9 Snapshot Diff Engine -> SnapshotDiff -> MonitorCheckResult
+```
+
+Completed capabilities: stable immutable Monitor Contract, explicit aware time/
+provenance, failure distinct from successful UNKNOWN, failure -> no authoritative
+Snapshot/no Diff, successful UNKNOWN and protected KNOWN_ABSENT, deterministic
+one-shot Monitor, same state -> SUCCESS + zero Diff, changed state -> SUCCESS +
+low-level Diff, one concrete official Adapter with deterministic parsing/no
+arbitrary URL/no LLM, real offline integration and read-only Repository. No
+Event or Replanning leakage. SnapshotDiff is low-level structured change;
+MonitorCheckResult is one check result. Neither is CompetitionEvent.
+
+Next implementation phase P10 consumes existing P9/P9.5 SnapshotDiff plus
+necessary target/source context, without re-fetching websites, reconstructing
+Snapshots or recomputing Diff. P11 owns Event -> Impact / Adaptive Replanning.
+
+Scheduler/polling loop: NOT IMPLEMENTED, NOT P9.5 EXIT BLOCKERS. Future scheduler
+invokes the one-shot Monitor and preserves its semantics. Deferred: second
+competition adapter, multi-source monitor, periodic scheduler/polling, distributed
+jobs, retry/backoff runtime policy, Snapshot history persistence, notification,
+CompetitionEvent (P10), Impact Analysis/Adaptive Replanning (P11), Agent, MCP,
+Frontend. P10 has not started.
+
+## P9.5.1 Monitor Contract — Review PASS, committed
 
 `domain.monitoring` defines immutable MonitorCheckRequest, SourceObservationResult,
 MonitorCheckResult, MonitorCheckOutcome and SourceCheckError. The Application
@@ -760,13 +795,13 @@ Snapshot builder or Diff orchestration implementation.
 
 P9.5.2 orchestration and P9.5.3 adapter are described below. The Contract adds no live network,
 parsing, retry/backoff, scheduling/polling, Repository mutation, Event, impact,
-notification, Replanning, LLM or Agent. P9.5 is not complete.
+notification, Replanning, LLM or Agent. P9.5 implementation is complete, pending Final Review re-run.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_monitoring.py
 ```
 
-## P9.5.2 One-shot Competition Monitor
+## P9.5.2 One-shot Competition Monitor — Review PASS, committed
 
 `application.monitor_checks.OneShotCompetitionMonitor(source).check(request)`
 calls the injected ObservationSource once. Failure preserves the typed error and
@@ -780,13 +815,13 @@ Diff; changed state is success with low-level Diff. Provenance is taken from the
 source result without verification upgrade. Fake sources exist only in tests;
 orchestration adds no HTTP/parser, scheduler, polling/retry, persistence,
 Event, notification, impact or Replanning. The concrete source adapter is described
-below. Diff != Event; P9.5 is not complete.
+below. Diff != Event; P9.5 implementation is complete, not closed.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/application/test_one_shot_monitor.py
 ```
 
-## P9.5.3 COMAP Official Observation Adapter
+## P9.5.3 COMAP Official Observation Adapter — Review PASS, committed
 
 `infrastructure.comap_observation.ComapOfficialObservationAdapter` implements
 CompetitionObservationSource for comap-mcm / comap-mcm-2027 / track=None and
@@ -806,13 +841,13 @@ Fetch and parse failures are typed CHECK_FAILED, not UNKNOWN facts. Known facts
 retain P9 validation; verification is preserved, not upgraded. The adapter returns
 SourceObservationResult only; no Snapshot/Diff/Event, scheduling or Replanning.
 Tests use a documented minimal synthetic fixture and block network. P9.5.4 real
-monitor integration is described below; P9.5 is not complete.
+monitor integration is described below; P9.5 implementation is complete.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/infrastructure/test_comap_observation.py
 ```
 
-## P9.5.4 Real Competition Monitor Integration
+## P9.5.4 Real Competition Monitor Integration — COMPLETED, Review PASS, committed
 
 The integration suite runs real JsonSeedCompetitionRepository and SnapshotBuilder
 for COMAP MCM 2027, then the concrete COMAP Adapter, OneShot Monitor and formal P9
@@ -830,7 +865,8 @@ parse failure returns no Snapshot and no Diff. Success returns Snapshot + Diff.
 Tests cover value changes, provenance/verification, target/time safety,
 determinism, serialization, immutable outputs and read-only Repository/data.
 No production code changes, persistence, scheduler/polling, Event, impact,
-notification or Replanning. Diff != Event; P9.5 Final Review/Closure are pending.
+notification or Replanning. Diff != Event; P9.5 Final Review is pending re-run
+after documentation follow-up; Closure has not executed.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p9_5_real_monitor_integration.py

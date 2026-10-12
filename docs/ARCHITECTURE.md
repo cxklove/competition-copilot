@@ -591,8 +591,11 @@ window do not imply absent endpoints. Whole-window UNKNOWN is a different state.
 Directed SnapshotDiff contains compact before/after SnapshotReferences with
 ID, target and observed_at, and immutable typed TimeWindowChange,
 WindowEndpointChange and TrackMembershipChange. References must have the same
-target, distinct IDs and
-before time <= after time; duplicate changed fields are rejected. It stores
+target and before time <= after time; duplicate changed fields are rejected.
+P9.1.1 permits reflexive same-snapshot zero-change comparison: the same snapshot
+ID requires otherwise identical reference metadata and empty changes. Conflicting
+metadata or nonempty changes under the same ID are invalid. Distinct observations
+may still have empty changes. It stores
 supplied changes without computing them or embedding complete snapshots.
 P9.3 must check those supplied facts against the referenced snapshots.
 

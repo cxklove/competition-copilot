@@ -629,6 +629,11 @@ evidence that the competition added a fact. The supplied before/after references
 must identify the same target in observation order. The contract does not compute
 changes or validate them against stored snapshots; that belongs to P9.3.
 
+P9.1.1 Contract Follow-up supports reflexive same-snapshot zero-change comparison.
+The same snapshot ID is valid only with otherwise identical reference metadata
+and empty changes. Conflicting metadata or nonempty changes under the same ID
+are invalid; distinct snapshots can still have empty changes.
+
 P9.2 constructs baseline snapshots and validates ID-only target relationships
 using Repository facts. P9.3 will compute deterministic Diff. P9.5 Monitor, P10 Event
 interpretation and P11 Replanning remain future work. `CompetitionEvent` is

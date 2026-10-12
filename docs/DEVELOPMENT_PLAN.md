@@ -383,8 +383,11 @@ observed competition/registration dates and must not precede source observation.
 
 `SnapshotDiff` retains directed before/after ID/target/time references and typed
 whole-window, window-endpoint and membership changes. Same target,
-chronological references, distinct
-snapshot IDs and unique changed fields are validated. VALUE_CHANGED requires
+chronological references and unique changed fields are validated. P9.1.1 Contract
+Follow-up is implemented, awaiting Review: reflexive same-snapshot zero-change
+comparison is valid only for identical reference metadata and empty changes.
+The same ID with conflicting metadata or nonempty changes is invalid; distinct
+snapshot IDs may still have empty changes. VALUE_CHANGED requires
 different known values; PRESENCE_CHANGED requires known presence/absence;
 transitions involving UNKNOWN are OBSERVATION_STATE_CHANGED, never fact addition
 or deletion. A missing endpoint within a known partial window remains UNKNOWN;

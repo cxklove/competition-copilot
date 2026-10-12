@@ -279,7 +279,10 @@ class SnapshotDiff(_TwinContract):
         if self.before.target != self.after.target:
             raise ValueError("Snapshot diff requires the same target")
         if self.before.snapshot_id == self.after.snapshot_id:
-            raise ValueError("Diff requires distinct observation snapshot references")
+            if self.before != self.after:
+                raise ValueError("Same snapshot ID requires identical reference metadata")
+            if self.changes:
+                raise ValueError("Same snapshot reference requires empty changes")
         if self.before.observed_at > self.after.observed_at:
             raise ValueError("Before observation must not follow after observation")
         fields = tuple(change.field for change in self.changes)

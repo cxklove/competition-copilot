@@ -6,7 +6,7 @@ P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
 P7.3B.5 and P7.4 passed review; P7.3B.4 received human approval.
 StudentProfile Domain already exists and supplies input. P7 finished requirements,
 evidence, deterministic diagnosis and real integration, not student ingestion.
-P8.1 Planning Domain Contract is IMPLEMENTED, pending review; P8.2 has not started.
+P8.1 Planning Domain Contract Review PASS; P8.2 Planning Inputs IMPLEMENTED, pending review.
 P8 is not complete. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -360,7 +360,7 @@ P8.1–P8.4 and P8 Final Review; the P7 Closure added no P8 functionality.
 
 ### P8.1 Planning Domain Contract
 
-IMPLEMENTED, pending review. Existing CompetitionPlan and PlanMilestone in
+Review PASS. Existing CompetitionPlan and PlanMilestone in
 `domain/plan.py` retain P1 identities/status/version/timestamps and optional
 milestone timing/effort. They now use immutable validated snapshots and tuple
 collections. Plan adds optional track_id, existing TimeWindow planning_horizon,
@@ -376,10 +376,31 @@ NO_GAP allows an empty plan. No gap comparison, action generation, deadline
 selection/default, priorities, resources, P5/P6 logic, Replanning or LLM/network
 is added. Target existence/parent integrity remains a caller responsibility;
 the contract rejects disagreement with the supplied P7 target and invalid references.
-P7 semantics are unchanged. P8.2 and Planner Engine are not implemented.
+P7 semantics are unchanged. Planner Engine is not implemented.
 
 P8.1 tests from repository root:
 `.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_planning_contract.py backend/tests/domain/test_plan.py backend/tests/domain/test_competition_plan.py backend/tests/domain/test_planning_event_integration.py`.
+
+### P8.2 Deterministic Planning Inputs
+
+IMPLEMENTED, pending review. `domain/planning_inputs.PlanningInputDeriver.derive`
+accepts only validated SkillGapDecision and returns tuple[PlanningNeed, ...].
+GAP -> SKILL_IMPROVEMENT; UNKNOWN -> UNCERTAINTY_RESOLUTION; SATISFIED -> no item
+need. Dual uncertainty preserves both reasons in one need; overall GAP_IDENTIFIED
+does not hide unknown items. PARTIAL/MISSING append one separate coverage need
+(source_item=None), while COMPLETE itself adds none. NO_GAP returns an empty tuple.
+source_audit returns the existing SkillGapPlanningAudit with exact source fields.
+
+Item order is preserved, followed by coverage uncertainty. Stable IDs use exact
+target, tagged scope, optional skill ID and type encoded as canonical JSON, never
+display labels/random/time/hash(). Source items, type, levels, reasons and evidence
+are preserved; no provenance is invented. P8.1 and P7 contracts are unchanged.
+No Plan/Milestone, timing, learning content, resolution strategy, priority/score,
+resources, P5/P6 evaluation, Repository/Provider, network/LLM, Agent or Replanning
+is added. P8.3 and Planner Engine are not implemented; P8 is not complete.
+
+Targeted command from repository root:
+`.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_planning_inputs.py`.
 
 `CompetitionNormalizer` requires explicit competition, edition, and track IDs
 plus a source type on raw input. It accepts only integer years and ISO datetimes

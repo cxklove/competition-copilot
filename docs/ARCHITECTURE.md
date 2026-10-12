@@ -341,7 +341,7 @@ blockers. P8 implementation is not part of this Closure.
 
 ## 8. Planning Architecture
 
-### P8.1 Planning Domain Contract — IMPLEMENTED, pending review
+### P8.1 Planning Domain Contract — Review PASS
 
 Existing `domain/plan.py` CompetitionPlan/PlanMilestone are evolved in place.
 P1 provided identities, status/version and aware creation/update timestamps;
@@ -369,7 +369,35 @@ bounds. No arbitrary duration or registration/competition deadline policy exists
 
 P8.1 is contract-only. No Planner Engine, resources, P5/P6 logic, priority algorithm,
 LLM/network, Tool/API/Agent/MCP or Replanning is implemented. P7 remains frozen.
-Tests are synthetic Domain tests; P8.2 and P8 completion are not claimed.
+Tests are synthetic Domain tests; P8 completion is not claimed.
+
+### P8.2 Deterministic Planning Input Derivation — IMPLEMENTED, pending review
+
+`domain/planning_inputs.py` defines pure PlanningInputDeriver:
+`derive(SkillGapDecision) -> tuple[PlanningNeed, ...]`. It revalidates the supplied
+P7 snapshot and consumes item statuses without comparing proficiency, aggregating
+gap status or interpreting free-form text. GAP produces SKILL_IMPROVEMENT;
+UNKNOWN produces UNCERTAINTY_RESOLUTION; SATISFIED produces no item need. Dual
+uncertainty stays in one need with both original reasons. GAP_IDENTIFIED overall
+never suppresses another item's uncertainty. NO_GAP returns an empty tuple.
+
+Output follows P7 item order, skipping satisfied items, then appends one
+coverage-level UNCERTAINTY_RESOLUTION for PARTIAL or MISSING. COMPLETE itself
+produces none. Existing source_item=None plus the coverage reason identifies
+requirement-set scope; source_item present identifies skill scope. No fake skill
+ID or new scope/DTO is introduced. `source_audit(decision)` faithfully projects
+target, coverage, overall status and reasons into the existing SkillGapPlanningAudit.
+Caller retains the original Decision; all item facts/evidence remain immutable
+validated source snapshots in the needs.
+
+Need IDs use a tagged canonical JSON tuple of competition_id, edition_id,
+optional track_id, scope, optional skill_id and need type. This preserves exact
+identity even when IDs contain punctuation; no labels, random UUIDs, current
+time or process hash are used. Repeated derivation yields identical ordered JSON.
+No Plan/Milestone, timing, learning content, uncertainty-resolution strategy,
+priority/readiness score, resource, P5/P6 logic, Repository/Provider, network/LLM,
+Agent or Replanning is added. P8.1 and P7 contracts remain unchanged; P8.3 has not
+started. Synthetic tests live in `backend/tests/domain/test_planning_inputs.py`.
 
 ```text
 StudentProfile + Competition + SkillGap + Deadline

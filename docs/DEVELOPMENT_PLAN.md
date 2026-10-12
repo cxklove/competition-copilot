@@ -203,7 +203,7 @@ later planning stages do not change the frozen P7 semantics.
 
 ## P8 — Competition Planner
 
-**Status: IN PROGRESS; P8.1 IMPLEMENTED, pending review.** Consume the frozen P7
+**Status: IN PROGRESS; P8.1 Review PASS; P8.2 IMPLEMENTED, pending review.** Consume the frozen P7
 SkillGapDecision uncertainty rules above. Suggested decomposition:
 
 1. P8.1 Plan Domain Contract
@@ -236,7 +236,22 @@ known need references, source status/reason consistency and explicit timing boun
 audit, immutable snapshots and serialization. Existing P1 plan tests reflect tuple
 collections/new serialized fields; no P7 file changes. P8.2 inputs, Planner Engine,
 resources, Replanning, P5/P6 execution, Tool/API/Agent/MCP/network/LLM are not implemented.
-P8 is not complete; P8.2 has not started.
+P8 is not complete; P8.3 has not started.
+
+P8.2 adds pure `domain/planning_inputs.py` PlanningInputDeriver and synthetic
+`backend/tests/domain/test_planning_inputs.py`. derive accepts a validated P7
+SkillGapDecision and returns an immutable tuple of PlanningNeed. GAP maps to
+SKILL_IMPROVEMENT; UNKNOWN to UNCERTAINTY_RESOLUTION; SATISFIED to no item need.
+Both uncertainty reasons stay in a single skill need; all relevant source facts,
+requirement type and evidence are copied from the P7 item, not recreated.
+PARTIAL/MISSING each append one separate requirement-set uncertainty need with
+source_item=None and its existing coverage reason. COMPLETE adds no coverage need;
+NO_GAP has no remediation need. Item order is preserved before the coverage need.
+Stable IDs encode exact target/scope/skill/type without random/time/hash identity.
+source_audit returns a faithful existing SkillGapPlanningAudit projection.
+No Plan/Milestone, timing policy, content/strategy, score, LLM/network, resources,
+Repository/Provider, P5/P6 logic or Replanning is implemented. P8.1 and P7 models
+remain unchanged; real integration remains a future P8.4 task.
 
 - **Goal:** 把赛事目标与技能差距转为有依赖和期限的任务计划。
 - **Inputs:** StudentProfile、已验证 Competition、SkillGapDecision、Deadline、可用时间；保留 GAP / UNKNOWN / NO_GAP 和 requirement coverage 的冻结语义。

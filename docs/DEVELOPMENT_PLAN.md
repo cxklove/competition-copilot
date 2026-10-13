@@ -972,8 +972,8 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** IN PROGRESS. P11.1 Contract Review PASS / committed / frozen.
-  P11.2 deterministic Event Impact Analyzer implemented, awaiting Review.
+- **Status:** IN PROGRESS. P11.1 explicitly REOPENED for controlled mixed-scope /
+  decision Contract evolution, awaiting Review. P11.2 Analyzer Review PASS / committed / frozen.
   P11.3 decision/scope and later revision algorithms are NOT IMPLEMENTED。
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
@@ -982,7 +982,7 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 - **Acceptance Criteria:** 受影响计划可定位，Diff 可解释可追踪；重复事件不产生重复重规划，旧计划仍可查看。
 - **Explicitly Out of Scope:** Agent 自行改写规则、自动报名及前端可视化。
 
-### P11.1 — Adaptive Replanning Domain Contract (Review PASS, committed / frozen)
+### P11.1 — Adaptive Replanning Domain Contract (REOPENED, evolution awaiting Review)
 
 `domain/replanning.py` adds result Contracts only. P8/P10/P9/P9.5 remain frozen;
 no engine, Plan mutation, planner rerun or persistence is implemented by this Contract.
@@ -1011,11 +1011,12 @@ permits NO_PLAN_IMPACT with TARGET_MISMATCH. Edition/track mixed scopes are cont
 compatible, not automatically affected. OBSERVATION_COVERAGE_CHANGED remains
 information uncertainty; no automatic replan/factual removal.
 
-AffectedPlanScope distinguishes KNOWN-empty from UNRESOLVED, references plan_id
+AffectedPlanScope distinguishes KNOWN-empty, KNOWN-affected, PARTIALLY_RESOLVED
+known refs with unresolved remainder, and pure UNRESOLVED; references plan_id
 and canonical milestone IDs/whole-plan scope. ReplanningDecision outcomes:
 REPLAN / KEEP_CURRENT_PLAN / UNDETERMINED. Multiple unique Event IDs are ordered
-canonically; supplied analyses preserve evidence. AFFECTS_PLAN can pair with
-UNDETERMINED decision (REVISION_NOT_REPRESENTABLE); impact != automatic replan.
+canonically; supplied analyses preserve evidence. Confirmed impact requires REPLAN,
+but REPLAN does not create a revised Plan or guarantee revision representability.
 No-impact permits KEEP and empty PlanDiff; unresolved decisions can also leave
 the exact old Plan unchanged.
 
@@ -1058,7 +1059,7 @@ Official Source -> P9.5 Monitor -> SnapshotDiff -> P10 CompetitionEvent
 
 使用受控赛事变更，从 Snapshot 经 Diff、CompetitionEvent、影响分析到 Plan Diff 完成端到端演示；验证来源、审核、版本、事件幂等及 `before`/`after`/`trigger_event_id`/`reason_code`/`evidence` 全链路。记录场景测试结果及已知风险。此关口不新增代码范围，也不要求 Agent 或 Web。
 
-### P11.2 — Deterministic Event Impact Analysis (implemented, awaiting Review)
+### P11.2 — Deterministic Event Impact Analysis (Review PASS, committed / frozen)
 
 `domain/event_impact_analyzer.py` CompetitionEventImpactAnalyzer is a pure Domain
 Service: validated CompetitionEvent + StudentProfile + existing CompetitionPlan +
@@ -1095,6 +1096,35 @@ student identity, no text heuristic, input preservation, determinism and seriali
 NEXT P11.3: EventImpactAnalysis[] + Existing Plan + explicit context ->
 ReplanningDecision + canonical AffectedPlanScope, without Event reinterpretation,
 P10 invocation or website access. P11.3 is not implemented; P11 is not complete.
+
+### P11.1 Reopen — Mixed Scope / Decision Contract Evolution (awaiting Review)
+
+P11.3 exposed two confirmed Contract limitations: no known affected refs plus
+unresolved remainder, and REPLAN rejected mixed confirmed/uncertain impacts.
+Explicit controlled reopening evolves existing models only; P11.3 is NOT IMPLEMENTED.
+ScopeState gains PARTIALLY_RESOLVED with known milestone IDs and/or whole-plan
+impact plus unresolved remainder. No new serialized flag; derived property reads
+the state. KNOWN-empty and pure UNRESOLVED remain distinct. Partial-empty rejects.
+Known affected refs need Plan membership and reference evidence; no milestone guessing.
+
+Formal action precedence: any AFFECTS_PLAN -> REPLAN; otherwise any UNDETERMINED ->
+UNDETERMINED; all NO_PLAN_IMPACT -> KEEP. Mixed REPLAN must retain all analyses,
+known scope union and unresolved remainder (including partial confirmed scope).
+Whole-plan impact may coexist with unknown detail. REPLAN without confirmed impact,
+KEEP with uncertainty/impact, UNDETERMINED with confirmed impact, incomplete scope
+or contradictory reasons reject. Mixed reason: CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER;
+pure confirmed reason: CONFIRMED_PLAN_IMPACT, with existing STRUCTURAL_REVISION_SUPPORTED
+accepted for compatible old constructors. Existing no-impact/uncertainty reasons remain.
+
+Old Scope fields/KNOWN/UNRESOLVED JSON and compatible pure Decision constructors
+remain valid. Intentional migration: AFFECTS -> UNDETERMINED Decision no longer
+parses under formal precedence; later revision handling owns representability.
+No Decision/Scope ID is introduced; semantic state/reason/lineage differences remain
+explicit in stable JSON. NO_PLAN_IMPACT structured negative evidence is not weakened.
+Contract tests cover mixed milestone/whole-plan scope, uncertainty retention, precedence,
+reason compatibility, source ordering/duplicates, old payloads, immutability and JSON.
+No P11.3 Service, aggregation/decision generation, revision or Diff computation;
+P11.2/P8/P10/P9/P9.5 are unchanged. P11.4 is not entered.
 
 ## P12 — Agent Runtime and Multi-Agent Orchestration
 

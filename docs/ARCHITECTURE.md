@@ -1126,7 +1126,7 @@ Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time r
 
 ## 9. Replanning Architecture
 
-### P11.1 Adaptive Replanning Domain Contract — Review PASS, committed / frozen
+### P11.1 Adaptive Replanning Domain Contract — REOPENED, evolution awaiting Review
 
 P11 IN PROGRESS. `domain/replanning.py` is a pure immutable result Contract module.
 No Event-to-impact engine, decision engine, Plan revision, PlanDiff computation,
@@ -1153,10 +1153,10 @@ is invented. Cross-competition/edition and disjoint explicit tracks must be no
 impact. Mixed edition/track context does not prove dependency. Observation-only
 Events cannot assert factual impact and may remain UNDETERMINED.
 
-AffectedPlanScope: KNOWN (including empty) vs UNRESOLVED, with plan_id, whole-plan
+AffectedPlanScope: KNOWN (including empty), PARTIALLY_RESOLVED and UNRESOLVED, with plan_id, whole-plan
 flag and canonical milestone IDs. ReplanningDecision: REPLAN / KEEP_CURRENT_PLAN /
-UNDETERMINED. Impacts and action differ: AFFECTS_PLAN can still have no representable
-revision. Multiple unique Events, exact same Plan context and explicit reason/evidence
+UNDETERMINED. Confirmed impact requests REPLAN; revision representability is not
+promised by that decision. Multiple unique Events, exact same Plan context and explicit reason/evidence
 lineage are retained; no automatic mutation. Known no impact permits KEEP + empty Diff.
 
 PlanDiff preserves immutable before/after Plans and supplied decision/trigger/reasons/
@@ -1197,7 +1197,7 @@ CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan D
 
 影响分析以事件关联赛事、学生 Journey 和计划版本；仅受影响的计划进入重规划。每次自动重规划追加新计划版本，`Plan Diff` 至少保存 `before`、`after`、`trigger_event_id`（关联 `trigger_event`）、`reason_code` 和 `evidence`。证据指向事件、快照、事实来源和所用规则版本；旧计划不被覆盖，界面可展示具体任务和期限变化。
 
-### P11.2 Deterministic Event Impact Analysis — implemented, awaiting Review
+### P11.2 Deterministic Event Impact Analysis — Review PASS, committed / frozen
 
 CompetitionEventImpactAnalyzer in `domain/event_impact_analyzer.py` is pure Domain:
 CompetitionEvent + StudentProfile + existing CompetitionPlan + explicit aware
@@ -1227,6 +1227,31 @@ regeneration, ReplanningDecision engine, Plan mutation/revision/PlanDiff, Planne
 P5/P6/P7 rerun, persistence, severity/score, notification, LLM or Agent. P11.1/P10/
 P8/P9/P9.5 unchanged. P11 IN PROGRESS. NEXT P11.3 consumes ImpactAnalysis[] + Plan +
 explicit context for decision/scope without revisiting Event semantics or P10.
+
+### P11.1 Reopened Mixed Scope / Decision Evolution — awaiting Review
+
+The explicit reopening repairs P11.3 blockers in existing models, not a parallel
+Contract. PARTIALLY_RESOLVED extends ScopeState without new serialized fields:
+known milestone refs/whole-plan impact coexist with unresolved remainder. Pure
+UNRESOLVED still carries no known refs; KNOWN-empty cannot claim uncertainty.
+Derived has_unresolved_remainder reflects state. Canonical unique refs are immutable,
+must bind the Plan, and require explicit milestone evidence when supplied.
+
+ReplanningDecision validates supplied results using confirmed > uncertain > negative
+precedence. AFFECTS + UNDETERMINED -> REPLAN with all analyses/evidence retained,
+known affected scope union and PARTIALLY_RESOLVED remainder. Whole-plan impact does
+not erase uncertainty. No confirmed impact + some uncertainty -> UNDETERMINED;
+all proven no-impact -> KEEP / KNOWN-empty. No impact reasoning is repeated here.
+Mixed reason CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER is required; pure REPLAN
+accepts CONFIRMED_PLAN_IMPACT or compatible legacy STRUCTURAL_REVISION_SUPPORTED.
+Outcome/reason/scope contradictions reject; no service generates a Decision.
+
+Old fields/KNOWN/UNRESOLVED payloads and compatible pure constructors remain valid.
+Controlled breaking validation change: former AFFECTS -> UNDETERMINED Decision
+now rejects under the approved precedence. REPLAN does not create a Plan or promise
+revision feasibility; later revision handling owns that question. No Decision/Scope
+IDs; partial semantics remain distinct in JSON. NO_PLAN_IMPACT safety is unchanged.
+P11.2/P8/P10/P9/P9.5 remain frozen. P11.3 Service is NOT IMPLEMENTED; P11.4 not entered.
 
 ## 10. Agent Architecture
 

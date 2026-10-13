@@ -98,6 +98,7 @@ class PlanReference(_Contract):
 class ScopeState(str, Enum):
     KNOWN = "known"
     UNRESOLVED = "unresolved"
+    PARTIALLY_RESOLVED = "partially_resolved"
 
 
 class AffectedPlanScope(_Contract):
@@ -115,7 +116,14 @@ class AffectedPlanScope(_Contract):
     def unresolved_is_not_empty(self) -> Self:
         if self.state == ScopeState.UNRESOLVED and (self.whole_plan or self.milestone_ids):
             raise ValueError("Unresolved scope cannot assert affected elements")
+        if self.state == ScopeState.PARTIALLY_RESOLVED and not (self.whole_plan or self.milestone_ids):
+            raise ValueError("Partial scope needs known affected references and unresolved remainder")
         return self
+
+    @property
+    def has_unresolved_remainder(self) -> bool:
+        """Derived from state; no second overlapping serialized uncertainty flag."""
+        return self.state != ScopeState.KNOWN
 
 
 class ImpactOutcome(str, Enum):
@@ -143,6 +151,8 @@ class ReplanningReasonCode(str, Enum):
     STRUCTURAL_REVISION_SUPPORTED = "structural_revision_supported"
     REVISION_NOT_REPRESENTABLE = "revision_not_representable"
     IMPACT_UNDETERMINED = "impact_undetermined"
+    CONFIRMED_PLAN_IMPACT = "confirmed_plan_impact"
+    CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER = "confirmed_impact_with_unresolved_remainder"
 
 
 class ReplanningEvidence(_Contract):
@@ -294,8 +304,10 @@ class EventImpactAnalysis(_Contract):
         if self.outcome == ImpactOutcome.UNDETERMINED:
             if self.scope.state != ScopeState.UNRESOLVED or not reasons & uncertain:
                 raise ValueError("Undetermined impact needs unresolved scope and evidence reason")
-        elif self.scope.state != ScopeState.KNOWN:
-            raise ValueError("Determined impact requires known scope")
+        elif self.outcome == ImpactOutcome.NO_PLAN_IMPACT and self.scope.state != ScopeState.KNOWN:
+            raise ValueError("No impact requires fully known scope")
+        elif self.outcome == ImpactOutcome.AFFECTS_PLAN and self.scope.state == ScopeState.UNRESOLVED:
+            raise ValueError("Confirmed impact must retain known affected references")
         if self.outcome == ImpactOutcome.NO_PLAN_IMPACT:
             if self.scope.whole_plan or self.scope.milestone_ids:
                 raise ValueError("No impact requires known-empty scope")
@@ -308,13 +320,18 @@ class EventImpactAnalysis(_Contract):
                 raise ValueError("Affected Plan requires supplied dependency evidence")
             if self.event.category == CompetitionEventCategory.OBSERVATION_CHANGE:
                 raise ValueError("Coverage change alone cannot assert factual Plan impact")
-            if not self.scope.whole_plan:
-                raise ValueError("Plan target dependency has whole-plan scope")
+            cited_milestones = {mid for item in self.evidence for mid in item.milestone_ids}
+            if not set(self.scope.milestone_ids).issubset(cited_milestones):
+                raise ValueError("Known affected milestones require explicit reference evidence")
         return self
 
 
 class ReplanningDecision(_Contract):
-    """Impact and action are separate; multiple supplied analyses are supported."""
+    """Validate supplied action: confirmed > uncertain > proven no-impact.
+
+    Multiple analyses and unresolved evidence stay intact. This Contract neither
+    generates a decision nor promises that a Plan revision is representable.
+    """
 
     impacts: tuple[EventImpactAnalysis, ...] = Field(min_length=1)
     evaluated_at: AwareDatetime
@@ -356,6 +373,8 @@ class ReplanningDecision(_Contract):
             ReplanningReasonCode.STRUCTURAL_REVISION_SUPPORTED,
             ReplanningReasonCode.REVISION_NOT_REPRESENTABLE,
             ReplanningReasonCode.IMPACT_UNDETERMINED,
+            ReplanningReasonCode.CONFIRMED_PLAN_IMPACT,
+            ReplanningReasonCode.CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER,
         }:
             raise ValueError("Decision requires action reason codes")
         if self.outcome == ReplanningOutcome.KEEP_CURRENT_PLAN:
@@ -363,21 +382,35 @@ class ReplanningDecision(_Contract):
                 raise ValueError("Keep requires determined no-impact analyses")
             if self.scope.state != ScopeState.KNOWN or self.scope.whole_plan or self.scope.milestone_ids:
                 raise ValueError("Keep requires known-empty scope")
-            if ReplanningReasonCode.NO_PLAN_IMPACT not in reasons:
+            if reasons != {ReplanningReasonCode.NO_PLAN_IMPACT}:
                 raise ValueError("Keep requires no-impact reason")
         elif self.outcome == ReplanningOutcome.REPLAN:
-            if ImpactOutcome.AFFECTS_PLAN not in outcomes or ImpactOutcome.UNDETERMINED in outcomes:
-                raise ValueError("Replan requires determined impact")
-            if ReplanningReasonCode.STRUCTURAL_REVISION_SUPPORTED not in reasons:
-                raise ValueError("Replan requires explicit revision support")
-            expected_ids = {mid for item in self.impacts for mid in item.scope.milestone_ids}
-            expected_whole = any(item.scope.whole_plan for item in self.impacts)
-            if (self.scope.state != ScopeState.KNOWN
+            if ImpactOutcome.AFFECTS_PLAN not in outcomes:
+                raise ValueError("Replan requires at least one confirmed impact")
+            confirmed = tuple(item for item in self.impacts if item.outcome == ImpactOutcome.AFFECTS_PLAN)
+            unresolved = (ImpactOutcome.UNDETERMINED in outcomes
+                          or any(item.scope.has_unresolved_remainder for item in confirmed))
+            expected_ids = {mid for item in confirmed for mid in item.scope.milestone_ids}
+            expected_whole = any(item.scope.whole_plan for item in confirmed)
+            expected_state = ScopeState.PARTIALLY_RESOLVED if unresolved else ScopeState.KNOWN
+            if (self.scope.state != expected_state
                 or set(self.scope.milestone_ids) != expected_ids
                 or self.scope.whole_plan != expected_whole):
-                raise ValueError("Replan scope must preserve determined impact scope")
+                raise ValueError("Replan scope must preserve known references and all uncertainty")
+            supported_reasons = {
+                ReplanningReasonCode.STRUCTURAL_REVISION_SUPPORTED,
+                ReplanningReasonCode.CONFIRMED_PLAN_IMPACT,
+            }
+            if unresolved:
+                mixed = ReplanningReasonCode.CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER
+                if mixed not in reasons or reasons - (supported_reasons | {mixed}):
+                    raise ValueError("Mixed Replan needs explicit confirmed/unresolved reason")
+            elif not reasons or reasons - supported_reasons:
+                raise ValueError("Resolved Replan requires confirmed-impact reason")
         else:
-            if self.scope.state != ScopeState.UNRESOLVED or not reasons & {
+            if ImpactOutcome.AFFECTS_PLAN in outcomes or ImpactOutcome.UNDETERMINED not in outcomes:
+                raise ValueError("Undetermined requires uncertainty without confirmed impact")
+            if self.scope.state != ScopeState.UNRESOLVED or not reasons or reasons - {
                 ReplanningReasonCode.REVISION_NOT_REPRESENTABLE,
                 ReplanningReasonCode.IMPACT_UNDETERMINED,
             }:

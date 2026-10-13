@@ -13,9 +13,9 @@ Deterministic baseline planning scope is finished.
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
 resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZEN;
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
-and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 Contract Review PASS /
-committed / frozen; P11.2 deterministic Event Impact Analyzer implemented, awaiting
-Review.** No decision/revision engine yet.
+and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 explicitly REOPENED for
+controlled mixed-scope/decision Contract evolution, awaiting Review; P11.2 Analyzer
+Review PASS / committed / frozen.** P11.3 Service is NOT IMPLEMENTED; no revision engine.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1091,7 +1091,7 @@ Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
 
 Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
-## P11.1 Adaptive Replanning Domain Contract — Review PASS, committed / frozen
+## P11.1 Adaptive Replanning Domain Contract — REOPENED, controlled evolution awaiting Review
 
 `domain/replanning.py` defines immutable supplied-result Contracts only, not impact,
 decision, revision or PlanDiff computation engines are added by that module.
@@ -1124,12 +1124,15 @@ explicit tracks require NO_PLAN_IMPACT/TARGET_MISMATCH. Edition Event/track Plan
 and track Event/edition Plan share context without proving dependency. Observation
 coverage is not factual removal and can remain UNDETERMINED.
 
-AffectedPlanScope is KNOWN (possibly empty) or UNRESOLVED, with plan_id,
-whole_plan and canonical milestone IDs. Unknown is machine-distinct from known
-empty. ReplanningDecision supports REPLAN / KEEP_CURRENT_PLAN / UNDETERMINED,
+AffectedPlanScope is KNOWN (possibly empty), PARTIALLY_RESOLVED or UNRESOLVED, with
+plan_id, whole_plan and canonical milestone IDs. Partial scope preserves known
+refs plus unresolved remainder. Unknown is machine-distinct from known empty.
+ReplanningDecision supports REPLAN / KEEP_CURRENT_PLAN / UNDETERMINED,
 multiple unique canonical Event triggers, reasons and retained analysis evidence.
-AFFECTS_PLAN does not force REPLAN: revision may be unrepresentable. KEEP requires
-known no impact; uncertainty can retain the exact old Plan with empty Diff.
+Confirmed impact takes decision precedence: any AFFECTS_PLAN requires REPLAN;
+otherwise any UNDETERMINED requires UNDETERMINED; all NO_PLAN_IMPACT requires KEEP.
+REPLAN requests the next stage, not a promise of a representable revision or a new Plan.
+KEEP requires known no impact; pure uncertainty can retain the exact old Plan with empty Diff.
 
 PlanDiff retains immutable before/after CompetitionPlan and decision/trigger/
 reason/evidence lineage. Supplied PlanMilestonesChange contains typed before/after
@@ -1175,7 +1178,7 @@ Run:
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_contract.py
 ```
 
-## P11.2 Deterministic Event Impact Analyzer — implemented, awaiting Review
+## P11.2 Deterministic Event Impact Analyzer — Review PASS, committed / frozen
 
 `domain/event_impact_analyzer.py` CompetitionEventImpactAnalyzer.analyze(event,
 student, plan, evaluated_at=<explicit aware datetime>) is a pure Domain Service.
@@ -1211,6 +1214,35 @@ P5/P6/P7 calls, severity/score, notification, persistence, LLM or Agent. P11.1/P
 P8/P9/P9.5 stay frozen. P11 remains IN PROGRESS. NEXT P11.3: ImpactAnalysis[] +
 existing Plan + explicit context -> ReplanningDecision + canonical AffectedPlanScope;
 no need to reinterpret Event, revisit P10 or refetch sources.
+
+### P11.1 Mixed Impact Contract Evolution — awaiting Review
+
+Explicit reopening repairs the P11.3 blocker; no parallel model or P11.3 Service.
+Existing fields/old KNOWN and UNRESOLVED payloads stay unchanged; ScopeState adds
+PARTIALLY_RESOLVED. It requires known milestone refs or whole-plan impact and implies
+unresolved remainder. Pure UNRESOLVED has no known refs; KNOWN-empty cannot claim
+uncertainty. `has_unresolved_remainder` is a derived property, not another serialized
+flag. Refs are unique/canonical/immutable and must bind Plan/evidence.
+
+Decision validates confirmed > unresolved > proven no-impact action precedence.
+AFFECTS + UNDETERMINED -> REPLAN retains both analyses and PARTIALLY_RESOLVED scope;
+whole-plan impact never erases unresolved detail. NO_IMPACT + UNDETERMINED remains
+UNDETERMINED; all no-impact -> KEEP + KNOWN-empty. REPLAN scope preserves all known
+confirmed refs and any unresolved analyses/partial confirmed scope. Mixed REPLAN
+requires CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER; pure REPLAN accepts new
+CONFIRMED_PLAN_IMPACT or existing STRUCTURAL_REVISION_SUPPORTED. Existing NO_PLAN_IMPACT
+and IMPACT_UNDETERMINED reasons remain. All trigger/evidence lineage is retained.
+
+Controlled compatibility change: AFFECTS -> UNDETERMINED decision, formerly allowed
+for revision limits, now rejects under the mandated precedence; representability
+belongs to later revision handling. No-impact safety remains unchanged. No Decision/
+Scope ID exists; partial semantics are distinct in JSON. Scope extension and stricter
+outcome/reason/scope validators are explicit schema/validation evolution.
+P11.2/P8/P10/P9/P9.5 unchanged. P11.3 remains NOT IMPLEMENTED; P11.4 is not entered.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_mixed_contract.py
+```
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event_impact_analyzer.py

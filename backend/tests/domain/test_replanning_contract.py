@@ -199,10 +199,13 @@ def test_three_replanning_decisions(outcome):
     assert ReplanningDecision.model_validate_json(result.model_dump_json()) == result
 
 
-def test_impact_does_not_imply_replan_and_undetermined_can_keep_exact_old_plan():
+def test_confirmed_impact_precedence_and_uncertain_decision_can_retain_old_plan():
     old, approved = replan_context()
-    uncertain = decision(impacts=approved.impacts)
-    assert uncertain.impacts[0].outcome == "affects_plan"
+    # Controlled evolution: the old affects -> undetermined decision expectation
+    # is superseded by confirmed-impact action precedence. No revision is run.
+    with pytest.raises(ValidationError):
+        decision(impacts=approved.impacts)
+    uncertain = decision()
     diff = PlanDiff(before=old, after=old, decision=uncertain, evaluated_at=T3)
     assert diff.changes == ()
 

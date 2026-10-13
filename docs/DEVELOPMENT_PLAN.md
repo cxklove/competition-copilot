@@ -972,8 +972,9 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** IN PROGRESS. P11.1 Adaptive Replanning Domain Contract implemented,
-  awaiting Review. P11.2 and later engines/revision algorithms are NOT IMPLEMENTED。
+- **Status:** IN PROGRESS. P11.1 Contract Review PASS / committed / frozen.
+  P11.2 deterministic Event Impact Analyzer implemented, awaiting Review.
+  P11.3 decision/scope and later revision algorithms are NOT IMPLEMENTED。
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -981,10 +982,10 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 - **Acceptance Criteria:** 受影响计划可定位，Diff 可解释可追踪；重复事件不产生重复重规划，旧计划仍可查看。
 - **Explicitly Out of Scope:** Agent 自行改写规则、自动报名及前端可视化。
 
-### P11.1 — Adaptive Replanning Domain Contract (implemented, awaiting Review)
+### P11.1 — Adaptive Replanning Domain Contract (Review PASS, committed / frozen)
 
 `domain/replanning.py` adds result Contracts only. P8/P10/P9/P9.5 remain frozen;
-no engine, Plan mutation, planner rerun or persistence is implemented.
+no engine, Plan mutation, planner rerun or persistence is implemented by this Contract.
 
 P8 audit: CompetitionPlan has id/student/competition/edition/optional track,
 planning_horizon, skill_gap_audit, planning_needs, status/version, milestones and
@@ -1032,9 +1033,9 @@ Tests lock tri-state results, missing-dependency uncertainty, target/observation
 safety, typed evidence, known-empty/unresolved scope, no-op and supplied structural
 Diff, multiple trigger ordering/duplicates, identity/time, immutability and stable JSON.
 P11.2 INPUT READY: Event + StudentProfile + Existing CompetitionPlan -> impact
-analysis, using explicit reasons/evidence; no P11.2 implementation in P11.1.
+analysis, using explicit reasons/evidence; P11.2 implementation is described below.
 
-P11.1 safety follow-up awaits re-review. NO_PLAN_IMPACT requires verifiable structured
+P11.1 safety follow-up passed re-review and is frozen. NO_PLAN_IMPACT requires verifiable structured
 negative evidence: explicit target mismatch, or known/known factual membership with
 the Plan target track preserved before/after and a cited track_membership reference.
 Reason code alone and known-empty scope cannot prove no impact. UNRELATED_TRACK_CHANGE
@@ -1056,6 +1057,44 @@ Official Source -> P9.5 Monitor -> SnapshotDiff -> P10 CompetitionEvent
 ## MVP 2 — 自适应计划验收关口
 
 使用受控赛事变更，从 Snapshot 经 Diff、CompetitionEvent、影响分析到 Plan Diff 完成端到端演示；验证来源、审核、版本、事件幂等及 `before`/`after`/`trigger_event_id`/`reason_code`/`evidence` 全链路。记录场景测试结果及已知风险。此关口不新增代码范围，也不要求 Agent 或 Web。
+
+### P11.2 — Deterministic Event Impact Analysis (implemented, awaiting Review)
+
+`domain/event_impact_analyzer.py` CompetitionEventImpactAnalyzer is a pure Domain
+Service: validated CompetitionEvent + StudentProfile + existing CompetitionPlan +
+explicit aware evaluated_at -> EventImpactAnalysis only. It directly reuses frozen
+P11.1 outcomes, scope, ReplanningReasonCode and ReplanningEvidence. Student identity
+must match Plan; no profile copy or profile text/skill heuristic participates.
+
+Target relevance first: different competition/edition or disjoint explicit tracks
+-> NO_PLAN_IMPACT / TARGET_MISMATCH / known-empty scope, including observation Events.
+Mixed edition/track scope does not prove mismatch. Same-target registration/competition
+window changes -> UNDETERMINED / PLAN_DEPENDENCY_NOT_REPRESENTED; optional dates and
+milestone prose do not create dependencies. Observation knowledge lost/became known
+-> UNDETERMINED / OBSERVATION_ONLY_EVENT, not factual removal.
+
+Factual membership uses Event's existing typed source_changes. Target-track removal,
+including mixed removed/added sets -> AFFECTS_PLAN / TARGET_TRACK_REMOVED. Target
+preserved in both known sets with unrelated changes -> NO_PLAN_IMPACT /
+UNRELATED_TRACK_CHANGE. Target-track added -> AFFECTS_PLAN / PLAN_DEPENDENCY_MATCHED,
+explicitly mandated by frozen P11.1; this is the approved exception to uncertain-added
+fallback. Edition Plan or track absent from both sets -> UNDETERMINED. No Contract change.
+
+Positive/negative/uncertain evidence must support outcome. Affects scope is known
+whole-plan target impact without guessing milestone IDs; no-impact scope known-empty;
+uncertainty unresolved. Output passes normal P11.1 constructor with explicit time,
+Event/Plan references, typed source-field evidence and canonical ordering. Inputs are
+revalidated/detached and not mutated; output is immutable and JSON stable. No Impact ID.
+No Repository/Network/LLM/Agent, hidden facts, independent SnapshotDiff input,
+Event regeneration, decision engine, Plan revision/Diff, Planner rerun, P5/P6/P7 calls,
+score/severity, notification or persistence. Frozen phases are unchanged.
+
+Tests cover mismatch precedence, missing dependency, observation/fact separation,
+membership removal/addition/preservation/absence, safe scope, evidence, explicit time,
+student identity, no text heuristic, input preservation, determinism and serialization.
+NEXT P11.3: EventImpactAnalysis[] + Existing Plan + explicit context ->
+ReplanningDecision + canonical AffectedPlanScope, without Event reinterpretation,
+P10 invocation or website access. P11.3 is not implemented; P11 is not complete.
 
 ## P12 — Agent Runtime and Multi-Agent Orchestration
 

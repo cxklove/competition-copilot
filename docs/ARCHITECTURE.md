@@ -1126,11 +1126,12 @@ Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time r
 
 ## 9. Replanning Architecture
 
-### P11.1 Adaptive Replanning Domain Contract — implemented, awaiting Review
+### P11.1 Adaptive Replanning Domain Contract — Review PASS, committed / frozen
 
 P11 IN PROGRESS. `domain/replanning.py` is a pure immutable result Contract module.
 No Event-to-impact engine, decision engine, Plan revision, PlanDiff computation,
 Planner rerun, scoring, notification, persistence, Network, LLM or Agent is present.
+These are boundaries of the Contract module; P11.2 Analyzer is described below.
 P10 canonical CompetitionEvent is upstream authority; P8 Planner remains baseline
 authority. P5/P6/P7 rules and P8 need/milestone generation are not duplicated.
 
@@ -1178,7 +1179,7 @@ EventImpactAnalysis), not an implementation of that engine. Tests validate suppl
 outcomes/uncertainty, target/evidence/scope, before/after/trigger/reason audit,
 multiple Event ordering, time/identity, immutability and JSON.
 
-P11.1 Contract safety follow-up (awaiting re-review): NO_PLAN_IMPACT requires
+P11.1 Contract safety follow-up (re-review PASS, committed / frozen): NO_PLAN_IMPACT requires
 verifiable structured negative evidence, not a reason code or known-empty scope
 alone. Supported negative bases are explicit target mismatch or factual known/known
 track membership with the Plan's explicit track present before and after, cited by
@@ -1195,6 +1196,37 @@ CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan D
 ```
 
 影响分析以事件关联赛事、学生 Journey 和计划版本；仅受影响的计划进入重规划。每次自动重规划追加新计划版本，`Plan Diff` 至少保存 `before`、`after`、`trigger_event_id`（关联 `trigger_event`）、`reason_code` 和 `evidence`。证据指向事件、快照、事实来源和所用规则版本；旧计划不被覆盖，界面可展示具体任务和期限变化。
+
+### P11.2 Deterministic Event Impact Analysis — implemented, awaiting Review
+
+CompetitionEventImpactAnalyzer in `domain/event_impact_analyzer.py` is pure Domain:
+CompetitionEvent + StudentProfile + existing CompetitionPlan + explicit aware
+evaluated_at -> EventImpactAnalysis. Reuses P11.1 frozen Contract directly. Student
+identity must match Plan; no StudentProfile payload or unrelated fields are stored.
+
+Precedence: target relevance, then factual track evidence, then uncertainty.
+Competition/edition/disjoint explicit track mismatch -> known-empty NO_PLAN_IMPACT
+with TARGET_MISMATCH, including observation Events. Edition/track mixed scope alone
+is not mismatch. Window events without represented dependencies -> UNDETERMINED /
+PLAN_DEPENDENCY_NOT_REPRESENTED. Observation coverage -> UNDETERMINED /
+OBSERVATION_ONLY_EVENT; knowledge loss is not factual track removal. No title/date
+coincidence or human-text dependency guessing.
+
+Factual Event source_changes prove removal -> AFFECTS_PLAN / TARGET_TRACK_REMOVED;
+target retained in known before/after sets -> NO_PLAN_IMPACT / UNRELATED_TRACK_CHANGE.
+Target membership addition -> AFFECTS_PLAN / PLAN_DEPENDENCY_MATCHED, following the
+explicit frozen P11.1 addition rule; not a Contract modification. Edition Plan or
+target absent from both sets remains unresolved. Positive/negative typed evidence
+is required for determined outcomes; normal P11.1 constructor enforces consistency.
+Affects scope identifies whole-plan target impact, no individual milestone claim;
+uncertainty scope is UNRESOLVED; no-impact is KNOWN-empty. Event/Plan/field lineage,
+explicit time, canonical reasons/evidence, immutable output and stable JSON are retained.
+
+No hidden Repository facts, independent SnapshotDiff input, website fetch, Event
+regeneration, ReplanningDecision engine, Plan mutation/revision/PlanDiff, Planner or
+P5/P6/P7 rerun, persistence, severity/score, notification, LLM or Agent. P11.1/P10/
+P8/P9/P9.5 unchanged. P11 IN PROGRESS. NEXT P11.3 consumes ImpactAnalysis[] + Plan +
+explicit context for decision/scope without revisiting Event semantics or P10.
 
 ## 10. Agent Architecture
 

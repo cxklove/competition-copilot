@@ -13,8 +13,9 @@ Deterministic baseline planning scope is finished.
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
 resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZEN;
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
-and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 Adaptive Replanning
-Domain Contract implemented, awaiting Review.** No impact/replan engine yet.
+and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 Contract Review PASS /
+committed / frozen; P11.2 deterministic Event Impact Analyzer implemented, awaiting
+Review.** No decision/revision engine yet.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1090,11 +1091,12 @@ Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
 
 Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
-## P11.1 Adaptive Replanning Domain Contract — implemented, awaiting Review
+## P11.1 Adaptive Replanning Domain Contract — Review PASS, committed / frozen
 
 `domain/replanning.py` defines immutable supplied-result Contracts only, not impact,
-decision, revision or PlanDiff computation engines. P11 IN PROGRESS; P11.2 is not
-implemented. P10 Events are upstream authority; P8 remains baseline Planner authority.
+decision, revision or PlanDiff computation engines are added by that module.
+P11 IN PROGRESS; P11.2 implementation is described below. P10 Events are upstream
+authority; P8 remains baseline Planner authority.
 
 P8 audit: CompetitionPlan fields are id, student_id, competition_id, edition_id,
 optional track_id/planning_horizon/skill_gap_audit, planning_needs, status, version,
@@ -1141,7 +1143,7 @@ exact old Plan. P8/P10 Contracts/serialization remain unchanged.
 
 No impact scoring/severity, notification, persistence, Network, LLM or Agent;
 no P5/P6/P7 rule reimplementation or duplicated P8 Planner logic. No Plan mutation,
-revision algorithm, planner rerun or active-plan replacement. P11.2 will implement
+revision algorithm, planner rerun or active-plan replacement. P11.2 implements
 Event + StudentProfile + Existing Plan -> EventImpactAnalysis using these Contracts.
 
 ```text
@@ -1154,7 +1156,7 @@ Contract tests cover outcomes/uncertainty, target/track/evidence safety, multipl
 triggers, explicit aware time, no-op/changed supplied Diff, identity, immutability
 and JSON.
 
-P11.1 safety follow-up is awaiting re-review. NO_PLAN_IMPACT requires verifiable
+P11.1 safety follow-up passed re-review and is frozen. NO_PLAN_IMPACT requires verifiable
 structured negative evidence: target mismatch or factual known/known membership
 with the explicit Plan track present both before and after, cited in evidence.
 UNRELATED_TRACK_CHANGE describes that proven basis. A reason code, including
@@ -1171,6 +1173,47 @@ Run:
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_contract.py
+```
+
+## P11.2 Deterministic Event Impact Analyzer — implemented, awaiting Review
+
+`domain/event_impact_analyzer.py` CompetitionEventImpactAnalyzer.analyze(event,
+student, plan, evaluated_at=<explicit aware datetime>) is a pure Domain Service.
+Input: validated CompetitionEvent + StudentProfile + existing CompetitionPlan +
+explicit evaluation context. Output: frozen EventImpactAnalysis only. Student ID
+must match Plan student; no profile target exists and no profile prose/skills are
+used to infer impact. Mutable StudentProfile is detached/revalidated, not stored.
+
+Precedence: target mismatch -> factual track evidence -> observation uncertainty /
+missing dependency. Competition/edition or different explicit track targets give
+NO_PLAN_IMPACT / TARGET_MISMATCH with known-empty scope, even for observation Events.
+Edition Event / track Plan and track Event / edition Plan are not automatic mismatches.
+Window changes remain UNDETERMINED / PLAN_DEPENDENCY_NOT_REPRESENTED even when
+milestone titles mention dates or supplied dates coincide. Observation coverage,
+including membership lost/became known, is UNDETERMINED / OBSERVATION_ONLY_EVENT,
+never factual removal. Factual target-track removal gives AFFECTS_PLAN /
+TARGET_TRACK_REMOVED; preserved target with unrelated additions/removals gives
+NO_PLAN_IMPACT / UNRELATED_TRACK_CHANGE. Target-track addition gives AFFECTS_PLAN /
+PLAN_DEPENDENCY_MATCHED because frozen P11.1 explicitly requires that classification;
+the Analyzer does not revise Contract to introduce ambiguous-added semantics.
+Edition Plans or absent target membership without a proven transition remain unresolved.
+
+Known impact requires positive typed evidence; known no-impact requires negative
+typed evidence. Scope is KNOWN-empty for no-impact, UNRESOLVED for uncertainty,
+KNOWN whole-plan target impact with no individual milestone claims for affects.
+All outputs use normal P11.1 constructor, exact Event/Plan/source-field references,
+explicit aware time and canonical reasons/evidence; no generated Impact ID exists.
+No milestone title/description matching or unrelated student heuristics.
+
+No Repository/hidden facts, website access, standalone Diff input/recalculation,
+Event regeneration, decision engine, Plan/PlanDiff creation or mutation, Planner,
+P5/P6/P7 calls, severity/score, notification, persistence, LLM or Agent. P11.1/P10/
+P8/P9/P9.5 stay frozen. P11 remains IN PROGRESS. NEXT P11.3: ImpactAnalysis[] +
+existing Plan + explicit context -> ReplanningDecision + canonical AffectedPlanScope;
+no need to reinterpret Event, revisit P10 or refetch sources.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_event_impact_analyzer.py
 ```
 
 ```powershell

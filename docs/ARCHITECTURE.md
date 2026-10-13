@@ -1078,7 +1078,7 @@ Adaptive Replanning (P11), Agent, MCP and Frontend. Dedup is stateless/batch-loc
 Event != Diff; Event != Impact; Event != Replanning. P10 only consumes supplied
 SnapshotDiff and never refetches sources, rebuilds Snapshots or recomputes Diff.
 
-NEXT: P11 — Adaptive Replanning, NOT STARTED. Its inputs are canonical
+P11 — Adaptive Replanning follows P10; current P11.1 Contract status is below. Inputs are canonical
 CompetitionEvent + StudentProfile + existing CompetitionPlan + necessary planning
 context. P11 owns severity/risk, student/plan impact, affected milestones and Adaptive
 Replanning. It must not refetch sources, rebuild Snapshots, recompute Diff or regenerate Events.
@@ -1121,10 +1121,74 @@ Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
 P11 will consume Events + StudentProfile + existing CompetitionPlan + necessary
 planning context, producing Impact Analysis, Affected Plan scope, Replanning Decision
 and Plan Diff. P11 must not repeat website fetch, Snapshot construction, Diff or
-Event generation; P11 implementation is NOT STARTED.
+Event generation; P11.1 now defines Contract only, as documented below.
 Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
 ## 9. Replanning Architecture
+
+### P11.1 Adaptive Replanning Domain Contract — implemented, awaiting Review
+
+P11 IN PROGRESS. `domain/replanning.py` is a pure immutable result Contract module.
+No Event-to-impact engine, decision engine, Plan revision, PlanDiff computation,
+Planner rerun, scoring, notification, persistence, Network, LLM or Agent is present.
+P10 canonical CompetitionEvent is upstream authority; P8 Planner remains baseline
+authority. P5/P6/P7 rules and P8 need/milestone generation are not duplicated.
+
+P8 audit found optional Plan planning_horizon and milestone start_at/due_at/
+estimated_hours, milestone dependency_ids/status/source_need_id and Plan
+needs/audit/status/version/created_at/updated_at. There are no priority/resources
+or Event/window dependency fields. Baseline supplies one unscheduled milestone
+per need, inferring no dates or resources. Existing Plan/Need/Milestone IDs and
+immutable serialization remain intact. Optional dates alone are not dependency evidence.
+
+EventImpactAnalysis contains one Diff-backed Event, exact typed PlanReference,
+student identity, explicit aware evaluation time, tri-state outcome, typed evidence
+and scope. StudentProfile is referenced, not copied. Shared Evidence requires display
+prose/scalar values; ReplanningEvidence uses exact Event/Plan/milestone/source-field
+references and original Event provenance. Outcomes AFFECTS_PLAN / NO_PLAN_IMPACT /
+UNDETERMINED distinguish missing dependencies from no impact. Stable Plan track
+target can support a supplied factual membership dependency; no window dependency
+is invented. Cross-competition/edition and disjoint explicit tracks must be no
+impact. Mixed edition/track context does not prove dependency. Observation-only
+Events cannot assert factual impact and may remain UNDETERMINED.
+
+AffectedPlanScope: KNOWN (including empty) vs UNRESOLVED, with plan_id, whole-plan
+flag and canonical milestone IDs. ReplanningDecision: REPLAN / KEEP_CURRENT_PLAN /
+UNDETERMINED. Impacts and action differ: AFFECTS_PLAN can still have no representable
+revision. Multiple unique Events, exact same Plan context and explicit reason/evidence
+lineage are retained; no automatic mutation. Known no impact permits KEEP + empty Diff.
+
+PlanDiff preserves immutable before/after Plans and supplied decision/trigger/reasons/
+evidence. PlanMilestonesChange carries actual typed before/after milestone collections;
+no comparison engine generates it. First revision scope is existing P8 milestones
+only; target/student/needs/audit/horizon/status remain unchanged. Changed Plan
+requires REPLAN, next version, explicit update time and deterministic revised-plan-v1
+identity over exact before reference and ordered supplied after milestones. Identity
+helper only serializes inputs. No-op reuses exact old Plan. All evaluation times are
+explicit/aware, no auto-now. P8/P10/P9/P9.5 are unchanged.
+
+```text
+Official Source -> P9.5 Monitor -> SnapshotDiff -> P10 CompetitionEvent
+-> P11 Event Impact Analysis -> Replanning Decision -> Affected Plan Scope
+-> Revised CompetitionPlan -> PlanDiff
+```
+
+This is Contract readiness for P11.2 (Event + StudentProfile + Existing Plan ->
+EventImpactAnalysis), not an implementation of that engine. Tests validate supplied
+outcomes/uncertainty, target/evidence/scope, before/after/trigger/reason audit,
+multiple Event ordering, time/identity, immutability and JSON.
+
+P11.1 Contract safety follow-up (awaiting re-review): NO_PLAN_IMPACT requires
+verifiable structured negative evidence, not a reason code or known-empty scope
+alone. Supported negative bases are explicit target mismatch or factual known/known
+track membership with the Plan's explicit track present before and after, cited by
+track_membership evidence. UNRELATED_TRACK_CHANGE labels this verified basis;
+NO_RELEVANT_PLAN_ELEMENT cannot manufacture one. Missing window dependencies and
+same-target observation uncertainty remain UNDETERMINED. Typed target-track removal
+or addition cannot be overridden by contradictory reasons. Validators reject
+positive/negative/uncertain outcome-reason conflicts without generating any outcome.
+ReplanningDecision consumes only validated analyses; legitimate proven no-impact
+still supports KEEP + empty PlanDiff. No Analyzer or revision engine is introduced.
 
 ```text
 CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff

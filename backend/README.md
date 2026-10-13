@@ -13,7 +13,8 @@ Deterministic baseline planning scope is finished.
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
 resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZEN;
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
-and P10 Final Review re-run PASS.** NEXT: P11 — Adaptive Replanning, NOT STARTED.
+and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 Adaptive Replanning
+Domain Contract implemented, awaiting Review.** No impact/replan engine yet.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1059,7 +1060,7 @@ plan impact, Adaptive Replanning (P11), Agent, MCP and Frontend. Current dedup i
 stateless and batch-local only. P10 does not refetch websites, build Snapshots or
 recompute Diff.
 
-NEXT: P11 — Adaptive Replanning, NOT STARTED. Future P11 inputs are
+P11 — Adaptive Replanning follows P10; its P11.1 Contract is documented below. Inputs are
 canonical CompetitionEvent + StudentProfile + existing CompetitionPlan + necessary
 planning context. P11 owns severity/risk, student/plan impact, affected milestones
 and Adaptive Replanning; it must not refetch sources, rebuild Snapshots, recompute
@@ -1088,6 +1089,89 @@ Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
 ```
 
 Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
+
+## P11.1 Adaptive Replanning Domain Contract — implemented, awaiting Review
+
+`domain/replanning.py` defines immutable supplied-result Contracts only, not impact,
+decision, revision or PlanDiff computation engines. P11 IN PROGRESS; P11.2 is not
+implemented. P10 Events are upstream authority; P8 remains baseline Planner authority.
+
+P8 audit: CompetitionPlan fields are id, student_id, competition_id, edition_id,
+optional track_id/planning_horizon/skill_gap_audit, planning_needs, status, version,
+milestones, created_at and updated_at. PlanMilestone fields are id, title,
+description, start_at, due_at, estimated_hours, dependency_ids, status and
+source_need_id. PlanningNeed contains id, kind, reason_codes and optional P7
+source_item. All are immutable snapshots with stable JSON. Timing/horizon/hours
+and statuses exist, but no priority/resources or Event/window dependency references.
+dependency_ids are milestone references, not official-date dependencies.
+P8 baseline remains one need -> one unscheduled milestone and infers no dates,
+resources, priority or additional content. Plan/milestone IDs are caller-supplied
+in Contract; baseline builder uses deterministic SHA256 IDs (milestone includes
+plan/need IDs); PlanningNeed mapper uses canonical target/kind/skill identity.
+
+EventImpactAnalysis binds a Diff-backed Event, exact PlanReference, student_id,
+explicit aware evaluated_at, reason codes, typed reference evidence and scope.
+It does not embed StudentProfile. Shared Evidence requires display prose/scalar
+facts; P11 uses ReplanningEvidence for typed Event/Plan/milestone/field references,
+retaining original source evidence in Event Diff lineage. Outcomes: AFFECTS_PLAN,
+NO_PLAN_IMPACT, UNDETERMINED. Missing dependency != no impact. P8's stable Plan
+track target can support a factual membership dependency claim; window dates alone
+cannot prove impact. Validators reject claims without a changed target track;
+they do not infer or evaluate impact. Different competition/edition or different
+explicit tracks require NO_PLAN_IMPACT/TARGET_MISMATCH. Edition Event/track Plan
+and track Event/edition Plan share context without proving dependency. Observation
+coverage is not factual removal and can remain UNDETERMINED.
+
+AffectedPlanScope is KNOWN (possibly empty) or UNRESOLVED, with plan_id,
+whole_plan and canonical milestone IDs. Unknown is machine-distinct from known
+empty. ReplanningDecision supports REPLAN / KEEP_CURRENT_PLAN / UNDETERMINED,
+multiple unique canonical Event triggers, reasons and retained analysis evidence.
+AFFECTS_PLAN does not force REPLAN: revision may be unrepresentable. KEEP requires
+known no impact; uncertainty can retain the exact old Plan with empty Diff.
+
+PlanDiff retains immutable before/after CompetitionPlan and decision/trigger/
+reason/evidence lineage. Supplied PlanMilestonesChange contains typed before/after
+milestone collections; no Diff computation occurs. First structural scope is
+existing P8 milestones only, including their actual optional timing/status fields;
+target/student/needs/audit/horizon/status stay unchanged. Changed Plan requires
+REPLAN, next version, valid explicit timestamps and `revised-plan-v1:` SHA256
+identity over exact before reference + ordered after milestones. Identity helper
+only serializes supplied inputs; it never builds a Plan. Empty Diff reuses the
+exact old Plan. P8/P10 Contracts/serialization remain unchanged.
+
+No impact scoring/severity, notification, persistence, Network, LLM or Agent;
+no P5/P6/P7 rule reimplementation or duplicated P8 Planner logic. No Plan mutation,
+revision algorithm, planner rerun or active-plan replacement. P11.2 will implement
+Event + StudentProfile + Existing Plan -> EventImpactAnalysis using these Contracts.
+
+```text
+Official Source -> P9.5 Monitor -> SnapshotDiff -> P10 CompetitionEvent
+-> future P11 Event Impact Analysis -> Replanning Decision -> Affected Plan Scope
+-> Revised CompetitionPlan -> PlanDiff
+```
+
+Contract tests cover outcomes/uncertainty, target/track/evidence safety, multiple
+triggers, explicit aware time, no-op/changed supplied Diff, identity, immutability
+and JSON.
+
+P11.1 safety follow-up is awaiting re-review. NO_PLAN_IMPACT requires verifiable
+structured negative evidence: target mismatch or factual known/known membership
+with the explicit Plan track present both before and after, cited in evidence.
+UNRELATED_TRACK_CHANGE describes that proven basis. A reason code, including
+NO_RELEVANT_PLAN_ELEMENT, or known-empty scope alone cannot prove no impact.
+Missing window dependencies and same-target observation uncertainty remain
+UNDETERMINED. Typed target-track removal/addition cannot be overridden by contrary
+reason codes. Positive evidence cannot coexist with NO_PLAN_IMPACT; proven negative
+evidence cannot masquerade as impact or uncertainty. These are constructor invariants,
+not an Analyzer. KEEP + empty PlanDiff remains valid for proven no-impact analyses.
+Old no-impact fixtures that asserted no impact for same-target windows without
+dependencies now use a proven preserved-track basis; no frozen Contract was changed.
+
+Run:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_contract.py
+```
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p10_real_event_integration.py

@@ -13,9 +13,9 @@ Deterministic baseline planning scope is finished.
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
 resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZEN;
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
-and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 explicitly REOPENED for
-controlled mixed-scope/decision Contract evolution, awaiting Review; P11.2 Analyzer
-Review PASS / committed / frozen.** P11.3 Service is NOT IMPLEMENTED; no revision engine.
+and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 controlled mixed-impact
+evolution Review PASS / committed / frozen; P11.2 Analyzer Review PASS / committed /
+frozen. P11.3 Decision + Scope Service implemented, awaiting Review.** No revision engine.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1091,7 +1091,7 @@ Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
 
 Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
-## P11.1 Adaptive Replanning Domain Contract — REOPENED, controlled evolution awaiting Review
+## P11.1 Adaptive Replanning Domain Contract — controlled evolution Review PASS, committed / frozen
 
 `domain/replanning.py` defines immutable supplied-result Contracts only, not impact,
 decision, revision or PlanDiff computation engines are added by that module.
@@ -1211,13 +1211,14 @@ No milestone title/description matching or unrelated student heuristics.
 No Repository/hidden facts, website access, standalone Diff input/recalculation,
 Event regeneration, decision engine, Plan/PlanDiff creation or mutation, Planner,
 P5/P6/P7 calls, severity/score, notification, persistence, LLM or Agent. P11.1/P10/
-P8/P9/P9.5 stay frozen. P11 remains IN PROGRESS. NEXT P11.3: ImpactAnalysis[] +
+P8/P9/P9.5 stay frozen. P11 remains IN PROGRESS. Implemented P11.3: ImpactAnalysis[] +
 existing Plan + explicit context -> ReplanningDecision + canonical AffectedPlanScope;
 no need to reinterpret Event, revisit P10 or refetch sources.
 
-### P11.1 Mixed Impact Contract Evolution — awaiting Review
+### P11.1 Mixed Impact Contract Evolution — Review PASS, committed / frozen
 
-Explicit reopening repairs the P11.3 blocker; no parallel model or P11.3 Service.
+Explicit reopening repaired the P11.3 blocker without a parallel model or Service
+in that Contract change. P11.3 Service is documented below.
 Existing fields/old KNOWN and UNRESOLVED payloads stay unchanged; ScopeState adds
 PARTIALLY_RESOLVED. It requires known milestone refs or whole-plan impact and implies
 unresolved remainder. Pure UNRESOLVED has no known refs; KNOWN-empty cannot claim
@@ -1238,10 +1239,48 @@ for revision limits, now rejects under the mandated precedence; representability
 belongs to later revision handling. No-impact safety remains unchanged. No Decision/
 Scope ID exists; partial semantics are distinct in JSON. Scope extension and stricter
 outcome/reason/scope validators are explicit schema/validation evolution.
-P11.2/P8/P10/P9/P9.5 unchanged. P11.3 remains NOT IMPLEMENTED; P11.4 is not entered.
+P11.2/P8/P10/P9/P9.5 unchanged. P11.3 implementation is below; P11.4 is not entered.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_mixed_contract.py
+```
+
+## P11.3 Deterministic Replanning Decision + Affected Scope — implemented, awaiting Review
+
+`domain/replanning_decision_service.py` ReplanningDecisionService.decide(impacts,
+plan, evaluated_at=<explicit aware datetime>) is pure Domain. Input is immutable
+tuple[EventImpactAnalysis, ...] + existing CompetitionPlan + explicit context.
+Output is the frozen ReplanningDecision; its `.scope` is canonical AffectedPlanScope.
+No new result model, Decision/Analysis ID, revised Plan or PlanDiff is introduced.
+
+P11.2 remains sole impact authority. Service uses supplied outcomes/scopes, not
+EventType/source changes or milestone prose. Precedence: any AFFECTS -> REPLAN;
+else any UNDETERMINED -> UNDETERMINED; else all proven no-impact -> KEEP. Empty
+input rejects. All analyses must match the exact caller PlanReference (including
+target/student/version/content digest). Trigger Event ID is the frozen unique
+lineage key: exact duplicate analyses dedup within this batch, conflicting content
+for one key rejects. No cross-run suppression. All unique analyses/evidence remain.
+
+Confirmed milestone refs union uniquely in sorted canonical order; whole-plan
+marker is retained. Confirmed + unresolved (or partial confirmed scope) ->
+PARTIALLY_RESOLVED; pure uncertainty -> UNRESOLVED; resolved confirmed -> KNOWN
+affected; all no-impact -> KNOWN-empty. No-impact contributes no affected refs or
+uncertainty. Reasons reuse CONFIRMED_PLAN_IMPACT, CONFIRMED_IMPACT_WITH_UNRESOLVED_REMAINDER,
+IMPACT_UNDETERMINED and NO_PLAN_IMPACT. Normal frozen constructor validates all
+outcome/reason/scope/lineage consistency. Supplied aware instants normalize to UTC
+for order-independent JSON; no auto-now and no input mutation.
+
+No Event re-analysis, Analyzer/Planner/P5/P6/P7 rerun, Plan mutation/new Plan,
+PlanDiff computation, severity/score, Repository/persistence, notification, Network,
+LLM or Agent. P11.1/P11.2/P8/P10/P9/P9.5 remain unchanged. Tests cover mixed/pure
+outcomes, scope union/completeness, plan conflicts, duplicates/identity conflicts,
+permutations, time, input preservation, frozen output and JSON.
+NEXT P11.4: existing Plan + Decision + Scope + impact lineage + explicit planning
+context -> deterministic Plan Revision + PlanDiff; no Event/Impact re-analysis.
+P11.4 is not implemented and P11 is not complete.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_decision_service.py
 ```
 
 ```powershell

@@ -1126,7 +1126,7 @@ Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time r
 
 ## 9. Replanning Architecture
 
-### P11.1 Adaptive Replanning Domain Contract — REOPENED, evolution awaiting Review
+### P11.1 Adaptive Replanning Domain Contract — controlled evolution Review PASS, committed / frozen
 
 P11 IN PROGRESS. `domain/replanning.py` is a pure immutable result Contract module.
 No Event-to-impact engine, decision engine, Plan revision, PlanDiff computation,
@@ -1225,10 +1225,10 @@ explicit time, canonical reasons/evidence, immutable output and stable JSON are 
 No hidden Repository facts, independent SnapshotDiff input, website fetch, Event
 regeneration, ReplanningDecision engine, Plan mutation/revision/PlanDiff, Planner or
 P5/P6/P7 rerun, persistence, severity/score, notification, LLM or Agent. P11.1/P10/
-P8/P9/P9.5 unchanged. P11 IN PROGRESS. NEXT P11.3 consumes ImpactAnalysis[] + Plan +
+P8/P9/P9.5 unchanged. P11 IN PROGRESS. Implemented P11.3 consumes ImpactAnalysis[] + Plan +
 explicit context for decision/scope without revisiting Event semantics or P10.
 
-### P11.1 Reopened Mixed Scope / Decision Evolution — awaiting Review
+### P11.1 Reopened Mixed Scope / Decision Evolution — Review PASS, committed / frozen
 
 The explicit reopening repairs P11.3 blockers in existing models, not a parallel
 Contract. PARTIALLY_RESOLVED extends ScopeState without new serialized fields:
@@ -1251,7 +1251,34 @@ Controlled breaking validation change: former AFFECTS -> UNDETERMINED Decision
 now rejects under the approved precedence. REPLAN does not create a Plan or promise
 revision feasibility; later revision handling owns that question. No Decision/Scope
 IDs; partial semantics remain distinct in JSON. NO_PLAN_IMPACT safety is unchanged.
-P11.2/P8/P10/P9/P9.5 remain frozen. P11.3 Service is NOT IMPLEMENTED; P11.4 not entered.
+P11.2/P8/P10/P9/P9.5 remain frozen. P11.3 Service is documented below; P11.4 not entered.
+
+### P11.3 Deterministic Replanning Decision + Scope — implemented, awaiting Review
+
+Pure Domain ReplanningDecisionService in `domain/replanning_decision_service.py`:
+immutable EventImpactAnalysis tuple + existing CompetitionPlan + explicit aware
+evaluated_at -> ReplanningDecision containing canonical AffectedPlanScope. P11.2
+is sole impact authority: no EventType/source-change/summary inspection or hidden
+facts. Constructor revalidation is a safety gate, not repeated impact reasoning.
+
+Any AFFECTS -> REPLAN; otherwise any UNDETERMINED -> UNDETERMINED; all proven
+no-impact -> KEEP. Empty input rejects. Confirmed refs union canonically, whole-plan
+impact preserved, and uncertainty retained: KNOWN-empty / KNOWN-affected /
+PARTIALLY_RESOLVED / UNRESOLVED remain distinct. Frozen reason/outcome/evidence
+semantics are validated through the normal Decision constructor.
+
+Every analysis must bind the exact caller PlanReference. No analysis/decision ID
+exists: trigger Event ID is the frozen batch lineage key. Exact duplicates dedup;
+same key with conflicting content rejects; every unique confirmed/uncertain/negative
+analysis remains in canonical trigger order. Supplied aware timestamps normalize
+to UTC without input mutation or new clock readings. Output/evidence are immutable,
+deterministic and stable JSON.
+
+No new/revised Plan, Plan mutation, PlanDiff computation, Planner/P5/P6/P7 rerun,
+Repository/persistence, severity/score, notification, Network, LLM or Agent.
+P11.1/P11.2/P8/P10/P9/P9.5 unchanged. NEXT P11.4 consumes existing Plan + Decision +
+Scope + Impact lineage + explicit planning context for Plan Revision / PlanDiff
+without rerunning Event/Impact interpretation. P11 remains IN PROGRESS.
 
 ## 10. Agent Architecture
 

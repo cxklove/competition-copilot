@@ -1253,7 +1253,7 @@ revision feasibility; later revision handling owns that question. No Decision/Sc
 IDs; partial semantics remain distinct in JSON. NO_PLAN_IMPACT safety is unchanged.
 P11.2/P8/P10/P9/P9.5 remain frozen. P11.3 Service is documented below; P11.4 not entered.
 
-### P11.3 Deterministic Replanning Decision + Scope — implemented, awaiting Review
+### P11.3 Deterministic Replanning Decision + Scope — Review PASS, committed / frozen
 
 Pure Domain ReplanningDecisionService in `domain/replanning_decision_service.py`:
 immutable EventImpactAnalysis tuple + existing CompetitionPlan + explicit aware
@@ -1279,6 +1279,43 @@ Repository/persistence, severity/score, notification, Network, LLM or Agent.
 P11.1/P11.2/P8/P10/P9/P9.5 unchanged. NEXT P11.4 consumes existing Plan + Decision +
 Scope + Impact lineage + explicit planning context for Plan Revision / PlanDiff
 without rerunning Event/Impact interpretation. P11 remains IN PROGRESS.
+
+### P11.3.5 Structured Replanning Input Contract — implemented, awaiting Review
+
+P11.4 stopped because affected scope did not authorize any desired-after content.
+ReplanningInput in `domain/replanning_input.py` now describes approved WHAT, while
+AffectedPlanScope describes WHERE and PlanDiff audits actual changes after future APPLY.
+No Plan revision/application/Diff computation service is implemented.
+
+Minimum compatible operation is typed UPDATE_MILESTONE.due_at: same milestone ID,
+full immutable expected-before and explicit after milestone; every other field stays
+unchanged. No automatic Event-based date adjustment, prose rewriting or affected ->
+delete inference. ADD/REMOVE/REPLACE and other field updates are deferred. Target,
+PlanningNeeds/audit/horizon/plan-status changes remain outside frozen PlanDiff scope.
+
+Approval binds exact source Decision fingerprint, expected PlanReference/version/
+content and old milestone. HUMAN_APPROVED requires stable approval/approver/source
+references and explicit aware approved_at; Domain validates typed shape/binding,
+not external authenticity or a workflow. No nonexistent deterministic rule is claimed.
+Batch validates existing need/dependency references, planning horizon, authorized
+scope and approval chronology. Scope does not itself grant an operation.
+
+EXECUTABLE means complete explicit updates for resolved known milestone scope;
+PARTIALLY_EXECUTABLE preserves known operations plus unresolved scope/coverage;
+UNRESOLVED separates missing REPLAN instructions and UNDETERMINED from KEEP's
+NO_REVISION_REQUIRED. KEEP and pure uncertainty cannot carry executable operations.
+Whole-plan impact remains conservatively partial: even instructions for all milestone
+IDs do not prove complete resolution of all plan-level impacts. No partial transaction:
+the supplied operation batch is atomic or fails, with unresolved result semantics retained.
+
+One due_at update per target; duplicate/conflicting targets reject. Canonical ordering
+uses stable milestone IDs. Instruction/Input IDs are derived SHA256 properties over
+typed canonical payloads (UTC instants); Decision has no new ID, only a fingerprint
+for exact approval binding. Immutability and JSON reparse preserve deterministic IDs.
+Frozen PlanDiff compatibility is proven by an explicit approved test fixture, not a
+production adaptive rule. P11.4 remains NOT IMPLEMENTED; its minimal executable input
+path is now representable. No frozen Plan/PlanDiff/Analyzer/Decision Service change,
+Repository/persistence, notification, Network, LLM or Agent.
 
 ## 10. Agent Architecture
 

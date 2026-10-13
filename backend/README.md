@@ -15,7 +15,9 @@ resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZE
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
 and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 controlled mixed-impact
 evolution Review PASS / committed / frozen; P11.2 Analyzer Review PASS / committed /
-frozen. P11.3 Decision + Scope Service implemented, awaiting Review.** No revision engine.
+frozen. P11.3 Decision + Scope Service Review PASS / committed / frozen.
+P11.3.5 Structured Replanning Input Contract implemented, awaiting Review.**
+P11.4 revision remains NOT IMPLEMENTED; no apply/Diff engine.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1245,7 +1247,7 @@ P11.2/P8/P10/P9/P9.5 unchanged. P11.3 implementation is below; P11.4 is not ente
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_mixed_contract.py
 ```
 
-## P11.3 Deterministic Replanning Decision + Affected Scope — implemented, awaiting Review
+## P11.3 Deterministic Replanning Decision + Affected Scope — Review PASS, committed / frozen
 
 `domain/replanning_decision_service.py` ReplanningDecisionService.decide(impacts,
 plan, evaluated_at=<explicit aware datetime>) is pure Domain. Input is immutable
@@ -1281,6 +1283,52 @@ P11.4 is not implemented and P11 is not complete.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_decision_service.py
+```
+
+## P11.3.5 Structured Replanning Input Contract — implemented, awaiting Review
+
+P11.4's guard found no approved WHAT-to-change authority. `domain/replanning_input.py`
+now defines ReplanningInput / UpdateMilestoneInstruction / RevisionAuthority only.
+AffectedPlanScope describes WHERE; instructions describe explicit authorized WHAT;
+future P11.4 APPLY produces actual PlanDiff. No Event-to-Plan mutation guess or
+automatic deadline adjustment is introduced.
+
+MVP operation: UPDATE_MILESTONE, same stable milestone ID, explicit due_at change
+only. Full expected-before and after PlanMilestone are supplied; all other fields
+must match. ADD/REMOVE/REPLACE, title/description/start_at/hours/status/dependency/
+source_need_id changes are deferred. Target, PlanningNeeds, audit, horizon and
+plan-level status replacement are out of scope. Existing PlanDiff can audit this
+update as a typed whole milestone-collection change; no Diff computation is added.
+
+Instruction binds exact PlanReference/version/content, expected-before milestone,
+and canonical source Decision fingerprint (P11.1 has no Decision ID). HUMAN_APPROVED
+authority requires approval_ref, approved_by_ref, instruction_source_ref and explicit
+aware approved_at. Trusted caller supplies authentic approval references; Contract
+validates their shape/binding, not external authentication or an approval workflow.
+No fictional production deterministic rule is declared. Instructions retain existing
+need refs, valid dependency inventory and planning horizon. Approval must follow
+Decision evaluation and precede supplied_at; no auto-now.
+
+Statuses: EXECUTABLE for resolved known milestone scope covered by explicit updates;
+PARTIALLY_EXECUTABLE for known instructions with remaining coverage/uncertainty;
+UNRESOLVED for missing REPLAN instructions or UNDETERMINED decision; NO_REVISION_REQUIRED
+for KEEP only. KEEP/UNDETERMINED reject structural instructions. Pure unresolved
+scope cannot execute. Whole-plan impact permits individually approved operations
+but remains PARTIALLY_EXECUTABLE conservatively, even when all milestone IDs are
+targeted; it does not prove every impact resolved. Scope never creates instructions.
+
+Batch is atomic desired-after intent, not ordered in-place mutation. One update per
+milestone; exact duplicates/conflicts reject. Canonical order uses milestone ID.
+Input/Instruction deterministic IDs are derived properties over typed payloads with
+UTC instants; JSON reparse reproduces IDs (IDs are not redundant serialized fields).
+No apply service, Plan revision, PlanDiff engine, Repository/persistence, notification,
+Network, LLM or Agent. Frozen Plan/PlanDiff/Analyzer/Decision Service are unchanged.
+Contract tests include an explicit approved due-date fixture and frozen PlanDiff
+compatibility fixture, not a claimed Event-derived deadline rule. P11.4 input is
+ready for this narrow executable path after Review; P11.4 remains NOT IMPLEMENTED.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_input_contract.py
 ```
 
 ```powershell

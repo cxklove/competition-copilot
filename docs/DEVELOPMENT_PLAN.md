@@ -974,7 +974,9 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
 - **Status:** IN PROGRESS. P11.1 controlled mixed-scope / decision evolution
   Review PASS / committed / frozen. P11.2 Analyzer Review PASS / committed / frozen.
-  P11.3 Decision + Scope Service implemented, awaiting Review; P11.4 revision is NOT IMPLEMENTED。
+  P11.3 Decision + Scope Service Review PASS / committed / frozen.
+  P11.3.5 Structured Replanning Input Contract implemented, awaiting Review;
+  P11.4 revision is NOT IMPLEMENTED。
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1127,7 +1129,7 @@ reason compatibility, source ordering/duplicates, old payloads, immutability and
 That Contract evolution added no P11.3 Service, decision generation, revision or Diff computation;
 P11.2/P8/P10/P9/P9.5 are unchanged. P11.4 is not entered.
 
-### P11.3 — Deterministic Replanning Decision + Affected Scope (implemented, awaiting Review)
+### P11.3 — Deterministic Replanning Decision + Affected Scope (Review PASS, committed / frozen)
 
 Pure Domain `domain/replanning_decision_service.py` ReplanningDecisionService.decide:
 immutable ImpactAnalysis tuple + existing CompetitionPlan + explicit aware evaluated_at
@@ -1156,6 +1158,47 @@ No new Plan, mutation, PlanDiff, Planner/P5/P6/P7 calls, severity/score, Reposit
 persistence, notification, Network, LLM or Agent. Frozen Contract/Analyzer unchanged.
 NEXT P11.4: Plan + Decision + Scope + impact lineage + explicit planning context
 -> revised Plan + PlanDiff, without Event/Impact re-analysis. P11 remains IN PROGRESS.
+
+### P11.3.5 — Structured Replanning Input Contract (implemented, awaiting Review)
+
+P11.4 guard: Decision/Scope supplies WHY/WHERE, not approved WHAT-to-change.
+`domain/replanning_input.py` adds immutable typed ReplanningInput,
+UpdateMilestoneInstruction and RevisionAuthority. No application/revision/Diff service.
+Current PlanDiff supports milestone collection change, retaining target/student/
+needs/audit/horizon/plan-status and explicit identity/version metadata semantics.
+MVP instructions support same-ID UPDATE_MILESTONE.due_at only, with full supplied
+expected-before/after. No inferred date, content or need generation. ADD/REMOVE/
+REPLACE and all other milestone field updates are deferred; target/need/audit/
+horizon/plan-status replacement requires separate design/reopen where necessary.
+
+Preconditions: exact PlanReference (ID/version/target/content), exact old milestone,
+source Decision fingerprint and explicit HUMAN_APPROVED references (approval,
+approver, instruction source, aware approved_at). Caller supplies authenticated
+authority context; Domain checks references/binding, not a human workflow or
+external approval lookup. No fictional deterministic revision rule is implemented.
+Instructions must target known affected refs unless whole-plan scope applies;
+need refs remain existing, dependency IDs exist, horizon/time constraints hold.
+
+Input states machine-distinct: EXECUTABLE, PARTIALLY_EXECUTABLE, UNRESOLVED,
+NO_REVISION_REQUIRED. KEEP permits empty no-revision only; UNDETERMINED permits
+empty unresolved only; REPLAN without instructions is unresolved, never executable.
+Resolved milestone scope fully covered can execute; partial scope/missing coverage
+retains partial status. Whole-plan impact stays conservatively partial even with
+individual operations, since complete resolution is unproven. Pure unresolved
+scope rejects structural instruction. No affected -> remove default.
+
+Atomic desired-after batch; no sequential operation policy. One update per milestone;
+duplicate/conflicting updates and unsupported operations reject. Approval time binds
+Decision context and precedes explicit supplied_at. Canonical milestone order and
+derived SHA256 instruction/input IDs include typed authority/preconditions/after state;
+source Decision fingerprint binds exact lineage. No random ID/current clock.
+All models/collections are immutable and JSON stable. IDs are derived properties,
+not extra serialized fields. Tests prove explicit authorized update, safe statuses,
+scope/identity/version/before/authority conflicts and frozen PlanDiff expressiveness.
+
+P11.4 remains NOT IMPLEMENTED. After Review it can consume at least one executable
+approved due_at update without guessing WHAT, while preserving existing Plan context.
+No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
 ## P12 — Agent Runtime and Multi-Agent Orchestration
 

@@ -1303,3 +1303,65 @@ immutable nested tuples, deterministic identity and stable JSON are tested. No
 Repository, persistence, notification, Network, LLM, Agent or MCP. Frozen contracts
 and services remain unchanged. P11 remains IN PROGRESS; NEXT P11.5: Real Adaptive
 Replanning Integration (NOT IMPLEMENTED / NEXT PHASE; not entered in this phase).
+
+
+### P11.4.2 Plan-Level Revision Contract & Execution - IMPLEMENTED / AWAITING REVIEW
+
+Controlled reopen only: P11.1 PlanDiff, P11.3.5 inputs and P11.4 execution.
+P11.2/P11.3/P8/P10 production semantics are unchanged. P8 PlanStatus already has
+ draft/active/completed/cancelled/superseded, but had no transition policy.
+This phase defines only explicit approved draft/active -> cancelled, for verified
+TARGET_TRACK_REMOVED. completed/superseded cancellation and cancelled no-op reject.
+Target changes and supersession/replacement semantics remain deferred.
+
+Plan cancellation means this particular Plan is no longer executable. It does not
+mean withdrawal from the Competition, restoration of the track, erasure of the
+Event, or selection of a replacement track. Preserve target identity, needs, audit,
+horizon, historical milestones and created_at. No recommendation/gap/eligibility
+rerun, generated content, persistence, Network, LLM, Agent or MCP.
+
+UpdatePlanStatusInstruction carries exact expected PlanReference/version/content,
+expected-before status, desired cancelled status, source Decision fingerprint,
+original AffectedPlanScope and reused HUMAN_APPROVED RevisionAuthority references.
+ReplanningInput adds optional plan_status_instruction and scope_resolution.
+Cancellation cannot be combined with milestone edits in this first policy.
+
+AuthorizedScopeResolution is immutable, with COMPLETE/PARTIAL/UNRESOLVED states,
+explicit typed coverage, original scope, canonical instruction/milestone refs,
+Plan/Decision binding and authority. Impact scope describes WHERE; resolution
+specifies authorized executable coverage; instruction specifies WHAT; Diff records
+actual changes. COMPLETE cancellation requires one exact authorized status instruction,
+whole-plan confirmed removal impacts only, and no unresolved impacts/remainder.
+Normal EventImpactAnalysis validation verifies typed removal lineage; execution
+consumes that validated evidence without reinterpreting Events or SnapshotDiff.
+Human approval cannot override semantic incompatibility. Target-added impacts have
+no complete cancellation policy and reject. Milestone-only target-invalidation
+edits remain PARTIAL, including explicit partial coverage; fake COMPLETE rejects.
+Original impact, scope and uncertainty lineage is retained, never replaced.
+
+P11.4 revalidates all inputs, executes only EXECUTABLE batches atomically, constructs
+normal CompetitionPlan, then computes Diff from actual states. PARTIAL/UNRESOLVED
+REPLAN still reject. KEEP and UNDETERMINED safe no-op behavior is unchanged.
+PlanDiff adds optional immutable PlanStatusChange(before_status, after_status).
+Status-only cancellation has no milestone change declaration. Full collection
+snapshots still provide unchanged context for actual milestone revision.
+The schema can distinguish empty, milestone and status change; simultaneous
+status/milestone revision is deliberately rejected by this initial cancellation policy.
+
+Reuse revised-plan-v1 identity derivation with status included when it actually
+changes, version + 1, preserved created_at and explicit aware UTC execution time
+for updated_at. Existing milestone identity derivation and input IDs without new
+options remain unchanged. Old payloads parse; serialization schema adds nullable
+status_change / plan_status_instruction / scope_resolution fields. Receipt retains
+full resolution/instruction/approval payload alongside Diff/Event/Impact/Decision.
+
+Real offline production probes in test_plan_level_revision.py use Repository targets,
+P8 Builder, controlled test-only Event Engine lineage, unchanged Analyzer/Decision,
+explicit human-approved fixture cancellation, normal input/resolution constructors,
+and real Revision Service. Draft and active paths produce cancelled after Plan plus
+actual status Diff, without substituted milestone scope. Controlled events and
+approvals are test fixtures, not official historical changes or automatic rules.
+Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
+states, original context preservation, immutable JSON and determinism.
+P11.5 is NOT IMPLEMENTED / AWAITS RETRY after this phase Review. P11 remains
+IN PROGRESS; no P12 implementation or git commit in this phase.

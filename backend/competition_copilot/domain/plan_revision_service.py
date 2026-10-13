@@ -1,4 +1,4 @@
-"""Mechanical, atomic execution of approved milestone updates only."""
+"""Atomic approved milestone updates or operational plan cancellation."""
 
 from collections.abc import Mapping
 from datetime import datetime, timezone
@@ -10,6 +10,7 @@ from competition_copilot.domain.plan import CompetitionPlan, PlanMilestone
 from competition_copilot.domain.replanning import (
     PlanDiff,
     PlanMilestonesChange,
+    PlanStatusChange,
     ReplanningOutcome,
     revised_plan_identity,
 )
@@ -56,12 +57,15 @@ class PlanRevisionResult(BaseModel):
                 raise ValueError("Only fully executable REPLAN can produce a revision receipt")
             approved = {item.target_milestone_id: item.after for item in source.instructions}
             expected = tuple(approved.get(item.id, item) for item in source.before.milestones)
-            if diff.after.milestones != expected or diff.after.updated_at != diff.evaluated_at:
+            expected_status = (source.plan_status_instruction.desired_after_status
+                               if source.plan_status_instruction else source.before.status)
+            if (diff.after.milestones != expected or diff.after.updated_at != diff.evaluated_at
+                or diff.after.status != expected_status):
                 raise ValueError("Actual result must match all approved updates and execution time")
             inventory = {item.id for item in diff.after.milestones}
             if any(not set(item.dependency_ids).issubset(inventory) for item in diff.after.milestones):
                 raise ValueError("Final dependencies must reference existing milestones")
-        elif diff.after != source.before or diff.changes:
+        elif diff.after != source.before or diff.changes or diff.status_change is not None:
             raise ValueError("Non-REPLAN execution must preserve exact Plan")
         return self
 
@@ -104,7 +108,11 @@ class PlanRevisionService:
                 raise ValueError("Final dependency reference does not exist")
             after = CompetitionPlan(**{
                 **before.model_dump(), "milestones": milestones,
-                "id": revised_plan_identity(before, milestones),
+                "status": (source.plan_status_instruction.desired_after_status
+                           if source.plan_status_instruction else before.status),
+                "id": revised_plan_identity(before, milestones, after_status=(
+                    source.plan_status_instruction.desired_after_status
+                    if source.plan_status_instruction else before.status)),
                 "version": before.version + 1, "updated_at": instant,
             })
         # Actual validated states, not instruction intent, determine the Diff.
@@ -112,5 +120,7 @@ class PlanRevisionService:
             PlanMilestonesChange(before=before.milestones, after=after.milestones),
         ))
         diff = PlanDiff(before=before, after=after, decision=source.decision,
-                        evaluated_at=instant, changes=changes)
+                        evaluated_at=instant, changes=changes,
+                        status_change=(None if before.status == after.status else
+                                       PlanStatusChange(before_status=before.status, after_status=after.status)))
         return PlanRevisionResult(replanning_input=source, plan_diff=diff)

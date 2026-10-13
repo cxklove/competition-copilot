@@ -18,11 +18,14 @@ from pydantic import (
 )
 
 from competition_copilot.domain.digital_twin import StableId
-from competition_copilot.domain.plan import CompetitionPlan, PlanMilestone
+from competition_copilot.domain.plan import CompetitionPlan, PlanMilestone, PlanStatus
 from competition_copilot.domain.replanning import (
+    AffectedPlanScope,
+    ImpactOutcome,
     PlanReference,
     ReplanningDecision,
     ReplanningOutcome,
+    ReplanningReasonCode,
     ScopeState,
 )
 
@@ -54,7 +57,11 @@ def _canonical(value: Any) -> Any:
 
 
 def _identity(prefix: str, value: BaseModel) -> str:
-    fields = TypeAdapter(Any).dump_python(_canonical(value.model_dump()), mode="json")
+    payload = value.model_dump()
+    for name in ("plan_status_instruction", "scope_resolution"):
+        if name in payload and payload[name] is None:
+            del payload[name]
+    fields = TypeAdapter(Any).dump_python(_canonical(payload), mode="json")
     data = json.dumps(fields, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return prefix + sha256(data.encode()).hexdigest()
 
@@ -125,12 +132,94 @@ class ReplanningInputStatus(str, Enum):
     NO_REVISION_REQUIRED = "no_revision_required"
 
 
+class UpdatePlanStatusInstruction(_InputContract):
+    operation: Literal["update_plan_status"]
+    source_decision_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    expected_plan: PlanReference
+    original_scope: AffectedPlanScope
+    expected_before_status: PlanStatus
+    desired_after_status: Literal[PlanStatus.CANCELLED]
+    authority: RevisionAuthority
+
+    @property
+    def id(self) -> str:
+        return _identity("replanning-instruction-v1:", self)
+
+    @model_validator(mode="after")
+    def allowed_transition(self) -> Self:
+        if self.expected_before_status not in (PlanStatus.DRAFT, PlanStatus.ACTIVE):
+            raise ValueError("Cancellation only permits draft/active; terminal/no-op transitions reject")
+        if self.original_scope.plan_id != self.expected_plan.plan_id or not self.original_scope.whole_plan:
+            raise ValueError("Cancellation instruction requires original whole-plan scope")
+        if self.authority.approved_at < self.expected_plan.updated_at:
+            raise ValueError("Approval cannot precede expected Plan")
+        return self
+
+
+class ScopeResolutionStatus(str, Enum):
+    COMPLETE = "complete"
+    PARTIAL = "partial"
+    UNRESOLVED = "unresolved"
+
+
+class AuthorizedScopeResolution(_InputContract):
+    """Explicit coverage assertion; COMPLETE still needs batch semantic validation."""
+
+    expected_plan: PlanReference
+    source_decision_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    original_scope: AffectedPlanScope
+    status: ScopeResolutionStatus
+    coverage: Literal["cancel_target_removed_plan", "partial_milestone_revision", "unresolved"]
+    executable_milestone_ids: tuple[StableId, ...] = ()
+    instruction_ids: tuple[StableId, ...] = ()
+    authority: RevisionAuthority
+
+    @property
+    def id(self) -> str:
+        return _identity("scope-resolution-v1:", self)
+
+    @property
+    def has_unresolved_remainder(self) -> bool:
+        return self.status != ScopeResolutionStatus.COMPLETE
+
+    @field_validator("executable_milestone_ids", "instruction_ids")
+    @classmethod
+    def canonical_refs(cls, value: tuple[str, ...]) -> tuple:
+        if len(set(value)) != len(value):
+            raise ValueError("Duplicate resolution reference")
+        return tuple(sorted(value))
+
+    @model_validator(mode="after")
+    def coverage_shape(self) -> Self:
+        if self.original_scope.plan_id != self.expected_plan.plan_id:
+            raise ValueError("Resolution scope must bind expected Plan")
+        if not set(self.executable_milestone_ids).issubset(self.expected_plan.milestone_ids):
+            raise ValueError("Resolution contains unknown milestone")
+        expected = {
+            ScopeResolutionStatus.COMPLETE: "cancel_target_removed_plan",
+            ScopeResolutionStatus.PARTIAL: "partial_milestone_revision",
+            ScopeResolutionStatus.UNRESOLVED: "unresolved",
+        }[self.status]
+        if self.coverage != expected:
+            raise ValueError("Coverage assertion must match resolution state")
+        if self.status == ScopeResolutionStatus.COMPLETE:
+            if not self.original_scope.whole_plan or self.executable_milestone_ids or len(self.instruction_ids) != 1:
+                raise ValueError("Complete cancellation requires one explicit plan-level instruction")
+        elif self.status == ScopeResolutionStatus.UNRESOLVED:
+            if self.instruction_ids or self.executable_milestone_ids:
+                raise ValueError("Unresolved resolution has no executable scope")
+        elif not self.instruction_ids or not self.executable_milestone_ids:
+            raise ValueError("Partial resolution must retain its approved known subset")
+        return self
+
+
 class ReplanningInput(_InputContract):
     """One atomic desired-after update batch, validated but never applied.
 
     WHERE is Decision.scope; WHAT is explicit instructions. One update per target.
     Partial means known operations are authorized, not a partial transaction.
-    Whole-plan impact cannot establish resolution completeness in this MVP.
+    Whole-plan milestone edits remain partial. Only explicit compatible
+    cancellation coverage can establish plan-level operational completeness.
     """
 
     before: CompetitionPlan
@@ -138,6 +227,8 @@ class ReplanningInput(_InputContract):
     supplied_at: AwareDatetime
     status: ReplanningInputStatus
     instructions: tuple[UpdateMilestoneInstruction, ...] = ()
+    plan_status_instruction: UpdatePlanStatusInstruction | None = None
+    scope_resolution: AuthorizedScopeResolution | None = None
 
     @property
     def id(self) -> str:
@@ -163,19 +254,65 @@ class ReplanningInput(_InputContract):
             raise ValueError("Decision must bind exact before Plan context")
         if self.supplied_at < self.decision.evaluated_at:
             raise ValueError("Input supply cannot precede Decision")
+        resolution = self.scope_resolution
+        fingerprint = replanning_decision_fingerprint(self.decision)
+        if resolution is not None:
+            if (resolution.expected_plan != reference
+                or resolution.source_decision_fingerprint != fingerprint
+                or resolution.original_scope != self.decision.scope):
+                raise ValueError("Resolution must bind same Plan/version/Decision/original scope")
+            if not self.decision.evaluated_at <= resolution.authority.approved_at <= self.supplied_at:
+                raise ValueError("Resolution approval time must follow Decision and precede supply")
+        status_instruction = self.plan_status_instruction
         outcome = self.decision.outcome
         if outcome == ReplanningOutcome.KEEP_CURRENT_PLAN:
-            if self.instructions or self.status != ReplanningInputStatus.NO_REVISION_REQUIRED:
+            if self.instructions or status_instruction or resolution or self.status != ReplanningInputStatus.NO_REVISION_REQUIRED:
                 raise ValueError("Keep permits only empty no-revision input")
             return self
         if outcome == ReplanningOutcome.UNDETERMINED:
-            if self.instructions or self.status != ReplanningInputStatus.UNRESOLVED:
+            if self.instructions or status_instruction or self.status != ReplanningInputStatus.UNRESOLVED:
                 raise ValueError("Undetermined permits unresolved input, not executable operations")
+            if resolution is not None and resolution.status != ScopeResolutionStatus.UNRESOLVED:
+                raise ValueError("Undetermined may only retain unresolved resolution")
+            return self
+        if status_instruction is not None:
+            if self.instructions:
+                raise ValueError("Cancellation batch cannot also modify historical milestones")
+            if (resolution is None or resolution.status != ScopeResolutionStatus.COMPLETE
+                or resolution.coverage != "cancel_target_removed_plan"):
+                raise ValueError("Plan cancellation requires explicit COMPLETE coverage resolution")
+            if (status_instruction.expected_plan != reference
+                or status_instruction.source_decision_fingerprint != fingerprint
+                or status_instruction.original_scope != self.decision.scope
+                or status_instruction.expected_before_status != self.before.status):
+                raise ValueError("Cancellation preconditions must bind exact Plan/status/scope/Decision")
+            if (resolution.instruction_ids != (status_instruction.id,)
+                or resolution.authority != status_instruction.authority):
+                raise ValueError("Complete coverage must bind exact instruction and authority")
+            impacts = self.decision.impacts
+            confirmed = tuple(item for item in impacts if item.outcome == ImpactOutcome.AFFECTS_PLAN)
+            # Normal impact constructors already verify typed removal evidence.
+            # Do not reinterpret EventType/source changes here.
+            if (not self.decision.scope.whole_plan or self.decision.scope.has_unresolved_remainder
+                or any(item.outcome == ImpactOutcome.UNDETERMINED for item in impacts)
+                or not confirmed
+                or any(ReplanningReasonCode.TARGET_TRACK_REMOVED not in item.reason_codes for item in confirmed)):
+                raise ValueError("Complete cancellation requires verified target removal only, no unresolved impact")
+            if self.status != ReplanningInputStatus.EXECUTABLE:
+                raise ValueError("Complete authorized cancellation must be EXECUTABLE")
             return self
         if not self.instructions:
             if self.status != ReplanningInputStatus.UNRESOLVED:
                 raise ValueError("Replan without instructions remains unresolved")
+            if resolution is not None and resolution.status != ScopeResolutionStatus.UNRESOLVED:
+                raise ValueError("Missing instructions cannot assert resolved coverage")
             return self
+        if resolution is not None:
+            if (resolution.status != ScopeResolutionStatus.PARTIAL
+                or set(resolution.instruction_ids) != {item.id for item in self.instructions}
+                or set(resolution.executable_milestone_ids) != {item.target_milestone_id for item in self.instructions}
+                or any(item.authority != resolution.authority for item in self.instructions)):
+                raise ValueError("Milestone-only resolution must retain exact partial subset/authority; fake COMPLETE rejects")
         scope = self.decision.scope
         if scope.state == ScopeState.UNRESOLVED:
             raise ValueError("Pure unresolved scope cannot authorize an executable target")
@@ -210,7 +347,7 @@ class ReplanningInput(_InputContract):
         targeted = {item.target_milestone_id for item in self.instructions}
         # Whole-plan scope says WHERE, not that these explicit operations settle
         # every impact. Preserve that resolution limit even if all IDs are targeted.
-        partial = (scope.has_unresolved_remainder or scope.whole_plan
+        partial = (resolution is not None or scope.has_unresolved_remainder or scope.whole_plan
                    or targeted != set(scope.milestone_ids))
         expected = (ReplanningInputStatus.PARTIALLY_EXECUTABLE
                     if partial else ReplanningInputStatus.EXECUTABLE)

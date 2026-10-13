@@ -26,7 +26,7 @@ from competition_copilot.domain.event import (
     CompetitionEventCategory,
     CompetitionEventType,
 )
-from competition_copilot.domain.plan import CompetitionPlan, PlanMilestone
+from competition_copilot.domain.plan import CompetitionPlan, PlanMilestone, PlanStatus
 
 
 class _Contract(BaseModel):
@@ -432,21 +432,42 @@ class PlanMilestonesChange(_Contract):
         return self
 
 
-def revised_plan_identity(before: CompetitionPlan, milestones: tuple[PlanMilestone, ...]) -> str:
+class PlanStatusChange(_Contract):
+    """Controlled operational cancellation, not a general status machine."""
+
+    field: Literal["status"] = "status"
+    before_status: PlanStatus
+    after_status: PlanStatus
+
+    @model_validator(mode="after")
+    def cancellation_only(self) -> Self:
+        if self.before_status not in (PlanStatus.DRAFT, PlanStatus.ACTIVE) or self.after_status != PlanStatus.CANCELLED:
+            raise ValueError("Only draft/active to cancelled is supported")
+        return self
+
+
+def revised_plan_identity(
+    before: CompetitionPlan, milestones: tuple[PlanMilestone, ...],
+    *, after_status: PlanStatus | None = None,
+) -> str:
     """Contract identity only: never builds/revises a Plan or computes changes."""
     before = CompetitionPlan.model_validate(before)
     values = tuple(PlanMilestone.model_validate(item) for item in milestones)
-    return "revised-plan-v1:" + _digest({
+    content = {
         "before": PlanReference.from_plan(before).model_dump(),
         "milestones": [item.model_dump() for item in values],
-    })
+    }
+    # Preserve existing milestone revision identities byte-for-byte.
+    if after_status is not None and after_status != before.status:
+        content["status"] = PlanStatus(after_status).value
+    return "revised-plan-v1:" + _digest(content)
 
 
 class PlanDiff(_Contract):
     """Auditable supplied before/after Plans, not a Diff computation engine.
 
-    First-version structural scope is the existing P8 milestone collection only.
-    Target/student/needs/audit/horizon/status stay the same. Revised identity is
+    Structural scope is milestones or controlled target-removal cancellation.
+    Target/student/needs/audit/horizon stay the same. Revised identity is
     lineage-sensitive; no-op reuses the exact old Plan, including metadata.
     """
 
@@ -455,6 +476,7 @@ class PlanDiff(_Contract):
     decision: ReplanningDecision
     evaluated_at: AwareDatetime
     changes: tuple[PlanMilestonesChange, ...] = Field(default=(), max_length=1)
+    status_change: PlanStatusChange | None = None
 
     @property
     def before_plan_id(self) -> str:
@@ -474,7 +496,7 @@ class PlanDiff(_Contract):
             raise ValueError("Decision must reference exact before Plan")
         if self.evaluated_at < self.decision.evaluated_at:
             raise ValueError("Diff evaluation cannot precede decision")
-        if not self.changes:
+        if not self.changes and self.status_change is None:
             if self.before != self.after:
                 raise ValueError("Empty Diff must reuse unchanged Plan")
             if self.decision.outcome == ReplanningOutcome.REPLAN:
@@ -482,17 +504,33 @@ class PlanDiff(_Contract):
             return self
         if self.decision.outcome != ReplanningOutcome.REPLAN:
             raise ValueError("Changed Plan requires approved Replan decision")
-        change = self.changes[0]
-        if change.before != self.before.milestones or change.after != self.after.milestones:
-            raise ValueError("Supplied change must match actual before/after milestones")
-        unchanged = set(CompetitionPlan.model_fields) - {"id", "version", "updated_at", "milestones"}
+        if self.changes:
+            change = self.changes[0]
+            if change.before != self.before.milestones or change.after != self.after.milestones:
+                raise ValueError("Supplied change must match actual before/after milestones")
+        elif self.before.milestones != self.after.milestones:
+            raise ValueError("Actual milestone difference requires a collection change")
+        if self.status_change is not None:
+            if (self.status_change.before_status != self.before.status
+                or self.status_change.after_status != self.after.status):
+                raise ValueError("Status change must match actual before/after")
+            if (not self.decision.scope.whole_plan or self.decision.scope.has_unresolved_remainder
+                or any(item.outcome == ImpactOutcome.UNDETERMINED for item in self.decision.impacts)
+                or any(ReplanningReasonCode.TARGET_TRACK_REMOVED not in item.reason_codes
+                       for item in self.decision.impacts if item.outcome == ImpactOutcome.AFFECTS_PLAN)):
+                raise ValueError("Cancellation requires verified target removal without unresolved impacts")
+            if self.changes or self.before.milestones != self.after.milestones:
+                raise ValueError("Cancellation preserves historical milestones")
+        elif self.before.status != self.after.status:
+            raise ValueError("Actual status difference requires typed status change")
+        unchanged = set(CompetitionPlan.model_fields) - {"id", "version", "updated_at", "milestones", "status"}
         if any(getattr(self.before, name) != getattr(self.after, name) for name in unchanged):
             raise ValueError("Revision cannot change unsupported Plan fields")
         if self.after.version != self.before.version + 1 or self.after.updated_at < self.before.updated_at:
             raise ValueError("Revision requires next version and non-reversed update time")
         if not self.decision.evaluated_at <= self.after.updated_at <= self.evaluated_at:
             raise ValueError("Revision update time must follow decision and precede Diff evaluation")
-        if self.after.id != revised_plan_identity(self.before, self.after.milestones):
+        if self.after.id != revised_plan_identity(self.before, self.after.milestones, after_status=self.after.status):
             raise ValueError("Revised Plan ID must match deterministic lineage identity")
         if not self.decision.scope.whole_plan:
             scoped = set(self.decision.scope.milestone_ids)

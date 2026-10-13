@@ -975,8 +975,8 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 - **Status:** IN PROGRESS. P11.1 controlled mixed-scope / decision evolution
   Review PASS / committed / frozen. P11.2 Analyzer Review PASS / committed / frozen.
   P11.3 Decision + Scope Service Review PASS / committed / frozen.
-  P11.3.5 Structured Replanning Input Contract implemented, awaiting Review;
-  P11.4 revision is NOT IMPLEMENTED。
+  P11.3.5 Structured Replanning Input Contract IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE;
+  P11.4 Deterministic Plan Revision + PlanDiff IMPLEMENTED / AWAITING FINAL RE-REVIEW; P11.5 NOT IMPLEMENTED / NEXT PHASE.
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1127,7 +1127,7 @@ explicit in stable JSON. NO_PLAN_IMPACT structured negative evidence is not weak
 Contract tests cover mixed milestone/whole-plan scope, uncertainty retention, precedence,
 reason compatibility, source ordering/duplicates, old payloads, immutability and JSON.
 That Contract evolution added no P11.3 Service, decision generation, revision or Diff computation;
-P11.2/P8/P10/P9/P9.5 are unchanged. P11.4 is not entered.
+P11.2/P8/P10/P9/P9.5 are unchanged. P11.4 implementation is documented below and awaits final re-review.
 
 ### P11.3 — Deterministic Replanning Decision + Affected Scope (Review PASS, committed / frozen)
 
@@ -1156,10 +1156,10 @@ uncertainty, exact Plan conflicts, duplicate/conflicting analyses, permutations,
 time, serialization, immutability, input preservation and no impact/Event rerun.
 No new Plan, mutation, PlanDiff, Planner/P5/P6/P7 calls, severity/score, Repository,
 persistence, notification, Network, LLM or Agent. Frozen Contract/Analyzer unchanged.
-NEXT P11.4: Plan + Decision + Scope + impact lineage + explicit planning context
+P11.4 input boundary: Plan + Decision + Scope + impact lineage + explicit planning context
 -> revised Plan + PlanDiff, without Event/Impact re-analysis. P11 remains IN PROGRESS.
 
-### P11.3.5 — Structured Replanning Input Contract (implemented, awaiting Review)
+### P11.3.5 Structured Replanning Input Contract - IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE
 
 P11.4 guard: Decision/Scope supplies WHY/WHERE, not approved WHAT-to-change.
 `domain/replanning_input.py` adds immutable typed ReplanningInput,
@@ -1196,8 +1196,8 @@ All models/collections are immutable and JSON stable. IDs are derived properties
 not extra serialized fields. Tests prove explicit authorized update, safe statuses,
 scope/identity/version/before/authority conflicts and frozen PlanDiff expressiveness.
 
-P11.4 remains NOT IMPLEMENTED. After Review it can consume at least one executable
-approved due_at update without guessing WHAT, while preserving existing Plan context.
+P11.4 now consumes executable approved due_at updates without guessing WHAT,
+while preserving existing Plan context; IMPLEMENTED / AWAITING FINAL RE-REVIEW.
 No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
 ## P12 — Agent Runtime and Multi-Agent Orchestration
@@ -1260,3 +1260,46 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 4. **Stage review completed:** 按阶段 Acceptance Criteria 审阅，并记录结论与遗留项。
 5. **No unrelated changes:** 仅修改当前阶段及任务相关文件，不顺带重构或格式化。
 6. **Known risks documented:** 记录数据来源、规则覆盖、平台依赖等已知风险、影响及后续处理阶段。
+
+### P11.4 Deterministic Plan Revision + PlanDiff - IMPLEMENTED / AWAITING FINAL RE-REVIEW
+
+
+P11.3 determines whether/where; P11.3.5 supplies approved WHAT; P11.4 only
+VALIDATES/APPLIES the approved batch. Affected scope never implies an operation.
+No automatic Event-to-milestone mutation, generated content, new Need or Planner call.
+
+`domain/plan_revision_service.py` PlanRevisionService.revise(before, replanning_input,
+executed_at=<explicit aware datetime>) returns immutable PlanRevisionResult.
+The result contains original ReplanningInput (including approval references and
+instruction IDs), and frozen PlanDiff; result.after exposes its CompetitionPlan.
+Input carries exact Decision/Scope/Impact/Event lineage transitively, without a
+second authority or re-analysis. Approval authenticity remains the trusted caller's
+responsibility, as in P11.3.5; execution does not reassess approval business merits.
+
+KEEP + NO_REVISION_REQUIRED reuses unchanged Plan and empty Diff (no ID/version/time
+change). UNDETERMINED + UNRESOLVED also leaves Plan unchanged with empty Diff, retaining
+UNDETERMINED Decision and scope lineage; it is not a proven KEEP. REPLAN with missing
+or PARTIALLY_EXECUTABLE input rejects execution. No known subset is applied while
+uncertainty remains, including whole-plan inputs conservatively marked partial.
+
+Only EXECUTABLE approved UPDATE_MILESTONE.due_at is applied. Revalidate exact Plan
+ID/version/content, expected-before, Decision binding, scope, authority chronology,
+conflicts and allowed fields through normal frozen constructors. Final dependency
+inventory is additionally checked for all milestones, including untouched legacy ones.
+All instructions succeed atomically or no result is produced. No in-place mutation.
+Preserve existing milestone order and unaffected content, PlanningNeeds, audit,
+target/student, horizon, Plan status and created_at. Reuse frozen revised_plan_identity,
+next version rule and explicit UTC executed_at for updated_at. No random/current clock.
+
+Construct valid after Plan first, then compare actual before/after milestone collections.
+PlanDiff contains exactly one PlanMilestonesChange for changed collection, or none
+for safe no-op. This frozen granularity retains unchanged context inside collection
+snapshots; no invented per-milestone ADD/REMOVE records. No-op UPDATE is rejected by
+P11.3.5; REPLAN cannot fabricate an empty-diff success. No ADD/REMOVE/REPLACE support.
+
+The receipt preserves revision input/authority provenance without extending frozen
+PlanDiff, alongside Decision/Impact/Event lineage. Normal constructor validation,
+immutable nested tuples, deterministic identity and stable JSON are tested. No
+Repository, persistence, notification, Network, LLM, Agent or MCP. Frozen contracts
+and services remain unchanged. P11 remains IN PROGRESS; NEXT P11.5: Real Adaptive
+Replanning Integration (NOT IMPLEMENTED / NEXT PHASE; not entered in this phase).

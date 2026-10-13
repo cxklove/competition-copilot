@@ -16,8 +16,8 @@ P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review
 and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 controlled mixed-impact
 evolution Review PASS / committed / frozen; P11.2 Analyzer Review PASS / committed /
 frozen. P11.3 Decision + Scope Service Review PASS / committed / frozen.
-P11.3.5 Structured Replanning Input Contract implemented, awaiting Review.**
-P11.4 revision remains NOT IMPLEMENTED; no apply/Diff engine.
+P11.3.5 Structured Replanning Input Contract IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE.**
+P11.4 Plan Revision + PlanDiff IMPLEMENTED / AWAITING FINAL RE-REVIEW; P11.5 NOT IMPLEMENTED / NEXT PHASE.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1241,7 +1241,7 @@ for revision limits, now rejects under the mandated precedence; representability
 belongs to later revision handling. No-impact safety remains unchanged. No Decision/
 Scope ID exists; partial semantics are distinct in JSON. Scope extension and stricter
 outcome/reason/scope validators are explicit schema/validation evolution.
-P11.2/P8/P10/P9/P9.5 unchanged. P11.3 implementation is below; P11.4 is not entered.
+P11.2/P8/P10/P9/P9.5 unchanged. P11.3 implementation is below; P11.4 implementation is documented below and awaits final re-review.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_mixed_contract.py
@@ -1277,20 +1277,20 @@ PlanDiff computation, severity/score, Repository/persistence, notification, Netw
 LLM or Agent. P11.1/P11.2/P8/P10/P9/P9.5 remain unchanged. Tests cover mixed/pure
 outcomes, scope union/completeness, plan conflicts, duplicates/identity conflicts,
 permutations, time, input preservation, frozen output and JSON.
-NEXT P11.4: existing Plan + Decision + Scope + impact lineage + explicit planning
+P11.4 input boundary: existing Plan + Decision + Scope + impact lineage + explicit planning
 context -> deterministic Plan Revision + PlanDiff; no Event/Impact re-analysis.
-P11.4 is not implemented and P11 is not complete.
+P11.4 is implemented and awaiting final re-review below; P11 remains IN PROGRESS.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_decision_service.py
 ```
 
-## P11.3.5 Structured Replanning Input Contract — implemented, awaiting Review
+## P11.3.5 Structured Replanning Input Contract - IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE
 
 P11.4's guard found no approved WHAT-to-change authority. `domain/replanning_input.py`
 now defines ReplanningInput / UpdateMilestoneInstruction / RevisionAuthority only.
 AffectedPlanScope describes WHERE; instructions describe explicit authorized WHAT;
-future P11.4 APPLY produces actual PlanDiff. No Event-to-Plan mutation guess or
+P11.4 APPLY produces Revised CompetitionPlan and actual PlanDiff. No Event-to-Plan mutation guess or
 automatic deadline adjustment is introduced.
 
 MVP operation: UPDATE_MILESTONE, same stable milestone ID, explicit due_at change
@@ -1325,7 +1325,7 @@ No apply service, Plan revision, PlanDiff engine, Repository/persistence, notifi
 Network, LLM or Agent. Frozen Plan/PlanDiff/Analyzer/Decision Service are unchanged.
 Contract tests include an explicit approved due-date fixture and frozen PlanDiff
 compatibility fixture, not a claimed Event-derived deadline rule. P11.4 input is
-ready for this narrow executable path after Review; P11.4 remains NOT IMPLEMENTED.
+ready for this narrow executable path. P11.4 is IMPLEMENTED / AWAITING FINAL RE-REVIEW below.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_input_contract.py
@@ -1337,4 +1337,51 @@ ready for this narrow executable path after Review; P11.4 remains NOT IMPLEMENTE
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p10_real_event_integration.py
+```
+
+## P11.4 Deterministic Plan Revision + PlanDiff - IMPLEMENTED / AWAITING FINAL RE-REVIEW
+
+
+P11.3 determines whether/where; P11.3.5 supplies approved WHAT; P11.4 only
+VALIDATES/APPLIES the approved batch. Affected scope never implies an operation.
+No automatic Event-to-milestone mutation, generated content, new Need or Planner call.
+
+`domain/plan_revision_service.py` PlanRevisionService.revise(before, replanning_input,
+executed_at=<explicit aware datetime>) returns immutable PlanRevisionResult.
+The result contains original ReplanningInput (including approval references and
+instruction IDs), and frozen PlanDiff; result.after exposes its CompetitionPlan.
+Input carries exact Decision/Scope/Impact/Event lineage transitively, without a
+second authority or re-analysis. Approval authenticity remains the trusted caller's
+responsibility, as in P11.3.5; execution does not reassess approval business merits.
+
+KEEP + NO_REVISION_REQUIRED reuses unchanged Plan and empty Diff (no ID/version/time
+change). UNDETERMINED + UNRESOLVED also leaves Plan unchanged with empty Diff, retaining
+UNDETERMINED Decision and scope lineage; it is not a proven KEEP. REPLAN with missing
+or PARTIALLY_EXECUTABLE input rejects execution. No known subset is applied while
+uncertainty remains, including whole-plan inputs conservatively marked partial.
+
+Only EXECUTABLE approved UPDATE_MILESTONE.due_at is applied. Revalidate exact Plan
+ID/version/content, expected-before, Decision binding, scope, authority chronology,
+conflicts and allowed fields through normal frozen constructors. Final dependency
+inventory is additionally checked for all milestones, including untouched legacy ones.
+All instructions succeed atomically or no result is produced. No in-place mutation.
+Preserve existing milestone order and unaffected content, PlanningNeeds, audit,
+target/student, horizon, Plan status and created_at. Reuse frozen revised_plan_identity,
+next version rule and explicit UTC executed_at for updated_at. No random/current clock.
+
+Construct valid after Plan first, then compare actual before/after milestone collections.
+PlanDiff contains exactly one PlanMilestonesChange for changed collection, or none
+for safe no-op. This frozen granularity retains unchanged context inside collection
+snapshots; no invented per-milestone ADD/REMOVE records. No-op UPDATE is rejected by
+P11.3.5; REPLAN cannot fabricate an empty-diff success. No ADD/REMOVE/REPLACE support.
+
+The receipt preserves revision input/authority provenance without extending frozen
+PlanDiff, alongside Decision/Impact/Event lineage. Normal constructor validation,
+immutable nested tuples, deterministic identity and stable JSON are tested. No
+Repository, persistence, notification, Network, LLM, Agent or MCP. Frozen contracts
+and services remain unchanged. P11 remains IN PROGRESS; NEXT P11.5: Real Adaptive
+Replanning Integration (NOT IMPLEMENTED / NEXT PHASE; not entered in this phase).
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_revision_service.py
 ```

@@ -1,4 +1,4 @@
-"""Bounded deterministic LangGraph; structured caller selection only, no model.
+"""Bounded LangGraph; optional untrusted intent proposals, deterministic guards.
 
 The channel wrapper contains the public AgentState, not a parallel lifecycle model.
 Facade receipts wait in a private channel until a coherent terminal snapshot exists.
@@ -35,6 +35,18 @@ from competition_copilot.agents.contracts import (
     ToolResultReference,
     WorkflowStatus,
 )
+from competition_copilot.agents.routing import (
+    INTENT_CAPABILITIES,
+    IntentModel,
+    IntentModelInput,
+    IntentRoutingProposal,
+    ProposedTargets,
+    RoutingProposalValidator,
+    RoutingValidationResult,
+    RoutingValidationStatus,
+    context_conflicts,
+    routing_catalog,
+)
 from competition_copilot.agents.state import AgentState
 from competition_copilot.domain.digital_twin import StableId
 from competition_copilot.tools.contracts import ToolResult
@@ -53,6 +65,8 @@ class GraphInput(AgentContract):
     result_ref: ResultReference
     arguments_json: StableId | None = None
     approval_proposal: ApprovalRequest | None = None
+    routing_invocation_id: StableId | None = None
+    routing_arguments_ref: ResultReference | None = None
 
 
 class _Channels(TypedDict, total=False):
@@ -63,6 +77,8 @@ class _Channels(TypedDict, total=False):
     branch: str
     missing_fields: tuple[ContextField, ...]
     clarification_reason: ClarificationReason
+    proposal: IntentRoutingProposal
+    routing_validation: RoutingValidationResult
 
 
 def _replace(state: AgentState, **changes) -> AgentState:
@@ -129,9 +145,13 @@ class CompetitionCopilotGraph:
                                             config={"callbacks": []})
 
 
-def build_competition_copilot_graph(facade: AgentCapabilityFacade) -> CompetitionCopilotGraph:
+def build_competition_copilot_graph(
+    facade: AgentCapabilityFacade, *, intent_model: IntentModel | None = None,
+) -> CompetitionCopilotGraph:
     """Build/compile on explicit call, without checkpointer, store or external IO."""
     metadata = {m.capability: m for m in facade.list_capabilities()}
+    validator = RoutingProposalValidator(facade)
+    catalog = routing_catalog(facade)
 
     def intake(channels):
         frame = GraphInput.model_validate(channels["frame"])
@@ -145,6 +165,35 @@ def build_competition_copilot_graph(facade: AgentCapabilityFacade) -> Competitio
 
     def intent(channels):
         state = channels["state"]
+        if state.intent == AgentIntent.UNKNOWN and intent_model is not None:
+            # Explicit known intent always bypasses the model. No parameters,
+            # identities, approvals or Domain results may come from the model.
+            try:
+                raw = intent_model.propose(IntentModelInput(request=state.request, catalog=catalog))
+            except Exception:
+                return _failure(state, AgentErrorCode.TOOL_UNAVAILABLE, "INTENT_MODEL_FAILED")
+            try:
+                proposal = IntentRoutingProposal.model_validate(raw)
+            except (ValueError, TypeError):
+                return _failure(state, AgentErrorCode.UNSUPPORTED_INTENT, "INVALID_ROUTING_PROPOSAL")
+            frame = channels["frame"]
+            try:
+                validation = validator.validate(proposal, state.request,
+                    invocation_id=frame.routing_invocation_id,
+                    arguments_ref=frame.routing_arguments_ref, arguments=_arguments(frame))
+            except (ValueError, TypeError):
+                return _failure(state, AgentErrorCode.SERIALIZATION_ERROR, "Invalid routing arguments")
+            trace = {"proposal": proposal, "routing_validation": validation}
+            if validation.status == RoutingValidationStatus.REJECTED:
+                return {**trace, **_failure(state, AgentErrorCode.UNSUPPORTED_INTENT,
+                                           validation.reason.value)}
+            if validation.status == RoutingValidationStatus.CLARIFICATION:
+                return {**trace, "branch": "clarification",
+                        "missing_fields": validation.missing_context,
+                        "clarification_reason": validation.clarification_reason}
+            state = _replace(state, intent=proposal.intent, invocation=validation.invocation,
+                             status=WorkflowStatus.READY_TO_ROUTE)
+            return {**trace, "state": state, "branch": "route"}
         if state.intent == AgentIntent.UNKNOWN:
             return {"branch": "clarification", "missing_fields": (ContextField.INTENT,),
                     "clarification_reason": ClarificationReason.AMBIGUOUS_INTENT}
@@ -161,6 +210,8 @@ def build_competition_copilot_graph(facade: AgentCapabilityFacade) -> Competitio
         capability = metadata.get(state.invocation.capability)
         if capability is None:
             return _failure(state, AgentErrorCode.TOOL_UNAVAILABLE, "UNSUPPORTED_CAPABILITY")
+        if state.invocation.capability not in INTENT_CAPABILITIES[state.intent]:
+            return _failure(state, AgentErrorCode.UNSUPPORTED_INTENT, "INCOMPATIBLE_CAPABILITY")
         try:
             args = _arguments(frame)
         except (ValueError, TypeError):
@@ -171,6 +222,8 @@ def build_competition_copilot_graph(facade: AgentCapabilityFacade) -> Competitio
         elif not isinstance(args["payload"], dict):
             return _failure(state, AgentErrorCode.CAPABILITY_EXECUTION_FAILED, "INVALID_INPUT")
         else:
+            if context_conflicts(state.request, args["payload"], ProposedTargets()):
+                return _failure(state, AgentErrorCode.INVALID_WORKFLOW_TRANSITION, "CONTEXT_CONFLICT")
             schema = json.loads(capability.input_schema_json)
             payload_schema = schema["properties"]["payload"]
             if "$ref" in payload_schema:
@@ -283,7 +336,7 @@ def build_competition_copilot_graph(facade: AgentCapabilityFacade) -> Competitio
     graph.add_edge(START, "intake")
     graph.add_edge("intake", "intent")
     graph.add_conditional_edges("intent", lambda c: c["branch"],
-                                {"route": "route", "clarification": "clarification"})
+                                {"route": "route", "clarification": "clarification", "failure": END})
     graph.add_conditional_edges("route", lambda c: c["branch"], {
         "clarification": "clarification", "approval": "approval",
         "tool_execution": "tool_execution", "failure": END,

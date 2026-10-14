@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.3. Deterministic graph implemented; LLM and Runtime Adapter remain NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.4. Injected LLM intent proposals and deterministic routing validation implemented; Runtime Adapter remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.3 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.4 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.3 deterministic graph); LLM and Runtime Adapter are not implemented. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.4 intent routing). Injected model proposals are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -107,7 +107,7 @@ resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZE
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
 and P10 Final Review re-run PASS.** **P11 Adaptive Replanning: CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.**
 P11.1 through P11.5, including P11.1.2/P11.3.5/P11.4.2, are CLOSED / FROZEN.
-CURRENT: P12.3 LangGraph Orchestration Graph; P12 overall IN_PROGRESS.
+CURRENT: P12.4 LLM Intent + Safe Tool Selection; P12 overall IN_PROGRESS.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1536,7 +1536,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.3; P12.4 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_level_revision.py
@@ -1620,7 +1620,7 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.3; P12.4 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ```powershell
@@ -1630,7 +1630,7 @@ The original follow-up made no git commit; Closure is a documentation-only updat
 ## P12.0 Framework & AgentArts Compatibility Baseline
 
 Current canonical status: docs/DEVELOPMENT_PLAN.md. P12 IN_PROGRESS;
-P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 and later subphases NOT_STARTED.
+P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 and later subphases NOT_STARTED.
 Agent framework: LangGraph; support: LangChain Core; Domain schema: Pydantic 2.
 MVP: one platform-neutral orchestrator invoking Tool/Application deterministic
 capabilities, not a supervisor or autonomous ReAct core. AgentArts is a thin
@@ -1653,12 +1653,12 @@ P16 AgentArts Production Deployment & Hardening. No cloud resources are created.
 
 See docs/ARCHITECTURE.md for stable rationale, boundary and official sources;
 see docs/DEVELOPMENT_PLAN.md for subphases and Gates A-F. Existing backend install,
-pytest and Ruff commands above are unchanged; the P12.3 Python graph entrypoint is documented below; no interactive/LLM runtime exists.
+pytest and Ruff commands above are unchanged; the P12.3 Python graph entrypoint is documented below; P12.4 adds injected intent models; no interactive CLI or configured live provider exists.
 
 ## P12.1 Agent Contract & State
 
 Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 is COMMITTED
-(73d3d71); P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 and later subphases remain NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+(73d3d71); P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 and later subphases remain NOT_STARTED. DEVELOPMENT_PLAN is canonical.
 Package: competition_copilot.agents (the plural directory selected in P12.0).
 contracts.py defines interaction/audit envelopes; state.py defines immutable snapshots.
 AgentRequest, intent, clarification, explicit approval, capability invocation reference,
@@ -1682,7 +1682,7 @@ Install using the existing editable backend/dev command above; focused validatio
 ## P12.2 Agent Capability / Tool Facade
 
 Status: REVIEW_PASS; P12 overall IN_PROGRESS; P12.1 REVIEW_PASS;
-P12.3 REVIEW_PASS; P12.4 NOT_STARTED. Canonical status remains docs/DEVELOPMENT_PLAN.md.
+P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 NOT_STARTED. Canonical status remains docs/DEVELOPMENT_PLAN.md.
 competition_copilot.agents.capabilities adds a static approved capability facade,
 typed argument/result envelopes and JSON-safe discovery metadata. It reuses P12.1
 invocation refs, six P4 Tools, existing Applications and injected deterministic
@@ -1697,10 +1697,38 @@ are added. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_agent_capability_facade.py
 ```
 
+## P12.4 LLM Intent + Safe Tool Selection
+
+Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.3 REVIEW_PASS;
+P12.5 and later subphases NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+
+agents/routing.py defines an untrusted structured proposal and deterministic validator.
+The existing graph factory accepts optional intent_model injection. Explicit known
+intent bypasses the model; UNKNOWN may receive a proposal through the injected interface.
+agents/model.py offers an optional LangChain Core bridge around a caller-configured
+chat model; agents/prompts.py holds the single routing prompt. No concrete provider,
+API key, new dependency, cloud call or live model smoke is required for default tests.
+Business truth stays in P5-P11; models never supply arguments, results or approval.
+Caller supplies argument artifacts and invocation IDs; missing context clarifies,
+invalid/hallucinated proposals fail closed, model-originated mutation is blocked.
+Existing explain remains deterministic. P12.5 approval and P12.6 LLM explanation
+remain unimplemented, as do AgentArts adapter/MCP/persistence/memory.
+
+Install the agent extra using the P12.3 instructions below, then run offline tests:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_agent_intent_routing.py
+.\backend\.venv\Scripts\python -m pytest
+.\backend\.venv\Scripts\python -m ruff check .
+```
+
+AgentArts Gates A-E/G pass at the injected core boundary; Gate F remains DEFERRED.
+No configured live provider or production runtime certification is claimed.
+
 ## P12.3 LangGraph Orchestration Graph
 
 Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1/P12.2 REVIEW_PASS;
-P12.4 NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+P12.4 REVIEW_PASS; P12.5 NOT_STARTED. DEVELOPMENT_PLAN is canonical.
 competition_copilot.agents.graph.build_competition_copilot_graph(facade) creates a
 compiled deterministic LangGraph. Its invoke(GraphInput) returns existing AgentResponse;
 stream exposes stable node updates. GraphInput wraps AgentState, caller-owned interaction/

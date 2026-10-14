@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.3. Deterministic graph implemented; LLM and Runtime Adapter remain NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.4. Injected LLM intent proposals and deterministic routing validation implemented; Runtime Adapter remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.3 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.4 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.3 deterministic graph); LLM and Runtime Adapter are not implemented. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.4 intent routing). Injected model proposals are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1680,7 +1680,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.3; P12.4 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1756,13 +1756,13 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.3; P12.4 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. Current subphase P12.3: REVIEW_PASS.
-P12.4-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. Current subphase P12.4: REVIEW_PASS.
+P12.5-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
@@ -1898,7 +1898,76 @@ new/native dependencies. Gate F remains DEFERRED, with actual ARM64/runtime vali
 still required later. No LangGraph, LLM, approval workflow, MCP, Adapter, notification,
 scheduler, persistence or network invocation is added.
 
-### P12.3 deterministic LangGraph orchestration
+### P12.4 LLM intent and safe capability selection
+
+LLM proposes. Validator approves routing. Domain decides truth.
+
+IntentModel is an injected provider-neutral Protocol: IntentModelInput (request plus
+static routing catalog) -> IntentRoutingProposal. Optional LangChainIntentModel wraps
+a caller-supplied BaseChatModel.with_structured_output(IntentRoutingProposal). Its
+single call uses the central INTENT_ROUTING_PROMPT; no provider/model name, credentials,
+temperature, tool binding or tool loop is configured here. Provider support and timeouts
+are composition responsibilities. Structured model output follows the
+[official model structured-output interface](https://docs.langchain.com/oss/python/langchain/models#structured-output).
+No provider package or new dependency is added; the P12.3 agent extra already supplies
+LangChain Core. Concrete online provider smoke remains untested and optional.
+
+The proposal is UNTRUSTED: typed intent, one candidate capability, ambiguity, missing
+fields and optional proposed target IDs only. Extra fields, business conclusions,
+approval objects, arguments, hidden reasoning and arbitrary function names are rejected
+by the schema. Proposal target IDs are never promoted into executable context.
+Confidence is omitted. MULTI_STEP requests stop for clarification rather than a loop.
+
+The same eight-node graph now accepts optional intent_model injection. Explicit known
+AgentIntent always bypasses the model and preserves structured invocation/context.
+UNKNOWN without a model keeps the P12.3 clarification path. UNKNOWN with a model calls
+it once in intent, revalidates the schema, and passes it to RoutingProposalValidator.
+Private intent updates expose only the validated proposal/validation result, tied to
+the existing request ID; no raw model output, exception prose, provider object or
+hidden reasoning is serialized. Provider secrets/configuration stay outside State.
+
+Validator uses the Facade whitelist, a static one-to-many intent/capability safety map,
+schema-derived required fields, explicit target/student identity comparisons and the
+Facade's syntax-only validate_arguments entrypoint. This does not call authorities.
+Typed nested input/argument artifact references and exact Plan references are checked.
+Caller-owned nested contexts participate in bounded deterministic identity resolution.
+Matching outer/nested values merge; conflicting student identities fail closed.
+Recommendation candidates retain distinct target scopes, and proposal targets only
+assert compatibility with each resolved scope, never establish an identity.
+It never synthesizes student data, deadlines, eligibility or preconditions. The caller
+supplies the argument artifact, routing_invocation_id and routing_arguments_ref in
+GraphInput; missing IDs/arguments require clarification. The model cannot generate IDs.
+Even supplied arguments cannot override explicit caller context. Model-only target IDs,
+conflicting contexts, unsupported/deferred capabilities and incompatible intent pairs
+fail closed. Missing context/ambiguity/UNKNOWN remain clarification outcomes.
+
+Every model-originated MUTATING proposal is blocked for formal approval context, even
+if the message says 'yes' or an approval response exists elsewhere. It cannot create
+ApprovalRequest, ApprovalResponse or HUMAN_APPROVED. Existing explicit structured
+revision invocation still goes through the graph approval boundary and formal P11
+authorization; P12.5 owns full approval collection/conversion/resume. P12.6 owns LLM
+explanation. explain remains the same deterministic result-reference template.
+
+Model exceptions and malformed output produce typed FAILED responses with stable
+codes/messages, no exception details, fallback guessing or retries. Successful routing
+continues through route -> Facade -> original Domain result; business-negative results
+remain COMPLETED. Route also enforces compatibility and explicit context bindings for
+structured clients, without rerunning Domain decisions.
+
+AgentArts Gates A-E apply unchanged; new Gate G Model Injection Compatibility requires
+runtime/composition to inject the same IntentModel interface. Runtime adapters never
+own a second routing policy. Catalog projection contains only ID, static description,
+access/approval metadata and required field names, not handlers/class paths/repositories.
+request/intent/proposal/validation/invocation/result refs support future trace; no OTel,
+persistence, model telemetry export or AgentArts SDK is introduced. Gate F remains
+DEFERRED, with no additional native dependency risk from P12.4. Fake and future provider
+models share schema/validator/graph; model output itself need not be deterministic,
+while replaying the same proposal and dependencies is deterministic.
+
+### P12.3 deterministic LangGraph orchestration baseline
+
+The following records the reviewed P12.3 structured-input baseline; P12.4 below adds
+optional model injection and deterministic safety checks to the same graph.
 
 Implemented graph.py exposes build_competition_copilot_graph(facade), compiling a real
 LangGraph StateGraph on explicit factory call. CompetitionCopilotGraph.invoke returns

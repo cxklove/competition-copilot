@@ -373,6 +373,17 @@ class AgentCapabilityFacade:
         if any(item is None for item in dependencies):
             raise _InvocationRejected(CapabilityErrorCode.DEPENDENCY_UNAVAILABLE)
 
+    @staticmethod
+    def validate_arguments(invocation: CapabilityInvocationRequest, arguments: object):
+        """Syntax-only validation, with no delegation or dependency access."""
+        if invocation.capability not in _SPECS:
+            raise ValueError("Unsupported capability")
+        schema = CapabilityArguments[_SPECS[invocation.capability][0]]
+        args = schema.model_validate(arguments)
+        if args.artifact_ref != invocation.arguments_ref:
+            raise ValueError("Argument artifact must match invocation reference")
+        return schema.model_validate_json(args.model_dump_json())
+
     def execute(
         self, invocation: CapabilityInvocationRequest | dict,
         arguments: object, *, result_ref: ResultReference,
@@ -403,12 +414,7 @@ class AgentCapabilityFacade:
             return error(CapabilityErrorCode.UNSUPPORTED_CAPABILITY)
         try:
             invocation = CapabilityInvocationRequest.model_validate(raw)
-            schema = CapabilityArguments[_SPECS[capability][0]]
-            args = schema.model_validate(arguments)
-            if args.artifact_ref != invocation.arguments_ref:
-                raise ValueError("Argument artifact must match invocation reference")
-            # Reparse detached JSON even for legacy mutable Domain inputs.
-            args = schema.model_validate_json(args.model_dump_json())
+            args = self.validate_arguments(invocation, arguments)
         except (ValidationError, ValueError, TypeError):
             return error(CapabilityErrorCode.INVALID_INPUT)
         try:

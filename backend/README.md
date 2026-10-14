@@ -1,5 +1,97 @@
 # Backend
 
+## P11 Adaptive Replanning - Phase Closure
+
+Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
+Next Phase: P12 Agent - NEXT / NOT IMPLEMENTED (NOT_STARTED).
+Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
+
+| Phase | Scope | Status |
+|---|---|---|
+| P11 | Adaptive Replanning | CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE |
+| P11.1 | Adaptive Replanning Contract | CLOSED / FROZEN |
+| P11.1.2 | Canonical Plan Reference Serialization Compatibility Fix | CLOSED / FROZEN |
+| P11.2 | Deterministic Event Impact Analysis | CLOSED / FROZEN |
+| P11.3 | Replanning Decision + Affected Scope | CLOSED / FROZEN |
+| P11.3.5 | Structured Replanning Input | CLOSED / FROZEN |
+| P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
+| P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
+| P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
+| P12 | Agent | NEXT / NOT IMPLEMENTED |
+
+### Frozen authority map
+
+- P11.1: typed result Contract authority, including controlled mixed-scope/status Diff extensions.
+- P11.1.2: canonical PlanReference compatibility, not a new business authority.
+- P11.2: Event impact authority.
+- P11.3: ReplanningDecision + AffectedPlanScope authority.
+- P11.3.5: structured authorized WHAT-to-change authority, including explicit coverage resolution.
+- P11.4 / P11.4.2: deterministic authorized revision execution authority.
+- P11.5: real-component integration proof only; no new business authority.
+
+### Frozen safety semantics
+
+1. Impact is tri-state: NO_PLAN_IMPACT / UNDETERMINED / AFFECTS_PLAN.
+2. Missing represented Plan dependency -> UNDETERMINED, never proven no-impact.
+3. Decision precedence: any AFFECTS_PLAN -> REPLAN; else any UNDETERMINED ->
+   UNDETERMINED; else -> KEEP_CURRENT_PLAN. No voting or severity score.
+4. AffectedPlanScope describes WHERE; it is not a RevisionInstruction/operation.
+5. Reason code is neither structured evidence nor approval authority.
+6. Structural changes require typed explicit revision authority/evidence and exact
+   Plan/version/before-state preconditions; no Event-to-Plan mutation guessing.
+7. PARTIAL cannot masquerade as COMPLETE; partial structural execution rejects.
+   COMPLETE requires explicit coverage authority AND semantic compatibility.
+8. KEEP -> unchanged Plan, identity/version/metadata, and empty PlanDiff.
+9. UNDETERMINED -> unresolved input and no speculative revision; distinct from KEEP.
+10. Confirmed TARGET_TRACK_REMOVED + REPLAN + original whole-plan scope may be
+    resolved operationally by explicitly approved draft/active -> cancelled.
+11. Cancellation does not choose another track or erase the Event. Preserve target
+    identity, needs, audit, horizon and historical milestones; no automatic deletion.
+12. Revision is atomic, before Plan immutable, and PlanDiff derives from actual
+    validated before/after. Status-only cancellation declares no milestone change.
+13. Full Event -> Impact -> Decision -> original Scope -> authorized Resolution ->
+    Input -> Authority -> before/after Plan -> PlanDiff lineage is required.
+14. Legitimate sourced P8 Plans retain source_item/typed URLs and support deterministic
+    PlanReference, stable audit JSON and legacy identity. Explicit AnyUrl serialization
+    retains original UTC/key/sequence/enum rules; unknown types still reject.
+15. P11 Domain services have no Repository access, persistence or network side effects.
+16. No LLM/Agent owns P11 business authority; downstream orchestration must delegate
+    impact, decisions, authority validation and execution to deterministic services.
+
+### Integration proof and resolved evolution history
+
+P11.5 validates all three offline production-component paths:
+- Proven no-impact -> KEEP -> NO_REVISION_REQUIRED -> unchanged Plan + empty Diff.
+- Missing dependency -> UNDETERMINED -> UNRESOLVED -> no speculative revision.
+- Controlled TRACK_MEMBERSHIP_CHANGED / target removal -> AFFECTS_PLAN -> REPLAN ->
+  explicit COMPLETE coverage -> HUMAN_APPROVED active -> cancelled -> actual status Diff.
+
+Repository-backed target data is real local Seed; controlled changes/approval are
+TEST-ONLY scenarios, not official historical events or a claim that Huawei removed
+a track. Final Review PASS; exit criteria 16/16 PASS; validation: 1824 tests, 0 skipped,
+Ruff PASS, Diff Check PASS. P11.5 commit: 5394316; sourced-reference fix: bf792fc.
+Earlier reason/evidence, mixed-scope, revision-input and whole-plan capability
+blockers are resolved by controlled evolution. The sourced HttpUrl Final Review
+defect is resolved by P11.1.2. Detailed historical rationale below is retained;
+none of these historical blockers is an open P11 issue.
+
+### Deferred scope and P12 boundary
+
+P11 does not implement automatic replacement-track selection, automatic Eligibility/
+Recommendation/SkillGap reruns, new PlanningNeed derivation from Events, Plan save/
+replacement, Event history persistence, cross-run dedup persistence, scheduler/polling,
+notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
+Target-added impact has no complete cancellation policy. No supersession/replacement
+relation or arbitrary Plan status machine is implied by the existing status enum.
+
+P12 is NEXT, NOT IMPLEMENTED. A future Agent may understand natural-language intent,
+select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
+It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
+ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
+bypass Revision Authority or mutate Plans directly. Approval collection submits
+structured inputs through an authorized boundary; Domain remains the business authority.
+
+
 **Stage status: P2, P3, P4, P5, and P6 COMPLETE; P6.1/P6.2/P6.3/P6.4 and P6 Final Review PASS.**
 **P7 — Student Profile & Skill Gap: FROZEN; P7 Final Review PASS.**
 P7.1 and the student-evidence follow-up, P7.2, P7.3A, P7.3B.2,
@@ -13,11 +105,9 @@ Deterministic baseline planning scope is finished.
 Review PASS and committed; P9.5 Final Review re-run PASS.** Documentation follow-up
 resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZEN;
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
-and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 controlled mixed-impact
-evolution Review PASS / committed / frozen; P11.2 Analyzer Review PASS / committed /
-frozen. P11.3 Decision + Scope Service Review PASS / committed / frozen.
-P11.3.5 Structured Replanning Input Contract IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE.**
-P11.4/P11.4.2 REVIEW PASS / COMMITTED / FROZEN; P11.5 IMPLEMENTED / REVIEW PASS / COMMITTED.
+and P10 Final Review re-run PASS.** **P11 Adaptive Replanning: CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.**
+P11.1 through P11.5, including P11.1.2/P11.3.5/P11.4.2, are CLOSED / FROZEN.
+NEXT: P12 Agent - NOT IMPLEMENTED.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -647,7 +737,7 @@ are invalid; distinct snapshots can still have empty changes.
 P9.2 constructs baseline snapshots and validates ID-only target relationships
 using Repository facts. P9.3 computes deterministic Diff. P9.5 Monitor is implemented
 below; P10 Event interpretation is implemented through P10.1–P10.4, while
-P11 Impact Analysis / Adaptive Replanning remains future work. `CompetitionEvent` is
+P11 Impact Analysis / Adaptive Replanning is CLOSED / FROZEN below. `CompetitionEvent` is
 unchanged by P9.1; its controlled P10.1 evolution is documented below. P9.1 uses
 no Repository, Network, LLM, Agent or Plan logic.
 
@@ -721,7 +811,7 @@ Tests use fixed aware times, validated constructors and deterministic case IDs;
 check serialization, audit, immutability and safety; block Network/non-Seed data
 reads and leave Repository/data unchanged. Production code is unchanged. P9
 represents/builds/compares observations. Source observation/Monitor is implemented
-in P9.5 below; Event, impact and Replanning remain future work. P9 Final Review
+in P9.5 below; P10 Event and P11 impact/Replanning are CLOSED / FROZEN below. P9 Final Review
 PASS; P9 is FROZEN.
 
 ```powershell
@@ -813,7 +903,7 @@ Frontend. P10.1 Contract and P10.2 Engine are documented below.
   changing semantics. Snapshot history persistence is absent; future storage needs
   a separate storage/Repository contract, not Monitor Domain fields.
 - SnapshotDiff and MonitorCheckResult are not CompetitionEvent. P10 owns business
-  event mapping; P11 owns impact/severity/affected plans/user actions, PlanDiff,
+  event mapping; P11 owns impact/affected scope/authorized revision, PlanDiff,
   milestone updates and Adaptive Replanning. P9.5 has no notification, LLM or Agent.
 
 All listed scope/security/interface/failure/parser/provenance/one-shot semantics
@@ -945,7 +1035,7 @@ are compatibility-only; P10 scope does not expand into rule/award/eligibility fa
 
 ```text
 Official Source -> P9.5 Monitor -> Snapshot -> P9 Diff -> SnapshotDiff
--> P10.2 Event Engine -> CompetitionEvent -> future P11 Impact/Replanning
+-> P10.2 Event Engine -> CompetitionEvent -> P11 Impact/Replanning
 ```
 
 Event != Diff, Event != Impact, Event != Replanning. P10.1 defines Contract only;
@@ -1065,7 +1155,7 @@ recompute Diff.
 
 P11 — Adaptive Replanning follows P10; its P11.1 Contract is documented below. Inputs are
 canonical CompetitionEvent + StudentProfile + existing CompetitionPlan + necessary
-planning context. P11 owns severity/risk, student/plan impact, affected milestones
+planning context. P11 owns student/plan impact, affected milestones
 and Adaptive Replanning; it must not refetch sources, rebuild Snapshots, recompute
 Diff or regenerate Events.
 
@@ -1082,22 +1172,22 @@ Future defects require explicit reopen P10 → Implementation → Review → com
 P10 only consumes SnapshotDiff. Events are competition-level, not student-specific;
 no severity/risk, affected student/plan, Plan mutation, PlanDiff or Planner trigger.
 No EventRepository, Event DB or history persistence; future storage needs independent
-design. P11 will produce Impact Analysis, Affected Plan scope, Replanning Decision
-and Plan Diff from Events and planning context. No P11 code is implemented here.
+design. P11 produces Impact Analysis, Affected Plan scope, Replanning Decision
+and Plan Diff from Events and planning context. P10 does not implement P11 logic; the CLOSED / FROZEN P11 implementation is documented below.
 
 ```text
 Official Source -> P9.5 Monitor -> CompetitionSnapshot -> P9 SnapshotDiff
 -> P10.2 Primitive Events -> P10.3 Canonical Events (CompetitionEvent)
--> future P11 Impact / Replanning
+-> P11 Impact / Replanning
 ```
 
 Closure validation: 1536 passed, 0 skipped; Ruff/diff check PASS (closure-time record).
 
-## P11.1 Adaptive Replanning Domain Contract — controlled evolution Review PASS, committed / frozen
+## P11.1 Adaptive Replanning Contract - CLOSED / FROZEN
 
 `domain/replanning.py` defines immutable supplied-result Contracts only, not impact,
 decision, revision or PlanDiff computation engines are added by that module.
-P11 IN PROGRESS; P11.2 implementation is described below. P10 Events are upstream
+P11 CLOSED / FINAL REVIEW PASS / FROZEN; P11.2 implementation is described below. P10 Events are upstream
 authority; P8 remains baseline Planner authority.
 
 P8 audit: CompetitionPlan fields are id, student_id, competition_id, edition_id,
@@ -1153,7 +1243,7 @@ Event + StudentProfile + Existing Plan -> EventImpactAnalysis using these Contra
 
 ```text
 Official Source -> P9.5 Monitor -> SnapshotDiff -> P10 CompetitionEvent
--> future P11 Event Impact Analysis -> Replanning Decision -> Affected Plan Scope
+-> P11 Event Impact Analysis -> Replanning Decision -> Affected Plan Scope
 -> Revised CompetitionPlan -> PlanDiff
 ```
 
@@ -1180,7 +1270,7 @@ Run:
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_contract.py
 ```
 
-## P11.2 Deterministic Event Impact Analyzer — Review PASS, committed / frozen
+## P11.2 Deterministic Event Impact Analysis - CLOSED / FROZEN
 
 `domain/event_impact_analyzer.py` CompetitionEventImpactAnalyzer.analyze(event,
 student, plan, evaluated_at=<explicit aware datetime>) is a pure Domain Service.
@@ -1213,11 +1303,11 @@ No milestone title/description matching or unrelated student heuristics.
 No Repository/hidden facts, website access, standalone Diff input/recalculation,
 Event regeneration, decision engine, Plan/PlanDiff creation or mutation, Planner,
 P5/P6/P7 calls, severity/score, notification, persistence, LLM or Agent. P11.1/P10/
-P8/P9/P9.5 stay frozen. P11 remains IN PROGRESS. Implemented P11.3: ImpactAnalysis[] +
+P8/P9/P9.5 stay frozen. P11 is CLOSED / FINAL REVIEW PASS / FROZEN. Implemented P11.3: ImpactAnalysis[] +
 existing Plan + explicit context -> ReplanningDecision + canonical AffectedPlanScope;
 no need to reinterpret Event, revisit P10 or refetch sources.
 
-### P11.1 Mixed Impact Contract Evolution — Review PASS, committed / frozen
+### P11.1 Adaptive Replanning Contract - CLOSED / FROZEN (controlled evolution history; resolved)
 
 Explicit reopening repaired the P11.3 blocker without a parallel model or Service
 in that Contract change. P11.3 Service is documented below.
@@ -1247,7 +1337,7 @@ P11.2/P8/P10/P9/P9.5 unchanged. P11.3 implementation is below; P11.4 implementat
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_mixed_contract.py
 ```
 
-## P11.3 Deterministic Replanning Decision + Affected Scope — Review PASS, committed / frozen
+## P11.3 Replanning Decision + Affected Scope - CLOSED / FROZEN
 
 `domain/replanning_decision_service.py` ReplanningDecisionService.decide(impacts,
 plan, evaluated_at=<explicit aware datetime>) is pure Domain. Input is immutable
@@ -1279,15 +1369,15 @@ outcomes, scope union/completeness, plan conflicts, duplicates/identity conflict
 permutations, time, input preservation, frozen output and JSON.
 P11.4 input boundary: existing Plan + Decision + Scope + impact lineage + explicit planning
 context -> deterministic Plan Revision + PlanDiff; no Event/Impact re-analysis.
-P11.4 is Review PASS / committed / frozen; P11 remains IN PROGRESS.
+P11.4 is Review PASS / committed / frozen; P11 is CLOSED / FINAL REVIEW PASS / FROZEN.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_decision_service.py
 ```
 
-## P11.3.5 Structured Replanning Input Contract - IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE
+## P11.3.5 Structured Replanning Input - CLOSED / FROZEN
 
-P11.4's guard found no approved WHAT-to-change authority. `domain/replanning_input.py`
+Historical P11.4 guard found no approved WHAT-to-change authority; resolved by P11.3.5 and P11.4.2. `domain/replanning_input.py`
 now defines ReplanningInput / UpdateMilestoneInstruction / RevisionAuthority only.
 AffectedPlanScope describes WHERE; instructions describe explicit authorized WHAT;
 P11.4 APPLY produces Revised CompetitionPlan and actual PlanDiff. No Event-to-Plan mutation guess or
@@ -1339,7 +1429,7 @@ ready for this narrow executable path. P11.4 is REVIEW PASS / COMMITTED / FROZEN
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_p10_real_event_integration.py
 ```
 
-## P11.4 Deterministic Plan Revision + PlanDiff - REVIEW PASS / COMMITTED / FROZEN
+## P11.4 Deterministic Plan Revision + PlanDiff - CLOSED / FROZEN
 
 
 P11.3 determines whether/where; P11.3.5 supplies approved WHAT; P11.4 only
@@ -1379,7 +1469,7 @@ The receipt preserves revision input/authority provenance without extending froz
 PlanDiff, alongside Decision/Impact/Event lineage. Normal constructor validation,
 immutable nested tuples, deterministic identity and stable JSON are tested. No
 Repository, persistence, notification, Network, LLM, Agent or MCP. Frozen contracts
-and services remain unchanged. P11 remains IN PROGRESS; NEXT P11.5: Real Adaptive
+and services remain unchanged. P11 is CLOSED / FINAL REVIEW PASS / FROZEN; P11.5: Real Adaptive
 Replanning Integration (implemented, Review PASS / committed, below).
 
 ```powershell
@@ -1387,7 +1477,7 @@ Replanning Integration (implemented, Review PASS / committed, below).
 ```
 
 
-### P11.4.2 Plan-Level Revision Contract & Execution - REVIEW PASS / COMMITTED / FROZEN
+### P11.4.2 Plan-Level Replanning Resolution - CLOSED / FROZEN
 
 Controlled reopen only: P11.1 PlanDiff, P11.3.5 inputs and P11.4 execution.
 P11.2/P11.3/P8/P10 production semantics are unchanged. P8 PlanStatus already has
@@ -1446,14 +1536,14 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-IN PROGRESS; no P12 implementation or git commit in this phase.
+CLOSED / FROZEN; P12 is NEXT / NOT IMPLEMENTED. No P12 work or git commit in this Closure.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_level_revision.py
 ```
 
 
-### P11.5 Real Adaptive Replanning Integration - IMPLEMENTED / REVIEW PASS / COMMITTED
+### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
 
 `backend/tests/integration/test_real_adaptive_replanning.py` proves the frozen
 production-component chain, offline by default. No business orchestration service
@@ -1500,7 +1590,7 @@ result, never a manually substituted expected Diff. No persistence, active-Plan
 replacement, Scheduler, Notification, Network, LLM, Agent or MCP.
 
 P11 Adaptive Replanning functional chain is complete for the supported paths;
-P11.5 is Review PASS / committed; P11 remains FINAL REVIEW BLOCKED / IN PROGRESS pending re-review.
+P11.5 is CLOSED / FROZEN; P11 is CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.
 Exit criteria 16/16 are covered by this integration and frozen phase regressions.
 P12 input is ready at the deterministic contract boundary; no P12 implementation.
 A future Agent may collect explicit approvals and submit typed inputs through an
@@ -1512,9 +1602,9 @@ mutate Plans directly. Frozen production semantics remain unchanged.
 ```
 
 
-### P11.1.2 Canonical Plan Reference Serialization Follow-up - IMPLEMENTED / AWAITING REVIEW
+### P11.1.2 Canonical Plan Reference Serialization Compatibility Fix - CLOSED / FROZEN
 
-P11 Final Review found a legitimate sourced P8 Plan compatibility defect:
+Historical P11 Final Review found this sourced P8 Plan defect, now resolved by P11.1.2:
 PlanningNeed.source_item (SkillGapItem) retains nested HttpUrl source evidence;
 Plan JSON serialization worked but PlanReference digest raised TypeError.
 Controlled follow-up extends only the canonical serialization boundary for the
@@ -1529,9 +1619,9 @@ or removing source_item. Both student fixtures cover reference equality, Plan JS
 roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serialization.
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
-P11 overall remains FINAL REVIEW BLOCKED / IN PROGRESS pending follow-up Review
-and repeated Final Review. This is not P11 Final Review PASS or Closure; P12 has
-not started. No git commit in this follow-up.
+This compatibility defect is resolved by committed P11.1.2 (bf792fc).
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is NEXT / NOT IMPLEMENTED.
+The original follow-up made no git commit; Closure is a documentation-only update.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_reference_serialization.py backend/tests/integration/test_replanning_reference_serialization.py

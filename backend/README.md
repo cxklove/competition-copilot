@@ -17,7 +17,7 @@ and P10 Final Review re-run PASS.** **P11 IN PROGRESS: P11.1 controlled mixed-im
 evolution Review PASS / committed / frozen; P11.2 Analyzer Review PASS / committed /
 frozen. P11.3 Decision + Scope Service Review PASS / committed / frozen.
 P11.3.5 Structured Replanning Input Contract IMPLEMENTED / REVIEW PASS / COMMITTED / FROZEN FOR DOWNSTREAM USE.**
-P11.4/P11.4.2 REVIEW PASS / COMMITTED / FROZEN; P11.5 IMPLEMENTED / AWAITING REVIEW.
+P11.4/P11.4.2 REVIEW PASS / COMMITTED / FROZEN; P11.5 IMPLEMENTED / REVIEW PASS / COMMITTED.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1380,7 +1380,7 @@ PlanDiff, alongside Decision/Impact/Event lineage. Normal constructor validation
 immutable nested tuples, deterministic identity and stable JSON are tested. No
 Repository, persistence, notification, Network, LLM, Agent or MCP. Frozen contracts
 and services remain unchanged. P11 remains IN PROGRESS; NEXT P11.5: Real Adaptive
-Replanning Integration (implemented and awaiting Review below).
+Replanning Integration (implemented, Review PASS / committed, below).
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_revision_service.py
@@ -1445,7 +1445,7 @@ actual status Diff, without substituted milestone scope. Controlled events and
 approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
-P11.5 integration is implemented and awaiting Review below. P11 remains
+P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
 IN PROGRESS; no P12 implementation or git commit in this phase.
 
 ```powershell
@@ -1453,7 +1453,7 @@ IN PROGRESS; no P12 implementation or git commit in this phase.
 ```
 
 
-### P11.5 Real Adaptive Replanning Integration - IMPLEMENTED / AWAITING REVIEW
+### P11.5 Real Adaptive Replanning Integration - IMPLEMENTED / REVIEW PASS / COMMITTED
 
 `backend/tests/integration/test_real_adaptive_replanning.py` proves the frozen
 production-component chain, offline by default. No business orchestration service
@@ -1500,7 +1500,7 @@ result, never a manually substituted expected Diff. No persistence, active-Plan
 replacement, Scheduler, Notification, Network, LLM, Agent or MCP.
 
 P11 Adaptive Replanning functional chain is complete for the supported paths;
-P11.5 awaits Review, and P11 remains IN PROGRESS pending final phase closure.
+P11.5 is Review PASS / committed; P11 remains FINAL REVIEW BLOCKED / IN PROGRESS pending re-review.
 Exit criteria 16/16 are covered by this integration and frozen phase regressions.
 P12 input is ready at the deterministic contract boundary; no P12 implementation.
 A future Agent may collect explicit approvals and submit typed inputs through an
@@ -1509,4 +1509,30 @@ mutate Plans directly. Frozen production semantics remain unchanged.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_real_adaptive_replanning.py
+```
+
+
+### P11.1.2 Canonical Plan Reference Serialization Follow-up - IMPLEMENTED / AWAITING REVIEW
+
+P11 Final Review found a legitimate sourced P8 Plan compatibility defect:
+PlanningNeed.source_item (SkillGapItem) retains nested HttpUrl source evidence;
+Plan JSON serialization worked but PlanReference digest raised TypeError.
+Controlled follow-up extends only the canonical serialization boundary for the
+explicit Pydantic AnyUrl family (including HttpUrl/AnyHttpUrl), using its formal
+JSON URL representation. No default=str, repr or arbitrary-object fallback.
+Existing UTC datetime, enum, collection and sorted-key semantics are unchanged;
+previously unsupported types still reject. Pre-fix URL-free digest/identity
+constants are retained. No P8 schema, evidence deletion or P11 business-rule change.
+
+Focused tests reuse the existing real P8 COMAP planning chain without copying it
+or removing source_item. Both student fixtures cover reference equality, Plan JSON
+roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serialization.
+Typed URL construction is offline, without URL accessibility checks or DNS/network.
+P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
+P11 overall remains FINAL REVIEW BLOCKED / IN PROGRESS pending follow-up Review
+and repeated Final Review. This is not P11 Final Review PASS or Closure; P12 has
+not started. No git commit in this follow-up.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_reference_serialization.py backend/tests/integration/test_replanning_reference_serialization.py
 ```

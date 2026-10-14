@@ -8,10 +8,12 @@ from hashlib import sha256
 from typing import Any, Literal, Self
 
 from pydantic import (
+    AnyUrl,
     AwareDatetime,
     BaseModel,
     ConfigDict,
     Field,
+    TypeAdapter,
     field_validator,
     model_validator,
 )
@@ -45,9 +47,16 @@ class _Contract(BaseModel):
         return super().model_copy(deep=deep)
 
 
+_URL_JSON = TypeAdapter(AnyUrl)
+
+
 def _canonical(value: Any) -> Any:
     if isinstance(value, datetime):
         return value.astimezone(timezone.utc).isoformat()
+    if isinstance(value, AnyUrl):
+        # HttpUrl/AnyHttpUrl inherit AnyUrl. Serialize only this explicit typed
+        # family; unknown objects still fail at the existing JSON boundary.
+        return _URL_JSON.dump_python(value, mode="json")
     if isinstance(value, dict):
         return {key: _canonical(item) for key, item in value.items()}
     if isinstance(value, (tuple, list)):

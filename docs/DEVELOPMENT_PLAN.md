@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.1. Agent runtime remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.2. Agent runtime remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.1 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.2 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.1 contracts/state); Agent runtime is not implemented. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.2 capability facade); Agent runtime is not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1080,7 +1080,7 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.1; P12.2 is NOT_STARTED.
+- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.2; P12.3 is NOT_STARTED.
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1306,7 +1306,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
 ## P12 - Agent Framework, Orchestration & AgentArts Runtime Compatibility
 
-- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); current subphase P12.1 REVIEW_PASS.
+- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; current subphase P12.2 REVIEW_PASS.
 - **Framework:** LangGraph; supporting LangChain Core; Domain schema Pydantic 2.
 - **MVP:** one platform-neutral orchestrator Agent plus deterministic capabilities.
 - **Goal:** Natural Language -> Intent -> Clarification -> Capability Selection ->
@@ -1324,7 +1324,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 |---|---|---|---|
 | P12.0 Framework & AgentArts Compatibility Baseline | Framework/rationale, adapter boundaries, dependency/package plan, gates and roadmap | COMMITTED (73d3d71) | Official baseline documented; existing core tests preserved; no runtime certification |
 | P12.1 Agent Contract & State | Platform-neutral AgentRequest/AgentState/AgentResponse and stable references/errors | REVIEW_PASS | A/B/C; typed public JSON, explicit context, no RequestContext in core |
-| P12.2 Agent Capability / Tool Facade | Approved capabilities mapped to existing Tool/Application authorities | NOT_STARTED | A/B/C/D; no duplicate P5-P11 decisions or concrete Adapter imports |
+| P12.2 Agent Capability / Tool Facade | Approved capabilities mapped to existing Tool/Application authorities | REVIEW_PASS | A/B/C/D; no duplicate P5-P11 decisions or concrete Adapter imports |
 | P12.3 LangGraph Orchestration Graph | Bounded explicit nodes/edges and state inspection, no free-running loop | NOT_STARTED | A/B/D/E; stable node names; resolve/import-test agent dependency lock |
 | P12.4 LLM Intent + Safe Tool Selection | Intent/selection interface, capability allowlist and output validation | NOT_STARTED | A/B/C/D/E; provider behind injected interface; deterministic fixture models in default tests |
 | P12.5 Clarification + Human Approval | Explicit clarification/approval states, interrupt/resume and stale-input safety | NOT_STARTED | A/B/C/D/E; text is not approval; no business mutation before authorized input |
@@ -1335,7 +1335,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 | P12 Closure | Documentation-only CLOSED/FROZEN after Final Review PASS | NOT_STARTED | Synchronized status and clear P13 handoff |
 
 P12.0 implemented the design baseline and is committed. P12.1 implements contracts/state
-only; P12.2 and all later subphases remain NOT_STARTED. P12.0 added no Agent contract;
+only; P12.2 now implements the capability facade. P12.3 and later subphases remain NOT_STARTED. P12.0 added no Agent contract;
 P12.1 now adds typed interaction contracts and immutable snapshots. No StateGraph,
 compiled graph, router, model invocation, approval flow, MCP, probe or cloud deployment
 is implemented in either subphase.
@@ -1376,7 +1376,7 @@ setuptools package enumeration, dependency locks and accurate README commands to
 ### P12.1 implementation and exit criteria
 
 Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 COMMITTED
-(73d3d71), P12.2-P12.8, Final Review and Closure NOT_STARTED. P12.1 commit
+(73d3d71), P12.2 REVIEW_PASS; P12.3-P12.8, Final Review and Closure NOT_STARTED. P12.1 commit
 status is proved by Git history, not by this documentation state.
 
 Delivered: competition_copilot.agents/contracts.py and state.py, focused tests under
@@ -1405,9 +1405,98 @@ Tool routing remain later subphases; no structural Domain execution is implement
 | E Observability Contract | PASS: request/intent/status/invocation/approval/outcome refs; reserved node vocabulary preserved |
 | F Deployment | DEFERRED / NOT_APPLICABLE_YET: no image/runtime/graph execution in this phase |
 
-No new dependencies, model/LLM, StateGraph, Tool facade/execution, long-term memory,
+P12.1 added no new dependencies, model/LLM, StateGraph, Tool facade/execution, long-term memory,
 Runtime Adapter, MCP, cloud/network operation or persistence. P5-P11 authority remains
-frozen. P12.2 may start only after this implementation is reviewed and status advanced.
+frozen. P12.1 Review PASS; P12.2 now implements the separately documented facade boundary.
+
+### P12.2 implemented capability inventory and exit criteria
+
+Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1 REVIEW_PASS;
+P12.3-P12.8, Final Review and Closure NOT_STARTED. Git history, not a Markdown
+commit lifecycle state, proves commits.
+
+Actual inventory: P4 six Competition read Tools over CompetitionRepository; P5
+CompetitionEligibilityEvaluator + EligibilityRuleEngine + policy provider interface;
+P6 RecommendationScoringEngine/RecommendationRankingEngine (prepared contexts/scorers);
+P7 SkillGapEngine and SkillRequirementProvider; P8 PlanningInputDeriver +
+BaselineCompetitionPlanBuilder; P9 CompetitionSnapshotBuilder Application +
+SnapshotDiffEngine; P9.5 OneShotCompetitionMonitor + CompetitionObservationSource;
+P10 CompetitionEventEngine + CompetitionEventAggregator; P11
+CompetitionEventImpactAnalyzer, ReplanningDecisionService, ReplanningInput/authority/
+resolution contracts and PlanRevisionService. No production composition root/factory
+was found; existing integration tests compose these dependencies explicitly.
+
+Classification A ALREADY_AGENT_SAFE: P4 reads, P5 Eligibility Application, P9 repository
+Snapshot builder. Classification B DOMAIN_ONLY: P6 scoring/ranking, P7 gap, P8 derivation/
+builder, P9 Diff, P10 Event engine/aggregator, P11 Impact/Decision/Revision. They are exposed
+only behind the typed facade with temporary internal Domain delegation, never directly
+to Agent. Classification C NOT_AGENT_EXPOSABLE_YET: official-source monitoring pending
+approved source/Gateway/permission composition; input/authority preparation pending
+P12.5 approved workflow; explanation pending P12.6. Existing Monitor Application remains
+valid and unchanged; deferral does not assert a defect in it.
+
+| Capability ID | Underlying authority | Access | Explicit approval | Agent exposure |
+|---|---|---|---|---|
+| list_competitions | P4 ListCompetitionsTool | READ | NO | EXPOSED |
+| get_competition | P4 GetCompetitionTool | READ | NO | EXPOSED |
+| list_competition_editions | P4 ListCompetitionEditionsTool | READ | NO | EXPOSED |
+| get_competition_edition | P4 GetCompetitionEditionTool | READ | NO | EXPOSED |
+| list_edition_tracks | P4 ListEditionTracksTool | READ | NO | EXPOSED |
+| get_competition_track | P4 GetCompetitionTrackTool | READ | NO | EXPOSED |
+| check_eligibility | P5 CompetitionEligibilityEvaluator | DECISION | NO | EXPOSED |
+| get_recommendations | P6 scoring + ranking; caller-prepared eligibility/scorer policy | DECISION | NO | EXPOSED |
+| analyze_skill_gap | P7 SkillGapEngine | DECISION | NO | EXPOSED |
+| build_plan | P8 PlanningInputDeriver + baseline builder | DECISION (derived in-memory Plan) | NO | EXPOSED |
+| build_competition_snapshot | P9 Repository-interface Snapshot Application | READ | NO | EXPOSED |
+| diff_competition_snapshot | P9 SnapshotDiffEngine | DECISION | NO | EXPOSED |
+| derive_competition_events | P10 engine + aggregator | DECISION | NO | EXPOSED |
+| analyze_event_impact | P11.2 Analyzer | DECISION | NO | EXPOSED |
+| decide_replanning | P11.3 Decision Service | DECISION | NO | EXPOSED |
+| revise_plan (APPLY_APPROVED_PLAN_REVISION) | P11.3.5/11.4.2 contract + P11.4 service | MUTATING (returned revised Plan only) | YES; formally authorized P11 input | EXPOSED |
+| check_competition_changes / official-source monitor | P9.5 Monitor/Source interface | External observation | Source permission policy needed | DEFERRED |
+| prepare_replanning_input / authority conversion | P11 structured contract | Authorization boundary | YES | DEFERRED to P12.5 |
+| explain_replanning | Referenced P11 result + bounded explanation | Explanation | NO | DEFERRED to P12.6 |
+
+No speculative capability ID is added for deferred preparation or monitoring adapters.
+The facade is a fixed 16-capability set, not an AgentIntent mapper or dynamic registry.
+Inputs reuse CapabilityInvocationRequest and generic typed CapabilityArguments bound to
+its arguments_ref; metadata contains input schema JSON and formal result type. IDs are
+caller-owned invocation/artifact references; JSON Pointer qualification is projection,
+not a new generated ID scheme or persistence store. Invalid/missing correlation IDs
+reject at the syntax boundary without inventing a response ID. Unsupported capabilities
+return UNSUPPORTED_CAPABILITY; invalid payloads return INVALID_INPUT; missing injected
+dependencies return DEPENDENCY_UNAVAILABLE. Domain rejection produces EXECUTION_REJECTED,
+never an alternate business result or guessed tool.
+
+AgentCapabilityResult preserves original typed results, source metadata and producer
+reason/evidence refs. INELIGIBLE/UNKNOWN/NO_GAP/KEEP are successful capability execution.
+SUCCESS and ERROR are exclusive. Revision consumes exact before Plan + validated
+ReplanningInput + explicit time; Agent ApprovalResponse cannot substitute for it.
+Formal P11 input carries Decision/Scope/Resolution/authority transitively. All authority,
+partial scope, version, semantic compatibility and actual before/after checks stay P11.
+The facade adds no scoring/threshold/impact/preference/status-transition business rules.
+
+Exit criteria: exact inventory/metadata; deterministic explicit dispatch; unknown/deferred
+capability rejection; all six real Repository-backed read Tools; real P5 Application
+and three Eligibility outcomes; P6 confirmed/uncertain/blocked; P7 gap/no-gap/unknown;
+real P8 sourced COMAP planning; P9 observation safety; P10 Event and P11 tri-state/
+precedence preservation; valid approved cancellation and missing-authority/partial/
+stale-version rejection; no provider/infrastructure coupling; reference fidelity;
+JSON/roundtrip and source/evidence Pointer resolution; P12.1/P4/P5-P11 regressions.
+Controlled Events/approvals/policies are test scenarios, not official historical claims.
+
+| AgentArts gate | P12.2 status |
+|---|---|
+| A Core Independence | PASS: SDK absent, facade imports/tests work |
+| B JSON Compatibility | PASS: typed argument schemas/metadata/results and standard JSON roundtrip |
+| C Runtime Boundary | PASS: adapter need not know Repository/Domain implementations; core sees facade |
+| D Platform Parity | PASS at invocation boundary: fixed inputs/dependencies, no platform/runtime branches |
+| E Observability | PASS: invocation/capability/source-request/status/result-ref correlation; no OTel code |
+| F Deployment | DEFERRED: pure Python addition, no new/native dependencies; actual ARM64/image gate remains later |
+
+No Graph, model, Agent routing, approval workflow, Runtime Adapter, MCP, persistence,
+notification or scheduler. No live source/network call is exposed. P12.3 NOT_STARTED;
+P12.2 Review PASS; commit status is proved by Git history. P12.3 remains NOT_STARTED.
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
@@ -1558,7 +1647,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.1; P12.2 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.2; P12.3 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1610,7 +1699,7 @@ replacement, Scheduler, Notification, Network, LLM, Agent or MCP.
 P11 Adaptive Replanning functional chain is complete for the supported paths;
 P11.5 is CLOSED / FROZEN; P11 is CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.
 Exit criteria 16/16 are covered by this integration and frozen phase regressions.
-P12 input is ready at the deterministic contract boundary; no Agent graph or execution is implemented.
+P12 input is ready at the deterministic contract boundary; no Agent graph or autonomous workflow execution is implemented.
 A future Agent may collect explicit approvals and submit typed inputs through an
 authorized boundary; it cannot recompute impact/decisions, bypass resolution or
 mutate Plans directly. Frozen production semantics remain unchanged.
@@ -1634,5 +1723,5 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.1; P12.2 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.2; P12.3 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.

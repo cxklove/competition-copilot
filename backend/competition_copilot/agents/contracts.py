@@ -289,6 +289,10 @@ class CapabilityId(StrEnum):
 
     LIST_COMPETITIONS = "list_competitions"
     GET_COMPETITION = "get_competition"
+    LIST_EDITIONS = "list_competition_editions"
+    GET_EDITION = "get_competition_edition"
+    LIST_TRACKS = "list_edition_tracks"
+    GET_TRACK = "get_competition_track"
     CHECK_ELIGIBILITY = "check_eligibility"
     GET_RECOMMENDATIONS = "get_recommendations"
     ANALYZE_SKILL_GAP = "analyze_skill_gap"
@@ -296,6 +300,11 @@ class CapabilityId(StrEnum):
     CHECK_COMPETITION_CHANGES = "check_competition_changes"
     EXPLAIN_REPLANNING = "explain_replanning"
     REVISE_PLAN = "revise_plan"
+    DIFF_COMPETITION_SNAPSHOT = "diff_competition_snapshot"
+    BUILD_COMPETITION_SNAPSHOT = "build_competition_snapshot"
+    DERIVE_COMPETITION_EVENTS = "derive_competition_events"
+    ANALYZE_EVENT_IMPACT = "analyze_event_impact"
+    DECIDE_REPLANNING = "decide_replanning"
 
 
 class CapabilityInvocationRequest(AgentContract):

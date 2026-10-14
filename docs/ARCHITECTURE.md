@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.2. Agent runtime remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.3. Deterministic graph implemented; LLM and Runtime Adapter remain NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.2 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.3 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.2 capability facade); Agent runtime is not implemented. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.3 deterministic graph); LLM and Runtime Adapter are not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1471,16 +1471,15 @@ core dependencies and optional dev pytest/ruff. requirements.lock is a flat pinn
 pip requirements file; setuptools packages are explicitly listed. Tests live under
 backend/tests (existing Domain/Application/Integration layout).
 
-P12.0 is a documentation baseline: LangGraph/LangChain Core installation is DEFERRED;
-pyproject, existing lock and venv remain unchanged. P12.1 contracts need only Pydantic.
-At the first actual graph implementation (P12.3), introduce an optional agent extra
-with langgraph and langchain-core, resolve/lock compatible exact versions separately
-from unchanged P2-P11 core, and verify installation plus full regressions before use.
-Candidate baseline is LangGraph 1.x (SDK documentation requires LangGraph >=1.0);
-no concrete pair is approved without resolver/import tests. Do not install full
+P12.0 was a documentation baseline: LangGraph/LangChain Core installation was deferred;
+pyproject, existing lock and venv were unchanged in that subphase. P12.1 contracts need only Pydantic.
+P12.3 now implements the optional agent extra and exact requirements-agent.lock
+over the unchanged core requirements.lock, with install/import/full-regression evidence.
+Resolved graph baseline is LangGraph 1.2.15 / LangChain Core 1.6.10; actual
+AgentArts SDK compatibility remains a later isolated adapter gate. Do not install full
 langchain/community integrations or a provider package such as langchain-openai
-without a selected provider and phase requirement. No dependency-import smoke is
-claimed now because those packages are absent.
+without a selected provider and phase requirement. P12.0 made no dependency-import smoke claim for absent packages; P12.3 now
+validates the installed graph stack.
 
 AgentArts SDK is DEFERRED / optional integration-only, never a mandatory core dependency.
 At P12.7 use an isolated adapter/deployment dependency set and a separately pinned
@@ -1681,7 +1680,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.2; P12.3 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.3; P12.4 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1733,7 +1732,7 @@ replacement, Scheduler, Notification, Network, LLM, Agent or MCP.
 P11 Adaptive Replanning functional chain is complete for the supported paths;
 P11.5 is CLOSED / FROZEN; P11 is CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.
 Exit criteria 16/16 are covered by this integration and frozen phase regressions.
-P12 input is ready at the deterministic contract boundary; no Agent graph or autonomous workflow execution is implemented.
+P12 input is ready at the deterministic contract boundary; no autonomous or model-based workflow is implemented.
 A future Agent may collect explicit approvals and submit typed inputs through an
 authorized boundary; it cannot recompute impact/decisions, bypass resolution or
 mutate Plans directly. Frozen production semantics remain unchanged.
@@ -1757,13 +1756,13 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.2; P12.3 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.3; P12.4 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. Current subphase P12.2: REVIEW_PASS.
-P12.3-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. Current subphase P12.3: REVIEW_PASS.
+P12.4-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
@@ -1898,3 +1897,72 @@ Gate A-E PASS at the contract/invocation boundary; pure Python additions introdu
 new/native dependencies. Gate F remains DEFERRED, with actual ARM64/runtime validation
 still required later. No LangGraph, LLM, approval workflow, MCP, Adapter, notification,
 scheduler, persistence or network invocation is added.
+
+### P12.3 deterministic LangGraph orchestration
+
+Implemented graph.py exposes build_competition_copilot_graph(facade), compiling a real
+LangGraph StateGraph on explicit factory call. CompetitionCopilotGraph.invoke returns
+the existing AgentResponse; stream exposes named node updates for offline inspection.
+There is no graph construction at import, autonomous loop, model/keyword inference,
+capability planning or direct Domain/Repository access. The facade is a closure-injected
+dependency, never serialized state. LangGraph handles all execution edges.
+
+```text
+START -> intake -> intent
+                   | UNKNOWN -> clarification -> END
+                   | known -> route
+                               | missing structured context -> clarification -> END
+                               | pending explicit approval -> approval -> END
+                               | unsupported/invalid routing -> FAILED response -> END
+                               | ready -> tool_execution -> result_validation
+                                                            | ERROR -> FAILED response -> END
+                                                            | SUCCESS -> explain -> END
+```
+
+GraphInput is a small technical wrapper around AgentState: caller-owned clarification_id,
+result_ref, optional arguments_json (P12.2 argument artifact envelope) and optional
+caller-prepared ApprovalRequest proposal. It is not a parallel AgentState/Response.
+Private channels wrap the validated AgentState plus the execution receipt/branch/response,
+without copying lifecycle fields. The immutable public State forbids ToolResult before
+terminal response; tool_execution therefore retains the typed Facade receipt in its
+private channel until explain constructs a coherent COMPLETED State/AgentResponse.
+Each State replacement uses normal validated constructors. AgentRequest and State inputs
+are detached through JSON; original caller objects remain unchanged.
+
+Caller supplies structured AgentIntent and invocation; intent never reads user_message.
+UNKNOWN, missing invocation or missing required argument fields requests clarification
+without Tool execution. Route checks only whitelist and structural field presence from
+published schemas, not business context correctness. Missing target never selects a
+default competition. Invalid values remain Facade invocation errors. Terminal/clarification
+snapshots cannot restart execution; no persistent resume/checkpointer/store is implemented.
+
+Approval waits on a fully caller-prepared proposal with matching request/invocation/Plan
+refs and explicit time, but no ApprovalResponse. No authority is generated. If proposal
+facts themselves are missing, MISSING_APPROVAL_CONTEXT clarification safely requests them;
+the graph cannot invent a valid ApprovalRequest from missing refs/time. An already
+structured READY_TO_EXECUTE State must have matching explicit APPROVE where required;
+actual formal P11 authorization/semantic validation still occurs only through the Facade.
+An Agent APPROVE cannot replace a ReplanningInput. P12.5 owns authenticated approval
+collection, freshness/proposal-to-input binding and resume; no such workflow is added here.
+
+result_validation checks typed receipt/capability/correlation/ref shape, not Domain
+conclusions. Business-negative/uncertain results remain successful COMPLETED workflow.
+Producer audits merge without dropping original refs. explain uses one stable capability
+completion template and projects refs, with no new factual explanation. Formal results
+remain in per-run private receipt channels visible through stream; refs do not imply a
+persistent artifact store or conversation memory. P12.6 owns richer explanation.
+
+Eight node names remain intake, intent, route, clarification, approval, tool_execution,
+result_validation, explain. Updates streaming proves deterministic paths, response JSON
+and State validation. No loop/retry/reflection, runtime adapter, MCP, scheduler or model.
+Public wrapper disables ambient LangSmith tracing with tracing_context(enabled=False)
+and empty callbacks; stream is local inspection, not telemetry export. No OTel code.
+LangGraph's state/update/conditional-edge mechanism follows its [official Graph API](https://docs.langchain.com/oss/python/langgraph/graph-api).
+
+P12.3 uses optional LangGraph 1.2.15 / LangChain Core 1.6.10. Transitive checkpoint/prebuilt/
+SDK/LangSmith packages are library dependencies, not active persistent saver/ReAct/runtime
+features. Provider packages and AgentArts SDK are absent. Native transitive packages
+(orjson/ormsgpack/xxhash/uuid-utils/PyYAML/zstandard, etc.) have candidate ARM64 CPython 3.11
+wheels in a binary-only resolver dry-run. That is wheel availability evidence, not Linux
+execution/image/runtime certification; environment markers and container tests remain
+Gate F DEFERRED. Core lock/Domain signatures remain frozen and framework-independent.

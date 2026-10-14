@@ -12,6 +12,7 @@ dependencies = ["pydantic>=2", "tzdata>=2026.2; platform_system == 'Windows'"]
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
+agent = ["langgraph==1.2.15", "langchain-core==1.6.10"]
 
 [tool.setuptools]
 packages = [

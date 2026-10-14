@@ -58,3 +58,21 @@ API / Agent / MCP
 ## 安全与配置
 
 不要提交密钥或私有数据。引入配置时提供安全的示例文件，并忽略本地密钥和生成的数据。
+
+## Agent orchestration and runtime rules
+
+- Primary Agent orchestration framework is LangGraph; LangChain Core supplies only
+  necessary interfaces and Pydantic 2 supplies typed schemas. Start with one
+  orchestrator and deterministic capabilities; no free-running ReAct core,
+  artificial supervisor/business-agent split or custom while-loop harness.
+- Agent selects approved capabilities through Tool/Application boundaries and
+  explains returned evidence. P5-P11 Domain authorities alone decide Eligibility,
+  Recommendation scoring, SkillGap, planning, impact, replanning and revision.
+  Agent must not recreate those decisions, bypass authority/coverage validation or
+  mutate Plans. Human approval must be an explicit workflow state and structured
+  authorized input; model text never grants approval or changes factual truth.
+- AgentArts integration stays in a thin Infrastructure Runtime Adapter. SDK and
+  RequestContext must not enter Domain, Tool contracts or platform-neutral Agent
+  core; translate platform context into typed core input at the adapter boundary.
+  Local and runtime invocation reuse the same business authorities and must have
+  semantic parity. Platform-specific build constraints belong to deployment only.

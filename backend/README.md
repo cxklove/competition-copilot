@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Next Phase: P12 Agent - NEXT / NOT IMPLEMENTED (NOT_STARTED).
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.0. Agent runtime remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | NEXT / NOT IMPLEMENTED |
+| P12 | Agent | IN_PROGRESS; current subphase P12.0 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is NEXT, NOT IMPLEMENTED. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.0 baseline); Agent runtime is not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -107,7 +107,7 @@ resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZE
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
 and P10 Final Review re-run PASS.** **P11 Adaptive Replanning: CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.**
 P11.1 through P11.5, including P11.1.2/P11.3.5/P11.4.2, are CLOSED / FROZEN.
-NEXT: P12 Agent - NOT IMPLEMENTED.
+CURRENT: P12.0 Framework & AgentArts Compatibility Baseline; P12 overall IN_PROGRESS.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1536,7 +1536,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is NEXT / NOT IMPLEMENTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_level_revision.py
@@ -1620,9 +1620,37 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is NEXT / NOT IMPLEMENTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_replanning_reference_serialization.py backend/tests/integration/test_replanning_reference_serialization.py
 ```
+
+## P12.0 Framework & AgentArts Compatibility Baseline
+
+Current canonical status: docs/DEVELOPMENT_PLAN.md. P12 IN_PROGRESS;
+P12.0 REVIEW_PASS_AWAITING_COMMIT; P12.1 and later subphases NOT_STARTED.
+Agent framework: LangGraph; support: LangChain Core; Domain schema: Pydantic 2.
+MVP: one platform-neutral orchestrator invoking Tool/Application deterministic
+capabilities, not a supervisor or autonomous ReAct core. AgentArts is a thin
+runtime/deployment integration target; Domain keeps all business authority.
+
+Python requirement >=3.11; current local CPython 3.12.9 / Pydantic 2.13.5. Existing
+PEP 621 core/dev dependencies, requirements.lock and explicit setuptools package
+list remain unchanged. LangGraph/Core installation is DEFERRED to graph phase;
+future optional agent extra/lock contains only required abstractions. AgentArts
+SDK is DEFERRED / optional isolated runtime dependency, never a core import.
+No model provider, graph, tool router, approval flow, OTel/probe or MCP is added.
+No cloud/network invocation or SDK/package smoke is claimed in this phase.
+
+Core development is supported on Windows. Per the official AgentArts deployment
+baseline, final image validation uses Linux Ubuntu 22.04 ARM64 and project-compatible
+Python >=3.11 (SDK minimum 3.10+ does not override backend). Runtime/ARM64 image
+execution remains NOT_TESTED. Local/runtime semantic parity is mandatory at the
+adapter boundary; initial adapter P12.7, compatibility integration P12.8,
+P16 AgentArts Production Deployment & Hardening. No cloud resources are created.
+
+See docs/ARCHITECTURE.md for stable rationale, boundary and official sources;
+see docs/DEVELOPMENT_PLAN.md for subphases and Gates A-F. Existing backend install,
+pytest and Ruff commands above are unchanged; no new runnable Agent command exists.

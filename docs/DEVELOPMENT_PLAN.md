@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Next Phase: P12 Agent - NEXT / NOT IMPLEMENTED (NOT_STARTED).
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.0. Agent runtime remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | NEXT / NOT IMPLEMENTED |
+| P12 | Agent | IN_PROGRESS; current subphase P12.0 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is NEXT, NOT IMPLEMENTED. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.0 baseline); Agent runtime is not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -106,7 +106,7 @@ simple documentation convention, not a new runtime/status-management system.
 
 ## 执行约束与阶段关口
 
-按 P0 → P16 顺序交付；本文件中的目录和文件均为未来阶段的预计位置，不代表 P0 要创建它们。每个阶段只修改该阶段所需文件。所有业务判断留在 Domain Service，Repository 只做数据访问，Tool 只通过 Application/Domain Service 与抽象 Repository/Gateway 使用能力。硬约束必须可复现，关键决策返回 `reason_code` 和 `evidence`；新功能同时提交自动化测试。AgentArts 仅在 P16 接入隔离的运行与适配层。
+按 P0 → P16 顺序交付；本文件中的目录和文件均为未来阶段的预计位置，不代表 P0 要创建它们。每个阶段只修改该阶段所需文件。所有业务判断留在 Domain Service，Repository 只做数据访问，Tool 只通过 Application/Domain Service 与抽象 Repository/Gateway 使用能力。硬约束必须可复现，关键决策返回 `reason_code` 和 `evidence`；新功能同时提交自动化测试。AgentArts thin Runtime Adapter compatibility starts at P12.7-P12.8; P16 owns production deployment and hardening.
 
 MVP 1 是 P7 后的**后端能力验收关口**；MVP 2 是 P11 后的**后端能力验收关口**。两者不新增功能阶段，也不预设 Agent 或 Web 已完成。产品界面的完整演示安排在 P14 之后。
 
@@ -1076,7 +1076,7 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; NEXT P12 Agent is NOT IMPLEMENTED.
+- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.0; P12.1 is NOT_STARTED.
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1300,57 +1300,107 @@ P11.4 now consumes executable approved due_at updates without guessing WHAT,
 while preserving existing Plan context; IMPLEMENTED / AWAITING FINAL RE-REVIEW.
 No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
-## P12 — Agent Runtime and Multi-Agent Orchestration
+## P12 - Agent Framework, Orchestration & AgentArts Runtime Compatibility
 
-- **Status:** NEXT / NOT IMPLEMENTED (NOT_STARTED). P11 is CLOSED / FROZEN; P12 implementation has not begun.
+- **Status:** IN_PROGRESS. Current subphase P12.0 REVIEW_PASS_AWAITING_COMMIT.
+- **Framework:** LangGraph; supporting LangChain Core; Domain schema Pydantic 2.
+- **MVP:** one platform-neutral orchestrator Agent plus deterministic capabilities.
+- **Goal:** Natural Language -> Intent -> Clarification -> Capability Selection ->
+  Tool/Application Orchestration -> explicit Approval -> deterministic Domain Authority
+  -> evidence-grounded Explanation. Agent has no business authority.
+- **Scope:** core contract/state, approved capability facade, bounded orchestration,
+  model-assisted intent/selection, clarification/approval, explanation, thin Runtime
+  Adapter and offline/local-runtime parity. No ReAct loop, supervisor architecture,
+  replacement Domain rules, MCP or frontend implementation within P12.
+- **Canonical status source:** this file; README/ARCHITECTURE must mirror it.
 
-- **Goal:** 让 Agent 在已验证工具能力之上组织完整任务流程。
-- **Inputs:** P4–P11 稳定 Tool、工具契约、用户旅程。
-- **Main Deliverables:** Supervisor、Intelligence Agent、Planning Agent、Coach Agent 和平台无关 Runtime/Orchestration 边界。
-- **Files/Modules Expected:** `backend/agents/`、`backend/adapters/agent_runtime/`、`backend/tests/agents/`。
-- **Tests Required:** 工具选择、失败恢复、越权调用、无来源事实拒答和对话流程评测。
-- **Acceptance Criteria:** Agent 不直接读数据库/原始 JSON，不实现资格或评分公式；关键结论来自 Tool 并附理由证据。
-- **Explicitly Out of Scope:** 为多 Agent 而增加角色、AgentArts 集成和 Web 页面。
+### P12 subphase roadmap
 
-## P13 — MCP Adapter
+| Subphase | Goal / deliverable | Current status | Compatibility acceptance |
+|---|---|---|---|
+| P12.0 Framework & AgentArts Compatibility Baseline | Framework/rationale, adapter boundaries, dependency/package plan, gates and roadmap | REVIEW_PASS_AWAITING_COMMIT | Official baseline documented; existing core tests preserved; no runtime certification |
+| P12.1 Agent Contract & State | Platform-neutral AgentRequest/AgentState/AgentResponse and stable references/errors | NOT_STARTED | A/B/C; typed public JSON, explicit context, no RequestContext in core |
+| P12.2 Agent Capability / Tool Facade | Approved capabilities mapped to existing Tool/Application authorities | NOT_STARTED | A/B/C/D; no duplicate P5-P11 decisions or concrete Adapter imports |
+| P12.3 LangGraph Orchestration Graph | Bounded explicit nodes/edges and state inspection, no free-running loop | NOT_STARTED | A/B/D/E; stable node names; resolve/import-test agent dependency lock |
+| P12.4 LLM Intent + Safe Tool Selection | Intent/selection interface, capability allowlist and output validation | NOT_STARTED | A/B/C/D/E; provider behind injected interface; deterministic fixture models in default tests |
+| P12.5 Clarification + Human Approval | Explicit clarification/approval states, interrupt/resume and stale-input safety | NOT_STARTED | A/B/C/D/E; text is not approval; no business mutation before authorized input |
+| P12.6 Evidence-grounded Explanation | Explain deterministic reason/evidence without inventing facts or new decisions | NOT_STARTED | A/B/D/E; evidence/reference fidelity, uncertainty and errors retained |
+| P12.7 AgentArts Runtime Adapter | AgentArtsRuntimeApp entrypoint/context translation around same Agent core | NOT_STARTED | A/B/C/D/E; optional SDK; no duplicate business logic; isolated adapter smoke |
+| P12.8 Real Agent + AgentArts Compatibility Integration | Real deterministic capability chains and local/adapter semantic parity | NOT_STARTED | A-F assessed; default offline, fixed/replayed model fixture, no cloud resource requirement for unit tests |
+| P12 Final Review | Full tests, boundary/authority/approval/evidence/parity/compatibility inventory | NOT_STARTED | A-F evidence and deferred live-deployment gates explicit |
+| P12 Closure | Documentation-only CLOSED/FROZEN after Final Review PASS | NOT_STARTED | Synchronized status and clear P13 handoff |
 
-- **Goal:** 把稳定 Tool 契约暴露给 MCP 客户端。
-- **Inputs:** 稳定 Tool 列表、权限边界、请求/响应 Schema。
-- **Main Deliverables:** MCP Adapter、工具映射、错误与权限处理文档。
-- **Files/Modules Expected:** `backend/adapters/mcp/`、`backend/tests/mcp/`。
-- **Tests Required:** Schema、调用映射、错误、鉴权及不越过 Tool 边界测试。
-- **Acceptance Criteria:** MCP 只暴露已有能力，不复制业务规则或直接访问具体数据库。
-- **Explicitly Out of Scope:** 新决策算法、AgentArts 和前端页面。
+P12.0 implements design baseline only. P12.1 and all later subphases remain
+NOT_STARTED. No Agent contract, StateGraph, compiled graph, router, model invocation,
+approval implementation, MCP, probe or cloud deployment is implemented here.
+P12 overall IN_PROGRESS is the aggregate state while its current child follows the
+canonical lifecycle; child transitions and closure still require the documented gates.
 
-## P14 — Agent-native Frontend
+### AgentArts compatibility gates (apply at each relevant P12 stage)
 
-- **Goal:** 通过 Web 展示完整旅程和可解释的状态变化。
-- **Inputs:** 稳定 API/Tool、P12 Agent 流程、产品页面职责。
-- **Main Deliverables:** AI Workspace、Discover、My Journey、Competition Workspace、Profile 的页面流程；资格理由和 Plan Diff 展示。
-- **Files/Modules Expected:** `frontend/`、必要的 `backend/api/` 协议层、前端测试。
-- **Tests Required:** 核心用户旅程、状态/错误处理、证据展示、可访问性和响应契约测试。
-- **Acceptance Criteria:** 学生可完成推荐到重规划闭环；API 不实现业务规则，页面不伪造赛事事实。
-- **Explicitly Out of Scope:** 大型社交/组队、自动报名、缴费或作品提交。
+| Gate | Required evidence | P12.0 disposition |
+|---|---|---|
+| A Core Independence | Core Agent tests/imports work without AgentArts SDK; P2-P11 untouched | Baseline defined; existing core independence verified; future Agent core not implemented |
+| B JSON Compatibility | AgentRequest/public state/AgentResponse/Tool results convert to runtime-safe JSON | Defined; actual Agent schemas/roundtrip tests start P12.1 |
+| C Runtime Adapter Boundary | SDK/RequestContext stay outside core; adapter only delegates | Architecture/engineering rule defined; adapter starts P12.7 |
+| D Platform Parity | Same request/deterministic dependencies -> semantic-equivalent response/reasons/evidence | Defined; model outputs fixed/replayed for comparison; integration starts P12.8 |
+| E Observability Readiness | Stable named nodes support tracing without business logic in probe | Reserved names defined; no probe/OTel code in P12.0 |
+| F Deployment Readiness | Linux ARM64 build, project Python >=3.11, dependency pins, container and runtime verified before deployment | Defined; actual ARM64/runtime execution NOT_TESTED, production validation P16 |
 
-## P15 — Evaluation
+Node names: intake, intent, clarification, route, tool_execution, approval,
+result_validation, explain. Approval must gate any effectful execution. Later graph
+routing uses approved typed capabilities; Domain remains business truth.
+Passing a documentation baseline does not mean all deployment gates have run.
+SDK/core support and production build assumptions are sourced in Architecture.
 
-- **Goal:** 用可复现用例评估正确性、解释性与完整用户旅程。
-- **Inputs:** P5–P14 功能、人工标注场景、边界规则与来源样本。
-- **Main Deliverables:** 资格/推荐/计划/监控/重规划基准集、评分脚本与评测报告。
-- **Files/Modules Expected:** `evals/`、`scripts/` 评测入口、相关文档。
-- **Tests Required:** 固定回归集、证据完整性、事件重放、工具/Agent 误用及端到端场景测试。
-- **Acceptance Criteria:** 评测可重复运行；失败案例与已知风险记录清楚，关键硬规则无模型裁决。
-- **Explicitly Out of Scope:** 用评测数据替代正式来源、改变 Domain 规则以迎合单个样例。
+### Dependency/packaging decision
 
-## P16 — Huawei AgentArts Integration
+P12.0 leaves pyproject.toml, requirements.lock and the Windows venv unchanged.
+LangGraph and LangChain Core are selected, installation DEFERRED until graph use
+(P12.3). Then add an optional agent extra and a separately resolved exact agent lock,
+without full LangChain/provider bundles; record import/install/full-regression evidence.
+AgentArts SDK remains a DEFERRED optional adapter/deployment dependency at P12.7,
+with an isolated runtime lock. No SDK must be needed to import/test the core.
+The SDK's Python 3.10+ minimum does not lower backend's >=3.11 requirement.
+Windows supports core development; Ubuntu 22.04 ARM64 is the production build target.
+No P12.0 dependency smoke is claimed for absent packages; no failing placeholder test.
+When packages are created under agents/ or infrastructure/agentarts/, update explicit
+setuptools package enumeration, dependency locks and accurate README commands together.
 
-- **Goal:** 在平台开放后接入 AgentArts，同时保持核心业务能力不变。
-- **Inputs:** P12 平台无关 Runtime/Orchestration 契约、P13 工具协议、AgentArts 官方能力与限制。
-- **Main Deliverables:** 隔离的 AgentArts Adapter、运行配置、迁移验证与回退方案。
-- **Files/Modules Expected:** `backend/adapters/agentarts/`、`backend/tests/agentarts/`、部署与迁移文档。
-- **Tests Required:** 原平台与 AgentArts 合约一致性、工具权限、失败恢复、回归评测及迁移边界测试。
-- **Acceptance Criteria:** 仅运行、编排与 Adapter 层需要替换/接入；Domain、Decision、Planning 代码和结果契约保持不变。
-- **Explicitly Out of Scope:** 为平台重写业务规则、Repository 决策逻辑或赛事数据来源。
+## P13 - MCP Adapter & AgentArts MCP Compatibility
+
+- **Status:** NOT_STARTED.
+- **Goal:** expose approved Tool capabilities through MCP with typed auth/error boundaries.
+- **Inputs:** stable P12 capability contracts and optional AgentArts adapter boundary.
+- **Deliverables:** protocol mapping, permissions, JSON schemas and AgentArts MCP compatibility evidence.
+- **Acceptance:** local/AgentArts tool semantics agree; SDK/MCP adapters contain no business rules or direct concrete DB access.
+- **Scope:** MCP compatibility is an acceptance dimension, not P12.0 MCP implementation.
+
+## P14 - Agent-native Frontend & Runtime Invocation Compatibility
+
+- **Status:** NOT_STARTED.
+- **Goal:** evidence-grounded user journey via stable API/AgentRequest/AgentResponse.
+- **Deliverables:** Workspace/Discover/Journey/Profile interfaces and compatible local/runtime invocation.
+- **Acceptance:** evidence, clarification/approval/resume and errors survive transport; API/UI never invent Domain truth.
+- **Deferred:** social/team marketplace, automatic registration/payment/submission.
+
+## P15 - Evaluation & Local/AgentArts Semantic Parity
+
+- **Status:** NOT_STARTED.
+- **Goal:** reproducible hard-rule, workflow, evidence, approval and transport-parity evaluation.
+- **Deliverables:** fixed datasets/scripts, replayable model fixtures, failure/risk reports and local/adapter comparison.
+- **Acceptance:** semantic results/reasons/evidence match under controlled inputs; no Domain edits to game evaluations.
+
+## P16 - AgentArts Production Deployment & Hardening
+
+- **Status:** NOT_STARTED.
+- **Role:** production hardening of the P12.7-P12.8 adapter, not first AgentArts integration.
+- **Inputs:** reviewed core/adapter, MCP/UI/parity contracts, official runtime compatibility and deployment configuration.
+- **Deliverables:** production runtime, Ubuntu/Linux ARM64 build/deployment and compatible Python/dependency/container pins;
+  IAM/least privilege, secrets, MaaS/model configuration, observability/tracing, scaling,
+  timeout/retry policies, load testing, security, cost controls and operational rollback.
+- **Acceptance:** Gate F and production parity/security/load/cost evidence; runtime changes cannot alter Domain truth.
+- **Boundary:** build/platform/runtime concerns stay in adapter/deployment, not Domain/Agent state/Tool contracts.
 
 ## Unified Definition of Done
 
@@ -1466,7 +1516,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is NEXT / NOT IMPLEMENTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1542,5 +1592,5 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is NEXT / NOT IMPLEMENTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.

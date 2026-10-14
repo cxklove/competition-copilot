@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Next Phase: P12 Agent - NEXT / NOT IMPLEMENTED (NOT_STARTED).
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.0. Agent runtime remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | NEXT / NOT IMPLEMENTED |
+| P12 | Agent | IN_PROGRESS; current subphase P12.0 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is NEXT, NOT IMPLEMENTED. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.0 baseline); Agent runtime is not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1412,14 +1412,93 @@ Repository/persistence, notification, Network, LLM or Agent.
 
 ## 10. Agent Architecture
 
+### Framework and business-authority decision
+
+Primary orchestration framework: **LangGraph**. Supporting abstractions:
+**LangChain Core** (messages, tool/model interfaces only). Domain schema: **Pydantic 2**.
+AgentArts integration: **Thin Runtime Adapter**. This is a stable architecture decision.
+
+The MVP is one platform-neutral Competition Copilot orchestrator Agent with multiple
+deterministic capabilities. No autonomous free-running ReAct core, supervisor/multi-agent
+MVP, AgentArts-specific business core or custom while-loop Agent Harness.
+The earlier Supervisor/Intelligence/Planning/Coach sketch is superseded by this
+single-orchestrator decision; additional agents require a justified later evolution.
+
+LLM decides what the user is asking, what clarification is needed, which approved
+capability to request and how to explain returned evidence. Domain decides what is
+true: Eligibility, Recommendation score, SkillGap, Plan construction, Event impact,
+ReplanningDecision and authorized revision execution. LLM decides what to ask and
+what capability to invoke. Domain decides what is true.
+Agent must call approved Tool/Application capabilities; it must not reproduce P5-P11
+rules, read raw JSON/DB as truth, invent result enums, bypass approval/coverage, convert
+PARTIAL to COMPLETE, or mutate CompetitionPlan. A model's proposed capability is
+validated against an allowlist, permissions and typed inputs before invocation.
+
+### Why LangGraph
+
+Competition Copilot is a stateful bounded workflow, not an unlimited autonomous loop.
+Explicit nodes/edges make intake, intent, clarification, routing, approval, execution,
+result validation and explanation inspectable and testable. Human approval is an
+explicit workflow state, not prose interpreted as permission. Existing P5-P11 services
+already own deterministic truth and must not be recomputed by a ReAct model.
+LangGraph offers graph control, state inspection and human-interrupt/resume primitives;
+our chosen bounded routing/evidence rules remain deterministic. Future trace inspection
+and AgentArts observability can map onto stable node names. These choices are project
+policy; upstream framework availability is documented in [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+and [interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts).
+
+Conceptual target only (no graph exists in P12.0):
+
 ```text
-Supervisor
-├── Intelligence Agent
-├── Planning Agent
-└── Coach Agent
+User -> Competition Copilot Agent -> LangGraph
+    intake / intent / clarification / route / tool_execution
+    approval / result_validation / explain
+        -> Agent Tool / Application Layer
+        -> P5-P11 deterministic Domain authorities
 ```
 
-Supervisor 负责路由和上下文；Intelligence Agent 解释发现、资格、推荐和技能结果；Planning Agent 协调计划与重规划工具；Coach Agent 解释学习资源和进度。Agent 只通过 Tool 获取经核验事实与业务结果，不读取原始 JSON/数据库做事实判断，也不实现资格规则或推荐评分。按清晰职责设置这三个 Agent，避免为了 Multi-Agent 数量而继续拆分。
+Stable future node names: intake, intent, clarification, route, tool_execution,
+approval, result_validation, explain. This list is not a claim of a linear execution
+order: protected execution must be gated by approval before its effect. Edge policies,
+checkpoint/resume consistency and post-resume preconditions will be designed/tested
+in their roadmap phases. P12.0 implements no graph, router, approval flow or tracing.
+
+### Dependency and packaging strategy
+
+Audited backend: Python >=3.11, current Windows CPython 3.12.9; mandatory pydantic>=2
+(current lock/venv 2.13.5) plus conditional Windows tzdata. PEP 621 pyproject declares
+core dependencies and optional dev pytest/ruff. requirements.lock is a flat pinned
+pip requirements file; setuptools packages are explicitly listed. Tests live under
+backend/tests (existing Domain/Application/Integration layout).
+
+P12.0 is a documentation baseline: LangGraph/LangChain Core installation is DEFERRED;
+pyproject, existing lock and venv remain unchanged. P12.1 contracts need only Pydantic.
+At the first actual graph implementation (P12.3), introduce an optional agent extra
+with langgraph and langchain-core, resolve/lock compatible exact versions separately
+from unchanged P2-P11 core, and verify installation plus full regressions before use.
+Candidate baseline is LangGraph 1.x (SDK documentation requires LangGraph >=1.0);
+no concrete pair is approved without resolver/import tests. Do not install full
+langchain/community integrations or a provider package such as langchain-openai
+without a selected provider and phase requirement. No dependency-import smoke is
+claimed now because those packages are absent.
+
+AgentArts SDK is DEFERRED / optional integration-only, never a mandatory core dependency.
+At P12.7 use an isolated adapter/deployment dependency set and a separately pinned
+runtime lock, preserving core tests without SDK. Avoid automatic SDK imports from
+package roots, Agent core, Domain, Tool/Application or Repository interfaces.
+When new packages are actually created, update the explicit setuptools package list
+and document their install/test commands and locks together. No empty placeholders.
+
+Target paths follow existing package/layer conventions:
+- backend/competition_copilot/agents/: future platform-neutral contracts, state,
+  graph, routing and explanation (plural agents matches the existing documented plan;
+  it still hosts one orchestrator, not multiple business Agents).
+- backend/competition_copilot/tools/ and application/: capability facade/use cases,
+  delegating to existing deterministic authorities through approved boundaries.
+- backend/competition_copilot/infrastructure/agentarts/: future thin runtime adapter,
+  entrypoint and platform context translation. Existing Infrastructure hosts adapters;
+  no second integrations/adapters tree is created just for P12.0.
+- backend/tests/agents/ and tests/integration/: future offline core/parity tests.
 
 ## 11. Tool Architecture
 
@@ -1433,9 +1512,52 @@ P4 Tool Layer 已完成：P4.3 验证 JSON 序列化、Schema、时间窗口、�
 
 稳定 Tool 的契约可由 MCP Adapter 暴露给授权客户端；MCP 只处理协议、参数映射、访问控制和响应序列化，不复制业务规则，也不直接访问数据库。MCP 与 Agent 都是业务入口，最终复用相同的 Tool 和 Domain Service 结果。
 
-## 13. AgentArts Migration Boundary
+## 13. AgentArts Runtime Adapter Boundary
 
-当前 Runtime、Tool 契约和编排均保持平台无关。AgentArts 开放后，接入或替换的范围仅是 Agent Runtime、orchestration 和隔离的 AgentArts Adapter；AgentArts SDK 不得进入 Domain、Application、Repository Interface 或通用 Tool。Domain、Decision、Planning 及其测试保持有效。
+```text
+AgentArts Runtime -> AgentArtsRuntimeApp -> thin runtime handler
+    -> CompetitionCopilotAgent.invoke(AgentRequest) -> LangGraph
+    -> Tool / Application -> Domain
+```
+
+This is a future conceptual invocation boundary, not implemented code. RuntimeAdapter
+wraps the same platform-neutral core; it contains no Eligibility, Recommendation,
+SkillGap, Event impact, Decision or revision logic. RequestContext is translated into
+core AgentRequest at this outer boundary; core imports no AgentArts RequestContext.
+Domain/AgentState/Tool schemas contain no ARM64/SDK deployment logic.
+
+Same AgentRequest and deterministic dependencies must yield semantically equivalent
+AgentResponse locally and through the adapter. Transport/runtime context may differ;
+business results/reasons/evidence must not. Future nondeterministic model input must
+be fixed/replayed for parity assertions; do not compare unconstrained fresh LLM calls.
+JSON compatibility covers request, public state, response and Tool results. Core
+unit tests remain offline and independent of SDK/cloud credentials.
+
+### Official compatibility snapshot (checked 2026-10-14)
+
+Huawei's [runtime overview](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_029.html)
+supports LangGraph and identifies AgentArtsRuntimeApp as the standard SDK HTTP boundary.
+The [SDK deployment guide](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_030.html)
+recommends Ubuntu 22.04 ARM64 builds and Python 3.10+; it warns against x86-built
+images for the documented runtime path. Our backend still requires Python >=3.11,
+so the SDK's lower minimum or sample Python 3.10 image cannot override project metadata.
+Use a compatible >=3.11 ARM64 Python image and revalidate at deployment time.
+Windows is SUPPORTED FOR CORE DEVELOPMENT, not the production image-build authority.
+Actual SDK import/runtime/container deployment is NOT TESTED in P12.0; documented
+support is a baseline, not a production deployment certification. No cloud resource,
+agentarts launch/deploy, Runtime call or Huawei API call is performed.
+
+The [official SDK repository](https://github.com/huaweicloud/agentarts-sdk-python)
+describes optional framework integration and LangGraph >=1.0 compatibility. SDK,
+framework, Python and image pins must be validated together in isolated adapter tests.
+Official [LangChain/LangGraph observability integration](https://support.huaweicloud.com/ops-agentarts/agentarts_14_0159.html)
+provides a future tracing target. Preserve the stable node names defined above;
+no probe, OpenTelemetry code or telemetry dependency is added in P12.0.
+
+AgentArts is runtime/deployment integration, never Domain authority. Initial thin
+adapter/parity coverage belongs to P12.7-P12.8; P16 is **AgentArts Production Deployment
+& Hardening**, not first integration. P16 owns production image/IAM/secrets/model
+configuration, tracing/scaling/timeout/retry/load/security/cost validation.
 
 ## 14. Repository Structure
 
@@ -1454,7 +1576,7 @@ P3 Repository Layer 已完成并冻结。`CompetitionRepository` 只读地返回
 
 - 来源发布的截止日期与实际生效日期可能不同；数据模型需要分别记录观测时间与规则生效时间，具体冲突处理留待相应阶段确定。
 - 赛事页面变化不一定代表规则变化；监控必须经核验和差异归一化，避免误触发重规划。
-- AgentArts 尚未开放，Adapter 契约须在接入阶段以实际平台能力验证，同时保持核心逻辑隔离。
+- AgentArts official compatibility is documented; SDK/image pins and Linux ARM64 deployment remain gated until isolated adapter/deployment validation. Core business logic remains platform-neutral.
 
 ### P11.4 Deterministic Plan Revision + PlanDiff - CLOSED / FROZEN
 
@@ -1559,7 +1681,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is NEXT / NOT IMPLEMENTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1635,5 +1757,14 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is NEXT / NOT IMPLEMENTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
+
+### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
+
+P12 overall: IN_PROGRESS. Current subphase P12.0: REVIEW_PASS_AWAITING_COMMIT.
+P12.1-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+Framework baseline is documented; no actual Agent graph, model call, facade/router,
+approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
+SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
+supports the selected direction. DEVELOPMENT_PLAN owns roadmap and Gates A-F.

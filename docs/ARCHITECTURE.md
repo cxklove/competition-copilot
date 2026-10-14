@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.0. Agent runtime remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.1. Agent runtime remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.0 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.1 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.0 baseline); Agent runtime is not implemented. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.1 contracts/state); Agent runtime is not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1681,7 +1681,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.1; P12.2 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1733,7 +1733,7 @@ replacement, Scheduler, Notification, Network, LLM, Agent or MCP.
 P11 Adaptive Replanning functional chain is complete for the supported paths;
 P11.5 is CLOSED / FROZEN; P11 is CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.
 Exit criteria 16/16 are covered by this integration and frozen phase regressions.
-P12 input is ready at the deterministic contract boundary; no P12 implementation.
+P12 input is ready at the deterministic contract boundary; no Agent graph or execution is implemented.
 A future Agent may collect explicit approvals and submit typed inputs through an
 authorized boundary; it cannot recompute impact/decisions, bypass resolution or
 mutate Plans directly. Frozen production semantics remain unchanged.
@@ -1757,14 +1757,75 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.1; P12.2 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. Current subphase P12.0: REVIEW_PASS_AWAITING_COMMIT.
-P12.1-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). Current subphase P12.1: REVIEW_PASS.
+P12.2-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
 supports the selected direction. DEVELOPMENT_PLAN owns roadmap and Gates A-F.
+
+### P12.1 Agent contract boundary and state principles
+
+Implemented package: competition_copilot.agents; contracts.py and state.py follow the
+P12.0 plural directory convention. No parallel business authority is introduced.
+Public contracts use frozen/extra-forbid/revalidated Pydantic 2 values, immutable
+tuples and normal constructors; model_copy(update=...) is rejected. All request,
+conversation, clarification, invocation, approval and artifact IDs are caller-owned
+stable references. No internal ID generation or new hash/versioning system is needed.
+The existing project has no universal schema_version convention; none is invented here.
+
+AgentIntent describes requested interaction, never Eligibility/Impact/Replan outcomes.
+UNKNOWN is valid and supports clarification without selecting a target. AgentRequest
+has optional context; edition/track hierarchy and supplied exact PlanReference
+consistency are checked, without checking Repository existence. Agent workflow statuses
+describe workflow readiness/completion, not Plan status or Domain truth.
+
+ClarificationRequest carries a typed reason, explicit missing/ambiguous ContextField
+set and interaction question. Replies/allowed answer choices and clarification merging
+remain P12.5 work; question prose never fills missing context or becomes evidence.
+ApprovalRequest binds a source request/invocation, exact before PlanReference,
+decision/scope/resolution/proposed-input references, explicit instruction coverage,
+reason/evidence references and caller-supplied aware created_at. Proposed artifact refs
+describe a proposal, not an already-approved P11 input or a semantic COMPLETE assertion.
+ApprovalResponse requires APPROVE or REJECT and explicit aware submitted_at; no default
+approval. State validates request/proposal/invocation/time matching. Request alone,
+ambiguous prose or intent APPROVE_PLAN_REVISION never constitutes authority.
+Later P12.5 must verify authenticated approval provenance and current preconditions;
+only an authorized boundary can construct P11 authority, which rechecks coverage and
+semantic compatibility. Workflow readiness cannot override those frozen guards.
+
+CapabilityInvocationRequest is typed proposal metadata with an argument-artifact
+reference, not an executable registry or Tool router. Capability IDs identify existing
+Domain/Tool capabilities to be exposed in P12.2; no facade is claimed yet. Approval is
+mandatory for a revision invocation. ToolResultReference reuses P4 ToolResult with a
+referenced payload rather than duplicating success/error semantics or large results.
+ResultReference retains typed artifact identity; ReasonReference binds a producer code
+to its retained result. AuditReferences preserves source/evidence/event/decision/input/
+resolution/authority/Diff links as canonical unique sets. Artifact retrieval, provenance
+and cross-artifact semantic verification remain Tool/Application/Domain responsibilities.
+
+AgentState stores request/context refs, one current invocation/result reference,
+clarification or approval interaction, audit refs and final response/error. It stores
+no Repository dump, Plan history, chat history or memory. Normal validated replacement
+and JSON/mapping projection are the compatibility seam for a later LangGraph schema;
+no graph, reducer or edge engine is implemented. Validators check coherent snapshots,
+not transition histories: terminal snapshots require matching final response, pending
+approval cannot complete, protected readiness/result requires explicit matching APPROVE,
+and final response cannot discard retained audit references. Later routing/resume must
+enforce temporal transitions, permissions, artifact freshness and authority anew.
+Business-negative results remain referenced results in COMPLETED workflow, not Agent
+errors. AgentError only describes workflow problems. Explanation prose is not evidence.
+
+All public values support standard JSON dumps, Pydantic JSON and validated roundtrips;
+sets, arbitrary runtime objects and unknown fields are rejected. Critical approval times
+are explicit aware UTC-normalized values. No provider/SDK types or local platform handles
+enter core. Trace correlation uses request_id, intent/status, invocation/approval refs
+and response outcome; reserved P12.0 node names remain unchanged, without OTel code.
+Compatibility Gates A-E PASS at contract level; actual LangGraph/SDK/runtime execution
+and deployment Gate F remain deferred. No LLM, capability execution or Domain rule
+reimplementation is part of P12.1.

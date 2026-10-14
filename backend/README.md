@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.0. Agent runtime remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.1. Agent runtime remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.0 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.1 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.0 baseline); Agent runtime is not implemented. A future Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.1 contracts/state); Agent runtime is not implemented. A future Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -107,7 +107,7 @@ resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZE
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
 and P10 Final Review re-run PASS.** **P11 Adaptive Replanning: CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.**
 P11.1 through P11.5, including P11.1.2/P11.3.5/P11.4.2, are CLOSED / FROZEN.
-CURRENT: P12.0 Framework & AgentArts Compatibility Baseline; P12 overall IN_PROGRESS.
+CURRENT: P12.1 Agent Contract & State; P12 overall IN_PROGRESS.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1536,7 +1536,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.1; P12.2 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_level_revision.py
@@ -1592,7 +1592,7 @@ replacement, Scheduler, Notification, Network, LLM, Agent or MCP.
 P11 Adaptive Replanning functional chain is complete for the supported paths;
 P11.5 is CLOSED / FROZEN; P11 is CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.
 Exit criteria 16/16 are covered by this integration and frozen phase regressions.
-P12 input is ready at the deterministic contract boundary; no P12 implementation.
+P12 input is ready at the deterministic contract boundary; no Agent graph or execution is implemented.
 A future Agent may collect explicit approvals and submit typed inputs through an
 authorized boundary; it cannot recompute impact/decisions, bypass resolution or
 mutate Plans directly. Frozen production semantics remain unchanged.
@@ -1620,7 +1620,7 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.0; later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.1; P12.2 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ```powershell
@@ -1630,7 +1630,7 @@ The original follow-up made no git commit; Closure is a documentation-only updat
 ## P12.0 Framework & AgentArts Compatibility Baseline
 
 Current canonical status: docs/DEVELOPMENT_PLAN.md. P12 IN_PROGRESS;
-P12.0 REVIEW_PASS_AWAITING_COMMIT; P12.1 and later subphases NOT_STARTED.
+P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 and later subphases NOT_STARTED.
 Agent framework: LangGraph; support: LangChain Core; Domain schema: Pydantic 2.
 MVP: one platform-neutral orchestrator invoking Tool/Application deterministic
 capabilities, not a supervisor or autonomous ReAct core. AgentArts is a thin
@@ -1654,3 +1654,27 @@ P16 AgentArts Production Deployment & Hardening. No cloud resources are created.
 See docs/ARCHITECTURE.md for stable rationale, boundary and official sources;
 see docs/DEVELOPMENT_PLAN.md for subphases and Gates A-F. Existing backend install,
 pytest and Ruff commands above are unchanged; no new runnable Agent command exists.
+
+## P12.1 Agent Contract & State
+
+Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 is COMMITTED
+(73d3d71); P12.2 and later subphases remain NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Package: competition_copilot.agents (the plural directory selected in P12.0).
+contracts.py defines interaction/audit envelopes; state.py defines immutable snapshots.
+AgentRequest, intent, clarification, explicit approval, capability invocation reference,
+AgentResponse and AgentState are provider-neutral Pydantic 2 values. All IDs are
+caller-owned; no random/clock IDs or implicit approval. Optional context never selects
+a default competition. PlanReference and P4 ToolResult are reused, not replaced.
+No Domain service is executed and no business decision, graph, router, reducer,
+model, memory, SDK adapter, network or persistence is implemented. Reference existence,
+approval provenance and P11 authority conversion remain later authorized-boundary work.
+Gate A-E contract tests PASS; deployment Gate F is DEFERRED. LangGraph/Core/SDK
+dependencies remain deferred as documented; only setuptools package enumeration changes.
+
+Install using the existing editable backend/dev command above; focused validation:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/agents/test_agent_contracts.py
+.\backend\.venv\Scripts\python -m pytest
+.\backend\.venv\Scripts\python -m ruff check .
+```

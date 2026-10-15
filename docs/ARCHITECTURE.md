@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.5. Clarification, explicit human approval and trusted-state continuation implemented; Runtime Adapter remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.6. Bounded evidence-grounded explanations and deterministic fallback implemented; Runtime Adapter remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.5 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.6 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.5 human continuation). Injected model proposals and explicit human replies are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.6 evidence-grounded explanation). Injected model proposals and explicit human replies are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1680,7 +1680,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.5; P12.6 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.6 (REVIEW_PASS); P12.7 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1756,13 +1756,13 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.5; P12.6 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.6 (REVIEW_PASS); P12.7 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. Current subphase P12.5: REVIEW_PASS.
-P12.6-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. P12.5: REVIEW_PASS. Current subphase P12.6: REVIEW_PASS.
+P12.6 REVIEW_PASS; P12.7-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
@@ -1892,11 +1892,61 @@ Source capture/one-shot monitor remains unexposed: OneShotCompetitionMonitor has
 proper Application boundary, but Agent-safe approved source/Gateway/network permission
 composition is not configured by this phase. No arbitrary URL capability is introduced;
 source failure is never converted to UNKNOWN Snapshot. ReplanningInput preparation and
-approval conversion remain deferred to P12.5; explanation capability to P12.6.
+approval conversion were deferred at the P12.2 baseline. P12.5 now provides the
+internal bridge; P12.6 provides Graph explanation without a new selectable capability.
 Gate A-E PASS at the contract/invocation boundary; pure Python additions introduce no
 new/native dependencies. Gate F remains DEFERRED, with actual ARM64/runtime validation
 still required later. No LangGraph, LLM, approval workflow, MCP, Adapter, notification,
 scheduler, persistence or network invocation is added.
+
+### P12.6 evidence-grounded explanation
+
+Domain decides truth. LLM explains truth. `agents/explanation.py` deterministically
+projects an existing typed Facade receipt into immutable ExplanationContext,
+ExplanationFact and GroundingEvidence values. Context includes request/intent/capability,
+exact business status, result/reason/evidence/source refs, SourceMetadata's URL/type/
+observed_at/verification, uncertainty, Plan references and actual PlanDiff/approval/
+trigger lineage. It does not receive the full AgentState, user message, student profile,
+Domain payload, service/repository handles, external free prose or provider credentials.
+Evidence code/field/value and P11 evidence references are retained; raw display messages
+are not approved statements. No Web search or extra capability execution resolves refs.
+
+ExplanationModel is a separate injectable Protocol from IntentModel and the human
+interpreter. The optional LangChainExplanationModel uses the existing Core dependency
+and structured ExplanationDraft schema; no provider SDK/key/model/endpoint is required.
+Central EXPLANATION_PROMPT separates instructions from authoritative result, evidence
+and source data. The first version supports bounded Chinese sentence composition:
+the model chooses supplied conclusion/statement variants, preserving every projected
+fact and its order, and cites whitelisted evidence/source IDs. This is deliberately
+not unrestricted paraphrasing or semantic NLP fact checking. Status/score/rank/operation
+are never new model-owned fields. Recommendation details keep producer bucket/rank
+order (first five per bucket, with omitted counts); Plan details show first ten
+needs/milestones and exact totals. No new deadline, resources or action is invented.
+
+ExplanationGroundingValidator checks the exact result reference, conclusion variants,
+fact IDs/order/text, reason codes, citation allowlists and required uncertainty. It
+rejects fabricated refs/reasons, status contradictions, changed operations and omitted
+uncertainty. UNKNOWN, partial coverage, unresolved scope and observation-only changes
+cannot become positive eligibility, no-impact or deletion. Source status/time stay as
+recorded; observation time never implies freshness. All audit refs remain available;
+when the projected JSON exceeds 64 KiB, model invocation is skipped, not data invented.
+
+The existing explain node consumes only the validated receipt. Model exception,
+timeout, invalid schema or grounding failure uses deterministic capability-specific
+status/fact/reason/evidence/source templates and leaves business success COMPLETED.
+No tool retry, revision retry or rollback occurs. Pending/rejected approvals use the
+same safe projection/validator/fallback, retaining exact ApprovalRequest and consent
+boundaries; clarification and workflow errors keep deterministic questions/errors.
+Topology and P5-P11 authorities are unchanged. AgentResponse and its audit/Plan refs
+remain the sole public response contract. No persistence or new selectable capability.
+
+Named graph updates expose explanation_context_built, explanation_model_called,
+explanation_grounding_passed and explanation_fallback_used through typed rendering
+metadata; no telemetry exporter or hidden reasoning is added. Gates A-E/G/H continue
+at the core boundary, F Deployment remains DEFERRED (no new dependency/native risk).
+Gate I Explanation Grounding Parity requires future Runtime adapters to inject only
+ExplanationModel and reuse this same context builder, validator, fallback and Graph.
+P12.7 owns the future thin Runtime Adapter; none is implemented here.
 
 ### P12.5 clarification, explicit approval and continuation
 
@@ -1970,7 +2020,7 @@ Execution remains Graph -> AgentCapabilityFacade -> P11 revision. The execution 
 rechecks the bridge result against the exact approved proposal, current Plan and explicit
 execution time; a manually READY State or APPROVE alone cannot bypass it. No direct
 PlanRevisionService call exists in Graph/human helpers. Actual Plan/PlanDiff remain P11
-outputs; explain remains deterministic until P12.6. Request, clarification response,
+outputs; P12.6 explains them through bounded composition and deterministic fallback. Request, clarification response,
 approval request/response, authority, Decision/events and revision receipt retain audit
 links without hidden model reasoning or credentials.
 
@@ -2028,7 +2078,7 @@ if the message says 'yes' or an approval response exists elsewhere. It cannot cr
 ApprovalRequest, ApprovalResponse or HUMAN_APPROVED. Existing explicit structured
 revision invocation still goes through the graph approval boundary and formal P11
 authorization; P12.5 owns full approval collection/conversion/resume. P12.6 owns LLM
-explanation. explain remains the same deterministic result-reference template.
+explanation through bounded structured composition, grounding validation and fallback.
 
 Model exceptions and malformed output produce typed FAILED responses with stable
 codes/messages, no exception details, fallback guessing or retries. Successful routing

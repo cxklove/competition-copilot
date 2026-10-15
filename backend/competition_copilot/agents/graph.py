@@ -36,6 +36,13 @@ from competition_copilot.agents.contracts import (
     ToolResultReference,
     WorkflowStatus,
 )
+from competition_copilot.agents.explanation import (
+    ExplanationContext,
+    ExplanationModel,
+    ExplanationRendering,
+    build_explanation_context,
+    generate_explanation,
+)
 from competition_copilot.agents.human_contracts import (
     ClarificationOption,
     HumanResponseInterpreter,
@@ -107,6 +114,8 @@ class _Channels(TypedDict, total=False):
     proposal: IntentRoutingProposal
     routing_validation: RoutingValidationResult
     human_resolution: str
+    explanation_context: ExplanationContext
+    explanation_rendering: ExplanationRendering
 
 
 def _replace(state: AgentState, **changes) -> AgentState:
@@ -185,6 +194,7 @@ class CompetitionCopilotGraph:
 def build_competition_copilot_graph(
     facade: AgentCapabilityFacade, *, intent_model: IntentModel | None = None,
     human_interpreter: HumanResponseInterpreter | None = None,
+    explanation_model: ExplanationModel | None = None,
 ) -> CompetitionCopilotGraph:
     """Build/compile on explicit call, without checkpointer, store or external IO."""
     metadata = {m.capability: m for m in facade.list_capabilities()}
@@ -268,9 +278,15 @@ def build_competition_copilot_graph(
             if response.decision == ApprovalDecision.REJECT:
                 result = AgentResponse(request_id=state.request.request_id, intent=state.intent,
                     outcome="COMPLETED", message="Revision rejected; no capability executed", audit=audit)
-                return {"state": _replace(state, status=WorkflowStatus.COMPLETED,
-                    approval_response=response, audit=audit, final_response=result),
-                    "response": result, "branch": "end", "human_resolution": "APPROVAL_REJECTED"}
+                terminal = _replace(state, status=WorkflowStatus.COMPLETED,
+                    approval_response=response, audit=audit, final_response=result)
+                context = build_explanation_context(terminal)
+                rendering = generate_explanation(context, explanation_model)
+                result = AgentResponse(**{**result.model_dump(), "message": rendering.message,
+                                          "plan_refs": context.plan_refs})
+                return {"state": _replace(terminal, final_response=result),
+                    "response": result, "branch": "end", "human_resolution": "APPROVAL_REJECTED",
+                    "explanation_context": context, "explanation_rendering": rendering}
             approved = build_approved_replanning_input(pending, response, source, state.request,
                 state.invocation, current_plan=reply.current_plan, approved_by_ref=reply.approved_by_ref)
             if reply.executed_at is None or reply.executed_at < response.submitted_at:
@@ -457,10 +473,13 @@ def build_competition_copilot_graph(
         except (ValueError, ValidationError):
             return _failure(state, AgentErrorCode.INVALID_WORKFLOW_TRANSITION,
                             "Approval proposal does not match request/invocation/Plan")
+        context = build_explanation_context(state)
+        rendering = generate_explanation(context, explanation_model)
         response = AgentResponse(request_id=state.request.request_id, intent=state.intent,
-                                 outcome=state.status, message="Explicit approval required",
-                                 approval_request=proposal, audit=state.audit)
-        return {"state": state, "response": response}
+                                 outcome=state.status, message=rendering.message,
+                                 approval_request=proposal, audit=state.audit, plan_refs=context.plan_refs)
+        return {"state": state, "response": response,
+                "explanation_context": context, "explanation_rendering": rendering}
 
     def tool_execution(channels):
         state, frame = channels["state"], channels["frame"]
@@ -504,17 +523,20 @@ def build_competition_copilot_graph(
 
     def explain(channels):
         state, receipt = channels["state"], channels["receipt"]
+        context = build_explanation_context(state, receipt)
+        rendering = generate_explanation(context, explanation_model)
+        state = _replace(state, audit=_merge_audit(state.audit, AuditReferences(results=context.result_refs)))
         response = AgentResponse(
             request_id=state.request.request_id, intent=state.intent,
             outcome=WorkflowStatus.COMPLETED, audit=state.audit,
-            message="Capability completed: " + receipt.capability.value + ". See referenced result.",
+            message=rendering.message, plan_refs=context.plan_refs,
         )
         reference = ToolResultReference(invocation_id=state.invocation.invocation_id,
                                        result=ToolResult[ResultReference](
                                            success=True, data=receipt.result_ref))
         return {"state": _replace(state, status=WorkflowStatus.COMPLETED,
                                    tool_result=reference, final_response=response),
-                "response": response}
+                "response": response, "explanation_context": context, "explanation_rendering": rendering}
 
     graph = StateGraph(_Channels)
     for name, node in (

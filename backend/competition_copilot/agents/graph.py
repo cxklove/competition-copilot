@@ -10,7 +10,7 @@ from collections.abc import Iterator
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langsmith import tracing_context
-from pydantic import ValidationError
+from pydantic import AwareDatetime, ValidationError
 from typing_extensions import TypedDict
 
 from competition_copilot.agents.capabilities import (
@@ -27,6 +27,7 @@ from competition_copilot.agents.contracts import (
     ApprovalDecision,
     ApprovalRequest,
     AuditReferences,
+    CapabilityInvocationRequest,
     ClarificationReason,
     ClarificationRequest,
     ContextField,
@@ -34,6 +35,20 @@ from competition_copilot.agents.contracts import (
     ResultReference,
     ToolResultReference,
     WorkflowStatus,
+)
+from competition_copilot.agents.human_contracts import (
+    ClarificationOption,
+    HumanResponseInterpreter,
+    HumanResume,
+)
+from competition_copilot.agents.human_interactions import (
+    build_approved_replanning_input,
+    explicit_approval_response,
+    prepare_approval,
+    resolve_clarification,
+    validate_explicit_approval,
+    validate_language_clarification,
+    validate_pending_revision,
 )
 from competition_copilot.agents.routing import (
     INTENT_CAPABILITIES,
@@ -49,6 +64,7 @@ from competition_copilot.agents.routing import (
 )
 from competition_copilot.agents.state import AgentState
 from competition_copilot.domain.digital_twin import StableId
+from competition_copilot.domain.replanning_input import ReplanningInput
 from competition_copilot.tools.contracts import ToolResult
 
 
@@ -67,6 +83,17 @@ class GraphInput(AgentContract):
     approval_proposal: ApprovalRequest | None = None
     routing_invocation_id: StableId | None = None
     routing_arguments_ref: ResultReference | None = None
+    resume: HumanResume | None = None
+    clarification_options: tuple[ClarificationOption, ...] = ()
+    approval_request_id: StableId | None = None
+    interaction_created_at: AwareDatetime | None = None
+    revision_proposal: ReplanningInput | None = None
+
+
+class GraphTurn(AgentContract):
+    """Execution bundle, reusing public State/Response; caller manages continuity."""
+    continuation: GraphInput
+    response: AgentResponse
 
 
 class _Channels(TypedDict, total=False):
@@ -79,6 +106,7 @@ class _Channels(TypedDict, total=False):
     clarification_reason: ClarificationReason
     proposal: IntentRoutingProposal
     routing_validation: RoutingValidationResult
+    human_resolution: str
 
 
 def _replace(state: AgentState, **changes) -> AgentState:
@@ -134,9 +162,18 @@ class CompetitionCopilotGraph:
         return {"frame": frame}
 
     def invoke(self, value: GraphInput | dict) -> AgentResponse:
+        return self.run_turn(value).response
+
+    def run_turn(self, value: GraphInput | dict) -> GraphTurn:
         with tracing_context(enabled=False):
             result = self.compiled.invoke(self._input(value), config={"callbacks": []})
-        return AgentResponse.model_validate(result["response"])
+        frame = GraphInput(**{**result["frame"].model_dump(), "state": result["state"], "resume": None})
+        return GraphTurn(continuation=frame, response=AgentResponse.model_validate(result["response"]))
+
+    def resume(self, prior: GraphInput | dict, response: HumanResume | dict) -> GraphTurn:
+        prior = GraphInput.model_validate(prior)
+        frame = GraphInput(**{**prior.model_dump(), "resume": HumanResume.model_validate(response)})
+        return self.run_turn(frame)
 
     def stream(self, value: GraphInput | dict) -> Iterator[dict]:
         """Offline node update inspection; no persistent trace or telemetry export."""
@@ -147,6 +184,7 @@ class CompetitionCopilotGraph:
 
 def build_competition_copilot_graph(
     facade: AgentCapabilityFacade, *, intent_model: IntentModel | None = None,
+    human_interpreter: HumanResponseInterpreter | None = None,
 ) -> CompetitionCopilotGraph:
     """Build/compile on explicit call, without checkpointer, store or external IO."""
     metadata = {m.capability: m for m in facade.list_capabilities()}
@@ -156,12 +194,106 @@ def build_competition_copilot_graph(
     def intake(channels):
         frame = GraphInput.model_validate(channels["frame"])
         state = AgentState.model_validate(frame.state)
+        if frame.resume is not None:
+            if state.status not in (WorkflowStatus.NEEDS_CLARIFICATION, WorkflowStatus.WAITING_FOR_APPROVAL):
+                return _failure(state, AgentErrorCode.INVALID_WORKFLOW_TRANSITION, "No pending interaction")
+            return {"state": state, "branch": ("clarification_resolution" if state.status ==
+                WorkflowStatus.NEEDS_CLARIFICATION else "approval_resolution")}
         if state.status not in (
             WorkflowStatus.RECEIVED, WorkflowStatus.READY_TO_ROUTE,
             WorkflowStatus.READY_TO_EXECUTE, WorkflowStatus.WAITING_FOR_APPROVAL,
         ):
             raise ValueError("Terminal/clarification snapshots cannot restart execution")
-        return {"state": state}
+        return {"state": state, "branch": "intent"}
+
+    def clarification_resolution(channels):
+        state, frame = channels["state"], channels["frame"]
+        reply = frame.resume
+        try:
+            response = reply.clarification
+            if response is None:
+                if reply.message is None or human_interpreter is None:
+                    raise ValueError("A clarification response is required")
+                proposed = human_interpreter.clarify(reply.message, state.clarification,
+                                                      frame.clarification_options)
+                response = validate_language_clarification(reply.message, state.clarification,
+                                                           proposed, frame.clarification_options)
+                if response is None:
+                    return {"branch": "clarification", "missing_fields": state.clarification.fields,
+                        "clarification_reason": state.clarification.reason,
+                        "human_resolution": "CLARIFICATION_UNRESOLVED"}
+            state, args = resolve_clarification(state, response, _arguments(frame),
+                state.invocation.arguments_ref if state.invocation else frame.routing_arguments_ref)
+            reference = ResultReference(kind="CLARIFICATION_RESPONSE", ref_id=
+                response.clarification_id + "/response/" + response.submitted_at.isoformat())
+            state = _replace(state, audit=_merge_audit(state.audit, AuditReferences(results=(reference,))))
+            frame = GraphInput(**{**frame.model_dump(), "state": state,
+                                  "arguments_json": json.dumps(args, sort_keys=True)})
+        except Exception:
+            return _failure(channels["state"], AgentErrorCode.INVALID_WORKFLOW_TRANSITION,
+                            "Clarification response rejected")
+        if state.clarification is not None:
+            return {"frame": frame, "state": state, "branch": "clarification",
+                "missing_fields": state.clarification.fields,
+                "clarification_reason": state.clarification.reason,
+                "human_resolution": "CLARIFICATION_PARTIAL"}
+        return {"frame": frame, "state": state, "branch": "intent",
+                "human_resolution": "CLARIFICATION_RESOLVED"}
+
+    def approval_resolution(channels):
+        state, frame = channels["state"], channels["frame"]
+        reply, pending = frame.resume, state.approval_request
+        try:
+            candidate = facade.validate_arguments(state.invocation, _arguments(frame))
+            source = candidate.payload.replanning_input
+            if candidate.payload.before != source.before:
+                raise ValueError("Current execution Plan differs from approved proposal")
+            # Pending interactions are candidates too, including ambiguous replies.
+            validate_pending_revision(pending, source, state.request, state.invocation)
+            if reply.current_plan is not None and reply.current_plan != pending.before_plan:
+                raise ValueError("Approval is stale: current Plan changed")
+            response = reply.approval
+            if response is None:
+                if reply.message is None:
+                    raise ValueError("Approval reply required")
+                response = explicit_approval_response(pending, reply.message)
+                if response is None:
+                    return {"branch": "approval", "human_resolution": "AMBIGUOUS_CONSENT"}
+            validate_explicit_approval(pending, response, source, state.request, state.invocation,
+                                      reply.current_plan)
+            refs = (ResultReference(kind="APPROVAL_REQUEST", ref_id=pending.approval_request_id),
+                ResultReference(kind="APPROVAL_RESPONSE", ref_id=pending.approval_request_id +
+                    "/response/" + response.submitted_at.isoformat()))
+            audit = _merge_audit(state.audit, pending.audit, AuditReferences(results=refs))
+            if response.decision == ApprovalDecision.REJECT:
+                result = AgentResponse(request_id=state.request.request_id, intent=state.intent,
+                    outcome="COMPLETED", message="Revision rejected; no capability executed", audit=audit)
+                return {"state": _replace(state, status=WorkflowStatus.COMPLETED,
+                    approval_response=response, audit=audit, final_response=result),
+                    "response": result, "branch": "end", "human_resolution": "APPROVAL_REJECTED"}
+            approved = build_approved_replanning_input(pending, response, source, state.request,
+                state.invocation, current_plan=reply.current_plan, approved_by_ref=reply.approved_by_ref)
+            if reply.executed_at is None or reply.executed_at < response.submitted_at:
+                raise ValueError("Explicit execution time must follow approval")
+            audit = _merge_audit(audit, AuditReferences(results=(
+                ResultReference(kind="REPLANNING_INPUT", ref_id=approved.id),
+                ResultReference(kind="AUTHORITY", ref_id=approved.id + (
+                    "#/plan_status_instruction/authority" if approved.plan_status_instruction
+                    else "#/instructions/0/authority")),
+            )))
+            args = {"artifact_ref": state.invocation.arguments_ref.model_dump(mode="json"),
+                "payload": {"before": approved.before.model_dump(mode="json"),
+                    "replanning_input": approved.model_dump(mode="json"),
+                    "executed_at": reply.executed_at.isoformat()}}
+            state = _replace(state, status=WorkflowStatus.READY_TO_EXECUTE,
+                             approval_response=response, audit=audit)
+            frame = GraphInput(**{**frame.model_dump(), "state": state, "revision_proposal": source,
+                                  "arguments_json": json.dumps(args, sort_keys=True)})
+            return {"frame": frame, "state": state, "branch": "route",
+                    "human_resolution": "APPROVAL_ACCEPTED_AUTHORITY_BOUND"}
+        except Exception:
+            return _failure(channels["state"], AgentErrorCode.INVALID_WORKFLOW_TRANSITION,
+                            "Approval response rejected: binding, authority or stale context")
 
     def intent(channels):
         state = channels["state"]
@@ -188,6 +320,27 @@ def build_competition_copilot_graph(
                 return {**trace, **_failure(state, AgentErrorCode.UNSUPPORTED_INTENT,
                                            validation.reason.value)}
             if validation.status == RoutingValidationStatus.CLARIFICATION:
+                if (validation.reason == "APPROVAL_REQUIRED" and frame.approval_request_id
+                    and frame.interaction_created_at and frame.routing_invocation_id
+                    and frame.routing_arguments_ref and proposal.ambiguity == "NONE"
+                    and not proposal.missing_context):
+                    try:
+                        args = _arguments(frame)
+                        if context_conflicts(state.request, args["payload"], proposal.targets):
+                            raise ValueError("Context conflict")
+                        invocation = CapabilityInvocationRequest(
+                            invocation_id=frame.routing_invocation_id,
+                            source_request_id=state.request.request_id, intent=proposal.intent,
+                            capability=proposal.candidate_capability, requires_approval=True,
+                            arguments_ref=frame.routing_arguments_ref)
+                        checked = facade.validate_arguments(invocation, args)
+                        prepare_approval(checked.payload.replanning_input, state.request, invocation,
+                            approval_request_id=frame.approval_request_id, created_at=frame.interaction_created_at)
+                        return {**trace, "state": _replace(state, intent=proposal.intent,
+                            invocation=invocation, status=WorkflowStatus.READY_TO_ROUTE), "branch": "route"}
+                    except Exception:
+                        return {**trace, **_failure(state, AgentErrorCode.MISSING_CONTEXT,
+                                                   "Invalid prepared mutation proposal")}
                 return {**trace, "branch": "clarification",
                         "missing_fields": validation.missing_context,
                         "clarification_reason": validation.clarification_reason}
@@ -248,6 +401,8 @@ def build_competition_copilot_graph(
                 if state.approval_response is not None:
                     return _failure(state, AgentErrorCode.APPROVAL_REQUIRED, "Approval was rejected")
                 if state.approval_request is None and frame.approval_proposal is None:
+                    if frame.approval_request_id is not None and frame.interaction_created_at is not None:
+                        return {"branch": "approval"}
                     return {"branch": "clarification", "missing_fields": (ContextField.APPROVAL_CONTEXT,),
                             "clarification_reason": ClarificationReason.MISSING_APPROVAL_CONTEXT}
                 return {"branch": "approval"}
@@ -274,8 +429,31 @@ def build_competition_copilot_graph(
         state, frame = channels["state"], channels["frame"]
         proposal = state.approval_request or frame.approval_proposal
         try:
+            checked = facade.validate_arguments(state.invocation, _arguments(frame))
+            source = checked.payload.replanning_input
+            if checked.payload.before != source.before:
+                raise ValueError("Execution Plan differs from proposed input")
+            if proposal is None:
+                if source.decision.outcome == "keep_current_plan":
+                    result = AgentResponse(request_id=state.request.request_id, intent=state.intent,
+                        outcome="COMPLETED", message="No revision required; no capability executed", audit=state.audit)
+                    return {"state": _replace(state, status=WorkflowStatus.COMPLETED, final_response=result),
+                            "response": result}
+                if source.decision.outcome == "undetermined":
+                    question = ClarificationRequest(clarification_id=frame.clarification_id,
+                        source_request_id=state.request.request_id, reason="MISSING_REQUIRED_CONTEXT",
+                        fields=(ContextField.CAPABILITY_ARGUMENTS,),
+                        question="Resolve the referenced Domain uncertainty before proposing revision")
+                    result = AgentResponse(request_id=state.request.request_id, intent=state.intent,
+                        outcome="NEEDS_CLARIFICATION", message=question.question, clarification=question, audit=state.audit)
+                    return {"state": _replace(state, status=WorkflowStatus.NEEDS_CLARIFICATION, clarification=question),
+                            "response": result}
+                proposal = prepare_approval(checked.payload.replanning_input, state.request, state.invocation,
+                    approval_request_id=frame.approval_request_id, created_at=frame.interaction_created_at)
+            # New and supplied requests must match the same current P11 input.
+            validate_pending_revision(proposal, source, state.request, state.invocation)
             state = _replace(state, status=WorkflowStatus.WAITING_FOR_APPROVAL,
-                             approval_request=proposal)
+                             approval_request=proposal, audit=_merge_audit(state.audit, proposal.audit))
         except (ValueError, ValidationError):
             return _failure(state, AgentErrorCode.INVALID_WORKFLOW_TRANSITION,
                             "Approval proposal does not match request/invocation/Plan")
@@ -288,6 +466,19 @@ def build_competition_copilot_graph(
         state, frame = channels["state"], channels["frame"]
         if state.status != WorkflowStatus.READY_TO_EXECUTE or state.invocation is None:
             raise ValueError("Execution requires a validated ready snapshot")
+        if state.invocation.capability == "revise_plan":
+            try:
+                checked = facade.validate_arguments(state.invocation, _arguments(frame))
+                if frame.resume is None or frame.revision_proposal is None:
+                    raise ValueError("Mutation requires a validated approval continuation")
+                expected = build_approved_replanning_input(state.approval_request,
+                    state.approval_response, frame.revision_proposal, state.request, state.invocation,
+                    current_plan=frame.resume.current_plan, approved_by_ref=frame.resume.approved_by_ref)
+                if (checked.payload.replanning_input != expected or checked.payload.before != expected.before
+                    or checked.payload.executed_at != frame.resume.executed_at):
+                    raise ValueError("Approved operation changed")
+            except Exception:
+                return _failure(state, AgentErrorCode.APPROVAL_REQUIRED, "Authorized revision input required")
         # All capability calls go through the Facade, exactly once, with no retry loop.
         receipt = facade.execute(state.invocation, _arguments(frame), result_ref=frame.result_ref)
         return {"receipt": receipt}
@@ -331,10 +522,20 @@ def build_competition_copilot_graph(
         ("clarification", clarification), ("approval", approval),
         ("tool_execution", tool_execution), ("result_validation", result_validation),
         ("explain", explain),
+        ("clarification_resolution", clarification_resolution), ("approval_resolution", approval_resolution),
     ):
         graph.add_node(name, node)
     graph.add_edge(START, "intake")
-    graph.add_edge("intake", "intent")
+    graph.add_conditional_edges("intake", lambda c: c["branch"], {
+        "intent": "intent", "clarification_resolution": "clarification_resolution",
+        "approval_resolution": "approval_resolution", "failure": END,
+    })
+    graph.add_conditional_edges("clarification_resolution", lambda c: c["branch"], {
+        "intent": "intent", "clarification": "clarification", "failure": END,
+    })
+    graph.add_conditional_edges("approval_resolution", lambda c: c["branch"], {
+        "route": "route", "approval": "approval", "end": END, "failure": END,
+    })
     graph.add_conditional_edges("intent", lambda c: c["branch"],
                                 {"route": "route", "clarification": "clarification", "failure": END})
     graph.add_conditional_edges("route", lambda c: c["branch"], {
@@ -343,7 +544,8 @@ def build_competition_copilot_graph(
     })
     graph.add_edge("clarification", END)
     graph.add_edge("approval", END)
-    graph.add_edge("tool_execution", "result_validation")
+    graph.add_conditional_edges("tool_execution", lambda c: "failure" if c.get("branch") == "failure" else "result_validation",
+                                {"failure": END, "result_validation": "result_validation"})
     graph.add_conditional_edges("result_validation", lambda c: c["branch"],
                                 {"success": "explain", "failure": END})
     graph.add_edge("explain", END)

@@ -99,6 +99,9 @@ class ReferenceKind(StrEnum):
     EVIDENCE = "EVIDENCE"
     SOURCE = "SOURCE"
     AUTHORITY = "AUTHORITY"
+    APPROVAL_REQUEST = "APPROVAL_REQUEST"
+    APPROVAL_RESPONSE = "APPROVAL_RESPONSE"
+    CLARIFICATION_RESPONSE = "CLARIFICATION_RESPONSE"
 
 
 class ResultReference(AgentContract):
@@ -234,7 +237,7 @@ class ApprovalRequest(AgentContract):
     proposed_after_plan: PlanReference | None = None
     decision_ref: ResultReference
     affected_scope_ref: ResultReference
-    resolution_ref: ResultReference
+    resolution_ref: ResultReference | None = None
     proposed_input_ref: ResultReference
     instruction_refs: tuple[ResultReference, ...] = Field(min_length=1)
     audit: AuditReferences
@@ -248,7 +251,7 @@ class ApprovalRequest(AgentContract):
             (self.resolution_ref, ReferenceKind.SCOPE_RESOLUTION),
             (self.proposed_input_ref, ReferenceKind.REPLANNING_INPUT),
         ):
-            if ref.kind != kind:
+            if ref is not None and ref.kind != kind:
                 raise ValueError("Wrong approval artifact type")
         if any(r.kind != ReferenceKind.REVISION_INSTRUCTION
                for r in self.instruction_refs):

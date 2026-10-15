@@ -20,6 +20,7 @@ from competition_copilot.agents.contracts import (
     ToolResultReference,
     WorkflowStatus,
 )
+from competition_copilot.agents.human_contracts import ClarificationResponse
 
 
 class AgentState(AgentContract):
@@ -40,10 +41,13 @@ class AgentState(AgentContract):
     audit: AuditReferences = Field(default_factory=AuditReferences)
     final_response: AgentResponse | None = None
     error: AgentError | None = None
+    clarification_response: ClarificationResponse | None = None
 
     @model_validator(mode="after")
     def coherent_snapshot(self) -> Self:
         request_id = self.request.request_id
+        if self.clarification_response and self.clarification_response.source_request_id != request_id:
+            raise ValueError("Clarification response request mismatch")
         if self.invocation and (
             self.invocation.source_request_id != request_id
             or self.invocation.intent != self.intent

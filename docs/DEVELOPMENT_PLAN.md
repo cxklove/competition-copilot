@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.4. Injected LLM intent proposals and deterministic routing validation implemented; Runtime Adapter remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.5. Clarification, explicit human approval and trusted-state continuation implemented; Runtime Adapter remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.4 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.5 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.4 intent routing). Injected model proposals are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.5 human continuation). Injected model proposals and explicit human replies are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1080,7 +1080,7 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.4; P12.5 is NOT_STARTED.
+- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.5; P12.6 is NOT_STARTED.
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1306,7 +1306,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
 ## P12 - Agent Framework, Orchestration & AgentArts Runtime Compatibility
 
-- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; current subphase P12.4 REVIEW_PASS.
+- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; current subphase P12.5 REVIEW_PASS.
 - **Framework:** LangGraph; supporting LangChain Core; Domain schema Pydantic 2.
 - **MVP:** one platform-neutral orchestrator Agent plus deterministic capabilities.
 - **Goal:** Natural Language -> Intent -> Clarification -> Capability Selection ->
@@ -1327,7 +1327,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 | P12.2 Agent Capability / Tool Facade | Approved capabilities mapped to existing Tool/Application authorities | REVIEW_PASS | A/B/C/D; no duplicate P5-P11 decisions or concrete Adapter imports |
 | P12.3 LangGraph Orchestration Graph | Bounded explicit nodes/edges and state inspection, no free-running loop | REVIEW_PASS | A/B/D/E; stable node names; resolve/import-test agent dependency lock |
 | P12.4 LLM Intent + Safe Tool Selection | Intent/selection interface, capability allowlist and output validation | REVIEW_PASS | A/B/C/D/E/G; provider behind injected interface; deterministic fixture models in default tests |
-| P12.5 Clarification + Human Approval | Explicit clarification/approval states, interrupt/resume and stale-input safety | NOT_STARTED | A/B/C/D/E; text is not approval; no business mutation before authorized input |
+| P12.5 Clarification + Human Approval | Explicit clarification/approval states, trusted-state resume and stale-input safety | REVIEW_PASS | A/B/C/D/E/G/H; text is not approval; no business mutation before authorized input |
 | P12.6 Evidence-grounded Explanation | Explain deterministic reason/evidence without inventing facts or new decisions | NOT_STARTED | A/B/D/E; evidence/reference fidelity, uncertainty and errors retained |
 | P12.7 AgentArts Runtime Adapter | AgentArtsRuntimeApp entrypoint/context translation around same Agent core | NOT_STARTED | A/B/C/D/E; optional SDK; no duplicate business logic; isolated adapter smoke |
 | P12.8 Real Agent + AgentArts Compatibility Integration | Real deterministic capability chains and local/adapter semantic parity | NOT_STARTED | A-F assessed; default offline, fixed/replayed model fixture, no cloud resource requirement for unit tests |
@@ -1335,7 +1335,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 | P12 Closure | Documentation-only CLOSED/FROZEN after Final Review PASS | NOT_STARTED | Synchronized status and clear P13 handoff |
 
 P12.0 implemented the design baseline and is committed. P12.1 implements contracts/state
-only; P12.2 now implements the capability facade. P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 and later subphases remain NOT_STARTED. P12.0 added no Agent contract;
+only; P12.2 now implements the capability facade. P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 and later subphases remain NOT_STARTED. P12.0 added no Agent contract;
 P12.1 now adds typed interaction contracts and immutable snapshots. P12.3 implements a bounded StateGraph over those contracts/facade. P12.4 adds optional injected structured intent proposals, with no live provider configured and no
 approval collection/resume flow, MCP, probe or cloud deployment is implemented.
 P12 overall IN_PROGRESS is the aggregate state while its current child follows the
@@ -1375,7 +1375,7 @@ setuptools package enumeration, dependency locks and accurate README commands to
 ### P12.1 implementation and exit criteria
 
 Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 COMMITTED
-(73d3d71), P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5-P12.8, Final Review and Closure NOT_STARTED. P12.1 commit
+(73d3d71), P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6-P12.8, Final Review and Closure NOT_STARTED. P12.1 commit
 status is proved by Git history, not by this documentation state.
 
 Delivered: competition_copilot.agents/contracts.py and state.py, focused tests under
@@ -1411,7 +1411,7 @@ frozen. P12.1 Review PASS; P12.2 now implements the separately documented facade
 ### P12.2 implemented capability inventory and exit criteria
 
 Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1 REVIEW_PASS;
-P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5-P12.8, Final Review and Closure NOT_STARTED. Git history, not a Markdown
+P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6-P12.8, Final Review and Closure NOT_STARTED. Git history, not a Markdown
 commit lifecycle state, proves commits.
 
 Actual inventory: P4 six Competition read Tools over CompetitionRepository; P5
@@ -1453,7 +1453,7 @@ valid and unchanged; deferral does not assert a defect in it.
 | decide_replanning | P11.3 Decision Service | DECISION | NO | EXPOSED |
 | revise_plan (APPLY_APPROVED_PLAN_REVISION) | P11.3.5/11.4.2 contract + P11.4 service | MUTATING (returned revised Plan only) | YES; formally authorized P11 input | EXPOSED |
 | check_competition_changes / official-source monitor | P9.5 Monitor/Source interface | External observation | Source permission policy needed | DEFERRED |
-| prepare_replanning_input / authority conversion | P11 structured contract | Authorization boundary | YES | DEFERRED to P12.5 |
+| prepare_replanning_input / authority conversion | P11 structured contract | Authorization boundary | YES | INTERNAL P12.5 bridge; not an agent-selectable capability |
 | explain_replanning | Referenced P11 result + bounded explanation | Explanation | NO | DEFERRED to P12.6 |
 
 No speculative capability ID is added for deferred preparation or monitoring adapters.
@@ -1496,12 +1496,12 @@ Controlled Events/approvals/policies are test scenarios, not official historical
 P12.2 added no Graph, model, Agent routing, approval workflow, Runtime Adapter, MCP,
 persistence, notification or scheduler. No live source/network call is exposed.
 P12.2 Review PASS; commit status is proved by Git history. P12.3 now implements the
-separately documented deterministic graph; P12.4 REVIEW_PASS; P12.5 NOT_STARTED.
+separately documented deterministic graph; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 NOT_STARTED.
 
 ### P12.3 actual graph implementation and exit criteria
 
 Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1/P12.2 REVIEW_PASS;
-P12.4 REVIEW_PASS; P12.5-P12.8, Final Review and Closure NOT_STARTED. P12.3 Review PASS; commit status is proved by Git history.
+P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6-P12.8, Final Review and Closure NOT_STARTED. P12.3 Review PASS; commit status is proved by Git history.
 
 Audited authority models: AgentState (request/intent/status/invocation/tool_result/
 clarification/approval/audit/final_response/error), AgentRequest, AgentResponse,
@@ -1577,7 +1577,7 @@ ReAct, AgentArts adapter, MCP, persistence/store, memory or scheduler in P12.3.
 ### P12.4 actual intent routing implementation and exit criteria
 
 Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1/P12.2/P12.3 REVIEW_PASS;
-P12.5-P12.8, Final Review and Closure NOT_STARTED. P12.4 Review PASS; commit status is proved by Git history. Canonical phase status remains this document.
+P12.5 REVIEW_PASS; P12.6-P12.8, Final Review and Closure NOT_STARTED. P12.4 Review PASS; commit status is proved by Git history. Canonical phase status remains this document.
 
 Delivered agents/routing.py (IntentModel, IntentModelInput, IntentRoutingProposal,
 RoutingProposalValidator, JSON-safe validation outcome and static safety map),
@@ -1631,6 +1631,60 @@ projection merges matching values, rejects conflicting students/outer constraint
 and preserves distinct recommendation candidate scopes. Proposal values remain
 assertions only. Real P6 matching-target and conflict regressions are added.
 P12.4 Review retry PASS; status REVIEW_PASS.
+
+### P12.5 actual human interaction implementation and exit criteria
+
+Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.4 REVIEW_PASS;
+P12.6-P12.8, Final Review and Closure NOT_STARTED. P12.5 Review PASS; commit status is proved by Git history.
+
+Delivered human_contracts.py (typed clarification replies/choices/proposals and HumanResume),
+human_interactions.py (requested-field merge, explicit consent/binding validators, P11
+authority bridge), minimal State/Graph integration and an optional injected structured
+LangChain clarification interpreter. Existing ClarificationRequest, ApprovalRequest,
+ApprovalResponse, AgentState, AgentResponse and Capability Facade are reused. Approval
+resolution_ref becomes optional for P11 milestone batches without a scope resolution;
+cancellation still requires formal COMPLETE resolution under frozen P11 validation.
+
+run_turn returns response plus caller-managed trusted continuation; resume accepts one
+typed or natural-language human reply. No persistent checkpointer/session store is
+installed. Clarification merges only requested missing fields and records reply refs;
+partial/ambiguous replies remain pending. Model proposals can select only unique
+caller-owned read choices with matching message labels, never invent IDs or approval.
+Structured replies bypass models. Approval uses typed responses or a bounded full-message
+consent/rejection rule, with exact pending/request/Plan/version/action/scope binding.
+The bridge consumes a caller-prepared valid P11 proposal, verifies fresh explicit
+approval and rebinds authority while retaining the same semantic operations/coverage.
+New authority-dependent IDs are normal P11 identities. Actor/current Plan/time come
+from a trusted runtime/application boundary. Authentication and durable replay storage
+are not claimed. Completed continuation cannot resume; original pending snapshot replay
+is not a cross-process consumption ledger.
+
+Exit criteria: real P4 clarification/resume; wrong/unrequested/conflicting/partial replies;
+structured and offline fake-interpreted natural clarification; no model-created IDs;
+exact approved/rejected/ambiguous response handling; wrong/cross-request/stale approval
+rejection; REPLAN without consent never executes; KEEP/UNKNOWN never request speculative
+mutation approval; caller execution Plan mismatch rejects; scope expansion/fake authority
+injection does not approve; real P11.5 controlled target removal -> AFFECTS -> REPLAN ->
+COMPLETE cancellation proposal -> Agent ApprovalRequest -> explicit APPROVE -> new P11
+authority -> Facade -> active/cancelled actual PlanDiff. Identical REJECT leaves Plan
+active. Before Plan remains immutable; events/Decision/proposal/response/authority/Diff
+audit links and deterministic JSON continuation are retained. Controlled events are test
+scenarios, not official historical changes. P12.6 alone adds LLM final explanation.
+
+| AgentArts gate | P12.5 disposition |
+|---|---|
+| A Core Independence | PASS: no AgentArts/provider SDK required |
+| B JSON Compatibility | PASS: pending State, GraphTurn/GraphInput, replies and responses roundtrip |
+| C Runtime Boundary | PASS: JSON reply plus trusted runtime continuation, no adapter business rules |
+| D Platform Parity | PASS at core boundary: same validators/bridge/graph, no OS branches |
+| E Observability | PASS: clarification/approval resolution nodes and correlated reply/authority/result refs |
+| F Deployment | DEFERRED: no new dependencies; Linux/runtime deployment remains untested |
+| G Model Injection | PASS: optional HumanResponseInterpreter; no model decides consent |
+| H Human-in-the-loop Continuation | PASS: explicit JSON-safe continuation and next reply, no globals or object handles |
+
+Gate H applies to downstream Runtime/frontend/evaluation: continuity uses the same
+core interaction rules. Durable session storage, authenticated transport and replay
+ledgers require later deployment gates, not local process globals.
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
@@ -1781,7 +1835,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.5; P12.6 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1857,5 +1911,5 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.5; P12.6 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.

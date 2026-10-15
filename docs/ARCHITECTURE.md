@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.4. Injected LLM intent proposals and deterministic routing validation implemented; Runtime Adapter remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.5. Clarification, explicit human approval and trusted-state continuation implemented; Runtime Adapter remains NOT IMPLEMENTED.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.4 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.5 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.4 intent routing). Injected model proposals are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.5 human continuation). Injected model proposals and explicit human replies are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1680,7 +1680,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.5; P12.6 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1756,13 +1756,13 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.4; P12.5 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.5; P12.6 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. Current subphase P12.4: REVIEW_PASS.
-P12.5-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. Current subphase P12.5: REVIEW_PASS.
+P12.6-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
@@ -1897,6 +1897,88 @@ Gate A-E PASS at the contract/invocation boundary; pure Python additions introdu
 new/native dependencies. Gate F remains DEFERRED, with actual ARM64/runtime validation
 still required later. No LangGraph, LLM, approval workflow, MCP, Adapter, notification,
 scheduler, persistence or network invocation is added.
+
+### P12.5 clarification, explicit approval and continuation
+
+The single orchestrator extends its existing topology with clarification_resolution
+and approval_resolution nodes. Clarification and approval remain distinct interactions:
+
+```text
+START -> intake -> intent -> route -> existing execution/validation/explain
+            | pending clarification + reply -> clarification_resolution
+            |                                  | partial/ambiguous -> clarification -> END
+            |                                  | resolved -> intent -> route
+            | pending approval + reply -> approval_resolution
+                                               | ambiguous -> approval -> END
+                                               | REJECT -> COMPLETED, no execution
+                                               | APPROVE -> authority binding -> route -> Facade
+```
+
+run_turn(GraphInput) returns GraphTurn containing the existing AgentResponse and an
+explicit GraphInput continuation wrapping the existing AgentState. resume(prior, HumanResume)
+reconstructs a turn without checkpointer, database, module globals or session Store.
+invoke still returns AgentResponse; stream exposes named node updates. This is one
+current workflow/proposal, not full Plan history or conversation memory. Completed or
+failed continuations cannot execute again. Runtime/application must retain trusted
+continuation state and supply the next human reply; it is not a signed, tamper-proof
+browser token. Cross-process replay prevention, authentication and durable state remain
+future transport/runtime/P16 responsibilities. Replaying the original pending snapshot
+for the same operation is deterministic; no persistent consumption ledger is claimed.
+
+ClarificationRequest is reused. ClarificationResponse carries exact clarification and
+request IDs, typed ClarificationValues and explicit aware submitted_at. Only requested
+fields may be supplied; existing values cannot be overwritten. Partial responses retain
+the unresolved fields. Values reach normal context/State/argument validation before
+continuing. A clarification never supplies approval or authority. Structured replies
+bypass models. Optional injected HumanResponseInterpreter proposes only selections from
+caller-prepared read-result choices. Deterministic validation requires exact pending
+IDs, requested fields, unique choices and full normalized message/approved-label match.
+Unknown labels, ambiguous options or invented IDs remain unresolved. It never searches
+Repository directly or trusts a model-created entity. The optional LangChain Core
+bridge uses a central structured clarification prompt; there is no provider dependency.
+
+Mutation first prepares/reuses the existing ApprovalRequest with exact before Plan,
+version/content reference, decision fingerprint, affected scope, resolution (when
+applicable), instruction IDs, proposal input ID and reason/evidence/event references.
+Its summary projects the exact status/due_at operation. ApprovalRequest is not authority.
+New, existing and resumed ApprovalRequests are revalidated against the current P11
+input/Decision and exact bindings before waiting, including ambiguous human replies.
+The caller supplies a formally valid P11 ReplanningInput as the proposal snapshot:
+its upstream declared authority is not treated as current-user approval. No fake/stub
+prior authority is generated here, and that source is never executed without current
+explicit consent. Unsupported partial inputs cannot be promoted to complete. KEEP
+finishes without mutation approval; UNDETERMINED requests uncertainty resolution.
+
+ApprovalResponse is reused. ExplicitApprovalValidator functions bind response/request
+IDs, submission time, exact proposal/action/instruction/resolution and current Plan
+reference. The authenticated actor reference/current Plan/time are trusted runtime
+inputs, not model assertions. Natural language uses a small complete-message NFKC/
+casefold/whitespace-normalized allowlist (confirm/approve and explicit Chinese consent;
+reject/no/cancel and Chinese equivalents). Substring matching is prohibited. Ambiguous
+consent, fake administrator claims and compound scope expansion remain waiting.
+Wrong IDs, changed scope and stale Plan/version reject. REJECT completes with no Tool
+execution or new PlanDiff. A rejection needs no actor grant or execution timestamp.
+
+The deterministic bridge rebinds RevisionAuthority to the exact ApprovalRequest,
+ApprovalResponse reference/time and caller actor. It preserves operation payload,
+Decision, original scope and coverage assertions; only authority-dependent instruction/
+resolution IDs and supplied time are rebound. Normal P11 constructors validate the
+whole input again. This does not recompute Decision or coverage. REPLAN is a Domain
+decision, while APPROVE is user permission to execute the referenced operation.
+
+Execution remains Graph -> AgentCapabilityFacade -> P11 revision. The execution node
+rechecks the bridge result against the exact approved proposal, current Plan and explicit
+execution time; a manually READY State or APPROVE alone cannot bypass it. No direct
+PlanRevisionService call exists in Graph/human helpers. Actual Plan/PlanDiff remain P11
+outputs; explain remains deterministic until P12.6. Request, clarification response,
+approval request/response, authority, Decision/events and revision receipt retain audit
+links without hidden model reasoning or credentials.
+
+Gates A-E/G remain core-boundary guarantees, F remains DEFERRED with no dependency
+change. Gate H Human-in-the-loop Continuation requires JSON-safe pending State,
+continuation and human reply, using the same validators/bridge/graph locally and in a
+future Runtime adapter. No AgentArts SDK, persistent saver, long-term memory, scheduler,
+notification or MCP implementation is introduced.
 
 ### P12.4 LLM intent and safe capability selection
 

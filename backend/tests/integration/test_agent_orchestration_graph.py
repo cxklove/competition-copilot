@@ -109,6 +109,7 @@ def test_graph_build_compile_node_names_and_no_store(facade):
     assert set(graph.compiled.get_graph().nodes) == {
         "__start__", "__end__", "intake", "intent", "route", "clarification",
         "approval", "tool_execution", "result_validation", "explain",
+        "clarification_resolution", "approval_resolution",
     }
     assert graph.compiled.checkpointer is None and graph.compiled.store is None
     assert facade.calls == []
@@ -175,7 +176,7 @@ def test_unsupported_capability_no_fallback(facade):
 
 
 @pytest.mark.parametrize("message", ["Please cancel", "可以，改吧"])
-def test_approval_wait_boundary_never_invents_authority(facade, message):
+def test_existing_approval_without_p11_context_never_invents_authority(facade, message):
     plan_ref = P12_1["plan_ref"].__wrapped__()
     request = P12_1["agent_request"].__wrapped__(plan_ref)
     request = AgentRequest(**{**request.model_dump(), "user_message": message})
@@ -193,8 +194,8 @@ def test_approval_wait_boundary_never_invents_authority(facade, message):
     )
     path, response, updates = path_and_response(build_competition_copilot_graph(facade), value)
     assert path == ("intake", "intent", "route", "approval")
-    assert response.outcome == "WAITING_FOR_APPROVAL"
-    assert response.approval_request == proposal
+    assert response.outcome == "FAILED"
+    assert response.approval_request is None
     assert updates[-1]["approval"]["state"].approval_response is None
     assert not hasattr(proposal, "authority") and facade.calls == []
 
@@ -306,8 +307,10 @@ def test_structured_approve_cannot_replace_p11_authorized_input(facade):
                                    "payload": {"before": {}, "replanning_input": {},
                                                "executed_at": "2026-10-14T12:00:00Z"}}))
     path, response, _ = path_and_response(build_competition_copilot_graph(facade), value)
-    assert path[-1] == "result_validation" and response.outcome == "FAILED"
-    assert "INVALID_INPUT" in response.message and facade.calls == [CapabilityId.REVISE_PLAN]
+    # P12.5 rejects before Facade execution: a typed APPROVE cannot bypass the
+    # validated continuation/authority bridge, even with a manually ready State.
+    assert path[-1] == "tool_execution" and response.outcome == "FAILED"
+    assert response.error.code == "APPROVAL_REQUIRED" and facade.calls == []
 
 
 def test_missing_and_malformed_arguments_stop_safely(facade):

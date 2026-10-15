@@ -5,7 +5,11 @@ import json
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from competition_copilot.agents.prompts import INTENT_ROUTING_PROMPT
+from competition_copilot.agents.human_contracts import ClarificationResolutionProposal
+from competition_copilot.agents.prompts import (
+    HUMAN_CLARIFICATION_PROMPT,
+    INTENT_ROUTING_PROMPT,
+)
 from competition_copilot.agents.routing import IntentModelInput, IntentRoutingProposal
 
 
@@ -19,3 +23,17 @@ class LangChainIntentModel:
         messages = [SystemMessage(content=INTENT_ROUTING_PROMPT),
                     HumanMessage(content=json.dumps(value.model_dump(mode="json"), sort_keys=True))]
         return IntentRoutingProposal.model_validate(self._structured.invoke(messages))
+
+
+class LangChainHumanResponseInterpreter:
+    """Optional clarification interpreter; approval uses no model inference."""
+    def __init__(self, chat_model: BaseChatModel):
+        self._structured = chat_model.with_structured_output(ClarificationResolutionProposal)
+
+    def clarify(self, message, question, options):
+        payload = {"message": message.model_dump(mode="json"),
+                   "question": question.model_dump(mode="json"),
+                   "options": [o.model_dump(mode="json") for o in options]}
+        result = self._structured.invoke([SystemMessage(content=HUMAN_CLARIFICATION_PROMPT),
+                                         HumanMessage(content=json.dumps(payload, sort_keys=True))])
+        return ClarificationResolutionProposal.model_validate(result)

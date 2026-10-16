@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.6. Bounded evidence-grounded explanations and deterministic fallback implemented; Runtime Adapter remains NOT IMPLEMENTED.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.7. Isolated AgentArts Runtime Adapter implemented; production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.6 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.7 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.6 evidence-grounded explanation). Injected model proposals and explicit human replies are validated; Runtime Adapter is not implemented. The Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.7 AgentArts Runtime Adapter). Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1680,7 +1680,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.6 (REVIEW_PASS); P12.7 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.7 (REVIEW_PASS); P12.8 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1756,13 +1756,13 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.6 (REVIEW_PASS); P12.7 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.7 (REVIEW_PASS); P12.8 and later subphases are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. P12.5: REVIEW_PASS. Current subphase P12.6: REVIEW_PASS.
-P12.6 REVIEW_PASS; P12.7-P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. P12.5: REVIEW_PASS. Current subphase P12.7: REVIEW_PASS.
+P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8, Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline
@@ -1899,6 +1899,66 @@ new/native dependencies. Gate F remains DEFERRED, with actual ARM64/runtime vali
 still required later. No LangGraph, LLM, approval workflow, MCP, Adapter, notification,
 scheduler, persistence or network invocation is added.
 
+### P12.7 AgentArts Runtime Adapter
+
+The platform edge lives in `competition_copilot.integrations.agentarts`. Only
+`app.py` imports `agentarts.sdk`. Its `create_app(adapter)` constructs the official
+`AgentArtsRuntimeApp` and registers an async `@app.entrypoint`. Core package imports
+do not load the SDK. No parallel HTTP server, model provider or business composition
+is installed by the handler. Official API baseline:
+[Runtime SDK guide](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_038.html).
+
+`AgentArtsInvocationEnvelope` nests the existing `AgentRequest`, or carries an
+opaque continuation reference plus exactly one existing typed human reply. Unknown
+fields, client AgentState, authority/execution context, callables and arbitrary
+capability selectors are rejected. `RuntimeBindings` is an injected trusted
+Application boundary: prepare the existing `GraphInput`, authorize continuation
+lookup, and prepare `HumanResume` with trusted actor/current Plan/explicit time.
+The adapter does not construct repositories, read seed files or call Domain services.
+No business contracts or decision rules are duplicated.
+
+An async handler delegates one `run_turn`/`resume` call to the existing synchronous
+graph through `asyncio.to_thread`. Routing, capability whitelist, human validators,
+P11 authority bridge and grounded explanation/fallback remain the same core path.
+There is no nested event loop, retry or second mutation invocation. The resulting
+envelope carries full `AgentResponse` JSON plus pending `GraphInput` JSON when
+needed. Enum, aware time and URLs use the existing typed JSON serializers.
+
+Returned pending state belongs to the trusted runtime/application boundary, which
+must authorize storage/lookup. It is not a safe arbitrary browser token. The public
+payload cannot submit that state, current Plan or approval authority. The adapter
+ships no persistent store, global session cache, signing or durable replay defense.
+Trusted continuation is reconstructed from JSON on each call and revalidated by
+the P12.5 graph, including current Decision/Plan/version/scope/operation bindings.
+Reject and invalid approval paths retain their existing no-mutation semantics.
+SDK `RequestContext` is deliberately unused for business truth, consent and evidence;
+no SDK object enters AgentState/AgentResponse. Transport identity cannot approve.
+
+Typed transport/dependency/validation/execution errors contain categories only,
+without exception text, paths, credentials or stack traces. Domain negatives such
+as INELIGIBLE/UNKNOWN remain ordinary successful core responses. Explanation
+failure still uses P12.6 fallback. Stable graph nodes provide observability; no
+second routing, explanation or tracing policy is implemented at the platform edge.
+
+Gate J Runtime Semantic Parity compares direct local and adapter invocation with
+the same request/dependencies, including clarification, approval/reject, domain
+refs, evidence and explanation. Gates A-I retain their established core policies.
+SDK smoke uses the real public app/entrypoint and in-memory invocation endpoint;
+all tests run offline. Deployment Gate F is DEFERRED_WITHOUT_BLOCKER at this
+development boundary, with the native inventory below still requiring P16 validation.
+
+Optional `agentarts` extra pins SDK 0.1.6. `requirements-agentarts.lock` extends
+the unchanged core/Agent locks, recording Windows CPython 3.12 development resolution.
+Mandatory SDK transitive MCP/Docker/identity packages do not introduce project
+capabilities. No concrete model SDK is added. Python >=3.11 remains the project
+minimum, compatible with the SDK's >=3.10 minimum; Python 3.10 itself is unsupported.
+Native risk inventory: existing orjson/ormsgpack/uuid_utils/xxhash/zstandard and new
+cryptography/cffi/pymongo/rpds-py/simplejson/httptools/watchfiles require target wheel
+validation. pywin32 is Windows-conditional. Linux uvloop from uvicorn's standard
+extra is not resolved in the Windows overlay. No CUDA dependency is introduced.
+An ARM64/Linux lock, native builds, image execution and cloud deployment are P16
+gates; a Windows installation does not verify them.
+
 ### P12.6 evidence-grounded explanation
 
 Domain decides truth. LLM explains truth. `agents/explanation.py` deterministically
@@ -1946,7 +2006,7 @@ metadata; no telemetry exporter or hidden reasoning is added. Gates A-E/G/H cont
 at the core boundary, F Deployment remains DEFERRED (no new dependency/native risk).
 Gate I Explanation Grounding Parity requires future Runtime adapters to inject only
 ExplanationModel and reuse this same context builder, validator, fallback and Graph.
-P12.7 owns the future thin Runtime Adapter; none is implemented here.
+P12.7 now implements the thin Runtime Adapter described below; production deployment remains P16.
 
 ### P12.5 clarification, explicit approval and continuation
 
@@ -2162,7 +2222,8 @@ LangGraph's state/update/conditional-edge mechanism follows its [official Graph 
 
 P12.3 uses optional LangGraph 1.2.15 / LangChain Core 1.6.10. Transitive checkpoint/prebuilt/
 SDK/LangSmith packages are library dependencies, not active persistent saver/ReAct/runtime
-features. Provider packages and AgentArts SDK are absent. Native transitive packages
+features. Provider packages remain absent; AgentArts SDK is now optional via the isolated
+P12.7 overlay. Native transitive packages
 (orjson/ormsgpack/xxhash/uuid-utils/PyYAML/zstandard, etc.) have candidate ARM64 CPython 3.11
 wheels in a binary-only resolver dry-run. That is wheel availability evidence, not Linux
 execution/image/runtime certification; environment markers and container tests remain

@@ -13,6 +13,7 @@ dependencies = ["pydantic>=2", "tzdata>=2026.2; platform_system == 'Windows'"]
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 agent = ["langgraph==1.2.15", "langchain-core==1.6.10"]
+agentarts = ["agentarts-sdk==0.1.6"]
 
 [tool.setuptools]
 packages = [
@@ -23,6 +24,8 @@ packages = [
     "competition_copilot.ingestion",
     "competition_copilot.infrastructure",
     "competition_copilot.infrastructure.repositories",
+    "competition_copilot.integrations",
+    "competition_copilot.integrations.agentarts",
     "competition_copilot.repositories",
     "competition_copilot.tools",
 ]

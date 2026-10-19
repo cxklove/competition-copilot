@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.4 HTTP/protocol compatibility); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.5 Gateway compatibility); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1691,7 +1691,7 @@ Actual SDK HTTP tests cover discovery/initialize, list/call, unsupported version
 mutation/invalid calls, local/protocol parity, concurrent input isolation and JSON.
 There is no business retry: response loss propagates transport failure with unknown
 caller execution outcome. Ordinary MCP JSON responses do not introduce business
-token streaming. Gateway-specific constraints remain P13.5; production hosting,
+token streaming. P13.5 contract checks are described below; production hosting,
 auth/IAM/ARM64/scaling remain P16.
 
 Tool schemas derive from typed inputs/projections; output serializes canonical
@@ -1699,8 +1699,8 @@ AgentCapabilityResult/data/audit. No parallel MCP business-result contracts. Nor
 business negatives remain successful calls; invalid input, missing context,
 unavailable dependencies and execution failures retain separate safe error semantics.
 Structured results are preferred without losing refs, reasons, evidence or sources.
-Gateway schema/structured-result fidelity must be verified, not inferred from SDK
-support. Detailed inventory, compatibility matrix and official sources are canonical
+Gateway schema/structured-result fidelity is checked by the local P13.5 profile,
+without claiming real cloud acceptance. Detailed inventory, matrix and sources are canonical
 in DEVELOPMENT_PLAN's P13.0 baseline.
 
 The dual-compatible integration boundary targets modern 2026-07-28 clients and
@@ -1720,11 +1720,35 @@ P11 Authority. No custom auth server/JWT/API-key scheme is invented; production
 auth/deployment remains P16. Gateway stream responses do not make legacy SSE the
 Server's primary transport.
 
-Independent MCP gates A-J cover capability authority, typed schema safety, mutation
+The P13.5 local Gateway contract profile verifies the following separate paths:
+
+```text
+AgentArts MCP Gateway -> Streamable HTTP /mcp -> MCP Server
+    -> P13.1 Registry -> P13.3 Dispatcher -> P12.2 Capability Facade
+AgentArts Runtime -> CompetitionCopilotAgent -> Graph -> Capability Facade
+```
+
+Gateway acceptance is at protocol/tool contract level, not deployed cloud acceptance.
+Test-only SDK forwarding fixtures model the frozen 2025-11-25 restricted methods,
+omitted discovery metadata and Gateway event-stream responses. The production Target
+is the unchanged SDK HTTP app; no AgentArts endpoint, registry or result mapper is
+added. Schema ingestion preserves all typed input semantics without outputSchema.
+Existing canonical JSON text remains a fallback when structuredContent is unavailable.
+
+MCP Gate K (AgentArts Gateway Semantic Parity) compares full canonical receipts across
+direct Facade, local MCP, modern HTTP and Gateway-compatible calls. MCP Gate L
+(Gateway Authority Isolation) requires auth, model tool choice, identity and session
+metadata never create human approval, mutation or Domain authority. Tests cover
+negative business outcomes, safe failures, zero execution on attacks, exactly one
+execution per valid call, independent connections and JSON/source/time fidelity.
+There is no new production behavior, cloud SDK, real Gateway or cloud resource.
+Whole-phase authority integration remains P13.6; deployment/hardening remains P16.
+
+Independent MCP gates A-L cover capability authority, typed schema safety, mutation
 isolation, AgentArts-era protocol, modern protocol, stateless execution, shared
 Runtime/MCP Domain authority, Gateway discovery/call readiness, protocol semantic
-parity and transport isolation. Evidence remains scoped to each P13 subphase;
-Gateway-specific checks and full integration remain P13.5/P13.6. They do not replace
+parity, transport isolation, Gateway semantic parity and Gateway authority isolation.
+Evidence remains scoped to each P13 subphase; full integration remains P13.6. They do not replace
 the frozen P12 AgentArts A-L gates. No cloud/deployment compatibility is claimed.
 
 ## 14. Repository Structure

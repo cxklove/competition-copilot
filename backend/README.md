@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.4 HTTP/protocol compatibility); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.5 Gateway compatibility); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1702,9 +1702,9 @@ dependencies. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 ## P13.0 MCP Protocol & AgentArts Compatibility Baseline
 
 P12 remains CLOSED_FROZEN. P13 is IN_PROGRESS; P13.0 is REVIEW_PASS.
-P13.0-P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5/P13.6, Final Review and Closure remain NOT_STARTED.
+P13.0-P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure remain NOT_STARTED.
 DEVELOPMENT_PLAN is the canonical lifecycle, capability inventory, compatibility
-matrix and independent MCP gate source (A-H baseline, extended by I/J in P13.4).
+matrix and independent MCP gate source (A-H baseline, I/J in P13.4, K/L in P13.5).
 
 P13 designs Competition Copilot as a Tools-only MCP server: typed projection ->
 existing Capability Facade -> existing authorities. This differs from P12.7
@@ -1834,10 +1834,36 @@ isolation. Gateway-specific compatibility remains P13.5; no AgentArts connection
 MCP Target/cloud provisioning, production deployment, auth/IAM setup or durable
 session is claimed. P16 owns production hosting and hardening.
 
+## P13.5 AgentArts Gateway Compatibility
+
+Status: REVIEW_PASS. The MCP Server is AgentArts-gateway-compatible
+at the locally tested protocol/tool contract level (2025-11-25 / Streamable HTTP).
+This is distinct from P12.7 Runtime, which hosts the complete Agent. The Gateway
+path discovers approved tools and calls the same Registry/Dispatcher/Facade; no
+separate tool list, Agent graph, LLM, business mapper or endpoint is introduced.
+
+Test-only official SDK forwarding fixtures model restricted Gateway discovery,
+schema ingestion without outputSchema/annotations/icons, and event-stream responses.
+They verify full canonical parity with direct Facade/local MCP/modern HTTP, including
+JSON text fallback, INELIGIBLE/UNKNOWN success, URLs/evidence/source refs/timezones,
+mutation denial, safe errors, metadata isolation and one execution per valid call.
+MCP Gates H/K/L pass at this local contract level. No real cloud acceptance is claimed.
+
+From repository root with the existing optional MCP installation:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_mcp_gateway_compatibility.py
+```
+
+Default tests use in-process ASGI and deny sockets; no credentials or cloud resources
+are required. Real Gateway smoke is NOT_RUN. No production Gateway/Target connection,
+public deployment or IAM/SWR/Secrets configuration exists. P13.6 remains NOT_STARTED;
+P16 owns production deployment/hardening. Dependency and installation commands are unchanged.
+
 ## P12.8 End-to-End Agent Integration
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.4 HTTP/protocol compatibility). DEVELOPMENT_PLAN is canonical.
+P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.5 Gateway compatibility). DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.composition.build_seed_agent` is the explicit outer composition
 root: seed repository, P4 tools, policy provider, P5-P11 authorities, Facade, injected

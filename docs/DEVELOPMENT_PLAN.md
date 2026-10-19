@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.4 HTTP/protocol compatibility); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.5 Gateway compatibility); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1331,7 +1331,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 
 | Deferred stage | Owned scope | Status |
 |---|---|---|
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.4) |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.5) |
 | P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
@@ -1801,7 +1801,7 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 ### P12.8 actual integration and P12 Final Review evidence
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.4 HTTP/protocol compatibility).
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.5 Gateway compatibility).
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1867,7 +1867,7 @@ Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documenta
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
-- **Status:** IN_PROGRESS; P13.0-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS. P12 remains CLOSED_FROZEN.
+- **Status:** IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS. P12 remains CLOSED_FROZEN.
 - **Goal:** Competition Copilot as an MCP **server**, projecting individually approved
   P12.2 capabilities through a standard external protocol boundary. No Agent redesign.
 - **Authority:** MCP tool call -> typed projection -> Capability Facade -> existing
@@ -1893,7 +1893,7 @@ Markdown lifecycle states. P13.0 does not implement P13.1 or later deliverables.
 | P13.2 MCP Server Core & Tool Catalog | Explicit official Python SDK integration/dependency decision, server construction and deterministic tools/list | REVIEW_PASS |
 | P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | REVIEW_PASS |
 | P13.4 Streamable HTTP & Protocol Compatibility | Stateless business execution; test 2025-11-25 and 2026-07-28 public SDK paths with equal authority results | REVIEW_PASS |
-| P13.5 AgentArts Gateway Compatibility | Local Gateway-compatible discovery/call/negotiation/schema/result tests; no production cloud resources | NOT_STARTED |
+| P13.5 AgentArts Gateway Compatibility | Local Gateway-compatible discovery/call/negotiation/schema/result tests; no production cloud resources | REVIEW_PASS |
 | P13.6 Real MCP Integration & Authority Preservation | Real repository/P5-P11 calls through admitted tools; Runtime/MCP authority parity, mutation-denial and data integrity | NOT_STARTED |
 | P13 Final Review | Whole-phase protocol, authority, exposure, compatibility, regression and documentation audit | NOT_STARTED |
 | P13 Closure | Documentation/status finalization after Review PASS | NOT_STARTED |
@@ -2062,7 +2062,7 @@ change, MCP server, endpoint, SDK reconfiguration, cloud resource or commit.
 ### P13.1 MCP Tool Exposure Contract
 
 Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0 REVIEW_PASS.
-P13.2/P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5/P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
+P13.2/P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
 
 SDK-free contracts live in `competition_copilot/integrations/mcp/`: `contracts.py`
 owns typed transport envelopes/schema generation; `registry.py` owns explicit
@@ -2160,7 +2160,7 @@ business/source data changes, SDK dependency changes, server or cloud deployment
 ### P13.2 MCP Server Core & Tool Catalog
 
 Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0/P13.1 REVIEW_PASS;
-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS; P13.5/P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
+P13.3 REVIEW_PASS; P13.4 REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
 
 `integrations/mcp/server.py` isolates official SDK imports and exposes
 `build_mcp_server(registry=None)` plus `to_sdk_tool(definition)`. Construction
@@ -2230,7 +2230,7 @@ network/cloud/model calls, business execution or source-data changes were requir
 ### P13.3 Safe Tool Execution & Result Mapping
 
 Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0-P13.2 REVIEW_PASS.
-P13.4 REVIEW_PASS; P13.5/P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
+P13.4 REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
 
 The SDK-free `integrations/mcp/execution.py` adds frozen `McpToolDispatcher` and a
 deterministic execution guard. `build_mcp_server(registry=None, facade=None)` now
@@ -2316,7 +2316,7 @@ cloud/Gateway resources, new dependency or git commit.
 ### P13.4 Streamable HTTP & Protocol Compatibility
 
 Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0-P13.3 REVIEW_PASS.
-P13.5/P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
+P13.5 REVIEW_PASS; P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
 
 The canonical targets are the reviewed P13.0 matrix, not a new version decision:
 modern `2026-07-28`, AgentArts compatibility `2025-11-25`. `integrations/mcp/http.py`
@@ -2398,6 +2398,85 @@ check; HTTP/architecture targeted run 35 passed. Combined MCP/P12.2 targeted
 regression 173 passed. Full suite 2316 passed, zero skipped; Ruff and diff check
 PASS. No change to P13.1-P13.3 Registry/Dispatcher/mapper/contracts, frozen P12 or
 Domain authorities, dependency locks or source data. No cloud resources or commit.
+
+### P13.5 AgentArts Gateway Compatibility
+
+Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0-P13.4 REVIEW_PASS.
+P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
+
+Frozen target: 2025-11-25, Streamable HTTP, initialize -> tools/list -> typed schema
+ingestion -> tools/call. Every call is self-contained; protocol sessions are not
+business sessions. P12.7 Runtime hosts the full Agent/Graph; Gateway calls approved
+capabilities through Registry -> Dispatcher -> Facade, without Agent/LLM execution.
+
+The [Gateway restrictions](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_024.html)
+and [MCP Target contract](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_063.html)
+were rechecked on 2026-10-19 without changing P13.0 targets. The local test profile
+uses initialize/list/call (ping remains allowed), no batch/tasks, and models omitted
+tools/list annotations/outputSchema/$schema/icons. Gateway-facing responses use
+text/event-stream; this does not turn the Target into a legacy SSE endpoint.
+
+Test-only `mcp_gateway_support.py` wraps the real `/mcp` Target using official SDK
+clients and an SDK Server as a forwarding fixture. SDKs own both HTTP/protocol
+boundaries. The fixture discovers upstream tools rather than owning another registry,
+forwards each call once, and omits unsupported catalog metadata. It is a restricted
+contract model, not a Huawei implementation/emulator or evidence of cloud acceptance.
+No new production adapter, endpoint, auth implementation or dependency is necessary.
+
+All discovered input schemas remain equal to P13.1, pass Draft 2020-12 validation,
+and retain nested types/refs, enums, required fields and extra-forbidden policy.
+The SDK's already locked jsonschema dependency is used only in tests. Catalogs and
+canonical SHA-256 fingerprints remain equal across repeat discovery and caller
+identity headers. No mutation, approval workflow or Agent internal tools are added.
+
+The unchanged P13.3 mapper supplies canonical structured receipts and matching JSON
+text. Tests additionally remove structuredContent conservatively to verify the JSON
+text fallback; this is a loss-tolerance test, not a claim that Huawei drops that field.
+No outputSchema or optional metadata is required for result truth. Gateway read,
+P5 INELIGIBLE/UNKNOWN and snapshot calls preserve complete canonical result identity,
+reasons, evidence/source refs, source URLs/metadata and aware UTC serialization.
+
+Gate K compares complete canonical receipts and is_error across direct Facade,
+local MCP, modern HTTP and the Gateway-compatible profile. Exclusions are only
+protocol envelopes/HTTP metadata and unsupported discovery metadata; no canonical
+business field is excluded. Each legitimate call executes the Facade once; direct
+Facade comparison is a separate explicit call on independent dependencies. Unknown,
+mutation, approval and injected-argument attempts execute it zero times.
+
+Gate L proves fake auth/admin/model-selection/session/user hints cannot supply
+student/plan identity, human approval, mutation authority or Domain truth. Independent
+connections share the same Target core/dependencies with fresh SDK transport hosts
+(SDK lifespans are single-use). Missing context stays invalid, previous students do
+not fill later calls, and errors retain safe codes without exception text. No retry,
+result cache, sticky session, conversation state or new business dispatch is added.
+
+| MCP Gate | P13.5 disposition |
+|---|---|
+| A Capability Authority | PASS: same approved Registry/Dispatcher/Facade |
+| B Tool Schema Safety | PASS: discovery ingestion and JSON receipts |
+| C Mutation Isolation | PASS: absent from catalog, denied on call |
+| D AgentArts Protocol | PASS: frozen 2025-11-25 path retained |
+| E Modern Compatibility | PASS: P13.4 regression and four-path parity |
+| F Stateless Execution | PASS: self-contained calls and metadata isolation |
+| G Authority Parity | PASS: same Facade canonical results |
+| H AgentArts Gateway Readiness | PASS at local protocol/tool contract level |
+| I Protocol Semantic Parity | PASS: modern/Gateway-compatible receipts equal |
+| J Transport Isolation | PASS: metadata cannot supply business context |
+| K AgentArts Gateway Semantic Parity | PASS: Facade/local/modern/Gateway canonical equality |
+| L Gateway Authority Isolation | PASS: identity/auth/model/session cannot authorize business mutation |
+
+MCP K/L extend the independent MCP gate family, not the frozen P12 AgentArts gates.
+Default tests block socket connect/bind/DNS and use only in-process ASGI. Real Gateway
+smoke: NOT_RUN; no safe preconfigured cloud test environment was used. It is optional,
+not a default test dependency or exit blocker. No credentials, Target/account IDs,
+cloud resources, public hosting, Gateway SDK pollution or production config added.
+P16 retains deployment/auth/IAM/SWR/Secrets/hardening. P13.6 remains NOT_STARTED.
+
+Validation: 25 Gateway contract tests passed; combined MCP/P12.2 regression 198
+passed; full suite 2341 passed, zero skipped. Ruff and diff check PASS. Only two
+new integration test files and three documentation files changed. No production
+code, registry, dispatcher, mapper, dependency lock, frozen authority or seed/policy
+data changed; no cloud resource, real Gateway smoke or git commit.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 

@@ -1,0 +1,256 @@
+{
+  "completed": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "可以先明确你的参赛目标与现有背景，再逐步查看赛事、资格与备赛建议。\n\n这是一条预设演示回复，不代表真实业务判断。",
+      "outcome": "COMPLETED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "ineligible": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "演示结果：INELIGIBLE。该预设案例不符合参赛条件。\n\n这是正常业务结果，不是系统错误，也不代表对你本人资格的真实判断。",
+      "outcome": "COMPLETED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "clarification": {
+    "continuation": null,
+    "continuation_ref": "opaque-1",
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": {
+        "clarification_id": "question-1",
+        "fields": [
+          "COMPETITION"
+        ],
+        "question": "你希望了解哪一项竞赛？",
+        "reason": "AMBIGUOUS_TARGET",
+        "source_request_id": "request-1"
+      },
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "还需要明确目标竞赛，才能继续处理这个请求。当前尚未提交任何补充信息。",
+      "outcome": "NEEDS_CLARIFICATION",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "approval": {
+    "continuation": null,
+    "continuation_ref": "opaque-2",
+    "error": null,
+    "response": {
+      "approval_request": {
+        "action": "PLAN_REVISION",
+        "affected_scope_ref": {
+          "kind": "AFFECTED_SCOPE",
+          "ref_id": "scope-1"
+        },
+        "approval_request_id": "approval-1",
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "FIXTURE_REVISION",
+              "result": {
+                "kind": "REPLANNING_DECISION",
+                "ref_id": "decision-1"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "EVIDENCE",
+              "ref_id": "evidence-1"
+            },
+            {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            }
+          ]
+        },
+        "before_plan": {
+          "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "milestone_ids": [],
+          "plan_id": "plan-1",
+          "student_id": "student-1",
+          "target": {
+            "competition_id": "competition-1",
+            "edition_id": "edition-1",
+            "track_id": null
+          },
+          "updated_at": "2026-10-19T08:00:00+08:00",
+          "version": 1
+        },
+        "created_at": "2026-10-19T00:00:00Z",
+        "decision_ref": {
+          "kind": "REPLANNING_DECISION",
+          "ref_id": "decision-1"
+        },
+        "instruction_refs": [
+          {
+            "kind": "REVISION_INSTRUCTION",
+            "ref_id": "instruction-1"
+          }
+        ],
+        "invocation_id": "invocation-1",
+        "proposed_after_plan": null,
+        "proposed_input_ref": {
+          "kind": "REPLANNING_INPUT",
+          "ref_id": "input-1"
+        },
+        "resolution_ref": null,
+        "source_request_id": "request-1",
+        "summary": "演示方案提出了备赛计划调整，等待用户明确确认。当前未执行任何修改。"
+      },
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "演示工作流已到达待确认状态。当前尚未批准、拒绝或执行任何计划修改。",
+      "outcome": "WAITING_FOR_APPROVAL",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "runtime_error": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": {
+      "code": "CORE_EXECUTION_ERROR",
+      "message": "CORE_EXECUTION_ERROR"
+    },
+    "response": null
+  }
+}

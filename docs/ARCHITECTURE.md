@@ -1900,6 +1900,44 @@ Primary contract is non-streaming. Contract-level Gates A-D/F-J have evidence fr
 fake tests; Gate E is CONTRACT_PASS_REAL_RUNTIME_DEFERRED. Real transports, UI,
 authorized hosting and production deployment remain distinct later work.
 
+### Frontend workspace presentation boundary
+
+```text
+Frontend App Shell -> Conversation State -> RuntimeInvocationClient.invoke
+                                           -> Fake transport (active)
+                                           -> Local transport (P14.5)
+                                           -> AgentArts transport (P14.6)
+```
+
+A single React/Vite workspace uses a pure reducer and built-in hooks. ConversationEntry
+is presentation-only (USER/AGENT/SYSTEM, rendering ID, request association and validated
+response), not LangGraph state or Domain history. Local UI IDLE/SUBMITTING/READY/ERROR
+is distinct from the AgentResponse workflow enum. Structured outcomes and actual HITL
+payloads drive state; explanation text is displayed verbatim without workflow parsing.
+
+Only composition root/demo code knows the FakeRuntimeTransport presets. Workspace
+depends on the generic invocation client; there is no MCP, direct transport/API call,
+LLM or Domain computation. New request IDs are caller-owned UI UUIDs; optional student
+ID is explicit context. Transport/session metadata never supplies identity or authority.
+
+A synchronous pending lock and disabled controls prevent duplicate invokes. Reducer
+attempt/request correlation plus unmount abort/generation guards reject late completions.
+Explicit retry resends the same request once; no automatic replay. Valid business
+negative/core FAILED results remain distinct from transport/runtime/contract/abort errors.
+All state is in memory, without durable session, storage, approval or mutation authority.
+
+Clarification/approval summaries are placeholders: no structured continuation submission,
+APPROVE/REJECT execution or authority. Result/evidence/PlanDiff rendering remains separate
+later work. Dev-only preset selection remounts the fake workspace; production bundles
+hide that selector while still using fake presets. Build success does not imply a
+real Runtime connection or production deployment. Minimal labels/live status/alerts
+and a single-column narrow layout support the MVP workspace.
+
+Frontend Gate K (UI State Determinism): identical validated response/actions yield
+identical presentation state. Gate L (Duplicate Invocation Safety): repeated pending
+submit produces one invocation. Fake/DOM tests supply evidence; Gate E remains
+CONTRACT_PASS_REAL_RUNTIME_DEFERRED. P12/P13 and P15/P16 boundaries are unchanged.
+
 ## 14. Repository Structure
 
 顶层目录约定：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。已完成的 Domain 与 P2 ingestion 实现位于 `backend/competition_copilot/`，真实 Raw、Review Manifest 和 Verified Seed 位于 `data/`。P3 只读接口位于 `backend/competition_copilot/repositories/`，当前 JSON Verified Seed Adapter 位于 `backend/competition_copilot/infrastructure/repositories/`。后续 `backend/` 可按 `application/`（用例及流程）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（其他持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）扩展。

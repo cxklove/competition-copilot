@@ -1899,7 +1899,8 @@ is reused, not a query-only or second business API. Invocation is non-streaming 
 The current internal GraphInput continuation must be hidden by future trusted hosting;
 safe artifact/ref presentation and generated public contracts are P14.1/P14.4/P14.5
 work. No browser secrets, client business rules or browser-created approval authority.
-P14.2-P14.7, Final Review and Closure remain NOT_STARTED; P15/P16 boundaries are unchanged.
+The frontend shell consumes the fake client; real Local/AgentArts runtime invocation
+remains P14.5/P14.6. P15/P16 boundaries are unchanged.
 
 ## P12.8 End-to-End Agent Integration
 
@@ -2121,7 +2122,8 @@ resolution passed, but no Linux/container/runtime deployment is claimed.
 
 frontend/src/runtime contains the transport-neutral RuntimeInvocationClient and
 Local/AgentArts interfaces with offline fake tests. P12 Pydantic contracts remain
-authoritative. No UI, backend endpoint or live Runtime connection is added.
+authoritative. The frontend workspace consumes this client through fake presets;
+no backend endpoint or live Runtime connection is added.
 
 From the repository root, verify checked-in public schema/type/fixture parity:
 

@@ -7,18 +7,29 @@
     "node": ">=24.12.0"
   },
   "scripts": {
-    "test": "node --test tests/*.test.ts",
-    "lint": "tsc --noEmit && prettier --check src/runtime/*.ts tests/*.ts",
-    "format": "prettier --write src/runtime/*.ts tests/*.ts",
-    "build": "tsc --noEmit"
+    "test": "tsx --test tests/*.test.ts tests/*.test.tsx",
+    "lint": "tsc --noEmit && prettier --check src/runtime/*.ts tests/runtime.test.ts src/workspace src/demo/client.ts src/main.tsx src/styles.css index.html tests/workspace.test.tsx",
+    "format": "prettier --write src/workspace src/demo/client.ts src/main.tsx src/styles.css index.html tests/workspace.test.tsx",
+    "build": "tsc --noEmit && vite build",
+    "dev": "vite --host 127.0.0.1",
+    "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
     "ajv": "8.20.0",
-    "ajv-formats": "3.0.1"
+    "ajv-formats": "3.0.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@testing-library/react": "16.3.3",
+    "@types/jsdom": "30.0.0",
     "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "jsdom": "26.1.0",
     "prettier": "3.9.10",
-    "typescript": "7.0.2"
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
   }
 }

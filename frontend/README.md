@@ -1,8 +1,9 @@
-# Frontend runtime invocation contract
+# Frontend workspace and runtime invocation contract
 
-This directory currently contains TypeScript runtime contracts and fake transport
-tests only. There is no UI, application entry, HTTP adapter or live Runtime connection.
-React + Vite app initialization remains P14.2; npm/package-lock is retained.
+The single React + TypeScript + Vite workspace presents current-page conversation,
+structured workflow states and result/HITL summary slots. It runs entirely on
+FakeRuntimeTransport presets through the existing RuntimeInvocationClient.
+There is no real backend/AgentArts connection, HITL submission or evidence/diff UI.
 Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`.
 
 ## Toolchain and commands
@@ -12,6 +13,7 @@ From the repository root:
 
 ```powershell
 npm ci --prefix frontend --registry=https://registry.npmjs.org --ignore-scripts
+npm run dev --prefix frontend
 npm test --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
@@ -19,11 +21,48 @@ npm run format --prefix frontend
 .\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
 ```
 
-`test` uses the Node test runner with native TypeScript stripping. `lint` runs
-TypeScript and Prettier; `build` currently means strict type checking only, with
-no emitted UI bundle. There is no dev/server command yet. Runtime dependencies
-are Ajv and ajv-formats; TypeScript, Node types and Prettier are development tools.
-Versions are pinned in package.json/package-lock.json. Tests require no network.
+`dev` serves Vite on 127.0.0.1 (default 5173, chooses an available port if busy).
+`preview` previews the built frontend on 127.0.0.1; neither command hosts a Runtime.
+`test` retains the Node test runner, using tsx to load TS/JSX; jsdom and Testing
+Library exercise the DOM offline. `lint` runs TypeScript and Prettier over existing
+runtime code/tests and the new workspace. `build` now type checks and produces a
+real Vite bundle in ignored dist/. No React framework/plugin or state library is
+needed beyond React's built-in reducer/hooks. Versions are pinned in package/lock;
+jsdom 26.1.0 supports the existing Node version. Installation needs npm registry
+access; default tests/build require no external network or credentials.
+
+## Workspace behavior and boundaries
+
+- src/workspace/: presentation-only ConversationEntry, pure reducer, invocation hook
+  and accessible Workspace. UI IDLE/SUBMITTING/READY/ERROR is separate from the
+  unchanged AgentResponse.outcome. Loading is never claimed as an Agent status.
+- src/main.tsx and src/demo/: composition root and fixed P12-shaped presets. Only
+  this boundary knows FakeRuntimeTransport. UI consumes an invoke-only projection
+  of RuntimeInvocationClient, never transport APIs or MCP.
+- Request IDs are created by the UI caller (crypto.randomUUID, injectable in tests).
+  Message rendering IDs are separate. Explicit retry preserves the original full
+  AgentRequest/ID; no silent retry or inferred transport/session identity.
+- Optional student ID is explicit structured input, not a profile editor or a session
+  inference. Missing context stays missing. Example prompts only fill the textarea.
+- A synchronous pending lock prevents duplicate invocation before React's disabled
+  state commits. Reducer attempt/request correlation and unmount abort/generation
+  guards keep late responses out of a fresh workspace.
+- Completed and business-negative replies are normal Agent entries. Core FAILED,
+  runtime envelope error, contract mismatch, transport failure and abort remain
+  distinct. Invalid raw payloads and exception details are never displayed as replies.
+- NEEDS_CLARIFICATION / WAITING_FOR_APPROVAL only show summaries and disable further
+  generic input. There are no approval/reject/clarification submission actions here.
+  P14.3 owns continuation UX; P14.4 owns evidence/source/PlanDiff rendering.
+- State is memory-only and clears on reload; no localStorage, durable resume, trusted
+  browser state, new business rules, secrets, client LLM or MCP integration.
+
+Manual fake demos: in dev only, expand the small 'development demo scenario' control
+at the bottom right to choose completed, business negative, clarification, approval,
+transport/runtime/contract error. Switching remounts/clears the demo workspace.
+Production builds omit that developer control and still use fake completed presets;
+a Vite production build is not a production AgentArts deployment. Presets are
+synthetic examples based on the existing contract fixtures, never decisions computed
+from the user's text/profile. The UI explicitly labels this fake environment.
 
 ## Contract source and synchronization
 

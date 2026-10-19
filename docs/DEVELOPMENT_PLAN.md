@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.7. Isolated AgentArts Runtime Adapter implemented; production deployment remains deferred to P16.
+Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.8. Real Agent end-to-end integration implemented; production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.7 |
+| P12 | Agent | IN_PROGRESS; current subphase P12.8 |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.7 AgentArts Runtime Adapter). Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
+P12 is IN_PROGRESS (P12.8 Real Agent integration). Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1080,7 +1080,7 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.7 (REVIEW_PASS); P12.8 is NOT_STARTED.
+- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED.
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1306,7 +1306,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
 ## P12 - Agent Framework, Orchestration & AgentArts Runtime Compatibility
 
-- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; current subphase P12.7 REVIEW_PASS.
+- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; current subphase P12.8 REVIEW_PASS.
 - **Framework:** LangGraph; supporting LangChain Core; Domain schema Pydantic 2.
 - **MVP:** one platform-neutral orchestrator Agent plus deterministic capabilities.
 - **Goal:** Natural Language -> Intent -> Clarification -> Capability Selection ->
@@ -1330,12 +1330,12 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 | P12.5 Clarification + Human Approval | Explicit clarification/approval states, trusted-state resume and stale-input safety | REVIEW_PASS | A/B/C/D/E/G/H; text is not approval; no business mutation before authorized input |
 | P12.6 Evidence-grounded Explanation | Explain deterministic reason/evidence without inventing facts or new decisions | REVIEW_PASS | A-I (F deferred); evidence/reference fidelity, uncertainty and errors retained |
 | P12.7 AgentArts Runtime Adapter | AgentArtsRuntimeApp entrypoint/context isolation around same Agent core | REVIEW_PASS | A-J; optional SDK; JSON human continuation and semantic parity; F production deferred |
-| P12.8 Real Agent + AgentArts Compatibility Integration | Real deterministic capability chains and local/adapter semantic parity | NOT_STARTED | A-F assessed; default offline, fixed/replayed model fixture, no cloud resource requirement for unit tests |
-| P12 Final Review | Full tests, boundary/authority/approval/evidence/parity/compatibility inventory | NOT_STARTED | A-F evidence and deferred live-deployment gates explicit |
+| P12.8 Real Agent + AgentArts Compatibility Integration | Real deterministic capability chains and local/adapter semantic parity | REVIEW_PASS | A-L assessed; real authorities, fake models, JSON human continuation and lifecycle parity; F production deferred |
+| P12 Final Review | Full tests, boundary/authority/approval/evidence/parity/compatibility inventory | NOT_STARTED | A-L evidence and deferred live-deployment gates explicit |
 | P12 Closure | Documentation-only CLOSED/FROZEN after Final Review PASS | NOT_STARTED | Synchronized status and clear P13 handoff |
 
 P12.0 implemented the design baseline and is committed. P12.1 implements contracts/state
-only; P12.2 now implements the capability facade. P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 and later subphases remain NOT_STARTED. P12.0 added no Agent contract;
+only; P12.2 now implements the capability facade. P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure remain NOT_STARTED. P12.0 added no Agent contract;
 P12.1 now adds typed interaction contracts and immutable snapshots. P12.3 implements a bounded StateGraph over those contracts/facade. P12.4 adds optional injected structured intent proposals, with no live provider configured and no
 MCP, probe or cloud deployment is implemented; P12.5 now supplies approval collection/resume.
 P12 overall IN_PROGRESS is the aggregate state while its current child follows the
@@ -1374,7 +1374,7 @@ setuptools package enumeration, dependency locks and accurate README commands to
 ### P12.1 implementation and exit criteria
 
 Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 COMMITTED
-(73d3d71), P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8, Final Review and Closure NOT_STARTED. P12.1 commit
+(73d3d71), P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.1 commit
 status is proved by Git history, not by this documentation state.
 
 Delivered: competition_copilot.agents/contracts.py and state.py, focused tests under
@@ -1410,7 +1410,7 @@ frozen. P12.1 Review PASS; P12.2 now implements the separately documented facade
 ### P12.2 implemented capability inventory and exit criteria
 
 Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1 REVIEW_PASS;
-P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8, Final Review and Closure NOT_STARTED. Git history, not a Markdown
+P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. Git history, not a Markdown
 commit lifecycle state, proves commits.
 
 Actual inventory: P4 six Competition read Tools over CompetitionRepository; P5
@@ -1501,7 +1501,7 @@ separately documented deterministic graph; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS;
 ### P12.3 actual graph implementation and exit criteria
 
 Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1/P12.2 REVIEW_PASS;
-P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8, Final Review and Closure NOT_STARTED. P12.3 Review PASS; commit status is proved by Git history.
+P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.3 Review PASS; commit status is proved by Git history.
 
 Audited authority models: AgentState (request/intent/status/invocation/tool_result/
 clarification/approval/audit/final_response/error), AgentRequest, AgentResponse,
@@ -1577,7 +1577,7 @@ ReAct, AgentArts adapter, MCP, persistence/store, memory or scheduler in P12.3.
 ### P12.4 actual intent routing implementation and exit criteria
 
 Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1/P12.2/P12.3 REVIEW_PASS;
-P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8, Final Review and Closure NOT_STARTED. P12.4 Review PASS; commit status is proved by Git history. Canonical phase status remains this document.
+P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.4 Review PASS; commit status is proved by Git history. Canonical phase status remains this document.
 
 Delivered agents/routing.py (IntentModel, IntentModelInput, IntentRoutingProposal,
 RoutingProposalValidator, JSON-safe validation outcome and static safety map),
@@ -1635,7 +1635,7 @@ P12.4 Review retry PASS; status REVIEW_PASS.
 ### P12.5 actual human interaction implementation and exit criteria
 
 Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.4 REVIEW_PASS;
-P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8, Final Review and Closure NOT_STARTED. P12.5 Review PASS; commit status is proved by Git history.
+P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.5 Review PASS; commit status is proved by Git history.
 
 Delivered human_contracts.py (typed clarification replies/choices/proposals and HumanResume),
 human_interactions.py (requested-field merge, explicit consent/binding validators, P11
@@ -1689,7 +1689,7 @@ ledgers require later deployment gates, not local process globals.
 ### P12.7 actual Runtime Adapter implementation and exit criteria
 
 Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.6 REVIEW_PASS;
-P12.8, Final Review and Closure NOT_STARTED. No commit or status sync is performed.
+P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. No commit or status sync is performed.
 
 The isolated `integrations/agentarts` package contains typed transport envelopes,
 SDK-free adapter logic and official SDK app wiring. `AgentArtsRuntimeApp` registers
@@ -1730,12 +1730,12 @@ Linux uvloop is not pinned by this Windows development resolution. No x86-only
 project assumption or CUDA requirement is added, but Linux ARM64 wheel/build/runtime
 verification is deferred to P16. No production Dockerfile, launch, SWR/IAM/MaaS
 configuration, secrets, autoscaling or deployment observability backend is added.
-P12.8 integration expansion is NOT_STARTED; P16 remains Production Deployment & Hardening.
+P12.8 integration expansion is REVIEW_PASS; P16 remains Production Deployment & Hardening.
 
 ### P12.6 actual explanation implementation and exit criteria
 
 Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.5 REVIEW_PASS;
-P12.7 REVIEW_PASS; P12.8, Final Review and Closure NOT_STARTED. P12.6 Review PASS; commit status is proved by Git history.
+P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.6 Review PASS; commit status is proved by Git history.
 
 Delivered `agents/explanation.py`: immutable ExplanationContext/GroundingEvidence,
 bounded ExplanationDraft, injectable ExplanationModel, deterministic context builder,
@@ -1775,6 +1775,73 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 | G Model Injection | PASS: separate injectable ExplanationModel Protocol |
 | H Human Continuation | PASS: P12.5 clarification/approval resume safety retained |
 | I Explanation Grounding Parity | PASS: future Runtime must reuse authoritative context, validator and fallback |
+
+### P12.8 actual integration and P12 Final Review evidence
+
+Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.7 REVIEW_PASS.
+P12 Final Review/Closure and P13 NOT_STARTED. No Final Review or commit is performed.
+
+Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
+`composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
+authorities and explicit caller-prepared inputs. Repository construction stays
+outside Agent; no hard rule, scoring formula, authority or grounding policy changed.
+No integration-required compatibility fix to existing core semantics was needed.
+
+| Final Review evidence | Location / acceptance |
+|---|---|
+| Agent contracts / JSON | existing tests/agents/test_agent_contracts.py |
+| Capability Facade / authorities | existing test_agent_capability_facade.py |
+| LangGraph / stable nodes | existing test_agent_orchestration_graph.py; new discovery trace test |
+| Routing whitelist / untrusted proposals | existing test_agent_intent_routing.py; new model failure/authority injection chain |
+| Clarification / approval / bridge | existing test_agent_human_interactions.py; new test_agent_human_flow_integration.py |
+| Explanation grounding / fallback | existing test_agent_explanation.py; new source-to-Runtime lineage tests |
+| SDK app / import isolation | existing test_agentarts_runtime.py; new formal-composition SDK endpoint test |
+| Real seed P4/P5/P6/P7/P8/P9/P10 | new test_agent_real_integration.py |
+| Controlled P11 Event/Impact/REPLAN/cancel | new human-flow test; frozen P11.5 fixture, not official history |
+| Lifecycle parity / architecture | agent_e2e_support.py comparator; test_agent_e2e_architecture.py |
+
+Real mainline P5 policies produce a definite negative and UNKNOWN; P6 preserves
+uncertain/blocked buckets, never promotes partial policy to confirmed. A supplemental
+complete-policy fixture is explicitly controlled test input evaluated by real P5
+for P6 confirmed coverage; no hand-created eligibility result substitutes for the
+mainline. COMAP reviewed skill requirements retain unspecified proficiency; real
+P7 -> P8 produces uncertainty-resolution needs/milestones/audit. All data files
+(seed/raw/manifests/policies/requirements) remain unchanged. Models are deterministic
+fakes and external network is blocked. P9/P10 exposure is unchanged; P9.5 source
+monitor is NOT_EXPOSED_BY_DESIGN and is not unlocked for integration.
+
+Clarification tests cover missing target, structured/NL reply from real read choices,
+wrong ID and resume. Approval tests cover pending/no mutation, explicit approve,
+reject, stale/wrong/cross-request rejection, actual PlanDiff and authority/evidence
+lineage, plus explanation failure after revision without re-execution. Each turn
+has at most one Facade call, approved mutation exactly one. Before Plan is immutable.
+Parity compares all core response fields and receipt content; only transport wrapper,
+continuation and named transport correlation metadata are excluded. Pending JSON is
+reconstructed through trusted application bindings, without global/session storage.
+
+| AgentArts gate | P12.8 disposition |
+|---|---|
+| A Core Independence | PASS: core SDK import isolation retained |
+| B JSON Compatibility | PASS: request/response, human continuation and nested refs |
+| C Runtime Boundary | PASS: same composed public core entry |
+| D Platform Parity | PASS: real-authority receipts and core responses agree |
+| E Observability | PASS: stable node path captured without a second trace policy |
+| F Deployment | DEFERRED_WITHOUT_BLOCKER: ARM64/cloud/P16 gates unchanged |
+| G Model Injection | PASS: fake routing/explanation/interpreter explicitly injected |
+| H Human Continuation | PASS: Local/Runtime structured and NL clarification; approval/reject |
+| I Explanation Grounding | PASS: same authoritative context/draft/validator/fallback |
+| J Runtime Semantic Parity | PASS: read, clarification, approval and explanation |
+| K End-to-End Agent Parity | PASS: full lifecycle semantics excluding named transport metadata |
+| L Authority Preservation | PASS: P5-P11 and explicit human approval lineage retained |
+
+P12.8 adds no dependency or schema changes, MCP/frontend, persistent store, memory,
+production deployment or production image. P16 still owns ARM64/SWR/IAM/Secrets/MaaS,
+observability backend, scaling/load tests and production hardening.
+
+Validation: 35 new targeted integration/architecture tests PASS; full suite 2175
+passed, zero skipped, including P12.1-P12.7 and relevant frozen P4-P11 regressions.
+Ruff and diff check PASS. This is implementation evidence, not P12.8 Review PASS
+or P12 Final Review execution.
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
@@ -1925,7 +1992,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.7 (REVIEW_PASS); P12.8 and later subphases are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -2001,5 +2068,5 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.7 (REVIEW_PASS); P12.8 and later subphases are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED.
 The original follow-up made no git commit; Closure is a documentation-only update.

@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 remains NOT_STARTED; production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.0 baseline); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,6 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1330,7 +1331,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 
 | Deferred stage | Owned scope | Status |
 |---|---|---|
-| P13 | MCP + AgentArts MCP compatibility | NOT_STARTED |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.0) |
 | P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
@@ -1800,7 +1801,7 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 ### P12.8 actual integration and P12 Final Review evidence
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 NOT_STARTED.
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.0 baseline).
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1866,12 +1867,197 @@ Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documenta
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
-- **Status:** NOT_STARTED.
-- **Goal:** expose approved Tool capabilities through MCP with typed auth/error boundaries.
-- **Inputs:** stable P12 capability contracts and optional AgentArts adapter boundary.
-- **Deliverables:** protocol mapping, permissions, JSON schemas and AgentArts MCP compatibility evidence.
-- **Acceptance:** local/AgentArts tool semantics agree; SDK/MCP adapters contain no business rules or direct concrete DB access.
-- **Scope:** MCP compatibility is an acceptance dimension, not P12.0 MCP implementation.
+- **Status:** IN_PROGRESS; P13.0 REVIEW_PASS. P12 remains CLOSED_FROZEN.
+- **Goal:** Competition Copilot as an MCP **server**, projecting individually approved
+  P12.2 capabilities through a standard external protocol boundary. No Agent redesign.
+- **Authority:** MCP tool call -> typed projection -> Capability Facade -> existing
+  Application/Tool/Domain authorities. No direct Domain execution or Repository access
+  from an MCP adapter; explicit outer composition injects the dependency tree.
+- **Scope:** Tools only, dual-protocol compatibility, stateless business execution,
+  Streamable HTTP and offline AgentArts Gateway compatibility. No external MCP
+  consumption, arbitrary MCP client, web search, Resources or Prompts.
+- **Boundary:** P12.7 Runtime executes the complete Agent/Graph; P13 Gateway-facing
+  tools call the Facade without AgentRequest, Graph, routing/explanation model or
+  natural-language intent parsing. Both paths preserve the same Domain truth.
+
+### P13 subphase roadmap and exit boundaries
+
+Lifecycle: NOT_STARTED -> IMPLEMENTED_AWAITING_REVIEW -> REVIEW_PASS; BLOCKED when
+required, CLOSED_FROZEN only after closure. Commit provenance stays in Git, not in
+Markdown lifecycle states. P13.0 does not implement P13.1 or later deliverables.
+
+| Subphase | Deliverable / exit boundary | Status |
+|---|---|---|
+| P13.0 MCP Protocol & AgentArts Compatibility Baseline | Audit, protocol/transport/exposure policy, compatibility matrix, gates and roadmap; no server/handlers | REVIEW_PASS |
+| P13.1 MCP Tool Exposure Contract | Individually reviewed allowlist, concrete stable tool names, typed input/output projection and registry contract | NOT_STARTED |
+| P13.2 MCP Server Core & Tool Catalog | Explicit official Python SDK integration/dependency decision, server construction and deterministic tools/list | NOT_STARTED |
+| P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | NOT_STARTED |
+| P13.4 Streamable HTTP & Protocol Compatibility | Stateless business execution; test 2025-11-25 and 2026-07-28 public SDK paths with equal authority results | NOT_STARTED |
+| P13.5 AgentArts Gateway Compatibility | Local Gateway-compatible discovery/call/negotiation/schema/result tests; no production cloud resources | NOT_STARTED |
+| P13.6 Real MCP Integration & Authority Preservation | Real repository/P5-P11 calls through admitted tools; Runtime/MCP authority parity, mutation-denial and data integrity | NOT_STARTED |
+| P13 Final Review | Whole-phase protocol, authority, exposure, compatibility, regression and documentation audit | NOT_STARTED |
+| P13 Closure | Documentation/status finalization after Review PASS | NOT_STARTED |
+
+### P13.0 protocol and transport baseline
+
+Checked against official documentation and installed metadata on 2026-10-19:
+
+- `MCP_UPSTREAM_BASELINE = 2026-07-28`.
+- `AGENTARTS_MCP_COMPATIBILITY_VERSION = 2025-11-25`.
+- These are documentation-level integration settings, not new Domain constants or
+  implemented negotiation. Protocol versions must never enter Domain/Application/Tool.
+- The [upstream release](https://blog.modelcontextprotocol.io/posts/2026-07-28/)
+  establishes a sessionless core. The [2025 lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle)
+  uses initialization/version negotiation. Keep both paths at the protocol edge;
+  neither may change capability execution or use MCP session IDs as business IDs.
+- [AgentArts Gateway configuration](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_024.html)
+  currently lists versions through 2025-11-25; do not claim 2026-07-28 support there.
+  A modern-only target is insufficient for AgentArts compatibility.
+- Streamable HTTP is the required remote path; stdio is optional local development/
+  testing. Legacy HTTP+SSE is not primary. A Streamable HTTP response carrying SSE
+  is not the separate legacy SSE transport.
+
+| Compatibility target / feature | Protocol / policy | Expected acceptance (not implemented support) |
+|---|---|---|
+| Local modern MCP client | 2026-07-28 | SUPPORTED target; tests required P13.4 |
+| AgentArts Gateway | 2025-11-25 | REQUIRED COMPATIBILITY; tests required P13.4/P13.5 |
+| Streamable HTTP | Remote primary transport | REQUIRED |
+| stdio | Development / local testing | LOCAL_DEV_OPTIONAL |
+| Legacy SSE | Separate legacy transport | NOT_PRIMARY |
+| MCP Tools | Explicit approved registry only | IN_SCOPE |
+| MCP Resources | No registration/advertisement | OUT_OF_SCOPE |
+| MCP Prompts | No registration/advertisement | OUT_OF_SCOPE |
+| MCP Sampling | No client model inference requests | NOT_USED |
+| MCP Elicitation | No MCP clarification/approval bridge | NOT_USED |
+| Roots / protocol Logging | No new architecture dependency on deprecated features | NOT_USED |
+| External MCP consumption / web search | Server-side capability projection only | OUT_OF_SCOPE |
+
+Business execution is stateless: same tool name + typed arguments + injected
+dependencies must reach the same Facade and equivalent result on both protocol
+paths. Inputs must be self-contained; no sticky worker, server-side conversation,
+pending-approval cache or in-memory MCP business session is allowed. Any legacy
+handshake state remains an SDK transport concern. `Mcp-Session-Id` cannot become
+student_id, plan_id, Agent session, user identity, approval request or authority.
+
+### Capability audit and exposure policy
+
+Audit source: `agents.contracts.CapabilityId`, actual `AgentCapabilityFacade.list_capabilities()`
+and static Facade dispatch. IDs below are **existing capability IDs, not MCP tool
+names**. All MCP exposure is currently unimplemented. READ/DECISION entries are
+candidates for individual P13.1 review, not an approved/exported MCP catalog.
+
+| Existing capability | Access | Agent exposed | Approval required | Existing authority |
+|---|---|---|---|---|
+| list_competitions | READ | YES | NO | P4 ListCompetitionsTool -> Repository interface |
+| get_competition | READ | YES | NO | P4 GetCompetitionTool -> Repository interface |
+| list_competition_editions | READ | YES | NO | P4 ListCompetitionEditionsTool -> Repository interface |
+| get_competition_edition | READ | YES | NO | P4 GetCompetitionEditionTool -> Repository interface |
+| list_edition_tracks | READ | YES | NO | P4 ListEditionTracksTool -> Repository interface |
+| get_competition_track | READ | YES | NO | P4 GetCompetitionTrackTool -> Repository interface |
+| build_competition_snapshot | READ | YES | NO | P9 CompetitionSnapshotBuilder |
+| check_eligibility | DECISION | YES | NO | P5 CompetitionEligibilityEvaluator / EligibilityRuleEngine |
+| get_recommendations | DECISION | YES | NO | P6 RecommendationScoringEngine / RecommendationRankingEngine |
+| analyze_skill_gap | DECISION | YES | NO | P7 SkillGapEngine |
+| build_plan | DECISION | YES | NO | P8 PlanningInputDeriver / BaselineCompetitionPlanBuilder |
+| diff_competition_snapshot | DECISION | YES | NO | P9 SnapshotDiffEngine |
+| derive_competition_events | DECISION | YES | NO | P10 CompetitionEventEngine / CompetitionEventAggregator |
+| analyze_event_impact | DECISION | YES | NO | P11 CompetitionEventImpactAnalyzer |
+| decide_replanning | DECISION | YES | NO | P11 ReplanningDecisionService |
+| revise_plan | MUTATING | YES | YES | P11 PlanRevisionService; P12.5 approval bridge in Agent workflow |
+| check_competition_changes | N/A: no Facade metadata | NO | N/A | Enum-only/deferred aggregate; no handler |
+| explain_replanning | N/A: no Facade metadata | NO | N/A | Not selectable; P12.6 Graph explanation remains internal |
+
+P9/P10 capabilities listed above really are exposed; do not incorrectly mark them
+deferred. P9.5 monitoring/source acquisition is not exposed and stays NOT_MCP_EXPOSED.
+No protocol phase may unlock a currently deferred capability by bypassing the Facade.
+
+Required policy: `MCP_EXPOSED` is an explicit reviewed subset of the P12.2 approved
+capabilities. READ and DECISION are candidates only; each must establish a safe
+external typed projection and preserve its prerequisites/evidence lineage. In
+particular, a caller-supplied prior decision or status is not authoritative merely
+because its JSON validates. Withhold capabilities without a reviewed safe projection.
+MUTATING is NOT_MCP_EXPOSED by default: specifically `revise_plan` is excluded.
+Approval-required metadata alone does not make a capability MCP-safe. No approve=true,
+MCP elicitation/sampling or authenticated/admin caller can replace explicit P12.5
+approval or create P11 authority. Authentication != Human Approval != P11 Authority.
+Any future mutation admission requires a separate trusted authorization transport
+design and Review; it is not part of the initial P13 policy.
+
+### Tool contract / execution requirements for later phases
+
+- P13.1 chooses concrete stable machine-safe tool names and explicit mappings to
+  capability IDs. No AgentIntent tools, Python handler/class/module names, decorated
+  function scanning, filesystem discovery or automatic registry export.
+- Use typed capability input or a reviewed typed MCP projection, with generated
+  Pydantic JSON Schema. No handwritten parallel schema or arbitrary kwargs/callables.
+  IDs/correlation and required context need explicit deterministic projection, not
+  inference from message text, client metadata or transport sessions.
+- Output projects the existing AgentCapabilityResult/canonical data/audit only:
+  preserve execution status, result/reason/evidence/source refs and error category.
+  Prefer structuredContent plus a JSON text representation where compatibility
+  requires it; never a second McpEligibilityResult/business-decision authority.
+- INELIGIBLE, UNKNOWN, NO_GAP and KEEP_CURRENT_PLAN remain successful tool execution
+  when the Facade succeeds. Invalid/unsupported calls, missing context, unavailable
+  dependencies and execution failure are errors; exact protocol/tool error mapping
+  is a P13.3 contract, with sanitized messages and no secret/stack-trace exposure.
+- MCP performs no LLM calls, natural-language routing, explanation, Graph invocation,
+  business decisions, repository queries or business file reads. P12 Runtime retains
+  complete Agent clarification/approval/resume; a missing MCP input is not MCP approval.
+- Future package placement is an isolated MCP integration adapter beside the existing
+  Runtime adapter; composition injects Facade dependencies outside both. No package,
+  endpoint, server, handler or tool registry implementation is created in P13.0.
+
+### SDK strategy and Gateway compatibility acceptance
+
+Local metadata: Python project >=3.11; optional AgentArts SDK 0.1.6 already brings
+official `mcp==2.3.0` and `mcp-types==2.3.0` through requirements-agentarts.lock.
+Those installed transitive dependencies do not mean project MCP support exists.
+The installed public version registry lists both target protocol eras; this is an
+audit observation, not a dual-protocol execution test. No dependency changes now.
+The [official Python v2 SDK](https://py.sdk.modelcontextprotocol.io/v2/) is the current
+stable candidate. P13.2 must explicitly select/integrate/pin it using the existing
+optional-dependency/lock strategy, keeping one consistent version with the Runtime
+overlay. Do not invent competing dependency truth or force MCP onto core-only users.
+
+Public SDK [legacy-client support](https://py.sdk.modelcontextprotocol.io/v2/run/legacy-clients/)
+describes serving both eras and stateless HTTP; use public APIs and prove the selected
+installed version in P13.2/P13.4 tests. No private transport imports, protocol patching,
+custom negotiation or assumption that an old FastMCP example matches current v2.
+
+The [AgentArts MCP Target contract](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_063.html)
+requires tool capability/discovery. Gateway readiness requires standard tools/list,
+tools/call, compatible negotiation and Streamable HTTP with JSON-safe input/results.
+The Gateway guide currently restricts methods to initialize/tools/list/tools/call/ping,
+does not accept batches or tool tasks, omits some tools/list metadata including
+annotations/outputSchema/$schema/icons, and returns gateway responses as event streams.
+P13.4/P13.5 must test this restricted path, schema usability, result/error fidelity and
+JSON/text fallback where necessary. Do not claim Gateway preserves unsupported metadata
+or supports the modern protocol. No custom auth, cloud provisioning or deployment is
+implemented; production auth/IAM/secrets/image/scaling remain P16 responsibilities.
+
+### Independent MCP compatibility gates
+
+These are **DEFINED / NOT_YET_VALIDATED**, not runtime PASS claims at P13.0.
+Existing P12 AgentArts A-L gates remain frozen and are a different gate family.
+
+| MCP gate | Required evidence | Planned validation |
+|---|---|---|
+| A Capability Authority | Explicit MCP subset of P12.2 approved capabilities; no invented handlers | P13.1-P13.3/P13.6 |
+| B Tool Schema Safety | Typed JSON-safe schemas/results; required context and evidence retained | P13.1-P13.4 |
+| C Mutation Isolation | Mutation absent from catalog and calls rejected; auth/flags cannot approve | P13.1-P13.3/P13.6 |
+| D Protocol Compatibility | AgentArts-compatible 2025-11-25 path actually works | P13.4/P13.5 |
+| E Modern Compatibility | Same server boundary admits 2026-07-28 clients without business branching | P13.2/P13.4 |
+| F Stateless Execution | Self-contained input; no MCP session business state or sticky execution dependency | P13.4/P13.6 |
+| G Runtime/MCP Authority Parity | Same Facade/data/reason/evidence/Domain truth; compare capability results, not Agent prose | P13.3/P13.6 |
+| H AgentArts Gateway Readiness | Local tools/list/tools/call/Streamable HTTP/negotiation/schema/result compatibility | P13.5/P13.6 |
+
+P13.0 exit evidence is the audit/design/matrix/roadmap above plus unchanged P1-P12
+regressions. Server/cloud compatibility itself is deferred to the listed phases,
+not silently counted as tested or deployed. P13.1 remains NOT_STARTED until authorized.
+
+P13.0 validation: full pytest 2175 passed, zero skipped; Ruff and diff check PASS.
+Only README/ARCHITECTURE/DEVELOPMENT_PLAN changed; no production/test/dependency/data
+change, MCP server, endpoint, SDK reconfiguration, cloud resource or commit.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 

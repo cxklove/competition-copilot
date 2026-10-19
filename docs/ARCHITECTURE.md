@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 remains NOT_STARTED; production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.0 baseline); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,6 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1557,6 +1558,87 @@ AgentArts is runtime/deployment integration, never Domain authority. Initial thi
 adapter/parity coverage belongs to P12.7-P12.8; P16 is **AgentArts Production Deployment
 & Hardening**, not first integration. P16 owns production image/IAM/secrets/model
 configuration, tracing/scaling/timeout/retry/load/security/cost validation.
+
+### P13 MCP protocol boundary (design baseline)
+
+P12 is frozen. P13 adds a server-side protocol edge around approved capabilities;
+it does not create another Agent or business authority. P13.0 defines this design
+only; no MCP server, tool catalog, handler or HTTP endpoint is implemented yet.
+
+```text
+Local MCP Client ---------+
+                         +--> MCP Server Adapter (protocol/transport only)
+AgentArts MCP Gateway ----+             |
+                                       v
+                              explicit MCP Tool Registry
+                                       |
+                                       v
+                              typed MCP Tool Projection
+                                       |
+                                       v
+AgentArts Runtime -> Core Agent -> Graph -> P12.2 Capability Facade
+                                                   |
+                                                   v
+                                          Application / Tool
+                                                   |
+                                                   v
+                                         P5-P11 Domain Authorities
+                                                   |
+                                                   v
+                                          Repository Interface
+                                                   ^
+                                                   |
+                                     Infrastructure Adapter implements
+```
+
+Runtime runs the complete P12 Agent, human workflow and grounded explanation.
+Gateway-facing MCP tools receive structured capability inputs and delegate directly
+to the same Facade. They invoke no AgentRequest/Graph or routing/explanation model.
+MCP cannot decide eligibility, score/rank, infer gaps, plan, interpret events, decide
+REPLAN, authorize revision or fabricate evidence. Adapter code cannot query a
+Repository, instantiate JSON adapters or read seed/policy/requirement files; an
+explicit outer composition root injects existing dependencies.
+
+Exposure is an individually reviewed allowlist, a subset of the actual Facade
+registry. AgentIntent is not a tool. READ/DECISION are candidates only, with trusted
+prerequisites/evidence preserved by reviewed typed projections; shape validation
+alone does not turn client-supplied decisions into truth. MUTATING (`revise_plan`)
+is excluded by default even though it requires approval. Deferred/enum-only
+capabilities and P9.5 monitoring stay unexposed. Exact tool names and projection
+models belong to P13.1, not this baseline. Catalog ordering/mappings must be explicit
+and deterministic; no decorated-function/module/filesystem auto-discovery.
+
+Tool schemas derive from typed inputs/projections; output serializes canonical
+AgentCapabilityResult/data/audit. No parallel MCP business-result contracts. Normal
+business negatives remain successful calls; invalid input, missing context,
+unavailable dependencies and execution failures retain separate safe error semantics.
+Structured results are preferred without losing refs, reasons, evidence or sources.
+Gateway schema/structured-result fidelity must be verified, not inferred from SDK
+support. Detailed inventory, compatibility matrix and official sources are canonical
+in DEVELOPMENT_PLAN's P13.0 baseline.
+
+The dual-compatible integration boundary targets modern 2026-07-28 clients and
+AgentArts' 2025-11-25 compatibility path. Required transport is Streamable HTTP;
+stdio is optional for local development, legacy SSE is not primary. The official
+SDK must hide the modern sessionless / legacy-handshake difference without changing
+Facade execution. Every tool call supplies its own arguments/context. MCP session
+IDs or client metadata must never become business/user/Plan/approval identities.
+No sticky business state, session approval cache or conversation storage is allowed.
+The existing optional SDK transitive install is not an implemented MCP service.
+
+P13 uses Tools only. Resources/Prompts/external MCP consumption are out of scope;
+Sampling/Elicitation are not used, and no new dependency on deprecated Roots or
+protocol Logging is designed. MCP elicitation, approve=true or an authenticated
+caller cannot replace P12.5 human approval. Authentication != Human Approval !=
+P11 Authority. No custom auth server/JWT/API-key scheme is invented; production
+auth/deployment remains P16. Gateway stream responses do not make legacy SSE the
+Server's primary transport.
+
+Independent MCP gates A-H cover capability authority, typed schema safety, mutation
+isolation, AgentArts-era protocol, modern protocol, stateless execution, shared
+Runtime/MCP Domain authority and Gateway discovery/call readiness. They are defined
+only at P13.0; runtime evidence is required in P13.1-P13.6. They do not replace the
+frozen P12 AgentArts A-L gates. No cloud/deployment compatibility is claimed yet.
 
 ## 14. Repository Structure
 

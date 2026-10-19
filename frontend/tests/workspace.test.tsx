@@ -9,6 +9,7 @@ import type { RuntimeMode } from '../src/runtime/transport.ts';
 import type { AgentResponse } from '../src/runtime/generated/contracts.ts';
 import { conversationReducer, initialState, workflowLabel } from '../src/workspace/state.ts';
 import { createDemoClient } from '../src/demo/client.ts';
+import type { InvocationClient } from '../src/workspace/useConversation.ts';
 
 // Install DOM before React DOM's event support detection; keep existing Node runner.
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost/' });
@@ -43,7 +44,7 @@ function clientFor(body: unknown, mode: RuntimeMode = 'LOCAL') {
   const transport = new FakeRuntimeTransport(mode, [{ body }]);
   return { transport, client: new RuntimeInvocationClient(transport, config(mode)) };
 }
-function mount(client: Pick<RuntimeInvocationClient, 'invoke'>, id = 'request-1') {
+function mount(client: InvocationClient, id = 'request-1') {
   return render(<Workspace client={client} nextRequestId={() => id} />);
 }
 async function send(view: ReturnType<typeof mount>, message = '帮我发现赛事') {
@@ -156,13 +157,13 @@ for (const [name, title] of [
   ['clarification', '需要补充信息'],
   ['approval', '等待用户确认'],
 ] as const) {
-  test(`${name} shows summary only, with no continuation/approval action`, async () => {
+  test(`${name} shows HITL controls without automatic continuation`, async () => {
     const { client, transport } = clientFor(fixtures[name]);
     const view = mount(client);
     await send(view);
     assert.ok(view.getByRole('heading', { name: title }));
     assert.ok(view.getByRole('status').textContent?.includes(title));
-    assert.equal(view.queryByRole('button', { name: /批准|拒绝|提交补充/ }), null);
+    assert.ok(view.getByRole('button', { name: name === 'approval' ? /APPROVE/ : '提交补充信息' }));
     assert.equal(
       (view.getByRole('button', { name: '发送请求' }) as HTMLButtonElement).disabled,
       true,

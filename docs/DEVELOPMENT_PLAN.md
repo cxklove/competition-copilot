@@ -1332,7 +1332,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 | Deferred stage | Owned scope | Status |
 |---|---|---|
 | P13 | MCP + AgentArts MCP compatibility | CLOSED_FROZEN |
-| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.2 shell) |
+| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.3 HITL UX) |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
 
@@ -2481,7 +2481,7 @@ data changed; no cloud resource, real Gateway smoke or git commit.
 ### P13.6 Real MCP Integration & Authority Preservation
 
 Status: REVIEW_PASS. P13 CLOSED_FROZEN; P13.0-P13.5 REVIEW_PASS.
-P13 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 IN_PROGRESS (P14.2 shell). P12 CLOSED_FROZEN.
+P13 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 IN_PROGRESS (P14.3 HITL UX). P12 CLOSED_FROZEN.
 This is integration evidence, not P13 Final Review or phase closure.
 
 No new MCP surface or business implementation. The same eight P13.1 tools and
@@ -2581,7 +2581,7 @@ Deferred scope is downstream work, not incomplete P13:
 
 | Phase | Deferred scope | Status |
 |---|---|---|
-| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.2 shell) |
+| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.3 HITL UX) |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening; production IAM, SWR, Secrets, observability, scaling, load testing and security hardening | NOT_STARTED |
 
@@ -2591,7 +2591,7 @@ P12 remains CLOSED_FROZEN; P4-P12 frozen semantics are unchanged.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 
-- **Status:** IN_PROGRESS; P14.0 REVIEW_PASS; P14.1 REVIEW_PASS; P14.2 REVIEW_PASS. P12/P13 remain CLOSED_FROZEN.
+- **Status:** IN_PROGRESS; P14.0-P14.3 REVIEW_PASS. P12/P13 remain CLOSED_FROZEN.
 - **Goal:** evidence-grounded user journey via stable API/AgentRequest/AgentResponse.
 - **Deliverables:** Workspace/Discover/Journey/Profile interfaces and compatible local/runtime invocation.
 - **Acceptance:** evidence, clarification/approval/resume and errors survive transport; API/UI never invent Domain truth.
@@ -2608,7 +2608,7 @@ Commit provenance stays in Git. Baseline definitions do not claim later delivera
 | P14.0 Frontend & Runtime Invocation Compatibility Baseline | Existing frontend/runtime audit; architecture, contract/security baseline, gates and roadmap only | REVIEW_PASS |
 | P14.1 Runtime Invocation Client Contract | Shared typed invocation/resume transport interface, controlled public projections, schema generation/validation strategy and fake client tests | REVIEW_PASS |
 | P14.2 Frontend App Shell & Conversation State | Initialize the selected empty-directory stack; shell, conversation/input, workflow/loading/error state with fake Runtime client | REVIEW_PASS |
-| P14.3 Clarification + Human Approval UX | Explicit clarification, APPROVE/REJECT, safe resume and HITL boundary | NOT_STARTED |
+| P14.3 Clarification + Human Approval UX | Explicit clarification, APPROVE/REJECT, safe resume and HITL boundary | REVIEW_PASS |
 | P14.4 Grounded Result / Evidence / PlanDiff Rendering | Structured canonical artifacts, explanation, reasons, evidence/sources and supplied diff presentation | NOT_STARTED |
 | P14.5 Local Runtime Invocation Integration | Trusted local composition/hosting of existing P12 invocation handler; safe browser projections, authorized continuation/artifact resolution and real Agent calls | NOT_STARTED |
 | P14.6 AgentArts Runtime Invocation Compatibility | Same client contract through configured AgentArts transport; local compatibility tests, no required production cloud deployment | NOT_STARTED |
@@ -2810,7 +2810,8 @@ changed; no production code, tests, dependencies, runtime routes or UI files add
 ### P14.1 Runtime Invocation Client Contract
 
 Status: REVIEW_PASS. P14.0 remains REVIEW_PASS; P14.2 REVIEW_PASS;
-P14.3-P14.7, Final Review and Closure remain NOT_STARTED. P12/P13 remain CLOSED_FROZEN.
+P14.3 is REVIEW_PASS; P14.4-P14.7, Final Review and Closure
+remain NOT_STARTED. P12/P13 remain CLOSED_FROZEN.
 
 The previously empty frontend now has a contract-only TypeScript/npm toolchain,
 not a React/Vite app or UI. Versions are locked; Node's test runner supplies offline
@@ -2900,12 +2901,14 @@ Remediation validation: frontend 86 tests passed, lint/build (typecheck) PASS;
 backend behavioral/drift tests 49 passed; full suite 2409 passed, zero skipped.
 Ruff, generated --check and git diff --check PASS. Review reproduction inputs now
 reject invalid messages/milestones/config and accept canonical request identity.
-P14.1 REVIEW_PASS; P14.2 REVIEW_PASS; P14.3-P14.7, Final Review and Closure remain NOT_STARTED.
+P14.1 REVIEW_PASS; P14.2 REVIEW_PASS. See P14.3 below for current continuation status;
+P14.4-P14.7, Final Review and Closure remain NOT_STARTED.
 
 ### P14.2 Frontend App Shell & Conversation State
 
 Status: REVIEW_PASS. P14 remains IN_PROGRESS; P14.0/P14.1 REVIEW_PASS.
-P14.3-P14.7, Final Review and Closure remain NOT_STARTED. P12/P13 CLOSED_FROZEN.
+P14.3 is REVIEW_PASS; P14.4-P14.7, Final Review and Closure
+remain NOT_STARTED. P12/P13 CLOSED_FROZEN.
 
 Implemented the previously selected React + TypeScript + Vite single workspace,
 retaining npm/package-lock and the Node test runner (tsx supplies JSX loading).
@@ -2929,15 +2932,15 @@ transport/runtime/contract/abort surfaces. Retry is explicit only; invalid paylo
 and internal exceptions never become Agent messages. State is current-page memory
 only, without storage or durable resume claims.
 
-App consumes only RuntimeInvocationClient.invoke. Fake transport presets are composed
+At P14.2 delivery, App consumed RuntimeInvocationClient.invoke. Fake presets are composed
 at src/demo and src/main, with fixed outcomes independent of user text/context; only
 caller identity is rebound for protocol correlation. Developer-only scenario controls
 cover completed, negative, clarification, approval and transport/runtime/contract errors.
 Production build hides that control but remains fake-driven, not deployed/connected.
 
-HITL states display summaries only; generic input pauses and no clarify/APPROVE/REJECT
-execution or resume UI exists. Result/evidence/diff bodies are not fabricated or rendered.
-Those remain P14.3/P14.4; real Local/AgentArts invocation remains P14.5/P14.6.
+At P14.2 delivery, HITL states displayed summaries only; P14.3 below adds typed
+continuation controls. Result/evidence/diff bodies are not fabricated or rendered;
+full rendering remains P14.4; real Local/AgentArts invocation remains P14.5/P14.6.
 No MCP/client LLM/business rules/secrets/persistent business state; P15/P16 unchanged.
 
 Frontend Gates A-D/F-J: PASS at this shell/fake boundary.
@@ -2954,6 +2957,64 @@ Local headless Chrome smoke verified desktop 1440px, narrow 390px (no horizontal
 overflow) and a completed fake invocation, without browser exceptions. Temporary
 browser/server were closed; screenshots remain ignored local preview artifacts.
 No backend production, P12/P13 contract or business changes; no Git commit.
+
+### P14.3 Clarification + Human Approval UX
+
+Status: REVIEW_PASS. P14 IN_PROGRESS; P14.0-P14.2 REVIEW_PASS.
+P14.4-P14.7, Final Review and Closure NOT_STARTED. P12/P13 CLOSED_FROZEN.
+
+Re-audited unchanged P12 public models and P12.7 envelope, including real validators:
+
+| Contract | Actual public fields / boundary |
+| --- | --- |
+| ClarificationRequest | clarification_id, source_request_id, reason, fields, question; no public choices |
+| ClarificationResponse | existing clarification_id/source_request_id, requested values, aware submitted_at |
+| ClarificationValues | competition_id/edition_id/track_id, student, plan_ref, intent, invocation, arguments_json; no writable APPROVAL_CONTEXT |
+| ApprovalRequest | approval/source/invocation IDs, PLAN_REVISION action, summary, before/optional after PlanReference, decision/scope/resolution/input/instruction refs, audit, aware created_at |
+| ApprovalResponse | existing approval_request_id/source_request_id, APPROVE or REJECT, submitted_at, optional comment; no Plan/scope echo or authority field |
+| Continuation | continuation_ref plus exactly one real clarification/approval/message; no new AgentRequest, GraphInput, invented token or business defaults |
+
+Implemented requested-field forms with empty initial values, typed/scoped nested JSON
+inputs when required, and public-contract validation through the unchanged P14.1
+client. Unsupported APPROVAL_CONTEXT stays disabled for trusted-server handling.
+Original context is readonly; no client conflict resolution, target inference or
+extra values. WAITING_FOR_APPROVAL displays readonly action/Plan version/target and
+lineage IDs, with equally visible explicit APPROVE and REJECT buttons. Text/Enter
+outside an explicitly focused action never grants approval. No optimistic Plan
+mutation/success; authoritative replies alone update workflow presentation.
+
+Workspace now uses RuntimeInvocationClient.exchange to retain its existing safe
+public wrapper. Independent interaction snapshot, current-token/proposal comparison,
+synchronous consumption, pending lock and existing generation/unmount guards prevent
+wrong, stale or repeated continuations. Original request and proposal IDs remain
+unchanged, including replacement approvals within the same request. Browser data
+remains client-controlled; server/core must revalidate actor, Plan/version/scope and
+authorized handle. No full AgentState or trusted browser authority is introduced.
+
+Continuation failures leave execution unconfirmed and consume UI controls; no auto
+retry or continuation retry button. Starting a new request invalidates old controls
+without claiming rejection/cancellation of the old server workflow. REJECT stays a
+normal response. UI timeline expressions are presentation events, never Domain events.
+Preset FakeRuntimeTransport sequences cover clarification, APPROVE/REJECT completion
+and errors without computing Plan diffs or business decisions. No real Runtime,
+MCP, secrets, backend changes, full evidence/PlanDiff UI or production auth/deployment.
+Real authorized hosting remains P14.5/P14.6; P15/P16 boundaries are unchanged.
+
+Frontend Gates A-D/F-L: PASS at the fake/UI boundary. Gate E remains
+CONTRACT_PASS_REAL_RUNTIME_DEFERRED. New Gate M - HITL Authority Preservation:
+collect user expressions only, never create human/mutation/trusted continuation
+authority. New Gate N - Continuation Identity Integrity: preserve current request,
+proposal and exact Plan/scope/action lineage through the actual public contract,
+with stale/replacement/replay guards. Both are covered by targeted offline tests.
+
+Validation: `npm run test:hitl --prefix frontend` 18 passed; full frontend 121 passed,
+zero skipped; TypeScript/Prettier lint and Vite build PASS. Backend full suite 2409
+passed, zero skipped; Ruff and generated contract `--check` PASS. Headless Chrome
+verified desktop 1440px and narrow 390px (scroll width 390px), empty clarification
+input, fake clarification completion and normal REJECT completion, with zero browser
+exceptions. Preview screenshots/profile remain ignored local artifacts and temporary
+browser/server were closed. `git diff --check` PASS. No backend or frozen P14.1 runtime
+contract changes, new dependency, real Runtime connection or Git commit.
 
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 

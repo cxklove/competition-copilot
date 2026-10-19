@@ -1,5 +1,6 @@
 import type { AgentRequest, AgentResponse } from '../runtime/generated/contracts.ts';
 import type { ClientErrorCode } from '../runtime/client.ts';
+import type { PublicInteraction } from './interactions.ts';
 
 // Presentation records only. These are neither AgentState nor trusted workflow state.
 export type ConversationEntry = {
@@ -8,6 +9,7 @@ export type ConversationEntry = {
   requestId: string;
   content: string;
   response?: AgentResponse;
+  renderKind?: 'CLARIFICATION_RESPONSE' | 'APPROVAL_RESPONSE';
 };
 export type ConversationState = {
   entries: ConversationEntry[];
@@ -16,6 +18,8 @@ export type ConversationState = {
   response: AgentResponse | null;
   error: ClientErrorCode | null;
   retryRequest: AgentRequest | null;
+  interaction: PublicInteraction | null;
+  continuationUnconfirmed: boolean;
 };
 export const initialState: ConversationState = {
   entries: [],
@@ -24,16 +28,61 @@ export const initialState: ConversationState = {
   response: null,
   error: null,
   retryRequest: null,
+  interaction: null,
+  continuationUnconfirmed: false,
 };
 export type ConversationAction =
   | { type: 'SUBMIT'; attempt: number; request: AgentRequest; retry: boolean }
-  | { type: 'RESOLVE'; attempt: number; response: AgentResponse }
-  | { type: 'ERROR'; attempt: number; request: AgentRequest; code: ClientErrorCode };
+  | {
+      type: 'RESOLVE';
+      attempt: number;
+      response: AgentResponse;
+      interaction?: PublicInteraction | null;
+    }
+  | {
+      type: 'ERROR';
+      attempt: number;
+      request: AgentRequest | Pick<AgentRequest, 'request_id'>;
+      code: ClientErrorCode;
+      continuation?: boolean;
+    }
+  | {
+      type: 'CONTINUE';
+      attempt: number;
+      requestId: string;
+      token: string;
+      content: string;
+      renderKind: 'CLARIFICATION_RESPONSE' | 'APPROVAL_RESPONSE';
+    }
+  | { type: 'NEW_WORKFLOW' };
 
 export function conversationReducer(
   state: ConversationState,
   action: ConversationAction,
 ): ConversationState {
+  if (action.type === 'NEW_WORKFLOW') return { ...initialState, entries: state.entries };
+  if (action.type === 'CONTINUE') {
+    if (state.uiStatus === 'SUBMITTING' || state.interaction?.token !== action.token) return state;
+    return {
+      ...state,
+      uiStatus: 'SUBMITTING',
+      active: { attempt: action.attempt, requestId: action.requestId },
+      error: null,
+      retryRequest: null,
+      interaction: state.interaction,
+      continuationUnconfirmed: false,
+      entries: [
+        ...state.entries,
+        {
+          id: `human-entry-${action.attempt}`,
+          role: 'USER',
+          requestId: action.requestId,
+          content: action.content,
+          renderKind: action.renderKind,
+        },
+      ],
+    };
+  }
   if (action.type === 'SUBMIT') {
     if (state.uiStatus === 'SUBMITTING') return state;
     return {
@@ -54,6 +103,8 @@ export function conversationReducer(
       response: null,
       error: null,
       retryRequest: null,
+      interaction: null,
+      continuationUnconfirmed: false,
     };
   }
   if (state.active?.attempt !== action.attempt) return state;
@@ -64,6 +115,8 @@ export function conversationReducer(
       uiStatus: 'READY',
       active: null,
       response: action.response,
+      interaction: action.interaction ?? null,
+      continuationUnconfirmed: false,
       entries: [
         ...state.entries,
         {
@@ -81,14 +134,17 @@ export function conversationReducer(
     uiStatus: 'ERROR',
     active: null,
     error: action.code,
-    retryRequest: action.request,
+    retryRequest:
+      action.continuation || !('user_message' in action.request) ? null : action.request,
+    interaction: null,
+    continuationUnconfirmed: !!action.continuation,
     entries: [
       ...state.entries,
       {
         id: `status-entry-${action.attempt}`,
         role: 'SYSTEM',
         requestId: action.request.request_id,
-        content: '本次请求未完成。',
+        content: action.continuation ? '续接结果尚未确认；执行状态可能未知。' : '本次请求未完成。',
       },
     ],
   };

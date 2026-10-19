@@ -1,9 +1,9 @@
 # Frontend workspace and runtime invocation contract
 
 The single React + TypeScript + Vite workspace presents current-page conversation,
-structured workflow states and result/HITL summary slots. It runs entirely on
+structured workflow states, clarification forms and explicit approval controls. It runs entirely on
 FakeRuntimeTransport presets through the existing RuntimeInvocationClient.
-There is no real backend/AgentArts connection, HITL submission or evidence/diff UI.
+There is no real backend/AgentArts connection or full evidence/diff UI.
 Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`.
 
 ## Toolchain and commands
@@ -15,6 +15,7 @@ From the repository root:
 npm ci --prefix frontend --registry=https://registry.npmjs.org --ignore-scripts
 npm run dev --prefix frontend
 npm test --prefix frontend
+npm run test:hitl --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
 npm run format --prefix frontend
@@ -37,7 +38,7 @@ access; default tests/build require no external network or credentials.
   and accessible Workspace. UI IDLE/SUBMITTING/READY/ERROR is separate from the
   unchanged AgentResponse.outcome. Loading is never claimed as an Agent status.
 - src/main.tsx and src/demo/: composition root and fixed P12-shaped presets. Only
-  this boundary knows FakeRuntimeTransport. UI consumes an invoke-only projection
+  this boundary knows FakeRuntimeTransport. UI consumes the generic client exchange
   of RuntimeInvocationClient, never transport APIs or MCP.
 - Request IDs are created by the UI caller (crypto.randomUUID, injectable in tests).
   Message rendering IDs are separate. Explicit retry preserves the original full
@@ -50,9 +51,21 @@ access; default tests/build require no external network or credentials.
 - Completed and business-negative replies are normal Agent entries. Core FAILED,
   runtime envelope error, contract mismatch, transport failure and abort remain
   distinct. Invalid raw payloads and exception details are never displayed as replies.
-- NEEDS_CLARIFICATION / WAITING_FOR_APPROVAL only show summaries and disable further
-  generic input. There are no approval/reject/clarification submission actions here.
-  P14.3 owns continuation UX; P14.4 owns evidence/source/PlanDiff rendering.
+- NEEDS_CLARIFICATION renders only requested public fields, with no default choice.
+  Nested profile/Plan/invocation values use a labeled JSON input only when requested;
+  P14.1 validates their real public shape. APPROVAL_CONTEXT has no writable public
+  clarification value and stays disabled for trusted-server handling.
+- WAITING_FOR_APPROVAL shows readonly action, Plan version/target and lineage refs.
+  Separate APPROVE/REJECT buttons send the actual ApprovalResponse, never authority.
+  Ordinary text, Enter elsewhere, dismiss and new-request actions do not approve.
+  No optimistic Plan update or success is displayed. P14.4 owns full evidence/diff UI.
+- A public interaction snapshot and private detached copy bind the current request,
+  proposal and opaque handle. Tokens are consumed synchronously before invocation;
+  stale callbacks, changed proposal context and repeated clicks cannot replay them.
+  This is a UI guard, never a replacement for server identity/scope/version validation.
+- Continuation failure leaves execution unconfirmed, without automatic or button retry.
+  Starting a new request invalidates the old UI controls but does not cancel/reject
+  the old server workflow. Initial ordinary requests retain explicit retry.
 - State is memory-only and clears on reload; no localStorage, durable resume, trusted
   browser state, new business rules, secrets, client LLM or MCP integration.
 
@@ -89,7 +102,7 @@ No MCP dependency or capability-specific business clients are introduced.
 
 `invoke(AgentRequest)` returns a validated AgentResponse. `resume` submits the
 existing typed continuation envelope. `exchange` returns the safe transport wrapper
-including an opaque continuation_ref, for a future UI to retain explicitly.
+including an opaque continuation_ref, retained explicitly by the HITL UI.
 LocalRuntimeTransport/AgentArtsRuntimeTransport are interfaces only; the deterministic
 FakeRuntimeTransport returns preset payloads and records calls without business logic.
 
@@ -116,6 +129,18 @@ opaque handles and resolve them through the existing P12 continuation_ref input.
 That hosting/authorization is not implemented here. Completed wire continuation:null
 is accepted. All browser handles/replies remain client-controlled and require server
 validation of identity, actor, scope and Plan version. No browser HUMAN_APPROVED.
+Clarification sends existing clarification_id/source_request_id plus only requested
+values; approval sends existing approval_request_id/source_request_id, decision and
+submitted_at. P12 does not require echoing Plan/scope fields in ApprovalResponse;
+those readonly references remain bound by the server's proposal and handle. No full
+AgentState is stored. Local interaction acceptance only means an attempt was sent,
+not that approval or mutation succeeded. Fake demos use fixed response sequences,
+not decision-dependent Plan calculations or a real authorized continuation store.
+
+Frontend Gate M (HITL Authority Preservation): controls collect expressions only;
+P12.5/core still creates authority. Gate N (Continuation Identity Integrity): current
+request/proposal/handle binding, stale replacement and consumed-action guards are
+covered by offline tests. Real hosting and final authorization remain P14.5/P14.6.
 
 Public config selects LOCAL/AGENTARTS and supplies baseUrl/runtimeName. Unknown config
 keys, missing/non-string required values, credential-bearing URLs and

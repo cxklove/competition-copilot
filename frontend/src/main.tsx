@@ -13,6 +13,8 @@ const scenarios: { value: DemoScenario; label: string }[] = [
   { value: 'transport_error', label: '传输错误' },
   { value: 'runtime_error', label: 'Runtime 错误' },
   { value: 'contract_error', label: '契约错误' },
+  { value: 'approval_transport_error', label: '批准续接传输失败' },
+  { value: 'approval_contract_error', label: '批准续接契约错误' },
 ];
 
 function DemoApp() {

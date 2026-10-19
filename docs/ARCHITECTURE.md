@@ -1903,7 +1903,7 @@ authorized hosting and production deployment remain distinct later work.
 ### Frontend workspace presentation boundary
 
 ```text
-Frontend App Shell -> Conversation State -> RuntimeInvocationClient.invoke
+Frontend App Shell -> Conversation State -> RuntimeInvocationClient.exchange
                                            -> Fake transport (active)
                                            -> Local transport (P14.5)
                                            -> AgentArts transport (P14.6)
@@ -1926,9 +1926,9 @@ Explicit retry resends the same request once; no automatic replay. Valid busines
 negative/core FAILED results remain distinct from transport/runtime/contract/abort errors.
 All state is in memory, without durable session, storage, approval or mutation authority.
 
-Clarification/approval summaries are placeholders: no structured continuation submission,
-APPROVE/REJECT execution or authority. Result/evidence/PlanDiff rendering remains separate
-later work. Dev-only preset selection remounts the fake workspace; production bundles
+Clarification/approval controls send public typed continuations without creating
+authority. Full result/evidence/PlanDiff rendering remains separate later work.
+Dev-only preset selection remounts the fake workspace; production bundles
 hide that selector while still using fake presets. Build success does not imply a
 real Runtime connection or production deployment. Minimal labels/live status/alerts
 and a single-column narrow layout support the MVP workspace.
@@ -1937,6 +1937,43 @@ Frontend Gate K (UI State Determinism): identical validated response/actions yie
 identical presentation state. Gate L (Duplicate Invocation Safety): repeated pending
 submit produces one invocation. Fake/DOM tests supply evidence; Gate E remains
 CONTRACT_PASS_REAL_RUNTIME_DEFERRED. P12/P13 and P15/P16 boundaries are unchanged.
+
+### Clarification and explicit approval presentation
+
+```text
+Validated AgentResponse + opaque continuation_ref
+  -> requested-field clarification form / readonly approval context
+  -> ClarificationResponse / ApprovalResponse(APPROVE | REJECT)
+  -> RuntimeInvocationClient.exchange -> Fake transport / P12 Runtime Adapter
+  -> P12.5 validation and authority bridge (server/core only)
+```
+
+Clarification edits only fields explicitly requested by the public contract. No
+choices are guessed; nested public models use scoped JSON inputs and the existing
+consumer validator. APPROVAL_CONTEXT has no writable ClarificationValues field and
+cannot be supplied by this browser UI. Original context is not silently merged or
+overridden; conflicts remain for core validation.
+
+Approval action, source/request/invocation identity, exact Plan version/target and
+scope/lineage refs are readonly. Only explicit APPROVE or REJECT buttons construct
+the unchanged ApprovalResponse IDs/decision/timestamp. No text parsing, implicit
+Enter/dismiss approval, HUMAN_APPROVED generation, direct mutation or optimistic
+success. REJECT is a normal authoritative response, not a transport error.
+
+A current public interaction token plus detached private snapshot rejects stale,
+replaced or changed proposal controls. A synchronous lock consumes the interaction
+before sending once. Browser snapshots remain client-controlled; final actor,
+request, Plan/version/scope authorization belongs to core/trusted hosting. Failed
+continuations have unknown execution state and no retry control; beginning another
+request disables old controls without claiming server cancellation/rejection.
+Only public continuation data is held in current-page memory, never GraphInput.
+
+Fake sequences cover clarification/completion, approve/completion, reject/completion
+and continuation errors without computing business outcomes. Local and AgentArts
+hosting remain P14.5/P14.6. Gate M (HITL Authority Preservation) requires expressions
+without browser-created authority; Gate N (Continuation Identity Integrity) requires
+current request/proposal/handle binding and stale/replay protection. Offline tests
+prove these UI guards; real Runtime parity remains deferred.
 
 ## 14. Repository Structure
 

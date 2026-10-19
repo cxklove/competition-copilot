@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { useConversation } from './useConversation.ts';
 import type { InvocationClient } from './useConversation.ts';
 import { workflowLabel } from './state.ts';
+import { HitlPanel } from './HitlPanel.tsx';
 
 const errors = {
   TRANSPORT_ERROR: '连接未完成，请检查后重试。请求不会自动重发。',
@@ -10,24 +11,36 @@ const errors = {
   CONTRACT_ERROR: '无法解析 Runtime 响应，本次内容未作为有效回复展示。',
   ABORTED: '请求已取消；这不代表业务操作已撤销。',
 };
+const continuationErrors = {
+  TRANSPORT_ERROR: '续接连接未确认完成。',
+  RUNTIME_ERROR: 'Runtime 未返回已确认的续接结果。',
+  CONTRACT_ERROR: '无法解析续接响应，本次内容未作为有效回复展示。',
+  ABORTED: '续接请求已取消等待；这不代表业务操作已撤销。',
+};
 const examples = ['有哪些适合我的竞赛？', '帮我检查参赛资格', '我该如何准备比赛？'];
 const newRequestId = () => crypto.randomUUID();
 
 export function Workspace({
   client,
   nextRequestId = newRequestId,
+  now,
 }: {
   client: InvocationClient;
   nextRequestId?: () => string;
+  now?: () => string;
 }) {
-  const { state, submit, retry } = useConversation(client, nextRequestId);
+  const { state, submit, retry, startNew, clarify, decide } = useConversation(
+    client,
+    nextRequestId,
+    now,
+  );
   const [input, setInput] = useState('');
   const [studentId, setStudentId] = useState('');
   const pending = state.uiStatus === 'SUBMITTING';
   const response = state.response;
   const needs = response?.outcome === 'NEEDS_CLARIFICATION';
   const waits = response?.outcome === 'WAITING_FOR_APPROVAL';
-  const locked = pending || needs || waits;
+  const locked = pending || needs || waits || state.continuationUnconfirmed;
 
   function send(event: FormEvent) {
     event.preventDefault();
@@ -62,7 +75,9 @@ export function Workspace({
           <section className="conversation" aria-labelledby="conversation-title">
             <div className="section-heading">
               <h2 id="conversation-title">对话</h2>
-              <span>当前会话</span>
+              <button type="button" onClick={startNew} disabled={pending}>
+                开始新请求
+              </button>
             </div>
             <div className="timeline" aria-busy={pending}>
               {state.entries.length === 0 ? (
@@ -110,13 +125,33 @@ export function Workspace({
                 </p>
               )}
             </div>
+            {(needs || waits) && response && (
+              <HitlPanel
+                key={state.interaction?.token ?? 'inactive-interaction'}
+                response={response}
+                interaction={state.interaction}
+                disabled={pending || state.continuationUnconfirmed}
+                clarify={clarify}
+                decide={decide}
+              />
+            )}
             {state.error && (
               <div className="error-surface" role="alert">
                 <strong>{state.error}</strong>
-                <p>{errors[state.error]}</p>
-                <button type="button" onClick={() => void retry()} disabled={pending}>
-                  重试此请求
-                </button>
+                <p>
+                  {state.continuationUnconfirmed
+                    ? continuationErrors[state.error]
+                    : errors[state.error]}
+                </p>
+                {state.continuationUnconfirmed ? (
+                  <p>
+                    续接请求未确认完成，执行状态可能未知。请重新检查当前状态后再操作；此处不重发续接请求。
+                  </p>
+                ) : (
+                  <button type="button" onClick={() => void retry()} disabled={pending}>
+                    重试此请求
+                  </button>
+                )}
               </div>
             )}
             <form className="composer" onSubmit={send}>
@@ -156,7 +191,7 @@ export function Workspace({
               </div>
               <p className="composer-hint" id="composer-hint">
                 {needs || waits
-                  ? '当前请求正在等待用户输入；本演示仅展示摘要，尚未提交任何确认或补充信息。'
+                  ? '请使用上方对应的补充信息或明确批准/拒绝控件。普通文字不会自动产生批准决定。'
                   : 'Enter 换行，Ctrl / ⌘ + Enter 发送。演示回复为预设内容，不代表真实业务判断。'}
               </p>
             </form>
@@ -180,13 +215,25 @@ export function Workspace({
                 <div className="interaction-shell">
                   <h3>需要补充信息</h3>
                   <p>{response.clarification?.question}</p>
-                  <span>尚未提交补充信息</span>
+                  <span>
+                    {state.continuationUnconfirmed
+                      ? '续接结果未确认'
+                      : pending
+                        ? '补充信息已发送，等待回复'
+                        : '请填写本次要求的字段'}
+                  </span>
                 </div>
               ) : waits ? (
                 <div className="interaction-shell">
                   <h3>等待用户确认</h3>
                   <p>{response.approval_request?.summary}</p>
-                  <span>尚未批准或拒绝任何操作</span>
+                  <span>
+                    {state.continuationUnconfirmed
+                      ? '执行状态未确认，不能断言是否已执行'
+                      : pending
+                        ? '决定已发送，等待 Runtime 确认'
+                        : '尚未发送批准或拒绝决定'}
+                  </span>
                 </div>
               ) : response ? (
                 <div className="result-summary">
@@ -202,6 +249,8 @@ export function Workspace({
               仅保留当前页面会话
               <br />
               刷新后清空，不作为业务记录。
+              <br />
+              开始新请求不表示批准、拒绝或撤销旧请求。
             </p>
           </aside>
         </div>

@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.8. Real Agent end-to-end integration implemented; production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 remains NOT_STARTED; production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.8 |
+| P12 | Agent | CLOSED_FROZEN |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.8 Real Agent integration). Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
+P12 is CLOSED_FROZEN. Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1080,7 +1080,7 @@ rebuild Snapshots, recalculate Diff or regenerate Events; P11.1 Contract status 
 ## P11 — Adaptive Replanning
 
 - **Goal:** 根据赛事事件评估影响并生成可审计的个人计划差异。
-- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED.
+- **Status:** CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE. All P11 subphases are CLOSED / FROZEN; P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN.
 - **Inputs:** canonical CompetitionEvent、existing CompetitionPlan、StudentProfile、必要 planning context；不重新抓官网、构造 Snapshot、计算 Diff 或生成 Event。
 - **Main Deliverables:** `CompetitionEvent → Impact Analysis → Affected Plan → Replanning → Plan Diff`；保存 `before`、`after`、`trigger_event`、`trigger_event_id`、`reason_code`、`evidence`。
 - **Files/Modules Expected:** `backend/domain/replanning/`、相关 `backend/application/` 与 `backend/tools/`、`backend/tests/replanning/`。
@@ -1306,7 +1306,7 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 
 ## P12 - Agent Framework, Orchestration & AgentArts Runtime Compatibility
 
-- **Status:** IN_PROGRESS. P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; current subphase P12.8 REVIEW_PASS.
+- **Status:** CLOSED_FROZEN. P12.0 REVIEW_PASS (baseline commit 73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS.
 - **Framework:** LangGraph; supporting LangChain Core; Domain schema Pydantic 2.
 - **MVP:** one platform-neutral orchestrator Agent plus deterministic capabilities.
 - **Goal:** Natural Language -> Intent -> Clarification -> Capability Selection ->
@@ -1318,11 +1318,32 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
   replacement Domain rules, MCP or frontend implementation within P12.
 - **Canonical status source:** this file; README/ARCHITECTURE must mirror it.
 
-### P12 subphase roadmap
+### P12 frozen scope and downstream handoff
+
+P12 is CLOSED_FROZEN after Final Review PASS. P12.0-P12.8 are REVIEW_PASS;
+the baseline commit remains 73d3d71 and implementation provenance is in Git history.
+Frozen scope: typed Agent contracts/state, Capability Facade, LangGraph orchestration,
+safe LLM routing, clarification, explicit human approval, P11 authority bridge,
+evidence-grounded explanation, AgentArts Runtime Adapter, real end-to-end integration
+and local/runtime semantic parity. Domain authorities retain business truth; explicit
+human approval retains mutation authorization. P1-P11 frozen semantics are unchanged.
+
+| Deferred stage | Owned scope | Status |
+|---|---|---|
+| P13 | MCP + AgentArts MCP compatibility | NOT_STARTED |
+| P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
+| P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
+| P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
+
+These are downstream roadmap responsibilities, not incomplete P12 deliverables.
+Gate F remains DEFERRED_WITHOUT_BLOCKER; no production deployment, durable session,
+MCP or frontend readiness is claimed. Closure changes documentation/status only.
+
+### P12 subphase completion
 
 | Subphase | Goal / deliverable | Current status | Compatibility acceptance |
 |---|---|---|---|
-| P12.0 Framework & AgentArts Compatibility Baseline | Framework/rationale, adapter boundaries, dependency/package plan, gates and roadmap | COMMITTED (73d3d71) | Official baseline documented; existing core tests preserved; no runtime certification |
+| P12.0 Framework & AgentArts Compatibility Baseline | Framework/rationale, adapter boundaries, dependency/package plan, gates and roadmap | REVIEW_PASS | Official baseline documented; existing core tests preserved; no runtime certification |
 | P12.1 Agent Contract & State | Platform-neutral AgentRequest/AgentState/AgentResponse and stable references/errors | REVIEW_PASS | A/B/C; typed public JSON, explicit context, no RequestContext in core |
 | P12.2 Agent Capability / Tool Facade | Approved capabilities mapped to existing Tool/Application authorities | REVIEW_PASS | A/B/C/D; no duplicate P5-P11 decisions or concrete Adapter imports |
 | P12.3 LangGraph Orchestration Graph | Bounded explicit nodes/edges and state inspection, no free-running loop | REVIEW_PASS | A/B/D/E; stable node names; resolve/import-test agent dependency lock |
@@ -1331,15 +1352,15 @@ No P8/P10/P11.1/P11.2/P11.3 changes, persistence, notification, LLM or Agent.
 | P12.6 Evidence-grounded Explanation | Explain deterministic reason/evidence without inventing facts or new decisions | REVIEW_PASS | A-I (F deferred); evidence/reference fidelity, uncertainty and errors retained |
 | P12.7 AgentArts Runtime Adapter | AgentArtsRuntimeApp entrypoint/context isolation around same Agent core | REVIEW_PASS | A-J; optional SDK; JSON human continuation and semantic parity; F production deferred |
 | P12.8 Real Agent + AgentArts Compatibility Integration | Real deterministic capability chains and local/adapter semantic parity | REVIEW_PASS | A-L assessed; real authorities, fake models, JSON human continuation and lifecycle parity; F production deferred |
-| P12 Final Review | Full tests, boundary/authority/approval/evidence/parity/compatibility inventory | NOT_STARTED | A-L evidence and deferred live-deployment gates explicit |
-| P12 Closure | Documentation-only CLOSED/FROZEN after Final Review PASS | NOT_STARTED | Synchronized status and clear P13 handoff |
+| P12 Final Review | Full tests, boundary/authority/approval/evidence/parity/compatibility inventory | REVIEW_PASS | A-L evidence and deferred live-deployment gates explicit |
+| P12 Closure | Documentation-only CLOSED/FROZEN after Final Review PASS | CLOSED_FROZEN | Synchronized status and clear P13 handoff |
 
 P12.0 implemented the design baseline and is committed. P12.1 implements contracts/state
-only; P12.2 now implements the capability facade. P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure remain NOT_STARTED. P12.0 added no Agent contract;
+only; P12.2 now implements the capability facade. P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12.0 added no Agent contract;
 P12.1 now adds typed interaction contracts and immutable snapshots. P12.3 implements a bounded StateGraph over those contracts/facade. P12.4 adds optional injected structured intent proposals, with no live provider configured and no
 MCP, probe or cloud deployment is implemented; P12.5 now supplies approval collection/resume.
-P12 overall IN_PROGRESS is the aggregate state while its current child follows the
-canonical lifecycle; child transitions and closure still require the documented gates.
+P12 overall CLOSED_FROZEN records completed implementation and Final Review PASS;
+P13-P16 retain independent implementation, review and closure gates.
 
 ### AgentArts compatibility gates (apply at each relevant P12 stage)
 
@@ -1373,8 +1394,8 @@ setuptools package enumeration, dependency locks and accurate README commands to
 
 ### P12.1 implementation and exit criteria
 
-Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 COMMITTED
-(73d3d71), P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.1 commit
+Status: REVIEW_PASS; P12 overall CLOSED_FROZEN. P12.0 REVIEW_PASS
+(baseline commit 73d3d71), P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12.1 commit
 status is proved by Git history, not by this documentation state.
 
 Delivered: competition_copilot.agents/contracts.py and state.py, focused tests under
@@ -1409,8 +1430,8 @@ frozen. P12.1 Review PASS; P12.2 now implements the separately documented facade
 
 ### P12.2 implemented capability inventory and exit criteria
 
-Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1 REVIEW_PASS;
-P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. Git history, not a Markdown
+Status: REVIEW_PASS. P12 overall CLOSED_FROZEN; P12.1 REVIEW_PASS;
+P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. Git history, not a Markdown
 commit lifecycle state, proves commits.
 
 Actual inventory: P4 six Competition read Tools over CompetitionRepository; P5
@@ -1500,8 +1521,8 @@ separately documented deterministic graph; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS;
 
 ### P12.3 actual graph implementation and exit criteria
 
-Status: REVIEW_PASS. P12 overall IN_PROGRESS; P12.1/P12.2 REVIEW_PASS;
-P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.3 Review PASS; commit status is proved by Git history.
+Status: REVIEW_PASS. P12 overall CLOSED_FROZEN; P12.1/P12.2 REVIEW_PASS;
+P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12.3 Review PASS; commit status is proved by Git history.
 
 Audited authority models: AgentState (request/intent/status/invocation/tool_result/
 clarification/approval/audit/final_response/error), AgentRequest, AgentResponse,
@@ -1576,8 +1597,8 @@ ReAct, AgentArts adapter, MCP, persistence/store, memory or scheduler in P12.3.
 
 ### P12.4 actual intent routing implementation and exit criteria
 
-Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1/P12.2/P12.3 REVIEW_PASS;
-P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.4 Review PASS; commit status is proved by Git history. Canonical phase status remains this document.
+Status: REVIEW_PASS. P12 CLOSED_FROZEN; P12.1/P12.2/P12.3 REVIEW_PASS;
+P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12.4 Review PASS; commit status is proved by Git history. Canonical phase status remains this document.
 
 Delivered agents/routing.py (IntentModel, IntentModelInput, IntentRoutingProposal,
 RoutingProposalValidator, JSON-safe validation outcome and static safety map),
@@ -1634,8 +1655,8 @@ P12.4 Review retry PASS; status REVIEW_PASS.
 
 ### P12.5 actual human interaction implementation and exit criteria
 
-Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.4 REVIEW_PASS;
-P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.5 Review PASS; commit status is proved by Git history.
+Status: REVIEW_PASS. P12 CLOSED_FROZEN; P12.1-P12.4 REVIEW_PASS;
+P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12.5 Review PASS; commit status is proved by Git history.
 
 Delivered human_contracts.py (typed clarification replies/choices/proposals and HumanResume),
 human_interactions.py (requested-field merge, explicit consent/binding validators, P11
@@ -1688,8 +1709,8 @@ ledgers require later deployment gates, not local process globals.
 
 ### P12.7 actual Runtime Adapter implementation and exit criteria
 
-Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.6 REVIEW_PASS;
-P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. No commit or status sync is performed.
+Status: REVIEW_PASS. P12 CLOSED_FROZEN; P12.1-P12.6 REVIEW_PASS;
+P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. Commit provenance is recorded in Git history.
 
 The isolated `integrations/agentarts` package contains typed transport envelopes,
 SDK-free adapter logic and official SDK app wiring. `AgentArtsRuntimeApp` registers
@@ -1734,8 +1755,8 @@ P12.8 integration expansion is REVIEW_PASS; P16 remains Production Deployment & 
 
 ### P12.6 actual explanation implementation and exit criteria
 
-Status: REVIEW_PASS. P12 IN_PROGRESS; P12.1-P12.5 REVIEW_PASS;
-P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12.6 Review PASS; commit status is proved by Git history.
+Status: REVIEW_PASS. P12 CLOSED_FROZEN; P12.1-P12.5 REVIEW_PASS;
+P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12.6 Review PASS; commit status is proved by Git history.
 
 Delivered `agents/explanation.py`: immutable ExplanationContext/GroundingEvidence,
 bounded ExplanationDraft, injectable ExplanationModel, deterministic context builder,
@@ -1778,8 +1799,8 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 
 ### P12.8 actual integration and P12 Final Review evidence
 
-Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review/Closure and P13 NOT_STARTED. No Final Review or commit is performed.
+Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 NOT_STARTED.
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1840,8 +1861,8 @@ observability backend, scaling/load tests and production hardening.
 
 Validation: 35 new targeted integration/architecture tests PASS; full suite 2175
 passed, zero skipped, including P12.1-P12.7 and relevant frozen P4-P11 regressions.
-Ruff and diff check PASS. This is implementation evidence, not P12.8 Review PASS
-or P12 Final Review execution.
+Ruff and diff check PASS. Final Review confirmed 2175 passed, zero skipped;
+Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documentation/status only.
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
@@ -1992,7 +2013,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -2068,5 +2089,5 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN.
 The original follow-up made no git commit; Closure is a documentation-only update.

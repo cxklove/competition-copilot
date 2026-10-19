@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.8. Real Agent end-to-end integration implemented; production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 remains NOT_STARTED; production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.8 |
+| P12 | Agent | CLOSED_FROZEN |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.8 Real Agent integration). Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
+P12 is CLOSED_FROZEN. Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -1680,7 +1680,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN. No P12 work or git commit in this Closure.
 
 
 ### P11.5 Real Adaptive Replanning Integration - CLOSED / FROZEN
@@ -1756,13 +1756,13 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ### P12.0 baseline status (mirrors DEVELOPMENT_PLAN)
 
-P12 overall: IN_PROGRESS. P12.0: COMMITTED (73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. P12.5: REVIEW_PASS. P12.6: REVIEW_PASS. P12.7: REVIEW_PASS. Current subphase P12.8: REVIEW_PASS.
-P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure: NOT_STARTED. P0-P11 remain CLOSED/FROZEN.
+P12 overall: CLOSED_FROZEN. P12.0: REVIEW_PASS (baseline commit 73d3d71). P12.1: REVIEW_PASS. P12.2: REVIEW_PASS. P12.3: REVIEW_PASS. P12.4: REVIEW_PASS. P12.5: REVIEW_PASS. P12.6: REVIEW_PASS. P12.7: REVIEW_PASS. P12.8: REVIEW_PASS.
+P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review: REVIEW_PASS; Closure: CLOSED_FROZEN. P0-P11 remain CLOSED/FROZEN.
 Framework baseline is documented; no actual Agent graph, model call, facade/router,
 approval flow, Runtime Adapter, MCP or production image is implemented in P12.0.
 SDK/runtime/container import/execution compatibility is NOT_TESTED; official baseline

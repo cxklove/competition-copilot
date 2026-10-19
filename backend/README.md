@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-Current Phase: P12 Agent - IN_PROGRESS; current subphase P12.8. Real Agent end-to-end integration implemented; production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 remains NOT_STARTED; production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -17,7 +17,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4 | Deterministic Plan Revision + PlanDiff | CLOSED / FROZEN |
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
-| P12 | Agent | IN_PROGRESS; current subphase P12.8 |
+| P12 | Agent | CLOSED_FROZEN |
 
 ### Frozen authority map
 
@@ -84,7 +84,7 @@ notification, Agent, MCP or frontend. Severity/impact scoring remains deferred.
 Target-added impact has no complete cancellation policy. No supersession/replacement
 relation or arbitrary Plan status machine is implied by the existing status enum.
 
-P12 is IN_PROGRESS (P12.8 Real Agent integration). Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
+P12 is CLOSED_FROZEN. Injected model proposals and explicit human replies are validated; the isolated Runtime Adapter reuses the same core graph. The Agent may understand natural-language intent,
 select tools/workflows, orchestrate, clarify, explain and collect explicit approval.
 It must not own Eligibility, Recommendation scoring, SkillGap, Event impact,
 ReplanningDecision or revision execution rules; must not turn PARTIAL into COMPLETE,
@@ -107,7 +107,7 @@ resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZE
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
 and P10 Final Review re-run PASS.** **P11 Adaptive Replanning: CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.**
 P11.1 through P11.5, including P11.1.2/P11.3.5/P11.4.2, are CLOSED / FROZEN.
-CURRENT: P12.8 Real Agent + AgentArts Compatibility Integration; P12 overall IN_PROGRESS.
+P12 Agent is CLOSED_FROZEN; P13 remains NOT_STARTED.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1536,7 +1536,7 @@ approvals are test fixtures, not official historical changes or automatic rules.
 Tests cover preconditions, fake complete, partial rejection, wrong impact, terminal
 states, original context preservation, immutable JSON and determinism.
 P11.5 integration is implemented, Review PASS / committed, as described below. P11 remains
-CLOSED / FROZEN; P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED. No P12 work or git commit in this Closure.
+CLOSED / FROZEN; P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN. No P12 work or git commit in this Closure.
 
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_plan_level_revision.py
@@ -1620,7 +1620,7 @@ roundtrip, Analyzer/Decision lineage and safe unresolved revision/Diff serializa
 Typed URL construction is offline, without URL accessibility checks or DNS/network.
 P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
-P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is IN_PROGRESS at P12.8 (REVIEW_PASS); Final Review and Closure are NOT_STARTED.
+P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN.
 The original follow-up made no git commit; Closure is a documentation-only update.
 
 ```powershell
@@ -1629,8 +1629,8 @@ The original follow-up made no git commit; Closure is a documentation-only updat
 
 ## P12.0 Framework & AgentArts Compatibility Baseline
 
-Current canonical status: docs/DEVELOPMENT_PLAN.md. P12 IN_PROGRESS;
-P12.0 COMMITTED (73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED.
+Current canonical status: docs/DEVELOPMENT_PLAN.md. P12 CLOSED_FROZEN;
+P12.0 REVIEW_PASS (baseline commit 73d3d71); P12.1 REVIEW_PASS; P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN.
 Agent framework: LangGraph; support: LangChain Core; Domain schema: Pydantic 2.
 MVP: one platform-neutral orchestrator invoking Tool/Application deterministic
 capabilities, not a supervisor or autonomous ReAct core. AgentArts is a thin
@@ -1657,8 +1657,8 @@ pytest and Ruff commands above are unchanged; the P12.3 Python graph entrypoint 
 
 ## P12.1 Agent Contract & State
 
-Status: REVIEW_PASS; P12 overall IN_PROGRESS. P12.0 is COMMITTED
-(73d3d71); P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure remain NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Status: REVIEW_PASS; P12 overall CLOSED_FROZEN. P12.0 is REVIEW_PASS
+(baseline commit 73d3d71); P12.2 REVIEW_PASS; P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. DEVELOPMENT_PLAN is canonical.
 Package: competition_copilot.agents (the plural directory selected in P12.0).
 contracts.py defines interaction/audit envelopes; state.py defines immutable snapshots.
 AgentRequest, intent, clarification, explicit approval, capability invocation reference,
@@ -1681,7 +1681,7 @@ Install using the existing editable backend/dev command above; focused validatio
 
 ## P12.2 Agent Capability / Tool Facade
 
-Status: REVIEW_PASS; P12 overall IN_PROGRESS; P12.1 REVIEW_PASS;
+Status: REVIEW_PASS; P12 overall CLOSED_FROZEN; P12.1 REVIEW_PASS;
 P12.3 REVIEW_PASS; P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS. Canonical status remains docs/DEVELOPMENT_PLAN.md.
 competition_copilot.agents.capabilities adds a static approved capability facade,
 typed argument/result envelopes and JSON-safe discovery metadata. It reuses P12.1
@@ -1700,8 +1700,8 @@ dependencies. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 
 ## P12.8 End-to-End Agent Integration
 
-Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review/Closure and P13 remain NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
+P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 NOT_STARTED. DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.composition.build_seed_agent` is the explicit outer composition
 root: seed repository, P4 tools, policy provider, P5-P11 authorities, Facade, injected
@@ -1750,14 +1750,14 @@ P9.5 monitor remains NOT_EXPOSED_BY_DESIGN. All data files are checked read-only
 ```
 
 Gate K covers complete local/runtime lifecycle parity; Gate L preserves Domain and
-explicit human authority lineage. This is integration evidence for later P12 Final
-Review, not that review itself. No MCP, frontend, persistence or production deployment
+explicit human authority lineage. End-to-end integration and P12 Final
+Review are complete. No MCP, frontend, persistence or production deployment
 is added. P16 retains ARM64/SWR/IAM/Secrets/MaaS/scaling/load/hardening responsibilities.
 
 ## P12.7 AgentArts Runtime Adapter
 
-Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.6 REVIEW_PASS;
-P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.6 REVIEW_PASS;
+P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.integrations.agentarts` contains the SDK-free typed transport
 and `app.py` official SDK wiring. The adapter calls the existing graph exactly once
@@ -1805,8 +1805,8 @@ gate; no ARM64 image or cloud readiness is claimed.
 
 ## P12.6 Evidence-grounded Explanation
 
-Status: REVIEW_PASS. P12 remains IN_PROGRESS; P12.1-P12.5 REVIEW_PASS;
-P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Status: REVIEW_PASS. P12 remains CLOSED_FROZEN; P12.1-P12.5 REVIEW_PASS;
+P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. DEVELOPMENT_PLAN is canonical.
 
 Agent now composes evidence-grounded Chinese explanations through an optional injected
 ExplanationModel (`build_competition_copilot_graph(..., explanation_model=...)`).
@@ -1827,8 +1827,8 @@ MCP, persistence, memory or deployment is added. Gates A-E/G/H/I apply; F is def
 
 ## P12.5 Clarification + Human Approval
 
-Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.4 REVIEW_PASS;
-P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.4 REVIEW_PASS;
+P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. DEVELOPMENT_PLAN is canonical.
 
 Agent graph now supports typed clarification/approval replies and explicit trusted-state
 continuation: run_turn(GraphInput) returns GraphTurn(response, continuation), and
@@ -1854,8 +1854,8 @@ P12.5 added no provider dependency, persistent saver, Runtime adapter or MCP. P1
 
 ## P12.4 LLM Intent + Safe Tool Selection
 
-Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1-P12.3 REVIEW_PASS;
-P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review and Closure NOT_STARTED. DEVELOPMENT_PLAN is canonical.
+Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.3 REVIEW_PASS;
+P12.5 REVIEW_PASS; P12.6 REVIEW_PASS; P12.7 REVIEW_PASS; P12.8 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. DEVELOPMENT_PLAN is canonical.
 
 agents/routing.py defines an untrusted structured proposal and deterministic validator.
 The existing graph factory accepts optional intent_model injection. Explicit known
@@ -1882,7 +1882,7 @@ No configured live provider or production runtime certification is claimed.
 
 ## P12.3 LangGraph Orchestration Graph
 
-Status: REVIEW_PASS; P12 IN_PROGRESS; P12.1/P12.2 REVIEW_PASS;
+Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1/P12.2 REVIEW_PASS;
 P12.4 REVIEW_PASS; P12.5 REVIEW_PASS; P12.6 REVIEW_PASS. DEVELOPMENT_PLAN is canonical.
 competition_copilot.agents.graph.build_competition_copilot_graph(facade) creates a
 compiled deterministic LangGraph. Its invoke(GraphInput) returns existing AgentResponse;

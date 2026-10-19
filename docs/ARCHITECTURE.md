@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.1 exposure contract); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.2 server core/catalog); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1563,8 +1563,8 @@ configuration, tracing/scaling/timeout/retry/load/security/cost validation.
 
 P12 is frozen. P13 adds a server-side protocol edge around approved capabilities;
 it does not create another Agent or business authority. P13.0 defines this design
-only. P13.1 adds the SDK-free exposure contract described below; no MCP server,
-runtime tool catalog, handler or HTTP endpoint is implemented yet.
+only. P13.1 adds the SDK-free exposure contract; P13.2 publishes its catalog through
+the official SDK server. Business execution and HTTP transport remain deferred.
 
 ```text
 Local MCP Client ---------+
@@ -1625,6 +1625,28 @@ Schemas derive from Pydantic and are returned as detached sorted JSON objects.
 Registry construction rejects duplicates, ambiguous capability aliases, unsafe
 mutation and upstream schema/access drift. Contract Gates A/B/C/F have evidence;
 protocol/transport and Runtime/MCP execution parity remain deferred to P13.2-P13.6.
+
+P13.2 adds `integrations/mcp/server.py`, the only project module importing the MCP
+SDK. Its explicit `build_mcp_server(registry)` factory constructs a public low-level
+Server with catalog and disabled-call callbacks, without starting transport or
+executing capabilities. `to_sdk_tool` copies each registry definition's exact name,
+description and typed input/output schema into fresh SDK Tool objects. There is no
+second hand-maintained server catalog or registration via business functions.
+
+The server supports tools/list through the SDK. Known tool calls fail with
+NOT_IMPLEMENTED_P13_3; unknown or excluded names fail with UNKNOWN_TOOL. No arguments
+are used to invoke Facade/Graph/Domain/Repository code. These deliberate failures
+do not implement business result mapping. SDK context stays protocol-only; there
+is no business session or global conversation/approval state. Public Client(server)
+provides local in-process smoke; Streamable HTTP remains P13.4, real capability
+execution P13.3, Gateway compatibility P13.5 and authority integration P13.6.
+
+MCP is an optional dependency overlay, independently installable without AgentArts.
+The AgentArts overlay includes the same MCP lock to avoid competing SDK pins. Core
+packages and the MCP exposure contracts remain importable without either platform
+SDK; only explicit server import needs MCP. No network, port or secret is accessed
+by project module import. No production deployment or dual-protocol HTTP parity is
+claimed by the local catalog smoke.
 
 Tool schemas derive from typed inputs/projections; output serializes canonical
 AgentCapabilityResult/data/audit. No parallel MCP business-result contracts. Normal

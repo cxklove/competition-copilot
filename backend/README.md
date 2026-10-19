@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.1 exposure contract); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.2 server core/catalog); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1702,7 +1702,7 @@ dependencies. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 ## P13.0 MCP Protocol & AgentArts Compatibility Baseline
 
 P12 remains CLOSED_FROZEN. P13 is IN_PROGRESS; P13.0 is REVIEW_PASS.
-P13.1 is REVIEW_PASS; P13.2-P13.6, Final Review and Closure remain NOT_STARTED.
+P13.1 is REVIEW_PASS; P13.2 is REVIEW_PASS; P13.3-P13.6, Final Review and Closure remain NOT_STARTED.
 DEVELOPMENT_PLAN is the canonical lifecycle, capability inventory, compatibility
 matrix and independent MCP gate A-H source.
 
@@ -1747,10 +1747,38 @@ remain valid; no new application start command exists. Contract tests run offlin
 .\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_mcp_exposure_contract.py
 ```
 
+## P13.2 MCP Server Core & Tool Catalog
+
+Status: REVIEW_PASS. The optional official MCP SDK 2.3.0 powers
+`competition_copilot.integrations.mcp.server.build_mcp_server(registry=None)`.
+Its tools/list publishes only P13.1 registry metadata and generated schemas.
+All known calls return `NOT_IMPLEMENTED_P13_3`; unknown/excluded names fail closed.
+Business tool execution is deferred to P13.3. No Streamable HTTP app or Gateway
+connection exists; those remain P13.4/P13.5. P16 retains production deployment.
+
+MCP installs independently of AgentArts and LangGraph. From the repository root,
+using the existing backend virtual environment:
+
+```powershell
+.\backend\.venv\Scripts\python -m pip install -r backend/requirements-mcp.lock
+.\backend\.venv\Scripts\python -m pip install --no-deps -e backend
+.\backend\.venv\Scripts\python -c "from competition_copilot.integrations.mcp.server import build_mcp_server; print(type(build_mcp_server()).__name__)"
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_mcp_server_core.py backend/tests/integration/test_mcp_import_boundaries.py
+```
+
+The project declares an optional `mcp` extra; the lock commands above retain exact
+development pins. AgentArts installs include this same MCP overlay. Existing core
+and Agent-only installs remain SDK-independent. No package build procedure changes.
+No process/server starts on import or construction; this phase uses public SDK
+`Client(server)` in-process tests, without ports, stdio loops, network or credentials.
+Tests assert registry/catalog fidelity, JSON safety, deterministic independent
+connections, execution disabled and SDK import isolation. There is no standalone
+transport startup command yet. Protocol-era HTTP tests remain deferred to P13.4.
+
 ## P12.8 End-to-End Agent Integration
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.1 exposure contract). DEVELOPMENT_PLAN is canonical.
+P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.2 server core/catalog). DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.composition.build_seed_agent` is the explicit outer composition
 root: seed repository, P4 tools, policy provider, P5-P11 authorities, Facade, injected

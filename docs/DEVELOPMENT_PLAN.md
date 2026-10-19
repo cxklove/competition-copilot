@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.1 exposure contract); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.2 server core/catalog); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1331,7 +1331,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 
 | Deferred stage | Owned scope | Status |
 |---|---|---|
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.1) |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.2) |
 | P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
@@ -1801,7 +1801,7 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 ### P12.8 actual integration and P12 Final Review evidence
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.1 exposure contract).
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.2 server core/catalog).
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1867,7 +1867,7 @@ Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documenta
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
-- **Status:** IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS. P12 remains CLOSED_FROZEN.
+- **Status:** IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS. P12 remains CLOSED_FROZEN.
 - **Goal:** Competition Copilot as an MCP **server**, projecting individually approved
   P12.2 capabilities through a standard external protocol boundary. No Agent redesign.
 - **Authority:** MCP tool call -> typed projection -> Capability Facade -> existing
@@ -1890,7 +1890,7 @@ Markdown lifecycle states. P13.0 does not implement P13.1 or later deliverables.
 |---|---|---|
 | P13.0 MCP Protocol & AgentArts Compatibility Baseline | Audit, protocol/transport/exposure policy, compatibility matrix, gates and roadmap; no server/handlers | REVIEW_PASS |
 | P13.1 MCP Tool Exposure Contract | Individually reviewed allowlist, concrete stable tool names, typed input/output projection and registry contract | REVIEW_PASS |
-| P13.2 MCP Server Core & Tool Catalog | Explicit official Python SDK integration/dependency decision, server construction and deterministic tools/list | NOT_STARTED |
+| P13.2 MCP Server Core & Tool Catalog | Explicit official Python SDK integration/dependency decision, server construction and deterministic tools/list | REVIEW_PASS |
 | P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | NOT_STARTED |
 | P13.4 Streamable HTTP & Protocol Compatibility | Stateless business execution; test 2025-11-25 and 2026-07-28 public SDK paths with equal authority results | NOT_STARTED |
 | P13.5 AgentArts Gateway Compatibility | Local Gateway-compatible discovery/call/negotiation/schema/result tests; no production cloud resources | NOT_STARTED |
@@ -2062,7 +2062,7 @@ change, MCP server, endpoint, SDK reconfiguration, cloud resource or commit.
 ### P13.1 MCP Tool Exposure Contract
 
 Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0 REVIEW_PASS.
-P13.2-P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
+P13.2 is REVIEW_PASS; P13.3-P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
 
 SDK-free contracts live in `competition_copilot/integrations/mcp/`: `contracts.py`
 owns typed transport envelopes/schema generation; `registry.py` owns explicit
@@ -2156,6 +2156,76 @@ P13.1 validation: 25 targeted contract tests PASS; with P12.2 Facade regression,
 57 passed. Full suite 2200 passed, zero skipped (including P12 Agent/Runtime and
 frozen P1-P11 regressions); Ruff and diff check PASS. No P12 production changes,
 business/source data changes, SDK dependency changes, server or cloud deployment.
+
+### P13.2 MCP Server Core & Tool Catalog
+
+Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0/P13.1 REVIEW_PASS;
+P13.3-P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
+
+`integrations/mcp/server.py` isolates official SDK imports and exposes
+`build_mcp_server(registry=None)` plus `to_sdk_tool(definition)`. Construction
+creates no connection, port, credentials, business dependency or business session.
+There is no module-level server instance, app startup or eager package export.
+It uses the official [public low-level Server API](https://py.sdk.modelcontextprotocol.io/v2/advanced/low-level-server/)
+to publish the existing exact schemas without decorator-generated tool definitions.
+`on_list_tools` projects only the P13.1 registry tuple, preserving its eight names,
+descriptions, ordering and full input/output schemas. Every request receives fresh
+SDK models/schemas; client edits cannot alter later catalogs. No titles, annotations,
+provider prompts, mutation hints or other metadata are invented.
+
+The call boundary is explicitly disabled: known names return an error result with
+text `NOT_IMPLEMENTED_P13_3`, never success or a fabricated McpToolResult. Unknown,
+excluded, typo and internal names return public MCP INVALID_PARAMS / UNKNOWN_TOOL.
+No argument is interpreted, echoed or delegated. This is a stub, not P13.3 result/
+execution mapping. No Facade execute, Graph, Repository, Domain authority or model
+is called by the server. SDK protocol context is ignored and never becomes business
+context. There is no application session/cache/persistence or reflection dispatch.
+
+#### SDK dependency and local smoke strategy
+
+- Selected official `mcp==2.3.0`, already installed with the P12.7 environment;
+  the current installed SDK supports the public Server / Client / Tool APIs used.
+  `mcp-types==2.3.0` stays aligned. SDK integration is now intentional, not inferred
+  from an AgentArts transitive dependency. No provider or cloud SDK was added.
+- `pyproject` adds optional `mcp` extra only. `requirements-mcp.lock` owns MCP SDK
+  pins and its resolved dependencies over the existing core lock. It does not
+  require LangGraph or AgentArts. `requirements-agentarts.lock` includes this shared
+  overlay instead of repeating those pins; versions are unchanged. The Agent lock
+  stays unchanged. Dependency tests reject conflicting versions across includes
+  and verify active pins against installed metadata.
+- Project minimum remains Python >=3.11. This is a CPython 3.12 Windows development
+  resolution, not an ARM64 certification. Windows pywin32 is conditional; native
+  dependency portability and production images remain P16 gates.
+- Public `Client(server)` runs in-process for tests; no stdio entrypoint is needed
+  in this phase. Tests use real SDK tools/list and disabled/unknown call requests,
+  not direct calls to our list handler. No external network or credentials.
+- Installed SDK era metadata and official v2 guidance remain the compatibility
+  selection evidence. These in-process tests do not certify 2025-11-25 / 2026-07-28
+  HTTP negotiation or AgentArts Gateway compatibility. P13.4/P13.5 retain those gates.
+  No Streamable HTTP app, stdio loop, remote connection or production deployment.
+
+| MCP Gate | P13.2 disposition |
+|---|---|
+| A Capability Authority | PASS: actual SDK catalog comes only from P13.1 approved registry |
+| B Tool Schema Safety | PASS: full typed schemas retained through SDK catalog JSON |
+| C Mutation Isolation | PASS: no mutation/internal tools listed; all execution disabled |
+| D AgentArts Protocol | SERVER_CORE_READY_PROTOCOL_TEST_DEFERRED |
+| E Modern Protocol | SERVER_CORE_READY_PROTOCOL_TEST_DEFERRED |
+| F Stateless Execution | PASS: no business session or business state in server/catalog |
+| G Runtime/MCP Authority Parity | CATALOG_MAPPING_PASS_EXECUTION_DEFERRED |
+| H Gateway Readiness | CATALOG_READY_TRANSPORT_DEFERRED |
+
+Tests cover public SDK construction/listing, registry/schema fidelity, injected
+metadata, mutation/internal absence, every known tool disabled, unknown names,
+determinism across fresh instances and independent SDK connections, detached JSON,
+dependency/import boundaries and local Graph execution with SDK imports blocked.
+The P13.1 static test now limits its SDK-free rule to the frozen contract modules;
+the new architecture test separately enforces server-only SDK imports.
+
+Validation: 22 new server/architecture tests PASS; with P13.1 contracts and P12.2
+Facade regression, 79 passed. Full suite 2222 passed, zero skipped, including P12
+Agent/Runtime and frozen authority regressions. Ruff and diff check PASS. No real
+network/cloud/model calls, business execution or source-data changes were required.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 

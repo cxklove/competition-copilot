@@ -14,6 +14,7 @@ dependencies = ["pydantic>=2", "tzdata>=2026.2; platform_system == 'Windows'"]
 dev = ["pytest", "ruff"]
 agent = ["langgraph==1.2.15", "langchain-core==1.6.10"]
 agentarts = ["agentarts-sdk==0.1.6"]
+mcp = ["mcp==2.3.0"]
 
 [tool.setuptools]
 packages = [

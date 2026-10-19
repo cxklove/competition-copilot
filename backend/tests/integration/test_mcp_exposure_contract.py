@@ -249,7 +249,9 @@ def test_deterministic_catalog_names_and_schema_order():
 
 def test_contract_package_has_no_server_io_or_authority_execution():
     folder = ROOT / "backend/competition_copilot/integrations/mcp"
-    for path in folder.glob("*.py"):
+    # P13.2 adds isolated SDK server wiring; these contracts remain SDK-free.
+    for name in ("__init__.py", "contracts.py", "registry.py"):
+        path = folder / name
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom):

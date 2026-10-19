@@ -1781,6 +1781,84 @@ workflow envelopes and transport metadata. Test data hashes guard official seed,
 policy and skill requirements; concurrency/context attacks retain input isolation.
 No production implementation, persistent state, cloud deployment or new dependencies.
 
+### Frontend and Runtime invocation boundary (P14 design baseline)
+
+```text
+                         Frontend
+                            |
+                 RuntimeInvocationClient
+                    /               \
+            Local Transport    AgentArts Transport
+                    \               /
+               trusted invocation/hosting boundary
+                            |
+                   P12 Runtime Adapter
+                            |
+                 CompetitionCopilotAgent
+                            |
+                        LangGraph
+                            |
+                    Capability Facade
+                            |
+                    P4-P11 Authorities
+
+MCP Client / AgentArts MCP Gateway -> MCP Server -> Registry -> Dispatcher -> same Facade
+```
+
+P14 designs user-visible presentation and Runtime invocation compatibility. The MCP
+boundary remains for structured capability consumers; frontend does not use tools/list
+or tools/call to replace the complete Agent/HITL workflow. Runtime mode selects a
+transport adapter, not separate Local/AgentArts business clients or UI semantics.
+Backend Pydantic AgentRequest/AgentResponse and public HITL contracts remain canonical.
+
+Actual P12.7 accepts a new request envelope or continuation_ref plus exactly one
+clarification/approval/message. Its pending output contains internal GraphInput;
+that output is not browser-safe verbatim. P14.1 defines minimal controlled public
+projections, and P14.5 supplies a trusted hosting boundary that retains/authorizes
+continuations and returns an opaque scoped handle. Full AgentState/GraphInput and
+trusted HumanResume execution context stay server-side. Handles and UI submissions
+are client-controlled; core/server must revalidate request/interaction IDs and exact
+Plan action/version/scope/actor. P12 contracts are not redesigned by this baseline.
+
+AgentResponse contains audit/result/PlanDiff refs, not every structured artifact body.
+Future authorized presentation projection at invocation composition must retain actual
+canonical receipts/evidence/sources/diffs without re-executing capabilities, inventing
+facts or assuming an existing artifact API. A missing artifact remains unavailable.
+Views can wrap/rename fields but cannot create another business truth contract.
+
+NEEDS_CLARIFICATION and WAITING_FOR_APPROVAL drive explicit UI panels. APPROVE/REJECT
+submit existing typed responses; a valid REJECT completes normally and is not a
+transport error. No explanation-text parsing, inferred approval, direct mutation,
+client LLM, eligibility/score/gap/replanning calculation or client-generated PlanDiff.
+Evidence renders only authoritative reasons/source metadata. Final UX includes actual
+conversation, structured results, HITL and error surfaces rather than raw JSON dumps.
+
+The high-code platform path POST /runtimes/{runtime_name}/invocations is transport
+configuration; the local SDK /invocations application contract remains unchanged.
+Browser -> trusted backend/BFF -> AgentArts is supported by the design. Production
+credentials never enter frontend source/bundles/public environment variables or storage.
+Public mode/base URL/display settings are distinct from secrets. Authentication,
+Gateway/session metadata and UI history confer no business identity or approval.
+
+Primary invocation is NON_STREAMING_PRIMARY: P12 returns one awaited JSON envelope.
+Platform streaming does not define a client event contract; streaming is optional/
+deferred and cannot be simulated as a claimed platform capability. UI history is
+current-page presentation only, with no durable refresh/resume promise.
+
+Public JSON Schema -> controlled generated TypeScript types/validation is the P14.1
+strategy. Do not generate internal graph/authority state or duplicate Domain interfaces.
+Unknown/mismatched response contracts fail visibly. Runtime, Agent, transport and
+contract errors remain distinct from business negatives and HITL/rejection outcomes.
+Local/AgentArts parity fixes request/trusted dependencies/continuation and compares
+authoritative artifacts/HITL/audit, excluding only transport correlation/timing/envelopes.
+
+Frontend Gates A-J cover presentation authority, contract fidelity, HITL integrity,
+transport isolation, runtime semantic parity, evidence grounding, client security,
+session isolation, error semantics and deployment boundary. They are design acceptance
+definitions, with implementation evidence assigned to P14.1-P14.7. P15 owns systematic
+evaluation; P16 owns production auth/IAM/Secrets/ARM64/SWR/observability/scaling/load/
+security/cost hardening. This baseline adds no app, client, endpoint or deployment.
+
 ## 14. Repository Structure
 
 顶层目录约定：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。已完成的 Domain 与 P2 ingestion 实现位于 `backend/competition_copilot/`，真实 Raw、Review Manifest 和 Verified Seed 位于 `data/`。P3 只读接口位于 `backend/competition_copilot/repositories/`，当前 JSON Verified Seed Adapter 位于 `backend/competition_copilot/infrastructure/repositories/`。后续 `backend/` 可按 `application/`（用例及流程）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（其他持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）扩展。

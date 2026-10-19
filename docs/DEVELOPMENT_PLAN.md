@@ -1332,7 +1332,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 | Deferred stage | Owned scope | Status |
 |---|---|---|
 | P13 | MCP + AgentArts MCP compatibility | CLOSED_FROZEN |
-| P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
+| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.0 baseline) |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
 
@@ -2481,7 +2481,7 @@ data changed; no cloud resource, real Gateway smoke or git commit.
 ### P13.6 Real MCP Integration & Authority Preservation
 
 Status: REVIEW_PASS. P13 CLOSED_FROZEN; P13.0-P13.5 REVIEW_PASS.
-P13 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 NOT_STARTED. P12 CLOSED_FROZEN.
+P13 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 IN_PROGRESS (P14.0 baseline). P12 CLOSED_FROZEN.
 This is integration evidence, not P13 Final Review or phase closure.
 
 No new MCP surface or business implementation. The same eight P13.1 tools and
@@ -2581,7 +2581,7 @@ Deferred scope is downstream work, not incomplete P13:
 
 | Phase | Deferred scope | Status |
 |---|---|---|
-| P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
+| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.0 baseline) |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening; production IAM, SWR, Secrets, observability, scaling, load testing and security hardening | NOT_STARTED |
 
@@ -2591,11 +2591,218 @@ P12 remains CLOSED_FROZEN; P4-P12 frozen semantics are unchanged.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 
-- **Status:** NOT_STARTED.
+- **Status:** IN_PROGRESS; P14.0 REVIEW_PASS. P12/P13 remain CLOSED_FROZEN.
 - **Goal:** evidence-grounded user journey via stable API/AgentRequest/AgentResponse.
 - **Deliverables:** Workspace/Discover/Journey/Profile interfaces and compatible local/runtime invocation.
 - **Acceptance:** evidence, clarification/approval/resume and errors survive transport; API/UI never invent Domain truth.
 - **Deferred:** social/team marketplace, automatic registration/payment/submission.
+
+### P14 subphase roadmap and exit boundaries
+
+Canonical status is this document. Lifecycle remains NOT_STARTED ->
+IMPLEMENTED_AWAITING_REVIEW -> REVIEW_PASS; whole-phase closure is CLOSED_FROZEN.
+Commit provenance stays in Git. Baseline definitions do not claim later deliverables.
+
+| Subphase | Deliverable / exit boundary | Status |
+|---|---|---|
+| P14.0 Frontend & Runtime Invocation Compatibility Baseline | Existing frontend/runtime audit; architecture, contract/security baseline, gates and roadmap only | REVIEW_PASS |
+| P14.1 Runtime Invocation Client Contract | Shared typed invocation/resume transport interface, controlled public projections, schema generation/validation strategy and fake client tests | NOT_STARTED |
+| P14.2 Frontend App Shell & Conversation State | Initialize the selected empty-directory stack; shell, conversation/input, workflow/loading/error state with fake Runtime client | NOT_STARTED |
+| P14.3 Clarification + Human Approval UX | Explicit clarification, APPROVE/REJECT, safe resume and HITL boundary | NOT_STARTED |
+| P14.4 Grounded Result / Evidence / PlanDiff Rendering | Structured canonical artifacts, explanation, reasons, evidence/sources and supplied diff presentation | NOT_STARTED |
+| P14.5 Local Runtime Invocation Integration | Trusted local composition/hosting of existing P12 invocation handler; safe browser projections, authorized continuation/artifact resolution and real Agent calls | NOT_STARTED |
+| P14.6 AgentArts Runtime Invocation Compatibility | Same client contract through configured AgentArts transport; local compatibility tests, no required production cloud deployment | NOT_STARTED |
+| P14.7 Real Frontend E2E & Cross-runtime Parity | Discovery/eligibility/clarification/recommendation/skill-gap/plan/approval/reject/error/fallback flows and key Local/AgentArts semantic comparisons | NOT_STARTED |
+| P14 Final Review | Whole-phase frontend/contract/HITL/transport/authority audit | NOT_STARTED |
+| P14 Closure | Status/documentation finalization after Final Review PASS | NOT_STARTED |
+
+### P14.0 audit and compatibility baseline
+
+P13 closure gate PASS: P13 CLOSED_FROZEN, P13.0-P13.6 REVIEW_PASS, Final Review
+REVIEW_PASS and Closure CLOSED_FROZEN. No P12/P13 production contracts are changed.
+
+#### Existing frontend inventory
+
+Audit on 2026-10-19 found `frontend/` empty: no package.json, lockfile, src/public,
+framework configuration, README, app entry, API client, pages or components. Current
+UI state is EMPTY (the P14.0 README adds documentation only). Existing framework,
+language, package manager, dev/build commands and test framework: NONE/NOT_AVAILABLE.
+Existing frontend lint/test/build scripts cannot be run because no manifest exists.
+Available local tools are Node v24.14.1 and npm 11.11.0; no install is performed.
+
+Because the directory is empty, select a minimal React + TypeScript + Vite client,
+with npm/package-lock as the planned package manager/lock strategy. The
+[official Vite guide](https://vite.dev/guide/) provides the react-ts template.
+Versions, actual scripts, lint and test choices are verified/pinned during P14.2
+initialization, not invented here. P14.1 can define SDK-free client contracts first.
+No framework/package files, UI, codegen toolchain or test framework are initialized.
+
+#### Public P12 contract inventory (actual source, not a new UI business schema)
+
+| Contract/source | Existing fields and constraints |
+|---|---|
+| agents.contracts.AgentRequest | request_id, user_message; optional conversation_id; context with explicit student_id/profile_ref/competition_id/edition_id/track_id/plan_ref. Context IDs and exact Plan reference must agree |
+| agents.contracts.AgentResponse | request_id, intent, outcome, message, optional clarification/approval_request/error, audit, plan_refs. No embedded generic capability-result payload |
+| WorkflowStatus | Enum includes RECEIVED, NEEDS_CLARIFICATION, READY_TO_ROUTE, WAITING_FOR_APPROVAL, READY_TO_EXECUTE, COMPLETED, FAILED; AgentResponse accepts only NEEDS_CLARIFICATION/WAITING_FOR_APPROVAL/COMPLETED/FAILED with matching payload |
+| ClarificationRequest | clarification_id, source_request_id, reason, fields, question |
+| human_contracts.ClarificationResponse | clarification_id, source_request_id, nonempty values, aware submitted_at; values support explicit target/student/plan/intent/invocation/arguments references/context, never inferred by UI |
+| ApprovalRequest | approval_request_id, source_request_id, invocation_id, action, summary, before_plan, optional proposed_after_plan, decision/scope/resolution/input/instruction refs, audit and aware created_at |
+| ApprovalResponse | approval_request_id, source_request_id, decision APPROVE or REJECT, aware submitted_at, optional comment. This is a submission, not authorization |
+| HumanMessage | interaction_id, source_request_id, text, aware submitted_at; not an automatic approval shortcut |
+| AuditReferences / ResultReference | Canonically ordered results and reason references; ReferenceKind includes EVIDENCE, SOURCE, PLAN_DIFF, approval and clarification refs. PlanReference preserves plan_id/version/content_digest/target |
+| domain.replanning.PlanDiff | Canonical before/after Plans, decision, evaluated_at, changes and optional status_change; trigger_event_ids derive from the decision. Render only when authorized artifacts supply it; UI never computes it |
+| AgentState / GraphInput / HumanResume | Internal workflow/arguments/authority context. HumanResume's approved_by_ref/current_plan/executed_at are trusted server inputs, never browser authority fields |
+
+All contracts use extra-forbidden validated Pydantic models and canonical JSON/time
+handling. Frontend consumes these contracts; it does not recreate Domain decisions,
+AgentState or a parallel FrontendEligibilityResponse/UiRecommendationDecision.
+
+#### Actual P12.7 runtime and local hosting inventory
+
+- Public local core: `CompetitionCopilotAgent.invoke(AgentRequest) -> AgentResponse`;
+  `run_turn/resume` keep internal GraphInput/GraphTurn at the server boundary.
+- Pure transport entry: `AgentArtsRuntimeAdapter.invoke(payload)`, with injected
+  trusted RuntimeBindings. `app.create_app(adapter)` builds official AgentArtsRuntimeApp
+  and an async @app.entrypoint. Its SDK-local `/invocations` route is already tested
+  in-process. There is no standalone configured local frontend runtime server or
+  default authorized bindings/resolver; P14.0 creates none. MCP `/mcp` is separate.
+- Runtime input is `AgentArtsInvocationEnvelope`: either `{"request": <AgentRequest>}`
+  or `{"continuation_ref": "authorized-reference", "clarification": <ClarificationResponse>}`,
+  with `approval` or typed `message` as alternatives. New request and resume are
+  exclusive; resume requires exactly one reply. A `query`-only body is not this contract.
+- Runtime output is `AgentArtsInvocationResult`: response: AgentResponse OR error:
+  RuntimeError, plus continuation: GraphInput exactly for pending clarification/approval.
+  Absent optional fields may serialize as null. Runtime error codes are
+  INVALID_RUNTIME_PAYLOAD, CORE_VALIDATION_ERROR, CORE_EXECUTION_ERROR,
+  RUNTIME_DEPENDENCY_ERROR. AgentResponse.error remains a separate core error category.
+- The handler ignores RequestContext for identity/consent/evidence; JSON serialization
+  uses existing Pydantic contracts. No transport metadata becomes business input.
+
+**Browser projection gaps identified, with implementation deferred:** the current
+runtime continuation is an internal GraphInput, not an opaque reference returned to
+the browser. Never expose/generate frontend types for that full object. P14.1 must
+define a minimal controlled presentation/transport projection; P14.5 must retain
+pending state at an authorized trusted boundary and return a scoped opaque handle,
+then resolve/revalidate it for the existing continuation_ref input. The handle is
+not authorization. Use the same rule for Local and AgentArts; keep P12 core unchanged.
+No durable/session database or refresh-resume guarantee is introduced by this baseline.
+
+AgentResponse carries audit/result/PlanDiff refs, not all canonical result bodies or
+source metadata. P14.1/P14.4/P14.5 must define authorized, minimal presentation access
+to existing canonical artifacts/receipts at the invocation composition boundary.
+Do not assume an artifact lookup API exists, replay capabilities to rebuild results,
+parse explanation text, call MCP, or invent missing evidence/diffs. Missing/unavailable
+artifacts remain visibly unavailable. No extra business API is designed here.
+
+#### Invocation and transport baseline
+
+Conceptual `RuntimeInvocationClient.invoke(AgentRequest) -> AgentResponse`, with
+explicit resume support preserving the public HITL contracts and safe continuation
+handle. Runtime errors/continuation metadata stay in typed transport outcomes; the
+formal interface and projection names are P14.1 work, not implemented classes.
+LocalRuntimeTransport and AgentArtsRuntimeTransport share this contract and error
+taxonomy. LOCAL/AGENTARTS select transport only, never business UI branches.
+
+The frontend primary path is Runtime -> P12 Adapter -> Agent -> Graph -> Facade.
+P13 MCP remains for structured MCP consumers/Gateway; no frontend tools/list/tools/call
+path replaces Agent workflow. Neither transport creates a second business dispatcher.
+
+Official high-code [ExecuteRuntime](https://support.huaweicloud.com/api-agentarts/InvokeRuntime1.html)
+uses POST `/runtimes/{runtime_name}/invocations`. The
+[routing contract](https://support.huaweicloud.com/highcode-agentarts/agentarts_10_131.html)
+preserves application bodies/responses; the actual Competition Copilot envelope
+above remains authoritative. Verified 2026-10-19. Runtime name/base URL/optional
+endpoint selection are injected transport/deployment configuration, not hardcoded
+production names or Domain fields. Authorization and X-Hw-Agentarts-Session-Id are
+platform transport concerns; no key/token is embedded in a browser bundle.
+
+P14 allows Browser -> trusted backend/BFF -> AgentArts Runtime. Direct browser-to-cloud
+is not presumed safe. Transport authentication is distinct from Human Approval and
+P11 authority. Public config may expose mode/local URL/display settings; AK/SK,
+API keys, service tokens, Authorization secrets never belong in VITE_/NEXT_PUBLIC_/
+PUBLIC_ variables, source, localStorage or browser-generated authority. Production
+credential provisioning, auth/IAM/routing/security policies remain P16.
+
+P12 currently returns one awaited JSON result; streaming baseline is
+NON_STREAMING_PRIMARY. Platform streaming capability does not define a P12 token or
+event schema. Streaming is OPTIONAL/DEFERRED; no fake character timers or P12 changes.
+
+#### UX, evidence and session safety
+
+NEEDS_CLARIFICATION renders clarification.question/fields/reason and submits explicit
+ClarificationResponse values against the same source_request_id/clarification_id.
+No silent target/profile guess. WAITING_FOR_APPROVAL renders the supplied action,
+summary, exact Plan version/scope/refs/audit, and available authoritative impact/diff.
+APPROVE and REJECT must be distinct explicit actions; closing a panel, continuing,
+sending a message or ambiguous text never approves. UI submits ApprovalResponse;
+only server/core validates pending ID, actor, scope, action, version and P11 bridge.
+Browser cannot set HUMAN_APPROVED, approved_by_ref or execution authority.
+
+There is no public REJECTED WorkflowStatus. A validated reject currently completes
+normally (COMPLETED, retained audit); UI preserves the explicit submitted REJECT and
+matching structured response/audit. It must not derive rejection from message text or
+invent a new Domain status. Rejected/stale/tampered input validation failures stay errors.
+
+Separate business outcomes (INELIGIBLE/UNKNOWN/UNDETERMINED/NO_GAP/KEEP_CURRENT_PLAN),
+clarification, approval wait, valid rejection, Agent errors, runtime invocation errors,
+network/transport errors and invalid-response/contract errors. AgentResponse.outcome,
+typed interaction payload and authoritative artifacts drive rendering; no regex/text
+routing on message. Retry is an explicit transport concern, never automatic replay
+of approval/mutation or an assumption that connection loss means no execution.
+
+P14 MVP plans conversation/input, workflow status, clarification panel, approval panel,
+structured results, reasons/evidence/sources and error/retry surfaces. P14.4 renders
+only provided canonical source_url/source_type/observed_at/verification_status and
+actual PlanDiff before/after/trigger/reason. Existing grounded explanation is display
+content; frontend makes no new LLM call, score, eligibility, gap, plan or diff decision.
+Raw JSON dumps are development debug only, not the final UI experience.
+
+UI history is current-page presentation state, not long-term Agent memory, an approval
+ledger or Domain history. Browser/AgentArts session IDs are correlation only, never
+student/competition/plan/approval IDs. Returned handles, structured context and all
+browser submissions are client-controlled and revalidated server-side. No durable
+resume on refresh is claimed; lost/expired context must be reported explicitly.
+
+#### Contract generation and compatibility evidence strategy
+
+Backend Pydantic is the contract source of truth. P14.1 should export a deliberately
+selected public JSON Schema set and generate TypeScript types with controlled
+validation/fixtures; safe view models may rename/wrap presentation fields without
+duplicating business models. Do not generate AgentState/GraphInput/HumanResume or
+maintain a drifting handwritten Domain interface. No codegen dependency is added now.
+Contract mismatches fail visibly; no guessed fields or complex version negotiation.
+
+Local and AgentArts comparison fixes AgentRequest, trusted dependencies and continuation
+context. Compare outcome, canonical business artifacts, reasons/evidence/source refs,
+Plan identity/diff, clarification/approval and errors. Only HTTP envelope details,
+correlation/session IDs, timing and Gateway metadata may differ; they cannot change
+business semantics. P14.7 proves key flows; P15 owns systematic metrics/benchmarks,
+formal evaluation and quality regression, not P14.0.
+
+| Frontend Gate | Required acceptance | Planned evidence |
+|---|---|---|
+| A Presentation Authority | UI never recomputes P5-P11 truth | P14.2/P14.4/P14.7 |
+| B Contract Fidelity | Public request/response/HITL semantics preserved | P14.1/P14.5-P14.7 |
+| C HITL Integrity | Explicit clarification/approval/reject; no browser authority | P14.3/P14.7 |
+| D Runtime Transport Isolation | Local/AgentArts differences stay in adapters | P14.1/P14.5/P14.6 |
+| E Runtime Semantic Parity | Same input/context yields equivalent authoritative outcomes | P14.6/P14.7 |
+| F Evidence Grounding | Only authoritative supplied artifacts/reasons/sources rendered | P14.4/P14.7 |
+| G Client Security | No production secrets or browser-created approval authority | P14.1/P14.3/P14.6 |
+| H Session Isolation | UI/transport sessions are not Domain identity/trusted state | P14.3/P14.5-P14.7 |
+| I Error Semantics | Business/HITL/Agent/runtime/transport/contract outcomes distinct | P14.1-P14.7 |
+| J Deployment Boundary | Invocation compatibility only; production hardening remains P16 | P14.6/P14.7 |
+
+Gates A-J are DEFINED / IMPLEMENTATION_EVIDENCE_DEFERRED at P14.0; no UI/runtime PASS
+is claimed. They are independent from frozen P12 AgentArts and P13 MCP gate families.
+P16 retains production AgentArts deployment, IAM/auth, Secrets, ARM64/SWR, observability,
+scaling, rate limiting, load/security hardening and cost controls. P15/P16 remain
+NOT_STARTED. No frontend implementation, new runtime endpoint, cloud connection,
+feature, test framework, dependency or commit is part of P14.0.
+
+Validation: backend full suite 2360 passed, zero skipped; Ruff and diff check PASS.
+Frontend existing lint/test/build: NOT_AVAILABLE (no package.json/scripts). Only
+DEVELOPMENT_PLAN, ARCHITECTURE, backend README and the new frontend baseline README
+changed; no production code, tests, dependencies, runtime routes or UI files added.
 
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 

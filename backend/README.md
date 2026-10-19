@@ -1882,7 +1882,24 @@ official data unchanged, including attack, concurrency and exception cases.
 MCP Gates M/N cover final authority lineage and cross-entry consistency. No production
 code, dependency or install/run command changes. Real Gateway smoke NOT_RUN; no cloud
 deployment, durable session, MCP mutation or frontend support is claimed. P13 Final
-Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 remains NOT_STARTED.
+Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 baseline IN_PROGRESS.
+
+## P14.0 Frontend & Runtime Invocation Compatibility Baseline
+
+P12/P13 remain CLOSED_FROZEN. P14 is IN_PROGRESS; P14.0 REVIEW_PASS.
+The frontend directory has documentation only; no app, runtime client, new endpoint
+or Local/AgentArts frontend connection is implemented. Inventory, actual contract
+fields, security boundaries, roadmap and Frontend Gates A-J are canonical in
+DEVELOPMENT_PLAN; `frontend/README.md` records the empty-directory baseline.
+
+Frontend's planned primary path is RuntimeInvocationClient -> Local/AgentArts
+transport -> existing P12 Runtime Adapter -> Agent/Graph -> Facade. MCP remains a
+separate structured capability boundary. P12.7's actual typed request/resume envelope
+is reused, not a query-only or second business API. Invocation is non-streaming first.
+The current internal GraphInput continuation must be hidden by future trusted hosting;
+safe artifact/ref presentation and generated public contracts are P14.1/P14.4/P14.5
+work. No browser secrets, client business rules or browser-created approval authority.
+P14.1-P14.7, Final Review and Closure remain NOT_STARTED; P15/P16 boundaries are unchanged.
 
 ## P12.8 End-to-End Agent Integration
 

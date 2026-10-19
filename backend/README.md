@@ -1899,7 +1899,7 @@ is reused, not a query-only or second business API. Invocation is non-streaming 
 The current internal GraphInput continuation must be hidden by future trusted hosting;
 safe artifact/ref presentation and generated public contracts are P14.1/P14.4/P14.5
 work. No browser secrets, client business rules or browser-created approval authority.
-P14.1-P14.7, Final Review and Closure remain NOT_STARTED; P15/P16 boundaries are unchanged.
+P14.2-P14.7, Final Review and Closure remain NOT_STARTED; P15/P16 boundaries are unchanged.
 
 ## P12.8 End-to-End Agent Integration
 
@@ -2116,3 +2116,22 @@ agent stack and skip as a module if LangGraph is absent. Full graph validation i
 the stack and has zero skips. Core contracts/root imports never require graph packages.
 Gate A-E PASS at graph boundary; Gate F DEFERRED. Native ARM64/CPython 3.11 wheel
 resolution passed, but no Linux/container/runtime deployment is claimed.
+
+## Frontend runtime contract consumer
+
+frontend/src/runtime contains the transport-neutral RuntimeInvocationClient and
+Local/AgentArts interfaces with offline fake tests. P12 Pydantic contracts remain
+authoritative. No UI, backend endpoint or live Runtime connection is added.
+
+From the repository root, verify checked-in public schema/type/fixture parity:
+
+```powershell
+.\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
+```
+
+Omit --check to regenerate after an authorized contract change. Internal graph and
+HumanResume authority state are never generated. The safe pending continuation_ref
+projection requires trusted hosting/authorization in P14.5; it does not expose the
+current internal P12 GraphInput output to browsers. AgentResponse refs remain refs;
+no new business result/evidence bodies are fabricated. Frontend commands and error,
+config, cancellation and continuation contracts are documented in frontend/README.md.

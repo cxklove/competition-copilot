@@ -1857,7 +1857,48 @@ transport isolation, runtime semantic parity, evidence grounding, client securit
 session isolation, error semantics and deployment boundary. They are design acceptance
 definitions, with implementation evidence assigned to P14.1-P14.7. P15 owns systematic
 evaluation; P16 owns production auth/IAM/Secrets/ARM64/SWR/observability/scaling/load/
-security/cost hardening. This baseline adds no app, client, endpoint or deployment.
+security/cost hardening. The baseline itself adds no app, client, endpoint or deployment; the contract implementation is described below.
+
+### Frontend runtime client contract boundary
+
+```text
+Frontend (future UI)
+  -> RuntimeInvocationClient (JSON projection, validation, safe error normalization)
+  -> RuntimeTransport
+       |-- LocalRuntimeTransport interface
+       `-- AgentArtsRuntimeTransport interface
+  -> P12 Runtime Adapter -> Agent -> Graph -> same Capability Facade
+```
+
+The client contract is implemented without UI or live HTTP/cloud mechanics. invoke
+accepts unchanged AgentRequest; resume accepts the actual typed P12 continuation
+input. exchange retains only the safe public response wrapper/opaque continuation_ref.
+Both transports consume identical schemas and semantics. FakeRuntimeTransport is a
+preset test driver, never a business authority. MCP remains a separate capability path.
+
+Backend Pydantic models generate selected checked-in JSON schemas/TypeScript types
+and validated fixtures using scripts/export_frontend_contracts.py. Offline drift tests
+compare them exactly. Ajv validates without coercion/default injection/extra removal;
+contract guards enforce identity, outcome/HITL consistency and audit binding.
+AgentState/GraphInput/HumanResume are excluded. PublicRuntimeResult reuses P12
+AgentResponse/RuntimeError and requires an opaque continuation_ref for pending HITL;
+raw internal continuation fails closed. Trusted hosting must implement authorized
+handle retention/resolution later, without changing P12 or trusting browser state.
+
+AgentResponse contains authoritative refs, not full evidence/result/PlanDiff bodies.
+The client preserves supplied refs/time/URL strings and never invents missing facts.
+Canonical artifacts remain a later authorized presentation concern. Core FAILED
+responses, business negatives and HITL/rejection remain structured Agent responses.
+Only transport, invalid contract, runtime envelope failure and cancellation become
+TRANSPORT_ERROR/CONTRACT_ERROR/RUNTIME_ERROR/ABORTED. No automatic retry, session
+memory, client-generated IDs/approval, business computations or response-text routing.
+
+Public mode/baseUrl/runtimeName config excludes secrets/credential URLs/query tokens;
+production auth stays outside the browser. Metadata never enters business data.
+AbortSignal is transport cancellation, not approval rejection or proof of no execution.
+Primary contract is non-streaming. Contract-level Gates A-D/F-J have evidence from
+fake tests; Gate E is CONTRACT_PASS_REAL_RUNTIME_DEFERRED. Real transports, UI,
+authorized hosting and production deployment remain distinct later work.
 
 ## 14. Repository Structure
 

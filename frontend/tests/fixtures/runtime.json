@@ -1,0 +1,4664 @@
+{
+  "agent_error": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": {
+        "code": "CAPABILITY_EXECUTION_FAILED",
+        "message": "Capability unavailable"
+      },
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "Fixture result",
+      "outcome": "FAILED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "approval": {
+    "continuation": null,
+    "continuation_ref": "opaque-2",
+    "error": null,
+    "response": {
+      "approval_request": {
+        "action": "PLAN_REVISION",
+        "affected_scope_ref": {
+          "kind": "AFFECTED_SCOPE",
+          "ref_id": "scope-1"
+        },
+        "approval_request_id": "approval-1",
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "FIXTURE_REVISION",
+              "result": {
+                "kind": "REPLANNING_DECISION",
+                "ref_id": "decision-1"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "EVIDENCE",
+              "ref_id": "evidence-1"
+            },
+            {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            }
+          ]
+        },
+        "before_plan": {
+          "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "milestone_ids": [],
+          "plan_id": "plan-1",
+          "student_id": "student-1",
+          "target": {
+            "competition_id": "competition-1",
+            "edition_id": "edition-1",
+            "track_id": null
+          },
+          "updated_at": "2026-10-19T08:00:00+08:00",
+          "version": 1
+        },
+        "created_at": "2026-10-19T00:00:00Z",
+        "decision_ref": {
+          "kind": "REPLANNING_DECISION",
+          "ref_id": "decision-1"
+        },
+        "instruction_refs": [
+          {
+            "kind": "REVISION_INSTRUCTION",
+            "ref_id": "instruction-1"
+          }
+        ],
+        "invocation_id": "invocation-1",
+        "proposed_after_plan": null,
+        "proposed_input_ref": {
+          "kind": "REPLANNING_INPUT",
+          "ref_id": "input-1"
+        },
+        "resolution_ref": null,
+        "source_request_id": "request-1",
+        "summary": "Fixture proposed revision"
+      },
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "Fixture result",
+      "outcome": "WAITING_FOR_APPROVAL",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "approve_reply": {
+    "approval": {
+      "approval_request_id": "approval-1",
+      "comment": null,
+      "decision": "APPROVE",
+      "source_request_id": "request-1",
+      "submitted_at": "2026-10-19T00:00:00Z"
+    },
+    "clarification": null,
+    "continuation_ref": "opaque-2",
+    "message": null,
+    "request": null
+  },
+  "behavior": [
+    {
+      "expected": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "request-1",
+          "user_message": "Check competition"
+        }
+      },
+      "kind": "input",
+      "name": "request identity 'request-1'",
+      "raw": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "request-1",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "request-1",
+          "user_message": "Check competition"
+        }
+      },
+      "kind": "input",
+      "name": "request identity ' request-1 '",
+      "raw": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": " request-1 ",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "request identity '   '",
+      "raw": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "   ",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "request identity ''",
+      "raw": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "request identity True",
+      "raw": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": true,
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "request-1\u001f",
+          "user_message": "Check competition"
+        }
+      },
+      "kind": "input",
+      "name": "request identity '\\x85request-1\\x1f'",
+      "raw": {
+        "request": {
+          "context": {
+            "competition_id": null,
+            "edition_id": null,
+            "plan_ref": null,
+            "profile_ref": null,
+            "student_id": null,
+            "track_id": null
+          },
+          "conversation_id": null,
+          "request_id": "\u0085request-1\u001f",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "valid message",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "response message 'valid message'",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "valid message",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "valid message",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "response message ' valid message '",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": " valid message ",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response message ''",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response message '   '",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "   ",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response message 123",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": 123,
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "\ufeff",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "response message '\\ufeff'",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "\ufeff",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "before_plan milestones []",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "proposed_after_plan milestones []",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-1",
+                "milestone-2"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "before_plan milestones ['milestone-2', 'milestone-1']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-2",
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-1",
+                "milestone-2"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "proposed_after_plan milestones ['milestone-2', 'milestone-1']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-2",
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "before_plan milestones ['milestone-1', 'milestone-1']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-1",
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "proposed_after_plan milestones ['milestone-1', 'milestone-1']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-1",
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "before_plan milestones [' milestone-1 ', 'milestone-1']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                " milestone-1 ",
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "proposed_after_plan milestones [' milestone-1 ', 'milestone-1']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                " milestone-1 ",
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "before_plan milestones [' milestone-1 ']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                " milestone-1 "
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "milestone-1"
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "proposed_after_plan milestones [' milestone-1 ']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                " milestone-1 "
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "before_plan milestones ['   ']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "   "
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "proposed_after_plan milestones ['   ']",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [
+                "   "
+              ],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "approval": {
+          "approval_request_id": "approval-1",
+          "comment": null,
+          "decision": "APPROVE",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z"
+        },
+        "clarification": null,
+        "continuation_ref": "opaque-2",
+        "message": null,
+        "request": null
+      },
+      "kind": "input",
+      "name": "approval identity ' approval-1 '",
+      "raw": {
+        "approval": {
+          "approval_request_id": " approval-1 ",
+          "comment": null,
+          "decision": "APPROVE",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z"
+        },
+        "clarification": null,
+        "continuation_ref": "opaque-2",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "approval identity '   '",
+      "raw": {
+        "approval": {
+          "approval_request_id": "   ",
+          "comment": null,
+          "decision": "APPROVE",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z"
+        },
+        "clarification": null,
+        "continuation_ref": "opaque-2",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "clarification blank question",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-1",
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": {
+            "clarification_id": "question-1",
+            "fields": [
+              "COMPETITION"
+            ],
+            "question": "   ",
+            "reason": "AMBIGUOUS_TARGET",
+            "source_request_id": "request-1"
+          },
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "NEEDS_CLARIFICATION",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "clarification duplicate fields",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-1",
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": {
+            "clarification_id": "question-1",
+            "fields": [
+              "COMPETITION",
+              "COMPETITION"
+            ],
+            "question": "Which competition?",
+            "reason": "AMBIGUOUS_TARGET",
+            "source_request_id": "request-1"
+          },
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "NEEDS_CLARIFICATION",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-1",
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": {
+            "clarification_id": "question-1",
+            "fields": [
+              "COMPETITION",
+              "TRACK"
+            ],
+            "question": "Which competition?",
+            "reason": "AMBIGUOUS_TARGET",
+            "source_request_id": "request-1"
+          },
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "NEEDS_CLARIFICATION",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "clarification canonical fields",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-1",
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": {
+            "clarification_id": "question-1",
+            "fields": [
+              "TRACK",
+              "COMPETITION"
+            ],
+            "question": "Which competition?",
+            "reason": "AMBIGUOUS_TARGET",
+            "source_request_id": "request-1"
+          },
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "NEEDS_CLARIFICATION",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "clarification empty reply",
+      "raw": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {}
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "arguments_json": null,
+            "competition_id": "competition-1",
+            "edition_id": null,
+            "intent": null,
+            "invocation": null,
+            "plan_ref": null,
+            "student": null,
+            "track_id": null
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      },
+      "kind": "input",
+      "name": "clarification normalized target",
+      "raw": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "arguments_json": null,
+            "competition_id": " competition-1 ",
+            "edition_id": null,
+            "intent": null,
+            "invocation": null,
+            "plan_ref": null,
+            "student": null,
+            "track_id": null
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "approval duplicate instructions",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "same"
+              },
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "same"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "approval wrong decision kind",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "SOURCE",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "approval missing evidence",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response duplicate audit",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              },
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Completed fixture",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Completed fixture",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "response reversed audit",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Completed fixture",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response unbound reason",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": null,
+        "error": null,
+        "response": {
+          "approval_request": null,
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "missing"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Completed fixture",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response interaction mismatch",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "other",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "output",
+      "name": "response payload mismatch",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "COMPLETED",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T00:00:00.123456Z",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      },
+      "kind": "output",
+      "name": "approval UTC normalization",
+      "raw": {
+        "continuation": null,
+        "continuation_ref": "opaque-2",
+        "error": null,
+        "response": {
+          "approval_request": {
+            "action": "PLAN_REVISION",
+            "affected_scope_ref": {
+              "kind": "AFFECTED_SCOPE",
+              "ref_id": "scope-1"
+            },
+            "approval_request_id": "approval-1",
+            "audit": {
+              "reasons": [
+                {
+                  "reason_code": "FIXTURE_REVISION",
+                  "result": {
+                    "kind": "REPLANNING_DECISION",
+                    "ref_id": "decision-1"
+                  }
+                }
+              ],
+              "results": [
+                {
+                  "kind": "EVIDENCE",
+                  "ref_id": "evidence-1"
+                },
+                {
+                  "kind": "REPLANNING_DECISION",
+                  "ref_id": "decision-1"
+                }
+              ]
+            },
+            "before_plan": {
+              "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "milestone_ids": [],
+              "plan_id": "plan-1",
+              "student_id": "student-1",
+              "target": {
+                "competition_id": "competition-1",
+                "edition_id": "edition-1",
+                "track_id": null
+              },
+              "updated_at": "2026-10-19T08:00:00+08:00",
+              "version": 1
+            },
+            "created_at": "2026-10-19T08:00:00.123456+08:00",
+            "decision_ref": {
+              "kind": "REPLANNING_DECISION",
+              "ref_id": "decision-1"
+            },
+            "instruction_refs": [
+              {
+                "kind": "REVISION_INSTRUCTION",
+                "ref_id": "instruction-1"
+              }
+            ],
+            "invocation_id": "invocation-1",
+            "proposed_after_plan": null,
+            "proposed_input_ref": {
+              "kind": "REPLANNING_INPUT",
+              "ref_id": "input-1"
+            },
+            "resolution_ref": null,
+            "source_request_id": "request-1",
+            "summary": "Fixture proposed revision"
+          },
+          "audit": {
+            "reasons": [
+              {
+                "reason_code": "FIXTURE_REASON",
+                "result": {
+                  "kind": "ELIGIBILITY_RESULT",
+                  "ref_id": "result-1"
+                }
+              }
+            ],
+            "results": [
+              {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "result-1"
+              },
+              {
+                "kind": "EVIDENCE",
+                "ref_id": "evidence-1"
+              },
+              {
+                "kind": "PLAN_DIFF",
+                "ref_id": "diff-1"
+              },
+              {
+                "kind": "SOURCE",
+                "ref_id": "https://example.org/official"
+              }
+            ]
+          },
+          "clarification": null,
+          "error": null,
+          "intent": "CHECK_ELIGIBILITY",
+          "message": "Fixture result",
+          "outcome": "WAITING_FOR_APPROVAL",
+          "plan_refs": [],
+          "request_id": "request-1"
+        }
+      }
+    },
+    {
+      "expected": {
+        "approval": {
+          "approval_request_id": "approval-1",
+          "comment": null,
+          "decision": "APPROVE",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00.123456Z"
+        },
+        "clarification": null,
+        "continuation_ref": "opaque-2",
+        "message": null,
+        "request": null
+      },
+      "kind": "input",
+      "name": "reply UTC normalization",
+      "raw": {
+        "approval": {
+          "approval_request_id": "approval-1",
+          "comment": null,
+          "decision": "APPROVE",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T08:00:00.123456+08:00"
+        },
+        "clarification": null,
+        "continuation_ref": "opaque-2",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "context parent required",
+      "raw": {
+        "request": {
+          "context": {
+            "edition_id": "edition-1"
+          },
+          "conversation_id": null,
+          "request_id": "request-1",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "context wrong profile kind",
+      "raw": {
+        "request": {
+          "context": {
+            "profile_ref": {
+              "kind": "SOURCE",
+              "ref_id": "profile-1"
+            }
+          },
+          "conversation_id": null,
+          "request_id": "request-1",
+          "user_message": "Check competition"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "clarification invocation approval required",
+      "raw": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "invocation": {
+              "arguments_ref": {
+                "kind": "CAPABILITY_ARGUMENTS",
+                "ref_id": "arguments-1"
+              },
+              "capability": "revise_plan",
+              "intent": "REQUEST_PLAN_REVISION",
+              "invocation_id": "invocation-1",
+              "source_request_id": "request-1"
+            }
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "invocation": {
+              "arguments_ref": {
+                "kind": "CAPABILITY_ARGUMENTS",
+                "ref_id": "arguments-1"
+              },
+              "capability": "revise_plan",
+              "intent": "REQUEST_PLAN_REVISION",
+              "invocation_id": "invocation-1",
+              "requires_approval": true,
+              "source_request_id": "request-1"
+            }
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      },
+      "kind": "input",
+      "name": "clarification typed proposal",
+      "raw": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "invocation": {
+              "arguments_ref": {
+                "kind": "CAPABILITY_ARGUMENTS",
+                "ref_id": "arguments-1"
+              },
+              "capability": "revise_plan",
+              "intent": "REQUEST_PLAN_REVISION",
+              "invocation_id": "invocation-1",
+              "requires_approval": true,
+              "source_request_id": "request-1"
+            }
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "student": {
+              "id": "student-1",
+              "interests": [
+                "coding"
+              ],
+              "skills": [
+                {
+                  "note": "practiced",
+                  "skill_id": "coding"
+                }
+              ]
+            }
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      },
+      "kind": "input",
+      "name": "clarification profile normalization",
+      "raw": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "student": {
+              "id": " student-1 ",
+              "interests": [
+                " coding ",
+                "coding"
+              ],
+              "skills": [
+                {
+                  "note": " practiced ",
+                  "skill_id": " coding "
+                }
+              ]
+            }
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      }
+    },
+    {
+      "expected": null,
+      "kind": "input",
+      "name": "clarification duplicate skill identity",
+      "raw": {
+        "approval": null,
+        "clarification": {
+          "clarification_id": "question-1",
+          "source_request_id": "request-1",
+          "submitted_at": "2026-10-19T00:00:00Z",
+          "values": {
+            "student": {
+              "id": " student-1 ",
+              "interests": [
+                " coding ",
+                "coding"
+              ],
+              "skills": [
+                {
+                  "note": " practiced ",
+                  "skill_id": " coding "
+                },
+                {
+                  "skill_id": "coding"
+                }
+              ]
+            }
+          }
+        },
+        "continuation_ref": "opaque-1",
+        "message": null,
+        "request": null
+      }
+    }
+  ],
+  "clarification": {
+    "continuation": null,
+    "continuation_ref": "opaque-1",
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": {
+        "clarification_id": "question-1",
+        "fields": [
+          "COMPETITION"
+        ],
+        "question": "Which competition?",
+        "reason": "AMBIGUOUS_TARGET",
+        "source_request_id": "request-1"
+      },
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "Fixture result",
+      "outcome": "NEEDS_CLARIFICATION",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "clarification_reply": {
+    "approval": null,
+    "clarification": {
+      "clarification_id": "question-1",
+      "source_request_id": "request-1",
+      "submitted_at": "2026-10-19T00:00:00Z",
+      "values": {
+        "arguments_json": null,
+        "competition_id": "competition-1",
+        "edition_id": null,
+        "intent": null,
+        "invocation": null,
+        "plan_ref": null,
+        "student": null,
+        "track_id": null
+      }
+    },
+    "continuation_ref": "opaque-1",
+    "message": null,
+    "request": null
+  },
+  "completed": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "Completed fixture",
+      "outcome": "COMPLETED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "ineligible": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "INELIGIBLE fixture",
+      "outcome": "COMPLETED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "reject": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "Revision rejected fixture",
+      "outcome": "COMPLETED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  },
+  "reject_reply": {
+    "approval": {
+      "approval_request_id": "approval-1",
+      "comment": null,
+      "decision": "REJECT",
+      "source_request_id": "request-1",
+      "submitted_at": "2026-10-19T00:00:00Z"
+    },
+    "clarification": null,
+    "continuation_ref": "opaque-2",
+    "message": null,
+    "request": null
+  },
+  "request": {
+    "context": {
+      "competition_id": null,
+      "edition_id": null,
+      "plan_ref": null,
+      "profile_ref": null,
+      "student_id": null,
+      "track_id": null
+    },
+    "conversation_id": null,
+    "request_id": "request-1",
+    "user_message": "Check competition"
+  },
+  "runtime_error": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": {
+      "code": "CORE_EXECUTION_ERROR",
+      "message": "CORE_EXECUTION_ERROR"
+    },
+    "response": null
+  },
+  "unknown": {
+    "continuation": null,
+    "continuation_ref": null,
+    "error": null,
+    "response": {
+      "approval_request": null,
+      "audit": {
+        "reasons": [
+          {
+            "reason_code": "FIXTURE_REASON",
+            "result": {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "result-1"
+            }
+          }
+        ],
+        "results": [
+          {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "result-1"
+          },
+          {
+            "kind": "EVIDENCE",
+            "ref_id": "evidence-1"
+          },
+          {
+            "kind": "PLAN_DIFF",
+            "ref_id": "diff-1"
+          },
+          {
+            "kind": "SOURCE",
+            "ref_id": "https://example.org/official"
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "intent": "CHECK_ELIGIBILITY",
+      "message": "UNKNOWN fixture",
+      "outcome": "COMPLETED",
+      "plan_refs": [],
+      "request_id": "request-1"
+    }
+  }
+}

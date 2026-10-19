@@ -1,0 +1,2723 @@
+{
+  "AgentArtsInvocationEnvelope": {
+    "$defs": {
+      "AgentContext": {
+        "additionalProperties": false,
+        "properties": {
+          "competition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Competition Id"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Edition Id"
+          },
+          "plan_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "profile_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ResultReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "student_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Student Id"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "title": "AgentContext",
+        "type": "object"
+      },
+      "AgentIntent": {
+        "enum": [
+          "DISCOVER_COMPETITIONS",
+          "GET_COMPETITION_DETAILS",
+          "CHECK_ELIGIBILITY",
+          "GET_RECOMMENDATIONS",
+          "ANALYZE_SKILL_GAP",
+          "BUILD_PLAN",
+          "CHECK_COMPETITION_CHANGES",
+          "EXPLAIN_REPLANNING",
+          "REQUEST_PLAN_REVISION",
+          "APPROVE_PLAN_REVISION",
+          "REJECT_PLAN_REVISION",
+          "UNKNOWN"
+        ],
+        "title": "AgentIntent",
+        "type": "string"
+      },
+      "AgentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "context": {
+            "$ref": "#/$defs/AgentContext"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Conversation Id"
+          },
+          "request_id": {
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          },
+          "user_message": {
+            "minLength": 1,
+            "title": "User Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "user_message"
+        ],
+        "title": "AgentRequest",
+        "type": "object"
+      },
+      "ApprovalDecision": {
+        "enum": [
+          "APPROVE",
+          "REJECT"
+        ],
+        "title": "ApprovalDecision",
+        "type": "string"
+      },
+      "ApprovalResponse": {
+        "additionalProperties": false,
+        "description": "Explicit caller submission; later authorized boundary verifies provenance.",
+        "properties": {
+          "approval_request_id": {
+            "minLength": 1,
+            "title": "Approval Request Id",
+            "type": "string"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Comment"
+          },
+          "decision": {
+            "$ref": "#/$defs/ApprovalDecision"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approval_request_id",
+          "source_request_id",
+          "decision",
+          "submitted_at"
+        ],
+        "title": "ApprovalResponse",
+        "type": "object"
+      },
+      "CapabilityId": {
+        "description": "Existing capabilities, not an executable registry or routing policy.",
+        "enum": [
+          "list_competitions",
+          "get_competition",
+          "list_competition_editions",
+          "get_competition_edition",
+          "list_edition_tracks",
+          "get_competition_track",
+          "check_eligibility",
+          "get_recommendations",
+          "analyze_skill_gap",
+          "build_plan",
+          "check_competition_changes",
+          "explain_replanning",
+          "revise_plan",
+          "diff_competition_snapshot",
+          "build_competition_snapshot",
+          "derive_competition_events",
+          "analyze_event_impact",
+          "decide_replanning"
+        ],
+        "title": "CapabilityId",
+        "type": "string"
+      },
+      "CapabilityInvocationRequest": {
+        "additionalProperties": false,
+        "description": "Proposal only; argument artifact is validated by future capability facade.",
+        "properties": {
+          "arguments_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "capability": {
+            "$ref": "#/$defs/CapabilityId"
+          },
+          "intent": {
+            "$ref": "#/$defs/AgentIntent"
+          },
+          "invocation_id": {
+            "minLength": 1,
+            "title": "Invocation Id",
+            "type": "string"
+          },
+          "requires_approval": {
+            "default": false,
+            "title": "Requires Approval",
+            "type": "boolean"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "invocation_id",
+          "source_request_id",
+          "intent",
+          "capability",
+          "arguments_ref"
+        ],
+        "title": "CapabilityInvocationRequest",
+        "type": "object"
+      },
+      "ClarificationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "clarification_id": {
+            "minLength": 1,
+            "title": "Clarification Id",
+            "type": "string"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "values": {
+            "$ref": "#/$defs/ClarificationValues"
+          }
+        },
+        "required": [
+          "clarification_id",
+          "source_request_id",
+          "values",
+          "submitted_at"
+        ],
+        "title": "ClarificationResponse",
+        "type": "object"
+      },
+      "ClarificationValues": {
+        "additionalProperties": false,
+        "properties": {
+          "arguments_json": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Arguments Json"
+          },
+          "competition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Competition Id"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Edition Id"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AgentIntent"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "invocation": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CapabilityInvocationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "plan_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "student": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/StudentProfile"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "title": "ClarificationValues",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "EducationLevel": {
+        "enum": [
+          "undergraduate",
+          "graduate"
+        ],
+        "title": "EducationLevel",
+        "type": "string"
+      },
+      "HumanMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "interaction_id": {
+            "minLength": 1,
+            "title": "Interaction Id",
+            "type": "string"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "interaction_id",
+          "source_request_id",
+          "text",
+          "submitted_at"
+        ],
+        "title": "HumanMessage",
+        "type": "object"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "ReferenceKind": {
+        "enum": [
+          "PROFILE",
+          "CAPABILITY_ARGUMENTS",
+          "TOOL_RESULT",
+          "ELIGIBILITY_RESULT",
+          "RECOMMENDATION_RESULT",
+          "SKILL_GAP_RESULT",
+          "COMPETITION_RESULT",
+          "EVENT",
+          "IMPACT_ANALYSIS",
+          "REPLANNING_DECISION",
+          "AFFECTED_SCOPE",
+          "SCOPE_RESOLUTION",
+          "REPLANNING_INPUT",
+          "REVISION_INSTRUCTION",
+          "PLAN_DIFF",
+          "EVIDENCE",
+          "SOURCE",
+          "AUTHORITY",
+          "APPROVAL_REQUEST",
+          "APPROVAL_RESPONSE",
+          "CLARIFICATION_RESPONSE"
+        ],
+        "title": "ReferenceKind",
+        "type": "string"
+      },
+      "ResultReference": {
+        "additionalProperties": false,
+        "description": "Reference to an existing artifact, not a duplicated Domain result.\n\nref_id may be a producer's canonical fingerprint when it has no native ID.\nThis contract validates shape, not artifact existence or factual truth.",
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/ReferenceKind"
+          },
+          "ref_id": {
+            "minLength": 1,
+            "title": "Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref_id"
+        ],
+        "title": "ResultReference",
+        "type": "object"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
+      },
+      "StudentProfile": {
+        "additionalProperties": false,
+        "description": "Student details explicitly provided for later competition decisions.",
+        "properties": {
+          "education_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EducationLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "goals": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grade"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "interests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "major": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Major"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "School"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/$defs/StudentSkill"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "weekly_available_hours": {
+            "anyOf": [
+              {
+                "maximum": 168,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Available Hours"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "StudentProfile",
+        "type": "object"
+      },
+      "StudentSkill": {
+        "additionalProperties": false,
+        "description": "A student's current state for one standard skill.",
+        "properties": {
+          "level": {
+            "$ref": "#/$defs/SkillLevel",
+            "default": "unknown"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          },
+          "self_assessed": {
+            "default": true,
+            "title": "Self Assessed",
+            "type": "boolean"
+          },
+          "skill_id": {
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id"
+        ],
+        "title": "StudentSkill",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Either a new request or an opaque trusted-continuation ref and one reply.\n\nNo client-supplied AgentState, GraphInput, authority or execution context.\nReferences are lookup keys, not authorization; the injected application\nboundary must authorize their resolution for the calling integration.",
+    "properties": {
+      "approval": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ApprovalResponse"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "clarification": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ClarificationResponse"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "continuation_ref": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Continuation Ref"
+      },
+      "message": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/HumanMessage"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "request": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AgentRequest"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "title": "AgentArtsInvocationEnvelope",
+    "type": "object"
+  },
+  "AgentRequest": {
+    "$defs": {
+      "AgentContext": {
+        "additionalProperties": false,
+        "properties": {
+          "competition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Competition Id"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Edition Id"
+          },
+          "plan_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "profile_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ResultReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "student_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Student Id"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "title": "AgentContext",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "ReferenceKind": {
+        "enum": [
+          "PROFILE",
+          "CAPABILITY_ARGUMENTS",
+          "TOOL_RESULT",
+          "ELIGIBILITY_RESULT",
+          "RECOMMENDATION_RESULT",
+          "SKILL_GAP_RESULT",
+          "COMPETITION_RESULT",
+          "EVENT",
+          "IMPACT_ANALYSIS",
+          "REPLANNING_DECISION",
+          "AFFECTED_SCOPE",
+          "SCOPE_RESOLUTION",
+          "REPLANNING_INPUT",
+          "REVISION_INSTRUCTION",
+          "PLAN_DIFF",
+          "EVIDENCE",
+          "SOURCE",
+          "AUTHORITY",
+          "APPROVAL_REQUEST",
+          "APPROVAL_RESPONSE",
+          "CLARIFICATION_RESPONSE"
+        ],
+        "title": "ReferenceKind",
+        "type": "string"
+      },
+      "ResultReference": {
+        "additionalProperties": false,
+        "description": "Reference to an existing artifact, not a duplicated Domain result.\n\nref_id may be a producer's canonical fingerprint when it has no native ID.\nThis contract validates shape, not artifact existence or factual truth.",
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/ReferenceKind"
+          },
+          "ref_id": {
+            "minLength": 1,
+            "title": "Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref_id"
+        ],
+        "title": "ResultReference",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "context": {
+        "$ref": "#/$defs/AgentContext"
+      },
+      "conversation_id": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Conversation Id"
+      },
+      "request_id": {
+        "minLength": 1,
+        "title": "Request Id",
+        "type": "string"
+      },
+      "user_message": {
+        "minLength": 1,
+        "title": "User Message",
+        "type": "string"
+      }
+    },
+    "required": [
+      "request_id",
+      "user_message"
+    ],
+    "title": "AgentRequest",
+    "type": "object"
+  },
+  "AgentResponse": {
+    "$defs": {
+      "AgentError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/$defs/AgentErrorCode"
+          },
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "AgentError",
+        "type": "object"
+      },
+      "AgentErrorCode": {
+        "enum": [
+          "UNSUPPORTED_INTENT",
+          "MISSING_CONTEXT",
+          "TOOL_UNAVAILABLE",
+          "INVALID_WORKFLOW_TRANSITION",
+          "APPROVAL_REQUIRED",
+          "SERIALIZATION_ERROR",
+          "CAPABILITY_EXECUTION_FAILED"
+        ],
+        "title": "AgentErrorCode",
+        "type": "string"
+      },
+      "AgentIntent": {
+        "enum": [
+          "DISCOVER_COMPETITIONS",
+          "GET_COMPETITION_DETAILS",
+          "CHECK_ELIGIBILITY",
+          "GET_RECOMMENDATIONS",
+          "ANALYZE_SKILL_GAP",
+          "BUILD_PLAN",
+          "CHECK_COMPETITION_CHANGES",
+          "EXPLAIN_REPLANNING",
+          "REQUEST_PLAN_REVISION",
+          "APPROVE_PLAN_REVISION",
+          "REJECT_PLAN_REVISION",
+          "UNKNOWN"
+        ],
+        "title": "AgentIntent",
+        "type": "string"
+      },
+      "ApprovalAction": {
+        "enum": [
+          "PLAN_REVISION"
+        ],
+        "title": "ApprovalAction",
+        "type": "string"
+      },
+      "ApprovalRequest": {
+        "additionalProperties": false,
+        "description": "A proposal, never HUMAN_APPROVED authority or semantic coverage proof.",
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/ApprovalAction"
+          },
+          "affected_scope_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "approval_request_id": {
+            "minLength": 1,
+            "title": "Approval Request Id",
+            "type": "string"
+          },
+          "audit": {
+            "$ref": "#/$defs/AuditReferences"
+          },
+          "before_plan": {
+            "$ref": "#/$defs/PlanReference"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decision_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "instruction_refs": {
+            "items": {
+              "$ref": "#/$defs/ResultReference"
+            },
+            "minItems": 1,
+            "title": "Instruction Refs",
+            "type": "array"
+          },
+          "invocation_id": {
+            "minLength": 1,
+            "title": "Invocation Id",
+            "type": "string"
+          },
+          "proposed_after_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "proposed_input_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "resolution_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ResultReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          },
+          "summary": {
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approval_request_id",
+          "source_request_id",
+          "invocation_id",
+          "action",
+          "summary",
+          "before_plan",
+          "decision_ref",
+          "affected_scope_ref",
+          "proposed_input_ref",
+          "instruction_refs",
+          "audit",
+          "created_at"
+        ],
+        "title": "ApprovalRequest",
+        "type": "object"
+      },
+      "AuditReferences": {
+        "additionalProperties": false,
+        "description": "Unordered reference sets with canonical JSON order; no evidence invention.",
+        "properties": {
+          "reasons": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ReasonReference"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "results": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ResultReference"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "title": "AuditReferences",
+        "type": "object"
+      },
+      "ClarificationReason": {
+        "enum": [
+          "MISSING_REQUIRED_CONTEXT",
+          "AMBIGUOUS_INTENT",
+          "AMBIGUOUS_TARGET",
+          "MISSING_STUDENT_PROFILE",
+          "MISSING_APPROVAL_CONTEXT"
+        ],
+        "title": "ClarificationReason",
+        "type": "string"
+      },
+      "ClarificationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "clarification_id": {
+            "minLength": 1,
+            "title": "Clarification Id",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/$defs/ContextField"
+            },
+            "minItems": 1,
+            "title": "Fields",
+            "type": "array"
+          },
+          "question": {
+            "minLength": 1,
+            "title": "Question",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/$defs/ClarificationReason"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "clarification_id",
+          "source_request_id",
+          "reason",
+          "fields",
+          "question"
+        ],
+        "title": "ClarificationRequest",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "ContextField": {
+        "enum": [
+          "INTENT",
+          "STUDENT_PROFILE",
+          "COMPETITION",
+          "EDITION",
+          "TRACK",
+          "PLAN",
+          "APPROVAL_CONTEXT",
+          "CAPABILITY_INVOCATION",
+          "CAPABILITY_ARGUMENTS"
+        ],
+        "title": "ContextField",
+        "type": "string"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "ReasonReference": {
+        "additionalProperties": false,
+        "properties": {
+          "reason_code": {
+            "minLength": 1,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/$defs/ResultReference"
+          }
+        },
+        "required": [
+          "result",
+          "reason_code"
+        ],
+        "title": "ReasonReference",
+        "type": "object"
+      },
+      "ReferenceKind": {
+        "enum": [
+          "PROFILE",
+          "CAPABILITY_ARGUMENTS",
+          "TOOL_RESULT",
+          "ELIGIBILITY_RESULT",
+          "RECOMMENDATION_RESULT",
+          "SKILL_GAP_RESULT",
+          "COMPETITION_RESULT",
+          "EVENT",
+          "IMPACT_ANALYSIS",
+          "REPLANNING_DECISION",
+          "AFFECTED_SCOPE",
+          "SCOPE_RESOLUTION",
+          "REPLANNING_INPUT",
+          "REVISION_INSTRUCTION",
+          "PLAN_DIFF",
+          "EVIDENCE",
+          "SOURCE",
+          "AUTHORITY",
+          "APPROVAL_REQUEST",
+          "APPROVAL_RESPONSE",
+          "CLARIFICATION_RESPONSE"
+        ],
+        "title": "ReferenceKind",
+        "type": "string"
+      },
+      "ResultReference": {
+        "additionalProperties": false,
+        "description": "Reference to an existing artifact, not a duplicated Domain result.\n\nref_id may be a producer's canonical fingerprint when it has no native ID.\nThis contract validates shape, not artifact existence or factual truth.",
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/ReferenceKind"
+          },
+          "ref_id": {
+            "minLength": 1,
+            "title": "Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref_id"
+        ],
+        "title": "ResultReference",
+        "type": "object"
+      },
+      "WorkflowStatus": {
+        "enum": [
+          "RECEIVED",
+          "NEEDS_CLARIFICATION",
+          "READY_TO_ROUTE",
+          "WAITING_FOR_APPROVAL",
+          "READY_TO_EXECUTE",
+          "COMPLETED",
+          "FAILED"
+        ],
+        "title": "WorkflowStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "approval_request": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ApprovalRequest"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "audit": {
+        "$ref": "#/$defs/AuditReferences"
+      },
+      "clarification": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ClarificationRequest"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "error": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AgentError"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "intent": {
+        "$ref": "#/$defs/AgentIntent"
+      },
+      "message": {
+        "minLength": 1,
+        "title": "Message",
+        "type": "string"
+      },
+      "outcome": {
+        "$ref": "#/$defs/WorkflowStatus"
+      },
+      "plan_refs": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/PlanReference"
+        },
+        "title": "Plan Refs",
+        "type": "array"
+      },
+      "request_id": {
+        "minLength": 1,
+        "title": "Request Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "request_id",
+      "intent",
+      "outcome",
+      "message"
+    ],
+    "title": "AgentResponse",
+    "type": "object"
+  },
+  "ApprovalResponse": {
+    "$defs": {
+      "ApprovalDecision": {
+        "enum": [
+          "APPROVE",
+          "REJECT"
+        ],
+        "title": "ApprovalDecision",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Explicit caller submission; later authorized boundary verifies provenance.",
+    "properties": {
+      "approval_request_id": {
+        "minLength": 1,
+        "title": "Approval Request Id",
+        "type": "string"
+      },
+      "comment": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Comment"
+      },
+      "decision": {
+        "$ref": "#/$defs/ApprovalDecision"
+      },
+      "source_request_id": {
+        "minLength": 1,
+        "title": "Source Request Id",
+        "type": "string"
+      },
+      "submitted_at": {
+        "format": "date-time",
+        "title": "Submitted At",
+        "type": "string"
+      }
+    },
+    "required": [
+      "approval_request_id",
+      "source_request_id",
+      "decision",
+      "submitted_at"
+    ],
+    "title": "ApprovalResponse",
+    "type": "object"
+  },
+  "ClarificationResponse": {
+    "$defs": {
+      "AgentIntent": {
+        "enum": [
+          "DISCOVER_COMPETITIONS",
+          "GET_COMPETITION_DETAILS",
+          "CHECK_ELIGIBILITY",
+          "GET_RECOMMENDATIONS",
+          "ANALYZE_SKILL_GAP",
+          "BUILD_PLAN",
+          "CHECK_COMPETITION_CHANGES",
+          "EXPLAIN_REPLANNING",
+          "REQUEST_PLAN_REVISION",
+          "APPROVE_PLAN_REVISION",
+          "REJECT_PLAN_REVISION",
+          "UNKNOWN"
+        ],
+        "title": "AgentIntent",
+        "type": "string"
+      },
+      "CapabilityId": {
+        "description": "Existing capabilities, not an executable registry or routing policy.",
+        "enum": [
+          "list_competitions",
+          "get_competition",
+          "list_competition_editions",
+          "get_competition_edition",
+          "list_edition_tracks",
+          "get_competition_track",
+          "check_eligibility",
+          "get_recommendations",
+          "analyze_skill_gap",
+          "build_plan",
+          "check_competition_changes",
+          "explain_replanning",
+          "revise_plan",
+          "diff_competition_snapshot",
+          "build_competition_snapshot",
+          "derive_competition_events",
+          "analyze_event_impact",
+          "decide_replanning"
+        ],
+        "title": "CapabilityId",
+        "type": "string"
+      },
+      "CapabilityInvocationRequest": {
+        "additionalProperties": false,
+        "description": "Proposal only; argument artifact is validated by future capability facade.",
+        "properties": {
+          "arguments_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "capability": {
+            "$ref": "#/$defs/CapabilityId"
+          },
+          "intent": {
+            "$ref": "#/$defs/AgentIntent"
+          },
+          "invocation_id": {
+            "minLength": 1,
+            "title": "Invocation Id",
+            "type": "string"
+          },
+          "requires_approval": {
+            "default": false,
+            "title": "Requires Approval",
+            "type": "boolean"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "invocation_id",
+          "source_request_id",
+          "intent",
+          "capability",
+          "arguments_ref"
+        ],
+        "title": "CapabilityInvocationRequest",
+        "type": "object"
+      },
+      "ClarificationValues": {
+        "additionalProperties": false,
+        "properties": {
+          "arguments_json": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Arguments Json"
+          },
+          "competition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Competition Id"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Edition Id"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AgentIntent"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "invocation": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CapabilityInvocationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "plan_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "student": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/StudentProfile"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "title": "ClarificationValues",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "EducationLevel": {
+        "enum": [
+          "undergraduate",
+          "graduate"
+        ],
+        "title": "EducationLevel",
+        "type": "string"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "ReferenceKind": {
+        "enum": [
+          "PROFILE",
+          "CAPABILITY_ARGUMENTS",
+          "TOOL_RESULT",
+          "ELIGIBILITY_RESULT",
+          "RECOMMENDATION_RESULT",
+          "SKILL_GAP_RESULT",
+          "COMPETITION_RESULT",
+          "EVENT",
+          "IMPACT_ANALYSIS",
+          "REPLANNING_DECISION",
+          "AFFECTED_SCOPE",
+          "SCOPE_RESOLUTION",
+          "REPLANNING_INPUT",
+          "REVISION_INSTRUCTION",
+          "PLAN_DIFF",
+          "EVIDENCE",
+          "SOURCE",
+          "AUTHORITY",
+          "APPROVAL_REQUEST",
+          "APPROVAL_RESPONSE",
+          "CLARIFICATION_RESPONSE"
+        ],
+        "title": "ReferenceKind",
+        "type": "string"
+      },
+      "ResultReference": {
+        "additionalProperties": false,
+        "description": "Reference to an existing artifact, not a duplicated Domain result.\n\nref_id may be a producer's canonical fingerprint when it has no native ID.\nThis contract validates shape, not artifact existence or factual truth.",
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/ReferenceKind"
+          },
+          "ref_id": {
+            "minLength": 1,
+            "title": "Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref_id"
+        ],
+        "title": "ResultReference",
+        "type": "object"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
+      },
+      "StudentProfile": {
+        "additionalProperties": false,
+        "description": "Student details explicitly provided for later competition decisions.",
+        "properties": {
+          "education_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EducationLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "goals": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grade"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "interests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "major": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Major"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "School"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/$defs/StudentSkill"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "weekly_available_hours": {
+            "anyOf": [
+              {
+                "maximum": 168,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Available Hours"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "StudentProfile",
+        "type": "object"
+      },
+      "StudentSkill": {
+        "additionalProperties": false,
+        "description": "A student's current state for one standard skill.",
+        "properties": {
+          "level": {
+            "$ref": "#/$defs/SkillLevel",
+            "default": "unknown"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          },
+          "self_assessed": {
+            "default": true,
+            "title": "Self Assessed",
+            "type": "boolean"
+          },
+          "skill_id": {
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id"
+        ],
+        "title": "StudentSkill",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "clarification_id": {
+        "minLength": 1,
+        "title": "Clarification Id",
+        "type": "string"
+      },
+      "source_request_id": {
+        "minLength": 1,
+        "title": "Source Request Id",
+        "type": "string"
+      },
+      "submitted_at": {
+        "format": "date-time",
+        "title": "Submitted At",
+        "type": "string"
+      },
+      "values": {
+        "$ref": "#/$defs/ClarificationValues"
+      }
+    },
+    "required": [
+      "clarification_id",
+      "source_request_id",
+      "values",
+      "submitted_at"
+    ],
+    "title": "ClarificationResponse",
+    "type": "object"
+  },
+  "PublicRuntimeResult": {
+    "$defs": {
+      "AgentError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/$defs/AgentErrorCode"
+          },
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "AgentError",
+        "type": "object"
+      },
+      "AgentErrorCode": {
+        "enum": [
+          "UNSUPPORTED_INTENT",
+          "MISSING_CONTEXT",
+          "TOOL_UNAVAILABLE",
+          "INVALID_WORKFLOW_TRANSITION",
+          "APPROVAL_REQUIRED",
+          "SERIALIZATION_ERROR",
+          "CAPABILITY_EXECUTION_FAILED"
+        ],
+        "title": "AgentErrorCode",
+        "type": "string"
+      },
+      "AgentIntent": {
+        "enum": [
+          "DISCOVER_COMPETITIONS",
+          "GET_COMPETITION_DETAILS",
+          "CHECK_ELIGIBILITY",
+          "GET_RECOMMENDATIONS",
+          "ANALYZE_SKILL_GAP",
+          "BUILD_PLAN",
+          "CHECK_COMPETITION_CHANGES",
+          "EXPLAIN_REPLANNING",
+          "REQUEST_PLAN_REVISION",
+          "APPROVE_PLAN_REVISION",
+          "REJECT_PLAN_REVISION",
+          "UNKNOWN"
+        ],
+        "title": "AgentIntent",
+        "type": "string"
+      },
+      "AgentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_request": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ApprovalRequest"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "audit": {
+            "$ref": "#/$defs/AuditReferences"
+          },
+          "clarification": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ClarificationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AgentError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "intent": {
+            "$ref": "#/$defs/AgentIntent"
+          },
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/$defs/WorkflowStatus"
+          },
+          "plan_refs": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/PlanReference"
+            },
+            "title": "Plan Refs",
+            "type": "array"
+          },
+          "request_id": {
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "intent",
+          "outcome",
+          "message"
+        ],
+        "title": "AgentResponse",
+        "type": "object"
+      },
+      "ApprovalAction": {
+        "enum": [
+          "PLAN_REVISION"
+        ],
+        "title": "ApprovalAction",
+        "type": "string"
+      },
+      "ApprovalRequest": {
+        "additionalProperties": false,
+        "description": "A proposal, never HUMAN_APPROVED authority or semantic coverage proof.",
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/ApprovalAction"
+          },
+          "affected_scope_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "approval_request_id": {
+            "minLength": 1,
+            "title": "Approval Request Id",
+            "type": "string"
+          },
+          "audit": {
+            "$ref": "#/$defs/AuditReferences"
+          },
+          "before_plan": {
+            "$ref": "#/$defs/PlanReference"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decision_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "instruction_refs": {
+            "items": {
+              "$ref": "#/$defs/ResultReference"
+            },
+            "minItems": 1,
+            "title": "Instruction Refs",
+            "type": "array"
+          },
+          "invocation_id": {
+            "minLength": 1,
+            "title": "Invocation Id",
+            "type": "string"
+          },
+          "proposed_after_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "proposed_input_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "resolution_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ResultReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          },
+          "summary": {
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approval_request_id",
+          "source_request_id",
+          "invocation_id",
+          "action",
+          "summary",
+          "before_plan",
+          "decision_ref",
+          "affected_scope_ref",
+          "proposed_input_ref",
+          "instruction_refs",
+          "audit",
+          "created_at"
+        ],
+        "title": "ApprovalRequest",
+        "type": "object"
+      },
+      "AuditReferences": {
+        "additionalProperties": false,
+        "description": "Unordered reference sets with canonical JSON order; no evidence invention.",
+        "properties": {
+          "reasons": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ReasonReference"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "results": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ResultReference"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "title": "AuditReferences",
+        "type": "object"
+      },
+      "ClarificationReason": {
+        "enum": [
+          "MISSING_REQUIRED_CONTEXT",
+          "AMBIGUOUS_INTENT",
+          "AMBIGUOUS_TARGET",
+          "MISSING_STUDENT_PROFILE",
+          "MISSING_APPROVAL_CONTEXT"
+        ],
+        "title": "ClarificationReason",
+        "type": "string"
+      },
+      "ClarificationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "clarification_id": {
+            "minLength": 1,
+            "title": "Clarification Id",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/$defs/ContextField"
+            },
+            "minItems": 1,
+            "title": "Fields",
+            "type": "array"
+          },
+          "question": {
+            "minLength": 1,
+            "title": "Question",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/$defs/ClarificationReason"
+          },
+          "source_request_id": {
+            "minLength": 1,
+            "title": "Source Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "clarification_id",
+          "source_request_id",
+          "reason",
+          "fields",
+          "question"
+        ],
+        "title": "ClarificationRequest",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "ContextField": {
+        "enum": [
+          "INTENT",
+          "STUDENT_PROFILE",
+          "COMPETITION",
+          "EDITION",
+          "TRACK",
+          "PLAN",
+          "APPROVAL_CONTEXT",
+          "CAPABILITY_INVOCATION",
+          "CAPABILITY_ARGUMENTS"
+        ],
+        "title": "ContextField",
+        "type": "string"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "ReasonReference": {
+        "additionalProperties": false,
+        "properties": {
+          "reason_code": {
+            "minLength": 1,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/$defs/ResultReference"
+          }
+        },
+        "required": [
+          "result",
+          "reason_code"
+        ],
+        "title": "ReasonReference",
+        "type": "object"
+      },
+      "ReferenceKind": {
+        "enum": [
+          "PROFILE",
+          "CAPABILITY_ARGUMENTS",
+          "TOOL_RESULT",
+          "ELIGIBILITY_RESULT",
+          "RECOMMENDATION_RESULT",
+          "SKILL_GAP_RESULT",
+          "COMPETITION_RESULT",
+          "EVENT",
+          "IMPACT_ANALYSIS",
+          "REPLANNING_DECISION",
+          "AFFECTED_SCOPE",
+          "SCOPE_RESOLUTION",
+          "REPLANNING_INPUT",
+          "REVISION_INSTRUCTION",
+          "PLAN_DIFF",
+          "EVIDENCE",
+          "SOURCE",
+          "AUTHORITY",
+          "APPROVAL_REQUEST",
+          "APPROVAL_RESPONSE",
+          "CLARIFICATION_RESPONSE"
+        ],
+        "title": "ReferenceKind",
+        "type": "string"
+      },
+      "ResultReference": {
+        "additionalProperties": false,
+        "description": "Reference to an existing artifact, not a duplicated Domain result.\n\nref_id may be a producer's canonical fingerprint when it has no native ID.\nThis contract validates shape, not artifact existence or factual truth.",
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/ReferenceKind"
+          },
+          "ref_id": {
+            "minLength": 1,
+            "title": "Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref_id"
+        ],
+        "title": "ResultReference",
+        "type": "object"
+      },
+      "RuntimeError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/$defs/RuntimeErrorCode"
+          },
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "RuntimeError",
+        "type": "object"
+      },
+      "RuntimeErrorCode": {
+        "enum": [
+          "INVALID_RUNTIME_PAYLOAD",
+          "CORE_VALIDATION_ERROR",
+          "CORE_EXECUTION_ERROR",
+          "RUNTIME_DEPENDENCY_ERROR"
+        ],
+        "title": "RuntimeErrorCode",
+        "type": "string"
+      },
+      "WorkflowStatus": {
+        "enum": [
+          "RECEIVED",
+          "NEEDS_CLARIFICATION",
+          "READY_TO_ROUTE",
+          "WAITING_FOR_APPROVAL",
+          "READY_TO_EXECUTE",
+          "COMPLETED",
+          "FAILED"
+        ],
+        "title": "WorkflowStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Minimal hosting projection, not another AgentResponse or business result.",
+    "properties": {
+      "continuation": {
+        "default": null,
+        "title": "Continuation",
+        "type": "null"
+      },
+      "continuation_ref": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Continuation Ref"
+      },
+      "error": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/RuntimeError"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "response": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AgentResponse"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "title": "PublicRuntimeResult",
+    "type": "object"
+  },
+  "normalization": {
+    "AgentArtsInvocationEnvelope": {
+      "continuation_ref": "strip"
+    },
+    "AgentContext": {
+      "competition_id": "strip",
+      "edition_id": "strip",
+      "student_id": "strip",
+      "track_id": "strip"
+    },
+    "AgentError": {
+      "message": "strip"
+    },
+    "AgentRequest": {
+      "conversation_id": "strip",
+      "request_id": "strip",
+      "user_message": "strip"
+    },
+    "AgentResponse": {
+      "message": "strip",
+      "request_id": "strip"
+    },
+    "ApprovalRequest": {
+      "approval_request_id": "strip",
+      "created_at": "utc",
+      "invocation_id": "strip",
+      "source_request_id": "strip",
+      "summary": "strip"
+    },
+    "ApprovalResponse": {
+      "approval_request_id": "strip",
+      "comment": "strip",
+      "source_request_id": "strip",
+      "submitted_at": "utc"
+    },
+    "AuditReferences": {},
+    "CapabilityInvocationRequest": {
+      "invocation_id": "strip",
+      "source_request_id": "strip"
+    },
+    "ClarificationRequest": {
+      "clarification_id": "strip",
+      "question": "strip",
+      "source_request_id": "strip"
+    },
+    "ClarificationResponse": {
+      "clarification_id": "strip",
+      "source_request_id": "strip",
+      "submitted_at": "utc"
+    },
+    "ClarificationValues": {
+      "arguments_json": "strip",
+      "competition_id": "strip",
+      "edition_id": "strip",
+      "track_id": "strip"
+    },
+    "CompetitionTarget": {
+      "competition_id": "strip",
+      "edition_id": "strip",
+      "track_id": "strip"
+    },
+    "HumanMessage": {
+      "interaction_id": "strip",
+      "source_request_id": "strip",
+      "submitted_at": "utc",
+      "text": "strip"
+    },
+    "PlanReference": {
+      "milestone_ids": {
+        "items": "strip"
+      },
+      "plan_id": "strip",
+      "student_id": "strip"
+    },
+    "PublicRuntimeResult": {
+      "continuation_ref": "strip"
+    },
+    "ReasonReference": {
+      "reason_code": "strip"
+    },
+    "ResultReference": {
+      "ref_id": "strip"
+    },
+    "RuntimeError": {
+      "message": "strip"
+    },
+    "StudentProfile": {},
+    "StudentSkill": {}
+  }
+}

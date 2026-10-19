@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.3 safe execution); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.4 HTTP/protocol compatibility); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.2 REVIEW_PASS; P13.3 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1564,7 +1564,8 @@ configuration, tracing/scaling/timeout/retry/load/security/cost validation.
 P12 is frozen. P13 adds a server-side protocol edge around approved capabilities;
 it does not create another Agent or business authority. P13.0 defines this design
 only. P13.1 adds the SDK-free exposure contract; P13.2 publishes its catalog through
-the official SDK server. P13.3 adds guarded Facade execution; HTTP remains deferred.
+the official SDK server. P13.3 adds guarded Facade execution; P13.4 adds its official
+Streamable HTTP ASGI boundary without introducing another business server.
 
 ```text
 Local MCP Client ---------+
@@ -1658,15 +1659,40 @@ No exception text leaks and no business retry occurs after mapping failure.
 
 SDK context stays protocol-only; there is no business session, result cache or
 global conversation/approval state. Public Client(server) provides local in-process
-execution tests. Streamable HTTP remains P13.4, Gateway compatibility P13.5 and
-full authority/lifecycle integration P13.6. No protocol-era parity is claimed yet.
+execution tests. The HTTP/protocol boundary is described below; Gateway compatibility
+remains P13.5 and full authority/lifecycle integration P13.6.
 
 MCP is an optional dependency overlay, independently installable without AgentArts.
 The AgentArts overlay includes the same MCP lock to avoid competing SDK pins. Core
 packages and the MCP exposure contracts remain importable without either platform
 SDK; only explicit server import needs MCP. No network, port or secret is accessed
-by project module import. No production deployment or dual-protocol HTTP parity is
-claimed by the local catalog smoke.
+by project module import. No production deployment is claimed.
+
+`integrations/mcp/http.py` provides `build_streamable_http_app(server)` using the
+official SDK public ASGI factory with stateless HTTP and ordinary JSON responses.
+It hosts the same Server/Registry/Dispatcher/mapper for modern 2026-07-28 discover
+and AgentArts-compatible 2025-11-25 initialize. Protocol negotiation, encoding,
+headers and lifespan remain SDK-owned; no private patches, parallel business HTTP
+API or version-specific business branches. SDK Host/Origin protections remain
+enabled. App construction starts no listener or capability execution.
+
+HTTP clients and local clients preserve equal catalog schemas and complete canonical
+business receipts. Unknown versions fail at the SDK edge, not by pretending a
+business result. Business INELIGIBLE/UNKNOWN and typed tool errors remain distinct
+from transport failure. Source/time/URL and all audit refs survive HTTP JSON.
+Legacy stateless requests and modern sessionless requests return no session IDs;
+caller session/identity/admin metadata cannot become a student, plan or approval.
+No result cache or conversational business state is stored across requests.
+
+MCP Gate I (Protocol Semantic Parity) compares complete business receipts across
+protocols, excluding only protocol envelopes. MCP Gate J (Transport Isolation)
+requires headers/session/protocol data never supply business identity or authority.
+Actual SDK HTTP tests cover discovery/initialize, list/call, unsupported versions,
+mutation/invalid calls, local/protocol parity, concurrent input isolation and JSON.
+There is no business retry: response loss propagates transport failure with unknown
+caller execution outcome. Ordinary MCP JSON responses do not introduce business
+token streaming. Gateway-specific constraints remain P13.5; production hosting,
+auth/IAM/ARM64/scaling remain P16.
 
 Tool schemas derive from typed inputs/projections; output serializes canonical
 AgentCapabilityResult/data/audit. No parallel MCP business-result contracts. Normal
@@ -1694,11 +1720,12 @@ P11 Authority. No custom auth server/JWT/API-key scheme is invented; production
 auth/deployment remains P16. Gateway stream responses do not make legacy SSE the
 Server's primary transport.
 
-Independent MCP gates A-H cover capability authority, typed schema safety, mutation
+Independent MCP gates A-J cover capability authority, typed schema safety, mutation
 isolation, AgentArts-era protocol, modern protocol, stateless execution, shared
-Runtime/MCP Domain authority and Gateway discovery/call readiness. They are defined
-only at P13.0; runtime evidence is required in P13.1-P13.6. They do not replace the
-frozen P12 AgentArts A-L gates. No cloud/deployment compatibility is claimed yet.
+Runtime/MCP Domain authority, Gateway discovery/call readiness, protocol semantic
+parity and transport isolation. Evidence remains scoped to each P13 subphase;
+Gateway-specific checks and full integration remain P13.5/P13.6. They do not replace
+the frozen P12 AgentArts A-L gates. No cloud/deployment compatibility is claimed.
 
 ## 14. Repository Structure
 

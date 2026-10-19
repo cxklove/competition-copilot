@@ -24,11 +24,11 @@ def imports(path):
             yield from (alias.name for alias in node.names)
 
 
-def test_sdk_imports_only_in_isolated_server_module():
+def test_sdk_imports_only_in_isolated_server_and_http_modules():
     for path in PACKAGE.rglob("*.py"):
         sdk_imports = [name for name in imports(path)
                        if name.split(".")[0] in {"mcp", "mcp_types"}]
-        if path != PACKAGE / "integrations/mcp/server.py":
+        if path not in {PACKAGE / "integrations/mcp/server.py", PACKAGE / "integrations/mcp/http.py"}:
             assert not sdk_imports, path
         else:
             assert sdk_imports
@@ -73,6 +73,19 @@ def test_execution_uses_only_facade_contracts_and_one_explicit_business_entry():
     assert not any(isinstance(node.func, ast.Name)
                    and node.func.id in {"eval", "exec", "getattr", "open", "import_module"}
                    for node in calls)
+
+
+def test_http_is_sdk_hosting_only_and_versions_stay_at_protocol_edge():
+    path = PACKAGE / "integrations/mcp/http.py"
+    assert set(imports(path)) == {"typing", "mcp.server", "starlette.applications"}
+    calls = [node for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+             if isinstance(node, ast.Call)]
+    assert len(calls) == 1
+    assert ast.unparse(calls[0].func) == "server.streamable_http_app"
+    for area in ("domain", "application", "tools", "agents"):
+        for source in (PACKAGE / area).rglob("*.py"):
+            text = source.read_text(encoding="utf-8")
+            assert "2025-11-25" not in text and "2026-07-28" not in text, source
 
 
 def test_core_import_and_local_graph_work_with_sdk_imports_blocked():

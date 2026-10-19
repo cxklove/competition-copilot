@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.2 server core/catalog); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.3 safe execution); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.2 REVIEW_PASS; P13.3 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1702,7 +1702,7 @@ dependencies. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 ## P13.0 MCP Protocol & AgentArts Compatibility Baseline
 
 P12 remains CLOSED_FROZEN. P13 is IN_PROGRESS; P13.0 is REVIEW_PASS.
-P13.1 is REVIEW_PASS; P13.2 is REVIEW_PASS; P13.3-P13.6, Final Review and Closure remain NOT_STARTED.
+P13.1/P13.2 are REVIEW_PASS; P13.3 is REVIEW_PASS; P13.4-P13.6, Final Review and Closure remain NOT_STARTED.
 DEVELOPMENT_PLAN is the canonical lifecycle, capability inventory, compatibility
 matrix and independent MCP gate A-H source.
 
@@ -1752,9 +1752,9 @@ remain valid; no new application start command exists. Contract tests run offlin
 Status: REVIEW_PASS. The optional official MCP SDK 2.3.0 powers
 `competition_copilot.integrations.mcp.server.build_mcp_server(registry=None)`.
 Its tools/list publishes only P13.1 registry metadata and generated schemas.
-All known calls return `NOT_IMPLEMENTED_P13_3`; unknown/excluded names fail closed.
-Business tool execution is deferred to P13.3. No Streamable HTTP app or Gateway
-connection exists; those remain P13.4/P13.5. P16 retains production deployment.
+P13.3 extends the original disabled call boundary with guarded Facade execution,
+as described below. Unknown/excluded names still fail closed. No Streamable HTTP
+app or Gateway connection exists; those remain P13.4/P13.5. P16 retains production deployment.
 
 MCP installs independently of AgentArts and LangGraph. From the repository root,
 using the existing backend virtual environment:
@@ -1772,13 +1772,40 @@ and Agent-only installs remain SDK-independent. No package build procedure chang
 No process/server starts on import or construction; this phase uses public SDK
 `Client(server)` in-process tests, without ports, stdio loops, network or credentials.
 Tests assert registry/catalog fidelity, JSON safety, deterministic independent
-connections, execution disabled and SDK import isolation. There is no standalone
+connections, invalid-call rejection and SDK import isolation. There is no standalone
 transport startup command yet. Protocol-era HTTP tests remain deferred to P13.4.
+
+## P13.3 Safe Tool Execution & Result Mapping
+
+Status: REVIEW_PASS. MCP tools now execute the eight approved
+capabilities through the existing P12.2 Facade, supplied explicitly by trusted
+outer composition: `build_mcp_server(facade=configured_facade)`. This does not
+create a Repository, guess data paths or construct an Agent. Calling without an
+injected Facade fails closed; the existing construction smoke remains catalog-only.
+
+Exact registry lookup, exposure/mutation checks and typed validation precede one
+Facade execution. Canonical receipts pass unchanged as structured JSON plus
+deterministic JSON text. INELIGIBLE/UNKNOWN remain successful execution, with
+reason/evidence/source lineage preserved. Unknown names, invalid fields, mutation
+attempts and unexpected errors fail safely; no retry, LLM, Graph or session context.
+The frozen catalog names, schemas and ordering are unchanged. Other decision
+capabilities remain withheld; human approval/revision is not exposed through MCP.
+
+Using the existing optional MCP installation, run offline tests from repository root:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_mcp_execution.py backend/tests/integration/test_mcp_call_integration.py
+```
+
+Tests compose real Repository/P4/P5/P9 authorities with explicit dependencies and
+use public SDK in-process calls. Streamable HTTP and protocol-era verification
+remain P13.4; Gateway compatibility remains P13.5. No remote server, Gateway
+connection, mutation support or durable session is claimed. No dependencies added.
 
 ## P12.8 End-to-End Agent Integration
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.2 server core/catalog). DEVELOPMENT_PLAN is canonical.
+P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.3 safe execution). DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.composition.build_seed_agent` is the explicit outer composition
 root: seed repository, P4 tools, policy provider, P5-P11 authorities, Facade, injected

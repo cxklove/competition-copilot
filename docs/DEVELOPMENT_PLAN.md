@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.2 server core/catalog); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.3 safe execution); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.2 REVIEW_PASS; P13.3 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1331,7 +1331,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 
 | Deferred stage | Owned scope | Status |
 |---|---|---|
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.2) |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.3) |
 | P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
@@ -1801,7 +1801,7 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 ### P12.8 actual integration and P12 Final Review evidence
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.2 server core/catalog).
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.3 safe execution).
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1867,7 +1867,7 @@ Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documenta
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
-- **Status:** IN_PROGRESS; P13.0/P13.1 REVIEW_PASS; P13.2 REVIEW_PASS. P12 remains CLOSED_FROZEN.
+- **Status:** IN_PROGRESS; P13.0-P13.2 REVIEW_PASS; P13.3 REVIEW_PASS. P12 remains CLOSED_FROZEN.
 - **Goal:** Competition Copilot as an MCP **server**, projecting individually approved
   P12.2 capabilities through a standard external protocol boundary. No Agent redesign.
 - **Authority:** MCP tool call -> typed projection -> Capability Facade -> existing
@@ -1891,7 +1891,7 @@ Markdown lifecycle states. P13.0 does not implement P13.1 or later deliverables.
 | P13.0 MCP Protocol & AgentArts Compatibility Baseline | Audit, protocol/transport/exposure policy, compatibility matrix, gates and roadmap; no server/handlers | REVIEW_PASS |
 | P13.1 MCP Tool Exposure Contract | Individually reviewed allowlist, concrete stable tool names, typed input/output projection and registry contract | REVIEW_PASS |
 | P13.2 MCP Server Core & Tool Catalog | Explicit official Python SDK integration/dependency decision, server construction and deterministic tools/list | REVIEW_PASS |
-| P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | NOT_STARTED |
+| P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | REVIEW_PASS |
 | P13.4 Streamable HTTP & Protocol Compatibility | Stateless business execution; test 2025-11-25 and 2026-07-28 public SDK paths with equal authority results | NOT_STARTED |
 | P13.5 AgentArts Gateway Compatibility | Local Gateway-compatible discovery/call/negotiation/schema/result tests; no production cloud resources | NOT_STARTED |
 | P13.6 Real MCP Integration & Authority Preservation | Real repository/P5-P11 calls through admitted tools; Runtime/MCP authority parity, mutation-denial and data integrity | NOT_STARTED |
@@ -2062,7 +2062,7 @@ change, MCP server, endpoint, SDK reconfiguration, cloud resource or commit.
 ### P13.1 MCP Tool Exposure Contract
 
 Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0 REVIEW_PASS.
-P13.2 is REVIEW_PASS; P13.3-P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
+P13.2 is REVIEW_PASS; P13.3 is REVIEW_PASS; P13.4-P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
 
 SDK-free contracts live in `competition_copilot/integrations/mcp/`: `contracts.py`
 owns typed transport envelopes/schema generation; `registry.py` owns explicit
@@ -2160,7 +2160,7 @@ business/source data changes, SDK dependency changes, server or cloud deployment
 ### P13.2 MCP Server Core & Tool Catalog
 
 Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0/P13.1 REVIEW_PASS;
-P13.3-P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
+P13.3 REVIEW_PASS; P13.4-P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
 
 `integrations/mcp/server.py` isolates official SDK imports and exposes
 `build_mcp_server(registry=None)` plus `to_sdk_tool(definition)`. Construction
@@ -2173,7 +2173,7 @@ descriptions, ordering and full input/output schemas. Every request receives fre
 SDK models/schemas; client edits cannot alter later catalogs. No titles, annotations,
 provider prompts, mutation hints or other metadata are invented.
 
-The call boundary is explicitly disabled: known names return an error result with
+At the P13.2 exit baseline, the call boundary was disabled (superseded by P13.3 below): known names returned an error result with
 text `NOT_IMPLEMENTED_P13_3`, never success or a fabricated McpToolResult. Unknown,
 excluded, typo and internal names return public MCP INVALID_PARAMS / UNKNOWN_TOOL.
 No argument is interpreted, echoed or delegated. This is a stub, not P13.3 result/
@@ -2226,6 +2226,92 @@ Validation: 22 new server/architecture tests PASS; with P13.1 contracts and P12.
 Facade regression, 79 passed. Full suite 2222 passed, zero skipped, including P12
 Agent/Runtime and frozen authority regressions. Ruff and diff check PASS. No real
 network/cloud/model calls, business execution or source-data changes were required.
+
+### P13.3 Safe Tool Execution & Result Mapping
+
+Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0-P13.2 REVIEW_PASS.
+P13.4-P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
+
+The SDK-free `integrations/mcp/execution.py` adds frozen `McpToolDispatcher` and a
+deterministic execution guard. `build_mcp_server(registry=None, facade=None)` now
+accepts an explicitly composed P12.2 Facade; missing dependencies fail closed.
+No default Repository/data paths, profiles, targets or IDs are invented. Import
+and server construction still do not execute capabilities or access network.
+
+Execution chain:
+
+```text
+SDK tools/call -> exact registry lookup -> upstream/mutation policy guard
+-> typed McpToolInput validation -> controlled CapabilityArguments projection
+-> injected Facade metadata guard -> CapabilityFacade.execute (once)
+-> typed receipt / correlation validation -> McpToolResult -> SDK CallToolResult
+```
+
+The guard independently checks formal P12.2 metadata and injected Facade metadata:
+exposed flag, access, approval, mutation policy, capability availability and payload
+schema must agree. Even a deliberately corrupted registry cannot admit revision
+by disguising MUTATING as READ. Caller arguments cannot supply capability_id,
+approve/admin flags, invocation intent, session identity or extra fields. Required
+fields remain required. Prior decision/snapshot/plan capabilities stay withheld
+under the frozen exposure matrix; no additional tools are admitted.
+
+Compatibility detail: the frozen CapabilityInvocationRequest requires AgentIntent.
+A fixed internal label per admitted CapabilityId supplies this legacy field; it
+does not recognize intent, select capabilities, parse text or invoke Graph. Caller
+input never chooses this label. All business IDs and artifact refs come unchanged
+from explicit arguments. Only the existing Facade executes business authorities.
+There is no AgentRequest, routing/explanation model, Domain implementation import,
+Repository query, natural-language merge or approval bridge in the MCP path.
+
+`map_tool_result_to_mcp` in the isolated SDK server module serializes the existing
+McpToolResult as structured_content and deterministic JSON text. No second business
+result models, summaries or recomputed outcomes. is_error derives only from transport
+error or canonical CapabilityStatus.ERROR, never Eligibility/SkillGap/Replanning
+status. INELIGIBLE/UNKNOWN are successful calls; UNDETERMINED/NO_GAP/KEEP would likewise
+remain unchanged in any canonical success receipt, but their currently withheld
+capabilities are not newly exposed. Full result identity, data, audit reasons,
+evidence/source refs, source URL/type/observed_at/verification and timezones survive.
+
+Error mapping reuses the frozen P13.1 contract; tool names/input/output schemas/order
+and descriptions remain unchanged, including the existing error enum:
+
+| Condition | Safe response |
+|---|---|
+| Unknown/unlisted name, including guessed capability ID or mutation name | UNKNOWN_TOOL; SDK INVALID_PARAMS protocol error, preserving P13.2 behavior |
+| Missing/invalid/extra arguments or non-JSON-compatible input | INVALID_ARGUMENTS; structured error, zero Facade executions |
+| Mutation/approval-required, disabled exposure, metadata/schema drift or unavailable composition | CAPABILITY_NOT_EXPOSED; structured error, zero executions |
+| Canonical Facade ERROR receipt | Preserve canonical category/IDs/refs; is_error=true, error prose normalized to its stable code |
+| Unexpected exception, malformed/mismatched receipt or mapper failure | EXECUTION_FAILURE; no exception text, paths or secrets; no replay |
+
+No MCP business state, result cache, conversation or retry loop. One call executes
+Facade at most once; mapping failure never re-executes business work. Independent
+client calls remain independent, not durable idempotent sessions. Transport context
+and metadata are ignored, including admin/approved/session-like fields. HTTP,
+protocol-era compatibility, Gateway connectivity and production remain deferred.
+
+| MCP Gate | P13.3 disposition |
+|---|---|
+| A Capability Authority | PASS: explicit registry -> sole existing Facade execution |
+| B Schema Safety | PASS: strict typed input, canonical JSON structured/text result |
+| C Mutation Isolation | PASS: catalog exclusion plus independent execution guard |
+| D AgentArts Protocol | EXECUTION_READY_PROTOCOL_DEFERRED |
+| E Modern Protocol | EXECUTION_READY_PROTOCOL_DEFERRED |
+| F Stateless Execution | PASS: arguments/dependencies only, metadata independent |
+| G Authority Parity | PASS for direct Facade vs MCP canonical result; full lifecycle extension P13.6 |
+| H Gateway Readiness | EXECUTION_READY_TRANSPORT_DEFERRED |
+
+Tests use real SDK Client(server) calls, real seed Repository/P4/P5/P9 and fake
+failures only for boundary cases. They verify P5 INELIGIBLE/UNKNOWN direct-Facade
+parity, all admitted reads, strict inputs, capability/approval/name injection,
+registry corruption, mutation count zero, valid count one, receipt mismatches,
+safe exceptions, mapper failure without replay, JSON, unchanged catalogs and
+independent sessions with transport metadata. No dependency or seed/policy changes.
+
+Validation: 63 new dispatcher/SDK integration cases plus one new architecture check;
+combined MCP/P12.2 targeted regression 143 passed. Full suite 2286 passed, zero
+skipped, including relevant P4-P11 and frozen P12 regressions. Ruff and diff check
+PASS. Registry and input/output contract schemas are unchanged; no P13.4 work,
+cloud/Gateway resources, new dependency or git commit.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 

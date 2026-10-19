@@ -115,14 +115,14 @@ def test_unknown_and_excluded_calls_fail_closed(name, run):
 
 
 @pytest.mark.parametrize("name", [t.tool_name for t in build_mcp_tool_registry().tools])
-def test_every_known_tool_execution_is_disabled(name, run):
+def test_every_known_tool_rejects_invalid_input_without_execution(name, run):
     async def scenario():
         async with Client(build_mcp_server()) as client:
             await client.list_tools()
             result = await client.call_tool(name, {"admin_override": True, "secret": "not-echoed"})
             assert result.is_error is True
-            assert result.structured_content is None
-            assert [item.text for item in result.content] == ["NOT_IMPLEMENTED_P13_3"]
+            assert result.structured_content["error"]["code"] == "INVALID_ARGUMENTS"
+            assert json.loads(result.content[0].text) == result.structured_content
             assert "not-echoed" not in result.model_dump_json()
     run(scenario)
 

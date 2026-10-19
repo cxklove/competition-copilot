@@ -1,4 +1,6 @@
-"""SDK catalog edge only. Business tool execution is deferred to P13.3."""
+"""SDK edge: catalog projection and guarded Facade execution, no transport app."""
+
+import json
 
 from mcp import MCPError
 from mcp.server import Server, ServerRequestContext
@@ -12,6 +14,18 @@ from mcp.types import (
     Tool,
 )
 
+from competition_copilot.agents.capabilities import (
+    AgentCapabilityFacade,
+    CapabilityStatus,
+)
+from competition_copilot.integrations.mcp.contracts import (
+    McpToolErrorCode,
+    McpToolResult,
+)
+from competition_copilot.integrations.mcp.execution import (
+    McpToolDispatcher,
+    execution_error,
+)
 from competition_copilot.integrations.mcp.registry import (
     McpToolDefinition,
     McpToolRegistry,
@@ -29,32 +43,52 @@ def to_sdk_tool(definition: McpToolDefinition) -> Tool:
     )
 
 
-def build_mcp_server(registry: McpToolRegistry | None = None) -> Server:
+def map_tool_result_to_mcp(result: McpToolResult) -> CallToolResult:
+    """Lossless JSON projection. Business outcome is never reclassified."""
+    document = result.model_dump(mode="json")
+    return CallToolResult(
+        content=[TextContent(type="text", text=json.dumps(
+            document, sort_keys=True, allow_nan=False))],
+        structured_content=document,
+        is_error=(result.error is not None
+                  or result.result.status == CapabilityStatus.ERROR),
+    )
+
+
+def build_mcp_server(
+    registry: McpToolRegistry | None = None, *,
+    facade: AgentCapabilityFacade | None = None,
+) -> Server:
     """Construct without IO, business dependencies, session state or startup.
 
     Only the SDK owns protocol transport state. No context/meta becomes business
-    input. An explicit P13.3 change is required to admit capability execution.
+    input. Missing composition dependencies fail closed; no data paths are guessed.
     """
     registry = registry if registry is not None else build_mcp_tool_registry()
+    dispatcher = McpToolDispatcher(registry, facade)
 
     async def list_tools(
         context: ServerRequestContext, params: PaginatedRequestParams | None,
     ) -> ListToolsResult:
         return ListToolsResult(tools=[to_sdk_tool(item) for item in registry.tools])
 
-    async def execution_disabled(
+    async def call_tool(
         context: ServerRequestContext, params: CallToolRequestParams,
     ) -> CallToolResult:
+        result = dispatcher.dispatch(params.name, params.arguments)
+        if result.error and result.error.code == McpToolErrorCode.UNKNOWN_TOOL:
+            raise MCPError(INVALID_PARAMS, "UNKNOWN_TOOL")
         try:
-            registry.get(params.name)
-        except ValueError:
-            raise MCPError(INVALID_PARAMS, "UNKNOWN_TOOL") from None
-        return CallToolResult(
-            content=[TextContent(type="text", text="NOT_IMPLEMENTED_P13_3")],
-            is_error=True,
-        )
+            return map_tool_result_to_mcp(result)
+        except Exception:
+            # Mapping failure never replays a capability or exposes the exception.
+            fallback = execution_error(McpToolErrorCode.EXECUTION_FAILURE)
+            return CallToolResult(
+                content=[TextContent(type="text", text="EXECUTION_FAILURE")],
+                structured_content=fallback.model_dump(mode="json"), is_error=True,
+            )
 
     return Server(
         "competition-copilot", version="0.1.0",
-        on_list_tools=list_tools, on_call_tool=execution_disabled,
+        on_list_tools=list_tools, on_call_tool=call_tool,
     )

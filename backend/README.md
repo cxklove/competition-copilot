@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.6 real integration); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is CLOSED_FROZEN; Final Review: REVIEW_PASS; production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.5 REVIEW_PASS; P13.6 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | CLOSED_FROZEN; P13.0-P13.6 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1701,8 +1701,8 @@ dependencies. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 
 ## P13.0 MCP Protocol & AgentArts Compatibility Baseline
 
-P12 remains CLOSED_FROZEN. P13 is IN_PROGRESS; P13.0 is REVIEW_PASS.
-P13.0-P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5 REVIEW_PASS; P13.6 REVIEW_PASS; Final Review and Closure remain NOT_STARTED.
+P12 remains CLOSED_FROZEN. P13 is CLOSED_FROZEN; P13.0 is REVIEW_PASS.
+P13.0-P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5 REVIEW_PASS; P13.6 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN.
 DEVELOPMENT_PLAN is the canonical lifecycle, capability inventory, compatibility
 matrix and independent MCP gate source (A-H baseline, I/J in P13.4, K/L in P13.5, M/N in P13.6).
 
@@ -1882,12 +1882,12 @@ official data unchanged, including attack, concurrency and exception cases.
 MCP Gates M/N cover final authority lineage and cross-entry consistency. No production
 code, dependency or install/run command changes. Real Gateway smoke NOT_RUN; no cloud
 deployment, durable session, MCP mutation or frontend support is claimed. P13 Final
-Review and Closure remain NOT_STARTED; P14 remains NOT_STARTED.
+Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 remains NOT_STARTED.
 
 ## P12.8 End-to-End Agent Integration
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.6 real integration). DEVELOPMENT_PLAN is canonical.
+P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 CLOSED_FROZEN. DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.composition.build_seed_agent` is the explicit outer composition
 root: seed repository, P4 tools, policy provider, P5-P11 authorities, Facade, injected

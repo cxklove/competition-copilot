@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.5 Gateway compatibility); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.6 real integration); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.5 REVIEW_PASS; P13.6 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1625,10 +1625,10 @@ or a safe typed transport error; all business data and audit refs remain canonic
 Schemas derive from Pydantic and are returned as detached sorted JSON objects.
 Registry construction rejects duplicates, ambiguous capability aliases, unsafe
 mutation and upstream schema/access drift. Contract Gates A/B/C/F have evidence;
-protocol/transport and Runtime/MCP execution parity remain deferred to P13.2-P13.6.
+protocol/transport and Runtime/MCP parity evidence is described in P13.2-P13.6 below.
 
-P13.2 adds `integrations/mcp/server.py`, the only project module importing the MCP
-SDK. Its explicit `build_mcp_server(registry)` factory constructs a public low-level
+P13.2 adds `integrations/mcp/server.py`; SDK imports remain isolated to that module
+and P13.4's `http.py`. The explicit `build_mcp_server(registry)` factory constructs a public low-level
 Server with catalog and call callbacks, without starting transport or
 executing capabilities. `to_sdk_tool` copies each registry definition's exact name,
 description and typed input/output schema into fresh SDK Tool objects. There is no
@@ -1659,8 +1659,8 @@ No exception text leaks and no business retry occurs after mapping failure.
 
 SDK context stays protocol-only; there is no business session, result cache or
 global conversation/approval state. Public Client(server) provides local in-process
-execution tests. The HTTP/protocol boundary is described below; Gateway compatibility
-remains P13.5 and full authority/lifecycle integration P13.6.
+execution tests. The HTTP/protocol boundary, P13.5 Gateway contract and P13.6
+cross-entry authority integration are described below.
 
 MCP is an optional dependency overlay, independently installable without AgentArts.
 The AgentArts overlay includes the same MCP lock to avoid competing SDK pins. Core
@@ -1742,14 +1742,44 @@ metadata never create human approval, mutation or Domain authority. Tests cover
 negative business outcomes, safe failures, zero execution on attacks, exactly one
 execution per valid call, independent connections and JSON/source/time fidelity.
 There is no new production behavior, cloud SDK, real Gateway or cloud resource.
-Whole-phase authority integration remains P13.6; deployment/hardening remains P16.
+P13.6 authority integration is described below; deployment/hardening remains P16.
 
-Independent MCP gates A-L cover capability authority, typed schema safety, mutation
+Independent MCP gates A-N cover capability authority, typed schema safety, mutation
 isolation, AgentArts-era protocol, modern protocol, stateless execution, shared
 Runtime/MCP Domain authority, Gateway discovery/call readiness, protocol semantic
-parity, transport isolation, Gateway semantic parity and Gateway authority isolation.
-Evidence remains scoped to each P13 subphase; full integration remains P13.6. They do not replace
+parity, transport isolation, Gateway semantic parity/authority isolation, end-to-end
+authority preservation and cross-entry consistency. Evidence remains scoped to each
+P13 subphase; P13 Final Review is separate. They do not replace
 the frozen P12 AgentArts A-L gates. No cloud/deployment compatibility is claimed.
+
+P13.6 real integration uses the formal seed Agent composition and injects its same
+Facade instance into MCP, without new business implementation or tool exposure:
+
+```text
+Local MCP Client ------------------+
+Modern / legacy HTTP MCP Client ---+--> MCP Server -> Tool Registry -> Dispatcher
+AgentArts MCP Gateway profile -----+                                  |
+                                                                      v
+AgentArts Runtime -> P12 Agent -> LangGraph -----------------> Capability Facade
+                                                                      |
+                                                        P4-P11 deterministic authorities
+                                                                      |
+                                                     Repository/policy abstractions
+```
+
+Runtime/Gateway remain different entry points. Full canonical receipts, rather than
+Agent explanations, prove the shared authority lineage. Real data/policies and all
+eight admitted tools are exercised across Facade/Agent/Runtime/local/HTTP/Gateway.
+Withheld P6/P7/P8 capabilities execute only through their existing Agent/Facade paths;
+MCP cannot expose them merely because dependencies are composed. P9 exposes only
+the frozen read-only snapshot; monitoring/event capabilities remain withheld.
+
+MCP Gate M (End-to-End Authority Preservation) requires every result derive from
+the same composed deterministic authorities. MCP Gate N (Cross-entry Semantic
+Consistency) compares complete canonical business receipts, excluding only wording,
+workflow envelopes and transport metadata. Test data hashes guard official seed,
+policy and skill requirements; concurrency/context attacks retain input isolation.
+No production implementation, persistent state, cloud deployment or new dependencies.
 
 ## 14. Repository Structure
 

@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.5 Gateway compatibility); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.6 real integration); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0-P13.5 REVIEW_PASS; P13.6 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1331,7 +1331,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 
 | Deferred stage | Owned scope | Status |
 |---|---|---|
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.5) |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.6) |
 | P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
@@ -1801,7 +1801,7 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 ### P12.8 actual integration and P12 Final Review evidence
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.5 Gateway compatibility).
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.6 real integration).
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1867,7 +1867,7 @@ Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documenta
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
-- **Status:** IN_PROGRESS; P13.0-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS. P12 remains CLOSED_FROZEN.
+- **Status:** IN_PROGRESS; P13.0-P13.5 REVIEW_PASS; P13.6 REVIEW_PASS. P12 remains CLOSED_FROZEN.
 - **Goal:** Competition Copilot as an MCP **server**, projecting individually approved
   P12.2 capabilities through a standard external protocol boundary. No Agent redesign.
 - **Authority:** MCP tool call -> typed projection -> Capability Facade -> existing
@@ -1894,7 +1894,7 @@ Markdown lifecycle states. P13.0 does not implement P13.1 or later deliverables.
 | P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | REVIEW_PASS |
 | P13.4 Streamable HTTP & Protocol Compatibility | Stateless business execution; test 2025-11-25 and 2026-07-28 public SDK paths with equal authority results | REVIEW_PASS |
 | P13.5 AgentArts Gateway Compatibility | Local Gateway-compatible discovery/call/negotiation/schema/result tests; no production cloud resources | REVIEW_PASS |
-| P13.6 Real MCP Integration & Authority Preservation | Real repository/P5-P11 calls through admitted tools; Runtime/MCP authority parity, mutation-denial and data integrity | NOT_STARTED |
+| P13.6 Real MCP Integration & Authority Preservation | Real repository/P5-P11 calls through admitted tools; Runtime/MCP authority parity, mutation-denial and data integrity | REVIEW_PASS |
 | P13 Final Review | Whole-phase protocol, authority, exposure, compatibility, regression and documentation audit | NOT_STARTED |
 | P13 Closure | Documentation/status finalization after Review PASS | NOT_STARTED |
 
@@ -2062,7 +2062,7 @@ change, MCP server, endpoint, SDK reconfiguration, cloud resource or commit.
 ### P13.1 MCP Tool Exposure Contract
 
 Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0 REVIEW_PASS.
-P13.2/P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
+P13.2/P13.3 are REVIEW_PASS; P13.4 is REVIEW_PASS; P13.5 REVIEW_PASS; P13.6 REVIEW_PASS; Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
 
 SDK-free contracts live in `competition_copilot/integrations/mcp/`: `contracts.py`
 owns typed transport envelopes/schema generation; `registry.py` owns explicit
@@ -2160,7 +2160,7 @@ business/source data changes, SDK dependency changes, server or cloud deployment
 ### P13.2 MCP Server Core & Tool Catalog
 
 Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0/P13.1 REVIEW_PASS;
-P13.3 REVIEW_PASS; P13.4 REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
+P13.3 REVIEW_PASS; P13.4 REVIEW_PASS; P13.5 REVIEW_PASS; P13.6 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
 
 `integrations/mcp/server.py` isolates official SDK imports and exposes
 `build_mcp_server(registry=None)` plus `to_sdk_tool(definition)`. Construction
@@ -2230,7 +2230,7 @@ network/cloud/model calls, business execution or source-data changes were requir
 ### P13.3 Safe Tool Execution & Result Mapping
 
 Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0-P13.2 REVIEW_PASS.
-P13.4 REVIEW_PASS; P13.5 REVIEW_PASS; P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
+P13.4 REVIEW_PASS; P13.5 REVIEW_PASS; P13.6 REVIEW_PASS; Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
 
 The SDK-free `integrations/mcp/execution.py` adds frozen `McpToolDispatcher` and a
 deterministic execution guard. `build_mcp_server(registry=None, facade=None)` now
@@ -2316,7 +2316,7 @@ cloud/Gateway resources, new dependency or git commit.
 ### P13.4 Streamable HTTP & Protocol Compatibility
 
 Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0-P13.3 REVIEW_PASS.
-P13.5 REVIEW_PASS; P13.6, Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
+P13.5 REVIEW_PASS; P13.6 REVIEW_PASS; Final Review and Closure NOT_STARTED; P12 remains CLOSED_FROZEN.
 
 The canonical targets are the reviewed P13.0 matrix, not a new version decision:
 modern `2026-07-28`, AgentArts compatibility `2025-11-25`. `integrations/mcp/http.py`
@@ -2402,7 +2402,7 @@ Domain authorities, dependency locks or source data. No cloud resources or commi
 ### P13.5 AgentArts Gateway Compatibility
 
 Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0-P13.4 REVIEW_PASS.
-P13.6, Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
+P13.6 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12 remains CLOSED_FROZEN.
 
 Frozen target: 2025-11-25, Streamable HTTP, initialize -> tools/list -> typed schema
 ingestion -> tools/call. Every call is self-contained; protocol sessions are not
@@ -2470,13 +2470,90 @@ Default tests block socket connect/bind/DNS and use only in-process ASGI. Real G
 smoke: NOT_RUN; no safe preconfigured cloud test environment was used. It is optional,
 not a default test dependency or exit blocker. No credentials, Target/account IDs,
 cloud resources, public hosting, Gateway SDK pollution or production config added.
-P16 retains deployment/auth/IAM/SWR/Secrets/hardening. P13.6 remains NOT_STARTED.
+P16 retains deployment/auth/IAM/SWR/Secrets/hardening. P13.6 is REVIEW_PASS.
 
 Validation: 25 Gateway contract tests passed; combined MCP/P12.2 regression 198
 passed; full suite 2341 passed, zero skipped. Ruff and diff check PASS. Only two
 new integration test files and three documentation files changed. No production
 code, registry, dispatcher, mapper, dependency lock, frozen authority or seed/policy
 data changed; no cloud resource, real Gateway smoke or git commit.
+
+### P13.6 Real MCP Integration & Authority Preservation
+
+Status: REVIEW_PASS. P13 IN_PROGRESS; P13.0-P13.5 REVIEW_PASS.
+P13 Final Review and Closure NOT_STARTED; P14 NOT_STARTED. P12 CLOSED_FROZEN.
+This is integration evidence, not P13 Final Review or phase closure.
+
+No new MCP surface or business implementation. The same eight P13.1 tools and
+schemas remain frozen. Real tests use `composition.build_seed_agent`: formal
+JsonSeedCompetitionRepository/data/seed, JsonEligibilityPolicyProvider/data/eligibility,
+P4 tools, real P5-P11 deterministic authorities and one Capability Facade. MCP
+server/HTTP/Gateway fixtures receive that very Facade instance; Agent and the
+AgentArts Runtime Adapter retain the formal Graph path. No MCP-to-Graph shortcut.
+
+`test_mcp_authority_parity.py` exercises every admitted tool, with P5 negative and
+UNKNOWN cases, across direct Facade, public Agent, Runtime Adapter, local MCP,
+modern HTTP, AgentArts-compatible HTTP and the P13.5 Gateway profile. Complete
+AgentCapabilityResult JSON is equal, including execution/business status, IDs,
+reasons, evidence/source refs and source metadata. Comparison excludes only Agent
+wording/workflow envelopes and transport metadata, never canonical receipt fields.
+MCP calls do not increase routing/explanation model counts. Models are deterministic
+offline fixtures only on the Agent path; no real model/cloud is called.
+
+Official policy coverage is partial: legitimate real results include INELIGIBLE
+and UNKNOWN. No synthetic positive EligibilityResult or policy completion is used
+to claim official eligibility. Real P9 snapshot remains read-only and explicitly
+caller-timed, with aware UTC JSON normalization. P9 diff, P9.5 monitoring and P10
+event tools remain NOT_EXPOSED_BY_DESIGN. The exposed P9 snapshot is not a mutation.
+
+Recommendation/SkillGap/Plan Build remain NOT_EXPOSED through MCP. Supplemental
+tests run real P5-derived contexts through Agent/P6 scoring/ranking, actual repository
+and skill requirements through P7, and that actual decision through P8 planning.
+P6 soft scoring inputs remain explicitly test-only fixtures from the existing P12
+harness; no production weights or decisions are invented. The same composed Facades
+then deny guessed MCP calls for all three withheld authorities without executing them.
+Planning creates a canonical result only; no persistence or mutation is introduced.
+
+`test_mcp_real_integration.py` covers all four MCP paths with mutation/approval/name
+guesses, capability/approval-request argument injection, invalid context and sanitized
+internal exceptions. Invalid calls execute no Facade; legitimate calls execute once,
+with no automatic retry. Gateway admin/auth/user/session hints neither authorize
+revision nor fill missing student/plan context. Concurrent independent inputs retain
+their own student/request/result; successive competition reads retain explicit IDs.
+Catalog/schema remain stable after attacks. Existing P13.3/P13.4 regressions retain
+the distinction between canonical business negatives, tool failures and transport loss.
+
+`mcp_real_support.py` blocks sockets/DNS after Windows event-loop setup and hashes
+all data files before/after every new real integration case. Seed, policy and skill
+requirements are immutable. No DB/Redis/session/conversation/approval store, new
+dependency, production code change, cloud resource or credential is added.
+
+| MCP Gate | P13.6 disposition |
+|---|---|
+| A Capability Authority | PASS: unchanged admitted Registry -> Dispatcher -> Facade |
+| B Tool Schema Safety | PASS: unchanged schemas and JSON receipts |
+| C Mutation Isolation | PASS: catalog absence and zero execution on attacks |
+| D AgentArts Protocol Compatibility | PASS: legacy HTTP/Gateway and P13.4 regression |
+| E Modern Compatibility | PASS: modern HTTP and P13.4 regression |
+| F Stateless Execution | PASS: independent calls and concurrency isolation |
+| G Runtime/MCP Authority Parity | PASS: actual Agent/Runtime receipts equal MCP receipts |
+| H AgentArts Gateway Readiness | PASS at local protocol/tool contract level |
+| I Protocol Semantic Parity | PASS: complete modern/legacy receipt equality |
+| J Transport Isolation | PASS: session/header metadata cannot supply identity |
+| K Gateway Semantic Parity | PASS: Gateway/local/HTTP/Facade canonical equality |
+| L Gateway Authority Isolation | PASS: no auth/model/session mutation authority |
+| M End-to-End Authority Preservation | PASS: all entries retain the same composed deterministic authority lineage |
+| N Cross-entry Semantic Consistency | PASS: complete canonical receipts equal across all entries |
+
+MCP M/N extend the independent MCP gates, not the frozen P12 AgentArts gate family.
+Real Gateway smoke remains NOT_RUN and is optional; the local profile is not Huawei
+cloud acceptance. Deployment/auth/IAM/SWR/Secrets remain P16. No P14 work or commit.
+
+Validation: 19 new P13.6 integration cases passed; combined P13.1-P13.6/P12.2/P12.8
+targeted regression 231 passed. Full suite 2360 passed, zero skipped, including P12
+routing/approval/explanation/Runtime and P4-P11 regressions. Ruff and diff check PASS.
+Only three new test/support files and three documentation files changed; production
+code, dependency locks, Registry/Dispatcher/mapper and official data are unchanged.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 

@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.0 baseline); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.1 exposure contract); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1331,7 +1331,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 
 | Deferred stage | Owned scope | Status |
 |---|---|---|
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.0) |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS (P13.1) |
 | P14 | Frontend + Runtime invocation compatibility | NOT_STARTED |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
@@ -1801,7 +1801,7 @@ P12.1-P12.5/frozen authority regressions are required. P12.7 alone adds Runtime 
 ### P12.8 actual integration and P12 Final Review evidence
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.0 baseline).
+P12 Final Review REVIEW_PASS; P12 Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.1 exposure contract).
 
 Delivered public `agents.agent.CompetitionCopilotAgent` request entry and the outer
 `composition.build_seed_agent` factory. Local and Runtime use the same graph/Facade/
@@ -1867,7 +1867,7 @@ Gates A-E/G-L PASS, Gate F DEFERRED_WITHOUT_BLOCKER. Closure finalizes documenta
 
 ## P13 - MCP Adapter & AgentArts MCP Compatibility
 
-- **Status:** IN_PROGRESS; P13.0 REVIEW_PASS. P12 remains CLOSED_FROZEN.
+- **Status:** IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS. P12 remains CLOSED_FROZEN.
 - **Goal:** Competition Copilot as an MCP **server**, projecting individually approved
   P12.2 capabilities through a standard external protocol boundary. No Agent redesign.
 - **Authority:** MCP tool call -> typed projection -> Capability Facade -> existing
@@ -1889,7 +1889,7 @@ Markdown lifecycle states. P13.0 does not implement P13.1 or later deliverables.
 | Subphase | Deliverable / exit boundary | Status |
 |---|---|---|
 | P13.0 MCP Protocol & AgentArts Compatibility Baseline | Audit, protocol/transport/exposure policy, compatibility matrix, gates and roadmap; no server/handlers | REVIEW_PASS |
-| P13.1 MCP Tool Exposure Contract | Individually reviewed allowlist, concrete stable tool names, typed input/output projection and registry contract | NOT_STARTED |
+| P13.1 MCP Tool Exposure Contract | Individually reviewed allowlist, concrete stable tool names, typed input/output projection and registry contract | REVIEW_PASS |
 | P13.2 MCP Server Core & Tool Catalog | Explicit official Python SDK integration/dependency decision, server construction and deterministic tools/list | NOT_STARTED |
 | P13.3 Safe Tool Execution & Result Mapping | tools/call -> Facade only; typed result/error projection and business-negative preservation | NOT_STARTED |
 | P13.4 Streamable HTTP & Protocol Compatibility | Stateless business execution; test 2025-11-25 and 2026-07-28 public SDK paths with equal authority results | NOT_STARTED |
@@ -1943,8 +1943,8 @@ student_id, plan_id, Agent session, user identity, approval request or authority
 
 Audit source: `agents.contracts.CapabilityId`, actual `AgentCapabilityFacade.list_capabilities()`
 and static Facade dispatch. IDs below are **existing capability IDs, not MCP tool
-names**. All MCP exposure is currently unimplemented. READ/DECISION entries are
-candidates for individual P13.1 review, not an approved/exported MCP catalog.
+names**. At the P13.0 audit, exposure was unimplemented. The P13.1 contract below
+now records individual admission; no MCP runtime catalog or execution exists yet.
 
 | Existing capability | Access | Agent exposed | Approval required | Existing authority |
 |---|---|---|---|---|
@@ -2053,11 +2053,109 @@ Existing P12 AgentArts A-L gates remain frozen and are a different gate family.
 
 P13.0 exit evidence is the audit/design/matrix/roadmap above plus unchanged P1-P12
 regressions. Server/cloud compatibility itself is deferred to the listed phases,
-not silently counted as tested or deployed. P13.1 remains NOT_STARTED until authorized.
+not silently counted as tested or deployed. P13.1 contracts are recorded below.
 
 P13.0 validation: full pytest 2175 passed, zero skipped; Ruff and diff check PASS.
 Only README/ARCHITECTURE/DEVELOPMENT_PLAN changed; no production/test/dependency/data
 change, MCP server, endpoint, SDK reconfiguration, cloud resource or commit.
+
+### P13.1 MCP Tool Exposure Contract
+
+Status: REVIEW_PASS. P13 remains IN_PROGRESS; P13.0 REVIEW_PASS.
+P13.2-P13.6, Final Review and Closure remain NOT_STARTED. P12 stays CLOSED_FROZEN.
+
+SDK-free contracts live in `competition_copilot/integrations/mcp/`: `contracts.py`
+owns typed transport envelopes/schema generation; `registry.py` owns explicit
+immutable definitions and exclusions. Package metadata includes this directory;
+no dependencies were added. No MCP server, registration, RPC handler or HTTP path.
+
+`McpToolDefinition` records stable name, CapabilityId, description, upstream access,
+payload model, canonical result projection, approval metadata, exposure and mutation
+policy, and authority source. `McpToolRegistry` stores frozen ordered tuples,
+validates every admitted mapping against public Facade metadata/schema and rejects
+duplicate names, duplicate capability aliases, invalid names, incomplete policy,
+schema/access drift and mutation admission. Schema access returns fresh sorted
+JSON objects, without rewriting required fields or array order. This registry is
+server policy, never caller-supplied authorization or user-dependent discovery.
+
+`McpToolInput[ExistingPayload]` requires caller-owned invocation_id,
+source_request_id, CAPABILITY_ARGUMENTS arguments_ref, TOOL_RESULT result_ref and
+unchanged typed payload. IDs never come from MCP sessions or identity metadata.
+All inputs forbid extra fields. No business defaults, lookup, generated IDs or
+approval flags are added. Aware time normalization follows existing contracts.
+These fields define syntax; refs are not trusted merely because their shape passes.
+
+`McpToolResult` contains exactly one canonical `AgentCapabilityResult` or a typed
+pre-invocation error category. Canonical errors remain in the receipt; normal
+INELIGIBLE/UNKNOWN/UNDETERMINED results remain successful execution. No Domain
+result is copied into a parallel MCP truth model. Full payload, audit result/reason/
+evidence/source refs, HttpUrl and aware datetimes survive JSON serialization.
+Transport-only errors: INVALID_ARGUMENTS, UNKNOWN_TOOL, MISSING_CONTEXT,
+CAPABILITY_NOT_EXPOSED, EXECUTION_FAILURE. No arbitrary exception prose. The mapping
+to MCP wire errors/isError is deliberately deferred to P13.3.
+
+#### Reviewed capability exposure matrix
+
+Each payload/result below is the existing upstream contract, not a new business
+model. All admitted outputs use the common McpToolResult canonical receipt envelope.
+P4 inputs/outputs carry their existing List/Get names; no schemas are handwritten.
+
+| CapabilityId | Access / Agent exposed | MCP exposed / stable tool name | Payload -> canonical data | Authority | Mutation risk / reason |
+|---|---|---|---|---|---|
+| list_competitions | READ / YES | YES / competition_list | ListCompetitionsInput -> ListCompetitionsOutput | P4 ListCompetitionsTool | NON_MUTATING / APPROVED |
+| get_competition | READ / YES | YES / competition_get | GetCompetitionInput -> GetCompetitionOutput | P4 GetCompetitionTool | NON_MUTATING / APPROVED |
+| list_competition_editions | READ / YES | YES / competition_editions_list | ListCompetitionEditionsInput -> ListCompetitionEditionsOutput | P4 ListCompetitionEditionsTool | NON_MUTATING / APPROVED |
+| get_competition_edition | READ / YES | YES / competition_edition_get | GetCompetitionEditionInput -> GetCompetitionEditionOutput | P4 GetCompetitionEditionTool | NON_MUTATING / APPROVED |
+| list_edition_tracks | READ / YES | YES / competition_tracks_list | ListEditionTracksInput -> ListEditionTracksOutput | P4 ListEditionTracksTool | NON_MUTATING / APPROVED |
+| get_competition_track | READ / YES | YES / competition_track_get | GetCompetitionTrackInput -> GetCompetitionTrackOutput | P4 GetCompetitionTrackTool | NON_MUTATING / APPROVED |
+| build_competition_snapshot | READ / YES | YES / competition_snapshot_build | BuildSnapshotInput -> CompetitionSnapshot | P9 CompetitionSnapshotBuilder | NON_MUTATING / APPROVED |
+| check_eligibility | DECISION / YES | YES / eligibility_check | CheckEligibilityInput -> EligibilityDecision | P5 CompetitionEligibilityEvaluator | NON_MUTATING / APPROVED |
+| get_recommendations | DECISION / YES | NO / none | RecommendCompetitionsInput -> RecommendationRankingResult | P6 scoring/ranking | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| analyze_skill_gap | DECISION / YES | NO / none | AnalyzeSkillGapInput -> SkillGapDecision | P7 SkillGapEngine | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| build_plan | DECISION / YES | NO / none | BuildPlanInput -> CompetitionPlan | P8 deriver/builder | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| diff_competition_snapshot | DECISION / YES | NO / none | DiffSnapshotsInput -> SnapshotDiff | P9 SnapshotDiffEngine | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| derive_competition_events | DECISION / YES | NO / none | DeriveEventsInput -> EventBatch | P10 engine/aggregator | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| analyze_event_impact | DECISION / YES | NO / none | AnalyzeEventImpactInput -> EventImpactAnalysis | P11 impact analyzer | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| decide_replanning | DECISION / YES | NO / none | DecideReplanningInput -> ReplanningDecision | P11 decision service | NON_MUTATING / TRUSTED_ARTIFACT_BOUNDARY_REQUIRED |
+| revise_plan | MUTATING / YES; approval required | NO / none | ApplyApprovedRevisionInput -> PlanRevisionResult | P11 revision service / P12.5 bridge | MUTATING_NOT_EXPOSED / MUTATING_REQUIRES_HUMAN_FLOW |
+| check_competition_changes | N/A / NO | NO / none | No Facade handler | Deferred aggregate | N/A / UPSTREAM_CAPABILITY_NOT_EXPOSED |
+| explain_replanning | N/A / NO | NO / none | No Facade handler | Internal P12 explanation | N/A / UPSTREAM_CAPABILITY_NOT_EXPOSED |
+
+READ review: six P4 operations read formal repository data through Tools; P9 builder
+reads formal observations through existing Application composition. Snapshot building
+does not persist. Eligibility accepts explicit profile facts/target only; P5 fetches
+policy and decides truth. These eight contracts accept no caller-authored prior
+decision/snapshot/plan authority. Caller profile assertions remain explicit inputs,
+not authenticated verified identity or new official competition facts.
+
+Other DECISION inputs require caller-prepared eligibility, requirements, snapshots,
+diffs, events or plans. A trusted artifact admission/resolution design is not yet
+available at MCP boundary; shape validation alone is insufficient. They are withheld,
+not silently weakened, auto-exported or newly disabled in P12. Future admission
+requires explicit contract review. P9.5 monitoring has no CapabilityId/handler and
+stays excluded. Approval/clarification/routing/context/explanation helpers are not
+tools. Authentication or model calls never grant approval; no mutation exception.
+
+| MCP Gate | P13.1 evidence / disposition |
+|---|---|
+| A Capability Authority | PASS at contract level: explicit upstream subset; metadata/schema drift rejected |
+| B Tool Schema Safety | PASS at contract level: typed envelopes, preserved fields, JSON schemas/roundtrips |
+| C Mutation Isolation | PASS: mutation absent; attempted admission rejected |
+| D AgentArts Protocol | DESIGN_PASS_RUNTIME_DEFERRED; protocol execution P13.4/P13.5 |
+| E Modern Protocol | DESIGN_PASS_RUNTIME_DEFERRED; protocol execution P13.4 |
+| F Stateless Execution | PASS at contract level: self-contained inputs, no MCP business session |
+| G Runtime/MCP Authority Parity | DESIGN_PASS_INTEGRATION_DEFERRED; same Facade mapping, execution parity P13.6 |
+| H Gateway Readiness | DESIGN_PASS_TRANSPORT_DEFERRED; SDK-specific wire/schema adaptation P13.2-P13.5 |
+
+Contract tests cover explicit mappings, immutable/deterministic ordering and schemas,
+duplicates/aliases, upstream subset, mutation/deferred rejection, required/unknown
+fields, no internal/approval/session inputs, canonical time/URL/source/evidence and
+real P5 INELIGIBLE/UNKNOWN receipt roundtrips. No server starts or RPC calls.
+
+P13.1 validation: 25 targeted contract tests PASS; with P12.2 Facade regression,
+57 passed. Full suite 2200 passed, zero skipped (including P12 Agent/Runtime and
+frozen P1-P11 regressions); Ruff and diff check PASS. No P12 production changes,
+business/source data changes, SDK dependency changes, server or cloud deployment.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 

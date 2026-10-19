@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.0 baseline); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.1 exposure contract); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -108,7 +108,7 @@ resolved the earlier blocker. **P10 — Competition Event Engine: CLOSED / FROZE
 P10.1–P10.4 COMPLETE / REVIEW PASS / COMMITTED; documentation follow-up Review PASS
 and P10 Final Review re-run PASS.** **P11 Adaptive Replanning: CLOSED / FINAL REVIEW PASS / FROZEN FOR DOWNSTREAM USE.**
 P11.1 through P11.5, including P11.1.2/P11.3.5/P11.4.2, are CLOSED / FROZEN.
-P12 Agent is CLOSED_FROZEN; P13 is IN_PROGRESS at P13.0 (REVIEW_PASS).
+P12 Agent is CLOSED_FROZEN; P13.0 is REVIEW_PASS; P13.1 is REVIEW_PASS.
 Scheduler/polling is not implemented and is not an exit blocker. The current ingestion
 dataset contains 12 Raw fixtures and 12 Verified Seeds. Raw files are ingestion
 evidence; Verified Seeds are the formal business input for **P3 Repository**.
@@ -1702,7 +1702,7 @@ dependencies. Full exposure inventory and gates are in DEVELOPMENT_PLAN.
 ## P13.0 MCP Protocol & AgentArts Compatibility Baseline
 
 P12 remains CLOSED_FROZEN. P13 is IN_PROGRESS; P13.0 is REVIEW_PASS.
-P13.1-P13.6, P13 Final Review and P13 Closure remain NOT_STARTED.
+P13.1 is REVIEW_PASS; P13.2-P13.6, Final Review and Closure remain NOT_STARTED.
 DEVELOPMENT_PLAN is the canonical lifecycle, capability inventory, compatibility
 matrix and independent MCP gate A-H source.
 
@@ -1727,10 +1727,30 @@ protocol/Gateway sources and metadata/result restrictions are recorded in the pl
 Production auth/cloud/ARM64 deployment remains P16; no deployed MCP/Gateway support
 or durable sessions are claimed.
 
+## P13.1 MCP Tool Exposure Contract
+
+Status: REVIEW_PASS. The SDK-free `integrations/mcp/` package
+defines typed input/result envelopes and an immutable explicit exposure registry.
+Eight names are admitted: `competition_list`, `competition_get`,
+`competition_editions_list`, `competition_edition_get`, `competition_tracks_list`,
+`competition_track_get`, `competition_snapshot_build`, `eligibility_check`.
+They reuse existing payloads and canonical Capability Facade receipts. Other
+decision capabilities await trusted artifact admission; mutation and Agent
+internals are excluded. Full exposure matrix and gate dispositions are canonical
+in DEVELOPMENT_PLAN. Business decisions remain Domain-owned.
+
+No MCP SDK/runtime dependency, server, tools/list/tools/call RPC handler, HTTP
+endpoint or Gateway connection is added. Existing backend installation commands
+remain valid; no new application start command exists. Contract tests run offline:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_mcp_exposure_contract.py
+```
+
 ## P12.8 End-to-End Agent Integration
 
 Status: REVIEW_PASS; P12 CLOSED_FROZEN; P12.1-P12.7 REVIEW_PASS.
-P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.0 baseline). DEVELOPMENT_PLAN is canonical.
+P12 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P13 IN_PROGRESS (P13.1 exposure contract). DEVELOPMENT_PLAN is canonical.
 
 `competition_copilot.composition.build_seed_agent` is the explicit outer composition
 root: seed repository, P4 tools, policy provider, P5-P11 authorities, Facade, injected

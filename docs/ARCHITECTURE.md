@@ -3,7 +3,7 @@
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.
-P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.0 baseline); production deployment remains deferred to P16.
+P12 Agent: CLOSED_FROZEN; Final Review: REVIEW_PASS. P13 is IN_PROGRESS (P13.1 exposure contract); production deployment remains deferred to P16.
 Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must agree.
 
 | Phase | Scope | Status |
@@ -18,7 +18,7 @@ Canonical phase-status source: `docs/DEVELOPMENT_PLAN.md`; this document must ag
 | P11.4.2 | Plan-Level Replanning Resolution | CLOSED / FROZEN |
 | P11.5 | Real Adaptive Replanning Integration | CLOSED / FROZEN |
 | P12 | Agent | CLOSED_FROZEN |
-| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS |
+| P13 | MCP + AgentArts MCP compatibility | IN_PROGRESS; P13.0 REVIEW_PASS; P13.1 REVIEW_PASS |
 
 ### Frozen authority map
 
@@ -1563,7 +1563,8 @@ configuration, tracing/scaling/timeout/retry/load/security/cost validation.
 
 P12 is frozen. P13 adds a server-side protocol edge around approved capabilities;
 it does not create another Agent or business authority. P13.0 defines this design
-only; no MCP server, tool catalog, handler or HTTP endpoint is implemented yet.
+only. P13.1 adds the SDK-free exposure contract described below; no MCP server,
+runtime tool catalog, handler or HTTP endpoint is implemented yet.
 
 ```text
 Local MCP Client ---------+
@@ -1607,6 +1608,23 @@ is excluded by default even though it requires approval. Deferred/enum-only
 capabilities and P9.5 monitoring stay unexposed. Exact tool names and projection
 models belong to P13.1, not this baseline. Catalog ordering/mappings must be explicit
 and deterministic; no decorated-function/module/filesystem auto-discovery.
+
+P13.1 implements the contract in `integrations/mcp/contracts.py` and `registry.py`.
+The frozen `McpToolRegistry` binds eight explicit tool names to existing payload
+models and public Facade metadata: six P4 reads, P9 snapshot building and P5
+eligibility. All other DECISION capabilities are withheld until trusted prior
+artifact admission is designed; mutation remains excluded. The canonical exposure
+matrix is in DEVELOPMENT_PLAN. This is a contract catalog, not an SDK registration
+or tools/list implementation. No execution methods are attached to definitions.
+
+`McpToolInput` wraps unchanged typed payload with caller-owned invocation/request
+IDs and argument/result refs. No session identity, lookup, implicit context or
+approval is inferred. `McpToolResult` wraps the canonical AgentCapabilityResult
+or a safe typed transport error; all business data and audit refs remain canonical.
+Schemas derive from Pydantic and are returned as detached sorted JSON objects.
+Registry construction rejects duplicates, ambiguous capability aliases, unsafe
+mutation and upstream schema/access drift. Contract Gates A/B/C/F have evidence;
+protocol/transport and Runtime/MCP execution parity remain deferred to P13.2-P13.6.
 
 Tool schemas derive from typed inputs/projections; output serializes canonical
 AgentCapabilityResult/data/audit. No parallel MCP business-result contracts. Normal

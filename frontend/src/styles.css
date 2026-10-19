@@ -562,12 +562,112 @@ input::placeholder {
   display: block;
   margin-top: 8px;
 }
+.grounded-results {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.workspace-grid.has-result {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+}
+.grounded-results h4,
+.grounded-results h5 {
+  margin: 16px 0 8px;
+}
+.grounded-results p {
+  line-height: 1.65;
+}
+.result-artifact {
+  border-top: 1px solid #dce6e9;
+  padding-top: 5px;
+  margin-top: 18px;
+}
+.artifact-identity,
+.unavailable {
+  color: #647980;
+  font-size: 12px;
+}
+.business-status {
+  border-left: 3px solid #3e7180;
+  padding: 8px 10px;
+  background: #f0f6f6;
+  display: grid;
+  gap: 5px;
+}
+.business-status.is-uncertain {
+  border-color: #ad822e;
+  background: #fbf7ed;
+}
+.business-status code,
+.reason-list code {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.reason-list,
+.evidence-list,
+.plan-diff ul,
+.audit-details ul {
+  padding-left: 18px;
+}
+.reason-list li,
+.evidence-list > li,
+.plan-diff li {
+  margin: 10px 0;
+}
+.source-metadata {
+  background: #f5f8f9;
+  padding: 10px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 12px;
+}
+.source-metadata dl {
+  margin-bottom: 0;
+}
+.source-metadata dt {
+  color: #647980;
+}
+.source-metadata dd {
+  margin-left: 0;
+  margin-bottom: 6px;
+}
+.source-metadata a,
+.audit-details a {
+  color: #245969;
+  overflow-wrap: anywhere;
+}
+.before-after {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.before-after > * {
+  min-width: 0;
+  background: #f5f8f9;
+  padding: 10px;
+  border-radius: 6px;
+}
+.audit-details {
+  margin-top: 18px;
+  border-top: 1px solid #dce6e9;
+  padding-top: 12px;
+}
+.audit-details summary {
+  cursor: pointer;
+}
+@media (max-width: 1050px) {
+  .before-after {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .dev-scenarios select {
   margin-top: 4px;
   width: 100%;
   font-size: 11px;
 }
 @media (max-width: 760px) {
+  .workspace-grid.has-result {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .product-header {
     height: 75px;
     padding: 0 18px;

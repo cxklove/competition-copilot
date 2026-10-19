@@ -8,8 +8,25 @@ import type {
 } from '../runtime/generated/contracts.ts';
 import type { InvocationClient } from '../workspace/useConversation.ts';
 import fixtures from './fixtures.json' with { type: 'json' };
+import resultFixtures from './result-fixtures.json' with { type: 'json' };
+import type { ArtifactReader } from '../results/artifacts.ts';
+
+export type ResultScenario = keyof typeof resultFixtures;
+export const readDemoArtifacts: ArtifactReader = (response) => {
+  const preset = Object.values(resultFixtures).find((item) =>
+    item.runtime.response.audit.results.some((ref) =>
+      response.audit?.results?.some(
+        (actual) => actual.kind === ref.kind && actual.ref_id === ref.ref_id,
+      ),
+    ),
+  );
+  return preset
+    ? { ...structuredClone(preset.bundle), request_id: response.request_id }
+    : undefined;
+};
 
 export type DemoScenario =
+  | ResultScenario
   | 'completed'
   | 'negative'
   | 'clarification'
@@ -46,7 +63,15 @@ export function createDemoClient(scenario: DemoScenario = 'completed'): Invocati
             : scenario.startsWith('approval')
               ? 'approval'
               : 'completed';
-    const body = structuredClone(fixtures[name]);
+    const body = structuredClone(
+      Object.hasOwn(resultFixtures, scenario)
+        ? resultFixtures[scenario as ResultScenario].runtime
+        : fixtures[name],
+    ) as
+      | typeof fixtures.completed
+      | typeof fixtures.approval
+      | typeof fixtures.clarification
+      | typeof fixtures.runtime_error;
     if (body.response) {
       body.response.request_id = id;
       if (body.response.clarification) body.response.clarification.source_request_id = id;

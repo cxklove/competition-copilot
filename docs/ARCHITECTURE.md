@@ -1927,7 +1927,7 @@ negative/core FAILED results remain distinct from transport/runtime/contract/abo
 All state is in memory, without durable session, storage, approval or mutation authority.
 
 Clarification/approval controls send public typed continuations without creating
-authority. Full result/evidence/PlanDiff rendering remains separate later work.
+authority. Completed results use the readonly result presentation described below.
 Dev-only preset selection remounts the fake workspace; production bundles
 hide that selector while still using fake presets. Build success does not imply a
 real Runtime connection or production deployment. Minimal labels/live status/alerts
@@ -1974,6 +1974,49 @@ hosting remain P14.5/P14.6. Gate M (HITL Authority Preservation) requires expres
 without browser-created authority; Gate N (Continuation Identity Integrity) requires
 current request/proposal/handle binding and stale/replay protection. Offline tests
 prove these UI guards; real Runtime parity remains deferred.
+
+### Grounded result / evidence / PlanDiff presentation
+
+```text
+Validated AgentResponse (message + audit refs + plan_refs)
+  -> Result Presentation
+     |-- Grounded explanation (conversation, unchanged text)
+     |-- Business result / uncertainty
+     |-- Reason codes / evidence
+     |-- Source metadata
+     `-- Supplied PlanDiff before/after collections and lineage
+```
+
+P12 exposes references rather than artifact bodies. An optional readonly presentation
+snapshot supplies selected existing Domain artifacts keyed by current request ID and
+exact retained ResultReference. This stays outside the unchanged Runtime envelope.
+Only fake composition provides it here; P14.5 trusted hosting must authorize actual
+resolution and validate full Domain semantics. Components never fetch, invoke Runtime,
+approve, re-explain with LLMs or compute decisions. Unavailable references stay visible
+without invented content. The synchronous consumer guard rejects wrong request/ref,
+kind/model/schema or duplicates, clears stale content and reports attachment contract
+errors separately. Schema/type generation and canonical offline fixtures reuse the
+actual Pydantic models; structural validation does not assert business authority.
+
+Agent explanation is not parsed for status/reasons. Structured unknown/undetermined
+states remain uncertain; negative/no-gap/keep/rejection are normal outcomes. Reasons
+retain raw codes with safe label fallback. Evidence and sources render as untrusted
+escaped text; HTTP(S)-only links have safe new-tab rel values. Provided source type,
+aware observation time and pending/verified/rejected state are preserved, with missing
+metadata explicit. Source URLs and canonical data are not rewritten.
+
+The actual PlanDiff supplies whole milestone collection changes, not per-item change
+operations. Render both supplied collections and optional status_change, preserving
+old removed tasks and returned new/changed tasks. No browser Plan comparison,
+membership inference, new authoritative diff or optimistic diff from approval.
+Decision/trigger event/reason/evidence/source lineage and exact Plan IDs/versions stay
+attached to the supplied artifact. Pending HITL never renders a final PlanDiff.
+
+Gate O - Grounded Rendering Integrity: visible claims trace to current supplied
+explanation/artifact/audit data; missing content is never inferred. Gate P - PlanDiff
+Authority Integrity: render only the actual supplied diff. Gate Q - Source Presentation
+Safety: source/evidence data cannot execute script/HTML or dangerous URL schemes.
+Gate E remains CONTRACT_PASS_REAL_RUNTIME_DEFERRED. P14.5/P14.6 own real integration.
 
 ## 14. Repository Structure
 

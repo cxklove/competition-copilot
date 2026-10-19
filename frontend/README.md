@@ -3,7 +3,8 @@
 The single React + TypeScript + Vite workspace presents current-page conversation,
 structured workflow states, clarification forms and explicit approval controls. It runs entirely on
 FakeRuntimeTransport presets through the existing RuntimeInvocationClient.
-There is no real backend/AgentArts connection or full evidence/diff UI.
+The result panel presents supplied result artifacts, evidence, sources and PlanDiff.
+There is no real backend/AgentArts connection or authorized artifact hosting.
 Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`.
 
 ## Toolchain and commands
@@ -16,10 +17,12 @@ npm ci --prefix frontend --registry=https://registry.npmjs.org --ignore-scripts
 npm run dev --prefix frontend
 npm test --prefix frontend
 npm run test:hitl --prefix frontend
+npm run test:results --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
 npm run format --prefix frontend
 .\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
+.\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
 ```
 
 `dev` serves Vite on 127.0.0.1 (default 5173, chooses an available port if busy).
@@ -58,7 +61,8 @@ access; default tests/build require no external network or credentials.
 - WAITING_FOR_APPROVAL shows readonly action, Plan version/target and lineage refs.
   Separate APPROVE/REJECT buttons send the actual ApprovalResponse, never authority.
   Ordinary text, Enter elsewhere, dismiss and new-request actions do not approve.
-  No optimistic Plan update or success is displayed. P14.4 owns full evidence/diff UI.
+  No optimistic Plan update or success is displayed. Results render only after a
+  completed authoritative response; waiting HITL states never display final diffs.
 - A public interaction snapshot and private detached copy bind the current request,
   proposal and opaque handle. Tokens are consumed synchronously before invocation;
   stale callbacks, changed proposal context and repeated clicks cannot replay them.
@@ -118,7 +122,53 @@ messages. Core AgentResponse FAILED remains a valid structured response. Busines
 negative outcomes, clarification, approval wait and valid rejection do not become
 client errors. Actual AgentResponse contains audit/result refs rather than embedded
 business result/evidence/PlanDiff bodies; fixtures preserve that real shape instead
-of inventing business status fields. Artifact presentation remains P14.4/P14.5.
+of inventing business status fields. The readonly artifact presentation boundary below
+supports those referenced bodies without altering P12 or P14.1 wire contracts.
+
+## Grounded result presentation
+
+`src/results/` contains pure result/status, reason, evidence, source and PlanDiff
+components. Conversation displays the returned explanation verbatim; structured
+panels never parse it, call an LLM, calculate scores or invoke Runtime. UNKNOWN and
+UNDETERMINED have explicit uncertainty text. Missing reasons/bodies/source metadata
+stay missing; an unknown reason retains its raw code. Runtime errors stay separate.
+
+Actual AgentResponse contains `audit.results/reasons` and `plan_refs`, not embedded
+business decisions, Evidence or PlanDiff. An optional synchronous `ArtifactReader`
+at composition supplies a readonly `{request_id, artifacts:[{ref, model, value}]}`
+presentation snapshot. It is not another Agent API, a Runtime wire field, an artifact
+fetcher or authorization. Request ID, exact referenced kind/ID, model, duplicate keys
+and selected generated schema are checked before display. Invalid attachments show
+ARTIFACT_CONTRACT_ERROR and no body; a new response replaces the old presentation.
+Without a matching attachment, the UI shows the references and unavailable-body text.
+
+Only the demo composition currently supplies attachments, from fixed Pydantic-validated
+fixtures. Real authorized retrieval and final Domain model validation remain P14.5.
+JSON Schema guards structure only; they do not establish factual truth or duplicate
+Domain behavioral rules. P12/P13/P14.1 contracts are unchanged. No browser object is
+trusted authority. Generated schemas/types for selected existing EligibilityDecision,
+RecommendationEvaluation, SkillGapDecision, Evidence, SourceMetadata and PlanDiff
+come from `scripts/export_frontend_results.py`; regenerate by running it without
+`--check`. It reuses the existing export's type formatting and existing backend test
+factories only for offline synthetic fixtures. Backend drift tests revalidate every
+fixture with the unchanged Domain models. Do not hand-edit generated files or
+`src/demo/result-fixtures.json`. This is consumer data, not a new source of truth.
+
+PlanDiff's real contract provides complete milestone before/after collections and
+optional status_change, not per-item ADD/REMOVE/UPDATE operations. The UI preserves
+both supplied collections, including removed/new/changed content, exact Plan IDs and
+versions, decision, trigger events, reason codes, evidence refs and provided sources.
+It does not compare Plans, derive a per-item change classification, create a diff
+from plan_refs, or synthesize one after approval. Empty supplied diffs remain empty.
+
+Evidence is React-escaped text, never raw HTML/Markdown execution. Source links allow
+only HTTP(S), reject embedded credentials, use noopener/noreferrer with new tabs,
+and preserve the supplied URL string. Type, aware observation time (UTC display with
+original ISO in title/dateTime) and verification state remain distinct. Long refs/URLs
+wrap; semantic lists/headings/links and labeled before/after sections support keyboard
+and narrow-screen use. Frontend Gates O/P/Q cover grounded claims, supplied-diff
+authority and safe untrusted source presentation. Gate E remains
+CONTRACT_PASS_REAL_RUNTIME_DEFERRED; no real Runtime or production deployment claim.
 
 ## Continuation and security
 

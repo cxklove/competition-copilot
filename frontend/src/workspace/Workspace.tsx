@@ -4,6 +4,8 @@ import { useConversation } from './useConversation.ts';
 import type { InvocationClient } from './useConversation.ts';
 import { workflowLabel } from './state.ts';
 import { HitlPanel } from './HitlPanel.tsx';
+import { ResultPanel } from '../results/ResultPanel.tsx';
+import type { ArtifactReader } from '../results/artifacts.ts';
 
 const errors = {
   TRANSPORT_ERROR: '连接未完成，请检查后重试。请求不会自动重发。',
@@ -24,10 +26,12 @@ export function Workspace({
   client,
   nextRequestId = newRequestId,
   now,
+  readArtifacts,
 }: {
   client: InvocationClient;
   nextRequestId?: () => string;
   now?: () => string;
+  readArtifacts?: ArtifactReader;
 }) {
   const { state, submit, retry, startNew, clarify, decide } = useConversation(
     client,
@@ -71,7 +75,7 @@ export function Workspace({
           <h1>把竞赛目标，变成下一步。</h1>
           <p>从一个问题开始，梳理你的参赛与备赛方向。</p>
         </div>
-        <div className="workspace-grid">
+        <div className={`workspace-grid${response?.outcome === 'COMPLETED' ? ' has-result' : ''}`}>
           <section className="conversation" aria-labelledby="conversation-title">
             <div className="section-heading">
               <h2 id="conversation-title">对话</h2>
@@ -236,11 +240,7 @@ export function Workspace({
                   </span>
                 </div>
               ) : response ? (
-                <div className="result-summary">
-                  <h3>{response.outcome === 'FAILED' ? 'Agent 未完成请求' : '回复已就绪'}</h3>
-                  <p>可在对话中查看返回的说明。</p>
-                  <span>详细结果与依据暂不可用</span>
-                </div>
+                <ResultPanel response={response} readArtifacts={readArtifacts} />
               ) : (
                 <p className="panel-note">发送问题后，在这里查看当前请求的状态与结果摘要。</p>
               )}

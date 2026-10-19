@@ -1,0 +1,1330 @@
+{
+  "eligible": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "EligibilityDecision",
+          "ref": {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "presentation-eligible"
+          },
+          "value": {
+            "competition_id": "competition",
+            "edition_id": "edition",
+            "evidence": [
+              {
+                "code": "SYNTHETIC_RULE",
+                "field": "education",
+                "message": "Synthetic reviewed rule, not a real competition fact.",
+                "source": {
+                  "observed_at": "2030-01-01T00:00:00Z",
+                  "source_type": "manual",
+                  "source_url": "https://example.org/synthetic-rules",
+                  "verification_status": "verified"
+                },
+                "value": "undergraduate"
+              }
+            ],
+            "reason_codes": [
+              "RULE_SATISFIED"
+            ],
+            "rule_evaluations": [
+              {
+                "evidence": [
+                  {
+                    "code": "SYNTHETIC_RULE",
+                    "field": "education",
+                    "message": "Synthetic reviewed rule, not a real competition fact.",
+                    "source": {
+                      "observed_at": "2030-01-01T00:00:00Z",
+                      "source_type": "manual",
+                      "source_url": "https://example.org/synthetic-rules",
+                      "verification_status": "verified"
+                    },
+                    "value": "undergraduate"
+                  }
+                ],
+                "message": "Synthetic reviewed rule, not a real competition fact.",
+                "reason_code": "RULE_SATISFIED",
+                "rule_id": "synthetic-rule",
+                "scope": "competition",
+                "status": "eligible",
+                "target_id": "competition"
+              }
+            ],
+            "status": "eligible",
+            "track_id": null
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "RULE_SATISFIED",
+              "result": {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "presentation-eligible"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "presentation-eligible"
+            }
+          ]
+        },
+        "intent": "CHECK_ELIGIBILITY",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "ineligible": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "EligibilityDecision",
+          "ref": {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "presentation-ineligible"
+          },
+          "value": {
+            "competition_id": "competition",
+            "edition_id": "edition",
+            "evidence": [
+              {
+                "code": "SYNTHETIC_RULE",
+                "field": "education",
+                "message": "Synthetic reviewed rule, not a real competition fact.",
+                "source": {
+                  "observed_at": "2030-01-01T00:00:00Z",
+                  "source_type": "manual",
+                  "source_url": "https://example.org/synthetic-rules",
+                  "verification_status": "verified"
+                },
+                "value": "undergraduate"
+              }
+            ],
+            "reason_codes": [
+              "RULE_VIOLATED"
+            ],
+            "rule_evaluations": [
+              {
+                "evidence": [
+                  {
+                    "code": "SYNTHETIC_RULE",
+                    "field": "education",
+                    "message": "Synthetic reviewed rule, not a real competition fact.",
+                    "source": {
+                      "observed_at": "2030-01-01T00:00:00Z",
+                      "source_type": "manual",
+                      "source_url": "https://example.org/synthetic-rules",
+                      "verification_status": "verified"
+                    },
+                    "value": "undergraduate"
+                  }
+                ],
+                "message": "Synthetic reviewed rule, not a real competition fact.",
+                "reason_code": "RULE_VIOLATED",
+                "rule_id": "synthetic-rule",
+                "scope": "competition",
+                "status": "ineligible",
+                "target_id": "competition"
+              }
+            ],
+            "status": "ineligible",
+            "track_id": null
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "RULE_VIOLATED",
+              "result": {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "presentation-ineligible"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "presentation-ineligible"
+            }
+          ]
+        },
+        "intent": "CHECK_ELIGIBILITY",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "no_change": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "PlanDiff",
+          "ref": {
+            "kind": "PLAN_DIFF",
+            "ref_id": "presentation-no_change"
+          },
+          "value": {
+            "after": {
+              "competition_id": "competition",
+              "created_at": "2030-01-01T00:00:00Z",
+              "edition_id": "edition",
+              "id": "plan",
+              "milestones": [
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "m1",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "保留并更新的任务"
+                },
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "removed",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "被移除的任务"
+                }
+              ],
+              "planning_horizon": null,
+              "planning_needs": [],
+              "skill_gap_audit": null,
+              "status": "draft",
+              "student_id": "student",
+              "track_id": "a",
+              "updated_at": "2030-01-01T00:00:00Z",
+              "version": 1
+            },
+            "before": {
+              "competition_id": "competition",
+              "created_at": "2030-01-01T00:00:00Z",
+              "edition_id": "edition",
+              "id": "plan",
+              "milestones": [
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "m1",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "保留并更新的任务"
+                },
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "removed",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "被移除的任务"
+                }
+              ],
+              "planning_horizon": null,
+              "planning_needs": [],
+              "skill_gap_audit": null,
+              "status": "draft",
+              "student_id": "student",
+              "track_id": "a",
+              "updated_at": "2030-01-01T00:00:00Z",
+              "version": 1
+            },
+            "changes": [],
+            "decision": {
+              "evaluated_at": "2030-01-03T00:00:00Z",
+              "impacts": [
+                {
+                  "evaluated_at": "2030-01-02T00:00:00Z",
+                  "event": {
+                    "competition_id": "competition",
+                    "description": null,
+                    "edition_id": "edition",
+                    "event_type": "track_membership_changed",
+                    "id": "competition-event-v1:1ff3ecd18f8a19ec5d1efb7601ae5da542f8a78181a7ddbc93c52b0623dfd861",
+                    "observed_at": "2030-01-02T00:00:00Z",
+                    "occurred_at": null,
+                    "source": {
+                      "observed_at": "2030-01-01T00:00:00Z",
+                      "source_type": "manual",
+                      "source_url": "https://example.invalid/p11-contract-fixture",
+                      "verification_status": "verified"
+                    },
+                    "source_change_fields": [
+                      "track_membership"
+                    ],
+                    "source_diff": {
+                      "after": {
+                        "observed_at": "2030-01-02T00:00:00Z",
+                        "snapshot_id": "after",
+                        "target": {
+                          "competition_id": "competition",
+                          "edition_id": "edition",
+                          "track_id": null
+                        }
+                      },
+                      "before": {
+                        "observed_at": "2030-01-01T00:00:00Z",
+                        "snapshot_id": "before",
+                        "target": {
+                          "competition_id": "competition",
+                          "edition_id": "edition",
+                          "track_id": null
+                        }
+                      },
+                      "changes": [
+                        {
+                          "after": {
+                            "sources": [
+                              {
+                                "observed_at": "2030-01-01T00:00:00Z",
+                                "source_type": "manual",
+                                "source_url": "https://example.invalid/p11-contract-fixture",
+                                "verification_status": "verified"
+                              }
+                            ],
+                            "state": "known_value",
+                            "value": [
+                              "a",
+                              "b"
+                            ]
+                          },
+                          "before": {
+                            "sources": [
+                              {
+                                "observed_at": "2030-01-01T00:00:00Z",
+                                "source_type": "manual",
+                                "source_url": "https://example.invalid/p11-contract-fixture",
+                                "verification_status": "verified"
+                              }
+                            ],
+                            "state": "known_value",
+                            "value": [
+                              "a"
+                            ]
+                          },
+                          "field": "track_membership",
+                          "kind": "value_changed"
+                        }
+                      ]
+                    },
+                    "track_id": null
+                  },
+                  "evidence": [
+                    {
+                      "event_id": "competition-event-v1:1ff3ecd18f8a19ec5d1efb7601ae5da542f8a78181a7ddbc93c52b0623dfd861",
+                      "milestone_ids": [],
+                      "plan_id": "plan",
+                      "source_change_fields": [
+                        "track_membership"
+                      ]
+                    }
+                  ],
+                  "outcome": "no_plan_impact",
+                  "plan": {
+                    "content_digest": "cf5434b1b732ac41f24b45ddb48e3bfbadf6122eaa2f6ccb59fb6eb3506c4b92",
+                    "milestone_ids": [
+                      "m1",
+                      "removed"
+                    ],
+                    "plan_id": "plan",
+                    "student_id": "student",
+                    "target": {
+                      "competition_id": "competition",
+                      "edition_id": "edition",
+                      "track_id": "a"
+                    },
+                    "updated_at": "2030-01-01T00:00:00Z",
+                    "version": 1
+                  },
+                  "reason_codes": [
+                    "unrelated_track_change"
+                  ],
+                  "scope": {
+                    "milestone_ids": [],
+                    "plan_id": "plan",
+                    "state": "known",
+                    "whole_plan": false
+                  },
+                  "student_id": "student"
+                }
+              ],
+              "outcome": "keep_current_plan",
+              "reason_codes": [
+                "no_plan_impact"
+              ],
+              "scope": {
+                "milestone_ids": [],
+                "plan_id": "plan",
+                "state": "known",
+                "whole_plan": false
+              }
+            },
+            "evaluated_at": "2030-01-03T00:00:00Z",
+            "status_change": null
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "no_plan_impact",
+              "result": {
+                "kind": "PLAN_DIFF",
+                "ref_id": "presentation-no_change"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "PLAN_DIFF",
+              "ref_id": "presentation-no_change"
+            }
+          ]
+        },
+        "intent": "EXPLAIN_REPLANNING",
+        "message": "预设拒绝后回复：返回的方案未改变。",
+        "outcome": "COMPLETED",
+        "plan_refs": [
+          {
+            "content_digest": "cf5434b1b732ac41f24b45ddb48e3bfbadf6122eaa2f6ccb59fb6eb3506c4b92",
+            "milestone_ids": [
+              "m1",
+              "removed"
+            ],
+            "plan_id": "plan",
+            "student_id": "student",
+            "target": {
+              "competition_id": "competition",
+              "edition_id": "edition",
+              "track_id": "a"
+            },
+            "updated_at": "2030-01-01T00:00:00Z",
+            "version": 1
+          }
+        ],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "no_gap": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "SkillGapDecision",
+          "ref": {
+            "kind": "SKILL_GAP_RESULT",
+            "ref_id": "presentation-no_gap"
+          },
+          "value": {
+            "audit_evidence": [
+              {
+                "code": "ANALYSIS_AUDIT",
+                "field": null,
+                "message": "System assessment.",
+                "source": null,
+                "value": null
+              }
+            ],
+            "gap_status": "no_gap",
+            "items": [
+              {
+                "reason_codes": [
+                  "REQUIREMENT_SATISFIED"
+                ],
+                "requirement": {
+                  "evidence": [
+                    {
+                      "code": "SYNTHETIC_REQUIREMENT",
+                      "field": "requirements.skill-a.required_level",
+                      "message": "Synthetic reviewed requirement, not a real competition fact.",
+                      "source": {
+                        "observed_at": "2026-01-01T00:00:00Z",
+                        "source_type": "manual",
+                        "source_url": "https://example.org/synthetic-task",
+                        "verification_status": "verified"
+                      },
+                      "value": "intermediate"
+                    }
+                  ],
+                  "presence_evidence": [
+                    {
+                      "code": "SYNTHETIC_REQUIREMENT_PRESENCE",
+                      "field": "requirements.skill-a.present",
+                      "message": "Synthetic reviewed presence.",
+                      "source": {
+                        "observed_at": "2026-01-01T00:00:00Z",
+                        "source_type": "manual",
+                        "source_url": "https://example.org/synthetic-task",
+                        "verification_status": "verified"
+                      },
+                      "value": true
+                    }
+                  ],
+                  "required_level": "intermediate",
+                  "requirement_type": "required",
+                  "skill_id": "skill-a"
+                },
+                "status": "satisfied",
+                "student_evidence": [
+                  {
+                    "code": "STUDENT_SKILL_FACT",
+                    "field": "skills.skill-a.level",
+                    "message": "Explicit synthetic student proficiency fact.",
+                    "source": null,
+                    "value": "intermediate"
+                  }
+                ],
+                "student_level": "intermediate"
+              }
+            ],
+            "reason_codes": [
+              "REQUIREMENT_SATISFIED"
+            ],
+            "requirements": {
+              "coverage": "complete",
+              "coverage_note": "Explicit synthetic coverage assessment, not inferred from count.",
+              "requirements": [
+                {
+                  "evidence": [
+                    {
+                      "code": "SYNTHETIC_REQUIREMENT",
+                      "field": "requirements.skill-a.required_level",
+                      "message": "Synthetic reviewed requirement, not a real competition fact.",
+                      "source": {
+                        "observed_at": "2026-01-01T00:00:00Z",
+                        "source_type": "manual",
+                        "source_url": "https://example.org/synthetic-task",
+                        "verification_status": "verified"
+                      },
+                      "value": "intermediate"
+                    }
+                  ],
+                  "presence_evidence": [
+                    {
+                      "code": "SYNTHETIC_REQUIREMENT_PRESENCE",
+                      "field": "requirements.skill-a.present",
+                      "message": "Synthetic reviewed presence.",
+                      "source": {
+                        "observed_at": "2026-01-01T00:00:00Z",
+                        "source_type": "manual",
+                        "source_url": "https://example.org/synthetic-task",
+                        "verification_status": "verified"
+                      },
+                      "value": true
+                    }
+                  ],
+                  "required_level": "intermediate",
+                  "requirement_type": "required",
+                  "skill_id": "skill-a"
+                }
+              ],
+              "target": {
+                "competition_id": "competition-a",
+                "edition_id": "edition-a",
+                "scope": "edition",
+                "track_id": null
+              }
+            },
+            "target": {
+              "competition_id": "competition-a",
+              "edition_id": "edition-a",
+              "scope": "edition",
+              "track_id": null
+            }
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "REQUIREMENT_SATISFIED",
+              "result": {
+                "kind": "SKILL_GAP_RESULT",
+                "ref_id": "presentation-no_gap"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "SKILL_GAP_RESULT",
+              "ref_id": "presentation-no_gap"
+            }
+          ]
+        },
+        "intent": "ANALYZE_SKILL_GAP",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "partial_evidence": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "Evidence",
+          "ref": {
+            "kind": "EVIDENCE",
+            "ref_id": "presentation-partial_evidence"
+          },
+          "value": {
+            "code": "PARTIAL_SYNTHETIC",
+            "field": null,
+            "message": "只有依据文本，未提供来源。",
+            "source": null,
+            "value": null
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [],
+          "results": [
+            {
+              "kind": "EVIDENCE",
+              "ref_id": "presentation-partial_evidence"
+            }
+          ]
+        },
+        "intent": "UNKNOWN",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "pending_source": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "Evidence",
+          "ref": {
+            "kind": "EVIDENCE",
+            "ref_id": "presentation-pending_source"
+          },
+          "value": {
+            "code": "SYNTHETIC_RULE",
+            "field": "education",
+            "message": "Synthetic reviewed rule, not a real competition fact.",
+            "source": {
+              "observed_at": "2030-01-01T00:00:00Z",
+              "source_type": "manual",
+              "source_url": "https://example.org/synthetic-rules",
+              "verification_status": "pending"
+            },
+            "value": "undergraduate"
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [],
+          "results": [
+            {
+              "kind": "EVIDENCE",
+              "ref_id": "presentation-pending_source"
+            }
+          ]
+        },
+        "intent": "UNKNOWN",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "plan_diff": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "PlanDiff",
+          "ref": {
+            "kind": "PLAN_DIFF",
+            "ref_id": "presentation-plan_diff"
+          },
+          "value": {
+            "after": {
+              "competition_id": "competition",
+              "created_at": "2030-01-01T00:00:00Z",
+              "edition_id": "edition",
+              "id": "revised-plan-v1:c5898623ce3a16d1cbcce4a40e36f2fd70b6317474c73aa64690519daf52464d",
+              "milestones": [
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "m1",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "更新后的任务"
+                },
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "added",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "新增的任务"
+                }
+              ],
+              "planning_horizon": null,
+              "planning_needs": [],
+              "skill_gap_audit": null,
+              "status": "draft",
+              "student_id": "student",
+              "track_id": "a",
+              "updated_at": "2030-01-03T00:00:00Z",
+              "version": 2
+            },
+            "before": {
+              "competition_id": "competition",
+              "created_at": "2030-01-01T00:00:00Z",
+              "edition_id": "edition",
+              "id": "plan",
+              "milestones": [
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "m1",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "保留并更新的任务"
+                },
+                {
+                  "dependency_ids": [],
+                  "description": null,
+                  "due_at": null,
+                  "estimated_hours": null,
+                  "id": "removed",
+                  "source_need_id": null,
+                  "start_at": null,
+                  "status": "pending",
+                  "title": "被移除的任务"
+                }
+              ],
+              "planning_horizon": null,
+              "planning_needs": [],
+              "skill_gap_audit": null,
+              "status": "draft",
+              "student_id": "student",
+              "track_id": "a",
+              "updated_at": "2030-01-01T00:00:00Z",
+              "version": 1
+            },
+            "changes": [
+              {
+                "after": [
+                  {
+                    "dependency_ids": [],
+                    "description": null,
+                    "due_at": null,
+                    "estimated_hours": null,
+                    "id": "m1",
+                    "source_need_id": null,
+                    "start_at": null,
+                    "status": "pending",
+                    "title": "更新后的任务"
+                  },
+                  {
+                    "dependency_ids": [],
+                    "description": null,
+                    "due_at": null,
+                    "estimated_hours": null,
+                    "id": "added",
+                    "source_need_id": null,
+                    "start_at": null,
+                    "status": "pending",
+                    "title": "新增的任务"
+                  }
+                ],
+                "before": [
+                  {
+                    "dependency_ids": [],
+                    "description": null,
+                    "due_at": null,
+                    "estimated_hours": null,
+                    "id": "m1",
+                    "source_need_id": null,
+                    "start_at": null,
+                    "status": "pending",
+                    "title": "保留并更新的任务"
+                  },
+                  {
+                    "dependency_ids": [],
+                    "description": null,
+                    "due_at": null,
+                    "estimated_hours": null,
+                    "id": "removed",
+                    "source_need_id": null,
+                    "start_at": null,
+                    "status": "pending",
+                    "title": "被移除的任务"
+                  }
+                ],
+                "field": "milestones"
+              }
+            ],
+            "decision": {
+              "evaluated_at": "2030-01-03T00:00:00Z",
+              "impacts": [
+                {
+                  "evaluated_at": "2030-01-02T00:00:00Z",
+                  "event": {
+                    "competition_id": "competition",
+                    "description": null,
+                    "edition_id": "edition",
+                    "event_type": "track_membership_changed",
+                    "id": "competition-event-v1:b91b9860aab52cdcf05591ddb9a9a6edb3cb79720ca9be68de4a5f5e532bad5e",
+                    "observed_at": "2030-01-02T00:00:00Z",
+                    "occurred_at": null,
+                    "source": {
+                      "observed_at": "2030-01-01T00:00:00Z",
+                      "source_type": "manual",
+                      "source_url": "https://example.invalid/p11-contract-fixture",
+                      "verification_status": "verified"
+                    },
+                    "source_change_fields": [
+                      "track_membership"
+                    ],
+                    "source_diff": {
+                      "after": {
+                        "observed_at": "2030-01-02T00:00:00Z",
+                        "snapshot_id": "after",
+                        "target": {
+                          "competition_id": "competition",
+                          "edition_id": "edition",
+                          "track_id": null
+                        }
+                      },
+                      "before": {
+                        "observed_at": "2030-01-01T00:00:00Z",
+                        "snapshot_id": "before",
+                        "target": {
+                          "competition_id": "competition",
+                          "edition_id": "edition",
+                          "track_id": null
+                        }
+                      },
+                      "changes": [
+                        {
+                          "after": {
+                            "sources": [
+                              {
+                                "observed_at": "2030-01-01T00:00:00Z",
+                                "source_type": "manual",
+                                "source_url": "https://example.invalid/p11-contract-fixture",
+                                "verification_status": "verified"
+                              }
+                            ],
+                            "state": "known_value",
+                            "value": [
+                              "b"
+                            ]
+                          },
+                          "before": {
+                            "sources": [
+                              {
+                                "observed_at": "2030-01-01T00:00:00Z",
+                                "source_type": "manual",
+                                "source_url": "https://example.invalid/p11-contract-fixture",
+                                "verification_status": "verified"
+                              }
+                            ],
+                            "state": "known_value",
+                            "value": [
+                              "a"
+                            ]
+                          },
+                          "field": "track_membership",
+                          "kind": "value_changed"
+                        }
+                      ]
+                    },
+                    "track_id": null
+                  },
+                  "evidence": [
+                    {
+                      "event_id": "competition-event-v1:b91b9860aab52cdcf05591ddb9a9a6edb3cb79720ca9be68de4a5f5e532bad5e",
+                      "milestone_ids": [],
+                      "plan_id": "plan",
+                      "source_change_fields": [
+                        "track_membership"
+                      ]
+                    }
+                  ],
+                  "outcome": "affects_plan",
+                  "plan": {
+                    "content_digest": "cf5434b1b732ac41f24b45ddb48e3bfbadf6122eaa2f6ccb59fb6eb3506c4b92",
+                    "milestone_ids": [
+                      "m1",
+                      "removed"
+                    ],
+                    "plan_id": "plan",
+                    "student_id": "student",
+                    "target": {
+                      "competition_id": "competition",
+                      "edition_id": "edition",
+                      "track_id": "a"
+                    },
+                    "updated_at": "2030-01-01T00:00:00Z",
+                    "version": 1
+                  },
+                  "reason_codes": [
+                    "target_track_removed"
+                  ],
+                  "scope": {
+                    "milestone_ids": [],
+                    "plan_id": "plan",
+                    "state": "known",
+                    "whole_plan": true
+                  },
+                  "student_id": "student"
+                }
+              ],
+              "outcome": "replan",
+              "reason_codes": [
+                "structural_revision_supported"
+              ],
+              "scope": {
+                "milestone_ids": [],
+                "plan_id": "plan",
+                "state": "known",
+                "whole_plan": true
+              }
+            },
+            "evaluated_at": "2030-01-03T00:00:00Z",
+            "status_change": null
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "structural_revision_supported",
+              "result": {
+                "kind": "PLAN_DIFF",
+                "ref_id": "presentation-plan_diff"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "PLAN_DIFF",
+              "ref_id": "presentation-plan_diff"
+            }
+          ]
+        },
+        "intent": "EXPLAIN_REPLANNING",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [
+          {
+            "content_digest": "cf5434b1b732ac41f24b45ddb48e3bfbadf6122eaa2f6ccb59fb6eb3506c4b92",
+            "milestone_ids": [
+              "m1",
+              "removed"
+            ],
+            "plan_id": "plan",
+            "student_id": "student",
+            "target": {
+              "competition_id": "competition",
+              "edition_id": "edition",
+              "track_id": "a"
+            },
+            "updated_at": "2030-01-01T00:00:00Z",
+            "version": 1
+          },
+          {
+            "content_digest": "4e5a6c0bcb6b5f7dd3801a71674e0b944a859bd89f344b4029f16b4fde9616b3",
+            "milestone_ids": [
+              "added",
+              "m1"
+            ],
+            "plan_id": "revised-plan-v1:c5898623ce3a16d1cbcce4a40e36f2fd70b6317474c73aa64690519daf52464d",
+            "student_id": "student",
+            "target": {
+              "competition_id": "competition",
+              "edition_id": "edition",
+              "track_id": "a"
+            },
+            "updated_at": "2030-01-03T00:00:00Z",
+            "version": 2
+          }
+        ],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "recommendation": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "RecommendationEvaluation",
+          "ref": {
+            "kind": "RECOMMENDATION_RESULT",
+            "ref_id": "presentation-recommendation"
+          },
+          "value": {
+            "candidate": {
+              "competition_id": "competition-1",
+              "edition_id": "edition-1",
+              "track_id": null
+            },
+            "eligibility_decision": {
+              "competition_id": "competition-1",
+              "edition_id": "edition-1",
+              "evidence": [
+                {
+                  "code": "hard-rule",
+                  "field": null,
+                  "message": "Synthetic rule evidence.",
+                  "source": null,
+                  "value": null
+                }
+              ],
+              "reason_codes": [
+                "RULE_SATISFIED"
+              ],
+              "rule_evaluations": [
+                {
+                  "evidence": [
+                    {
+                      "code": "hard-rule",
+                      "field": null,
+                      "message": "Synthetic rule evidence.",
+                      "source": null,
+                      "value": null
+                    }
+                  ],
+                  "message": "Synthetic hard rule outcome.",
+                  "reason_code": "RULE_SATISFIED",
+                  "rule_id": "official-rule-v1",
+                  "scope": "edition",
+                  "status": "eligible",
+                  "target_id": "edition-1"
+                }
+              ],
+              "status": "eligible",
+              "track_id": null
+            },
+            "evidence": [
+              {
+                "code": "student-goal",
+                "field": "interests",
+                "message": "Student stated an interest in this subject.",
+                "source": null,
+                "value": "mathematics"
+              }
+            ],
+            "reason_codes": [
+              "SUITABILITY_ASSESSED"
+            ],
+            "score_components": [
+              {
+                "component_id": "goal-fit",
+                "evidence": [
+                  {
+                    "code": "student-goal",
+                    "field": "interests",
+                    "message": "Student stated an interest in this subject.",
+                    "source": null,
+                    "value": "mathematics"
+                  }
+                ],
+                "message": "Synthetic goal-fit signal.",
+                "reason_code": "GOAL_SIGNAL_PRESENT",
+                "score": 0.8
+              }
+            ],
+            "status": "recommended",
+            "suitability_score": 0.8
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "SUITABILITY_ASSESSED",
+              "result": {
+                "kind": "RECOMMENDATION_RESULT",
+                "ref_id": "presentation-recommendation"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "RECOMMENDATION_RESULT",
+              "ref_id": "presentation-recommendation"
+            }
+          ]
+        },
+        "intent": "GET_RECOMMENDATIONS",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "undetermined": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "SkillGapDecision",
+          "ref": {
+            "kind": "SKILL_GAP_RESULT",
+            "ref_id": "presentation-undetermined"
+          },
+          "value": {
+            "audit_evidence": [
+              {
+                "code": "ANALYSIS_AUDIT",
+                "field": null,
+                "message": "System assessment.",
+                "source": null,
+                "value": null
+              }
+            ],
+            "gap_status": "undetermined",
+            "items": [],
+            "reason_codes": [
+              "REQUIREMENT_DATA_MISSING"
+            ],
+            "requirements": {
+              "coverage": "missing",
+              "coverage_note": "Explicit synthetic coverage assessment, not inferred from count.",
+              "requirements": [],
+              "target": {
+                "competition_id": "competition-a",
+                "edition_id": "edition-a",
+                "scope": "edition",
+                "track_id": null
+              }
+            },
+            "target": {
+              "competition_id": "competition-a",
+              "edition_id": "edition-a",
+              "scope": "edition",
+              "track_id": null
+            }
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "REQUIREMENT_DATA_MISSING",
+              "result": {
+                "kind": "SKILL_GAP_RESULT",
+                "ref_id": "presentation-undetermined"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "SKILL_GAP_RESULT",
+              "ref_id": "presentation-undetermined"
+            }
+          ]
+        },
+        "intent": "ANALYZE_SKILL_GAP",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "unknown": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "EligibilityDecision",
+          "ref": {
+            "kind": "ELIGIBILITY_RESULT",
+            "ref_id": "presentation-unknown"
+          },
+          "value": {
+            "competition_id": "competition",
+            "edition_id": "edition",
+            "evidence": [
+              {
+                "code": "SYNTHETIC_RULE",
+                "field": "education",
+                "message": "Synthetic reviewed rule, not a real competition fact.",
+                "source": {
+                  "observed_at": "2030-01-01T00:00:00Z",
+                  "source_type": "manual",
+                  "source_url": "https://example.org/synthetic-rules",
+                  "verification_status": "verified"
+                },
+                "value": "undergraduate"
+              }
+            ],
+            "reason_codes": [
+              "PROFILE_DATA_MISSING"
+            ],
+            "rule_evaluations": [
+              {
+                "evidence": [
+                  {
+                    "code": "SYNTHETIC_RULE",
+                    "field": "education",
+                    "message": "Synthetic reviewed rule, not a real competition fact.",
+                    "source": {
+                      "observed_at": "2030-01-01T00:00:00Z",
+                      "source_type": "manual",
+                      "source_url": "https://example.org/synthetic-rules",
+                      "verification_status": "verified"
+                    },
+                    "value": "undergraduate"
+                  }
+                ],
+                "message": "Synthetic reviewed rule, not a real competition fact.",
+                "reason_code": "PROFILE_DATA_MISSING",
+                "rule_id": "synthetic-rule",
+                "scope": "competition",
+                "status": "unknown",
+                "target_id": "competition"
+              }
+            ],
+            "status": "unknown",
+            "track_id": null
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [
+            {
+              "reason_code": "PROFILE_DATA_MISSING",
+              "result": {
+                "kind": "ELIGIBILITY_RESULT",
+                "ref_id": "presentation-unknown"
+              }
+            }
+          ],
+          "results": [
+            {
+              "kind": "ELIGIBILITY_RESULT",
+              "ref_id": "presentation-unknown"
+            }
+          ]
+        },
+        "intent": "CHECK_ELIGIBILITY",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  },
+  "verified_source": {
+    "bundle": {
+      "artifacts": [
+        {
+          "model": "SourceMetadata",
+          "ref": {
+            "kind": "SOURCE",
+            "ref_id": "presentation-verified_source"
+          },
+          "value": {
+            "observed_at": "2030-01-01T00:00:00Z",
+            "source_type": "manual",
+            "source_url": "https://example.org/synthetic-rules",
+            "verification_status": "verified"
+          }
+        }
+      ],
+      "request_id": "request-1"
+    },
+    "runtime": {
+      "response": {
+        "audit": {
+          "reasons": [],
+          "results": [
+            {
+              "kind": "SOURCE",
+              "ref_id": "presentation-verified_source"
+            }
+          ]
+        },
+        "intent": "UNKNOWN",
+        "message": "预设结果；仅演示展示，不代表真实业务判断。",
+        "outcome": "COMPLETED",
+        "plan_refs": [],
+        "request_id": "request-1"
+      }
+    }
+  }
+}

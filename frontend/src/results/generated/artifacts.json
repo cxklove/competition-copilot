@@ -1,0 +1,2680 @@
+{
+  "EligibilityDecision": {
+    "$defs": {
+      "EligibilityReasonCode": {
+        "enum": [
+          "RULE_SATISFIED",
+          "RULE_VIOLATED",
+          "PROFILE_DATA_MISSING",
+          "RULE_DATA_MISSING"
+        ],
+        "title": "EligibilityReasonCode",
+        "type": "string"
+      },
+      "EligibilityScope": {
+        "enum": [
+          "competition",
+          "edition",
+          "track"
+        ],
+        "title": "EligibilityScope",
+        "type": "string"
+      },
+      "EligibilityStatus": {
+        "enum": [
+          "eligible",
+          "ineligible",
+          "unknown"
+        ],
+        "title": "EligibilityStatus",
+        "type": "string"
+      },
+      "Evidence": {
+        "additionalProperties": false,
+        "description": "A structured piece of evidence cited by a business conclusion.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Field"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SourceMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Evidence",
+        "type": "object"
+      },
+      "RuleEvaluation": {
+        "additionalProperties": false,
+        "description": "One rule's conclusion for one explicit competition/edition/track target.",
+        "properties": {
+          "evidence": {
+            "items": {
+              "$ref": "#/$defs/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "reason_code": {
+            "$ref": "#/$defs/EligibilityReasonCode"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/$defs/EligibilityScope"
+          },
+          "status": {
+            "$ref": "#/$defs/EligibilityStatus"
+          },
+          "target_id": {
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "scope",
+          "target_id",
+          "status",
+          "reason_code",
+          "message",
+          "evidence"
+        ],
+        "title": "RuleEvaluation",
+        "type": "object"
+      },
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Immutable provenance and verification state for a competition fact.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_type": {
+            "$ref": "#/$defs/SourceType"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "source_url",
+          "source_type",
+          "observed_at",
+          "verification_status"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Eligibility-specific DecisionResult with target and rule audit trail.\n\nConstruction validates internal consistency, not completeness of official\nrules. A future Domain Service must establish coverage before ELIGIBLE.",
+    "properties": {
+      "competition_id": {
+        "title": "Competition Id",
+        "type": "string"
+      },
+      "edition_id": {
+        "title": "Edition Id",
+        "type": "string"
+      },
+      "evidence": {
+        "items": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "title": "Evidence",
+        "type": "array"
+      },
+      "reason_codes": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Reason Codes",
+        "type": "array"
+      },
+      "rule_evaluations": {
+        "items": {
+          "$ref": "#/$defs/RuleEvaluation"
+        },
+        "title": "Rule Evaluations",
+        "type": "array"
+      },
+      "status": {
+        "$ref": "#/$defs/EligibilityStatus"
+      },
+      "track_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Track Id"
+      }
+    },
+    "required": [
+      "status",
+      "reason_codes",
+      "competition_id",
+      "edition_id"
+    ],
+    "title": "EligibilityDecision",
+    "type": "object"
+  },
+  "Evidence": {
+    "$defs": {
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Immutable provenance and verification state for a competition fact.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_type": {
+            "$ref": "#/$defs/SourceType"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "source_url",
+          "source_type",
+          "observed_at",
+          "verification_status"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "A structured piece of evidence cited by a business conclusion.",
+    "properties": {
+      "code": {
+        "title": "Code",
+        "type": "string"
+      },
+      "field": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Field"
+      },
+      "message": {
+        "title": "Message",
+        "type": "string"
+      },
+      "source": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      }
+    },
+    "required": [
+      "code",
+      "message"
+    ],
+    "title": "Evidence",
+    "type": "object"
+  },
+  "PlanDiff": {
+    "$defs": {
+      "AffectedPlanScope": {
+        "additionalProperties": false,
+        "properties": {
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/$defs/ScopeState"
+          },
+          "whole_plan": {
+            "default": false,
+            "title": "Whole Plan",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "plan_id",
+          "state"
+        ],
+        "title": "AffectedPlanScope",
+        "type": "object"
+      },
+      "CompetitionEvent": {
+        "additionalProperties": false,
+        "description": "P1 recorded events and P10 Diff-backed business/coverage interpretations.\n\nP10 observed_at is explicit detection time, not business effective time.\noccurred_at is retained only for legacy records. Description is display-only.\nNo impact, student, notification or workflow semantics.",
+        "properties": {
+          "competition_id": {
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "edition_id": {
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "event_type": {
+            "$ref": "#/$defs/CompetitionEventType"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Occurred At"
+          },
+          "source": {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          "source_change_fields": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Source Change Fields",
+            "type": "array"
+          },
+          "source_diff": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SnapshotDiff"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "id",
+          "competition_id",
+          "edition_id",
+          "event_type",
+          "observed_at",
+          "source"
+        ],
+        "title": "CompetitionEvent",
+        "type": "object"
+      },
+      "CompetitionEventType": {
+        "enum": [
+          "registration_opened",
+          "registration_closed",
+          "deadline_changed",
+          "material_updated",
+          "rule_updated",
+          "track_updated",
+          "result_published",
+          "other",
+          "registration_window_changed",
+          "competition_window_changed",
+          "track_membership_changed",
+          "observation_coverage_changed"
+        ],
+        "title": "CompetitionEventType",
+        "type": "string"
+      },
+      "CompetitionPlan": {
+        "additionalProperties": false,
+        "description": "Immutable initial plan for an exact edition or track.\n\nExisting timestamps/version/status remain supplied metadata, not replanning.\nTarget existence and parent relationships are validated by the caller; this\nmodel checks exact agreement with the supplied P7 target. An audit can be\nretained with no needs/milestones. No dates, priorities or actions are inferred.",
+        "properties": {
+          "competition_id": {
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "edition_id": {
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "milestones": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/PlanMilestone"
+            },
+            "title": "Milestones",
+            "type": "array"
+          },
+          "planning_horizon": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TimeWindow"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "planning_needs": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/PlanningNeed"
+            },
+            "title": "Planning Needs",
+            "type": "array"
+          },
+          "skill_gap_audit": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillGapPlanningAudit"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "status": {
+            "$ref": "#/$defs/PlanStatus",
+            "default": "draft"
+          },
+          "student_id": {
+            "title": "Student Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "student_id",
+          "competition_id",
+          "edition_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CompetitionPlan",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "EventImpactAnalysis": {
+        "additionalProperties": false,
+        "description": "Supplied outcome against exact Plan context; validators do not infer impact.\n\nEdition-level Event / track Plan and track Event / edition Plan share context,\nbut relevance alone proves no dependency. Different explicit tracks are disjoint.\nStudent context has no independent competition target: it binds plan.student_id.",
+        "properties": {
+          "evaluated_at": {
+            "format": "date-time",
+            "title": "Evaluated At",
+            "type": "string"
+          },
+          "event": {
+            "$ref": "#/$defs/CompetitionEvent"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/$defs/ReplanningEvidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "outcome": {
+            "$ref": "#/$defs/ImpactOutcome"
+          },
+          "plan": {
+            "$ref": "#/$defs/PlanReference"
+          },
+          "reason_codes": {
+            "items": {
+              "$ref": "#/$defs/ReplanningReasonCode"
+            },
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "scope": {
+            "$ref": "#/$defs/AffectedPlanScope"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "plan",
+          "student_id",
+          "evaluated_at",
+          "outcome",
+          "scope",
+          "reason_codes",
+          "evidence"
+        ],
+        "title": "EventImpactAnalysis",
+        "type": "object"
+      },
+      "FactChangeKind": {
+        "enum": [
+          "value_changed",
+          "presence_changed",
+          "observation_state_changed"
+        ],
+        "title": "FactChangeKind",
+        "type": "string"
+      },
+      "ImpactOutcome": {
+        "enum": [
+          "affects_plan",
+          "no_plan_impact",
+          "undetermined"
+        ],
+        "title": "ImpactOutcome",
+        "type": "string"
+      },
+      "MilestoneStatus": {
+        "enum": [
+          "pending",
+          "in_progress",
+          "completed",
+          "blocked",
+          "skipped"
+        ],
+        "title": "MilestoneStatus",
+        "type": "string"
+      },
+      "ObservationState": {
+        "enum": [
+          "known_value",
+          "known_absent",
+          "unknown"
+        ],
+        "title": "ObservationState",
+        "type": "string"
+      },
+      "ObservedInstant": {
+        "additionalProperties": false,
+        "description": "One window endpoint; an omitted endpoint in a partial window is UNKNOWN.",
+        "properties": {
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/SourceMetadata"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/$defs/ObservationState"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "ObservedInstant",
+        "type": "object"
+      },
+      "ObservedTimeWindow": {
+        "additionalProperties": false,
+        "description": "A known window may have partial (or unknown) endpoints per TimeWindow.\n\nWhole-field UNKNOWN says the window itself was not reliably observed.\nMissing endpoints do not assert that those endpoints are absent.",
+        "properties": {
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/SourceMetadata"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/$defs/ObservationState"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TimeWindow"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "ObservedTimeWindow",
+        "type": "object"
+      },
+      "ObservedTrackMembership": {
+        "additionalProperties": false,
+        "description": "Complete edition track ID set, including a known empty set.\n\nAn incomplete/unobserved set is UNKNOWN, not KNOWN_VALUE(()).\nKNOWN_ABSENT asserts absence of the membership fact itself, not zero tracks.",
+        "properties": {
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/SourceMetadata"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/$defs/ObservationState"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "ObservedTrackMembership",
+        "type": "object"
+      },
+      "PlanMilestone": {
+        "additionalProperties": false,
+        "description": "Immutable milestone; purpose derives from its referenced PlanningNeed.\n\nsource_need_id=None retains P1 general/manual milestone semantics, without\nclaiming a P7-backed skill action. Timing may be absent or partially known.",
+        "properties": {
+          "dependency_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Dependency Ids",
+            "type": "array"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Due At"
+          },
+          "estimated_hours": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Estimated Hours"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "source_need_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Need Id"
+          },
+          "start_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start At"
+          },
+          "status": {
+            "$ref": "#/$defs/MilestoneStatus",
+            "default": "pending"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "PlanMilestone",
+        "type": "object"
+      },
+      "PlanMilestonesChange": {
+        "additionalProperties": false,
+        "description": "Supplied whole-collection structural change; preserves P8 milestone order.",
+        "properties": {
+          "after": {
+            "items": {
+              "$ref": "#/$defs/PlanMilestone"
+            },
+            "title": "After",
+            "type": "array"
+          },
+          "before": {
+            "items": {
+              "$ref": "#/$defs/PlanMilestone"
+            },
+            "title": "Before",
+            "type": "array"
+          },
+          "field": {
+            "const": "milestones",
+            "default": "milestones",
+            "title": "Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "PlanMilestonesChange",
+        "type": "object"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "PlanStatus": {
+        "enum": [
+          "draft",
+          "active",
+          "completed",
+          "cancelled",
+          "superseded"
+        ],
+        "title": "PlanStatus",
+        "type": "string"
+      },
+      "PlanStatusChange": {
+        "additionalProperties": false,
+        "description": "Controlled operational cancellation, not a general status machine.",
+        "properties": {
+          "after_status": {
+            "$ref": "#/$defs/PlanStatus"
+          },
+          "before_status": {
+            "$ref": "#/$defs/PlanStatus"
+          },
+          "field": {
+            "const": "status",
+            "default": "status",
+            "title": "Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "before_status",
+          "after_status"
+        ],
+        "title": "PlanStatusChange",
+        "type": "object"
+      },
+      "PlanningNeed": {
+        "additionalProperties": false,
+        "description": "Supplied action purpose, justified by P7 facts; never compares skill levels.",
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/$defs/PlanningNeedType"
+          },
+          "reason_codes": {
+            "items": {
+              "$ref": "#/$defs/SkillGapReasonCode"
+            },
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "source_item": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillGapItem"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "reason_codes"
+        ],
+        "title": "PlanningNeed",
+        "type": "object"
+      },
+      "PlanningNeedType": {
+        "enum": [
+          "skill_improvement",
+          "uncertainty_resolution"
+        ],
+        "title": "PlanningNeedType",
+        "type": "string"
+      },
+      "ReplanningDecision": {
+        "additionalProperties": false,
+        "description": "Validate supplied action: confirmed > uncertain > proven no-impact.\n\nMultiple analyses and unresolved evidence stay intact. This Contract neither\ngenerates a decision nor promises that a Plan revision is representable.",
+        "properties": {
+          "evaluated_at": {
+            "format": "date-time",
+            "title": "Evaluated At",
+            "type": "string"
+          },
+          "impacts": {
+            "items": {
+              "$ref": "#/$defs/EventImpactAnalysis"
+            },
+            "minItems": 1,
+            "title": "Impacts",
+            "type": "array"
+          },
+          "outcome": {
+            "$ref": "#/$defs/ReplanningOutcome"
+          },
+          "reason_codes": {
+            "items": {
+              "$ref": "#/$defs/ReplanningReasonCode"
+            },
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "scope": {
+            "$ref": "#/$defs/AffectedPlanScope"
+          }
+        },
+        "required": [
+          "impacts",
+          "evaluated_at",
+          "outcome",
+          "scope",
+          "reason_codes"
+        ],
+        "title": "ReplanningDecision",
+        "type": "object"
+      },
+      "ReplanningEvidence": {
+        "additionalProperties": false,
+        "description": "Structured references; full source lineage stays in the supplied Event.",
+        "properties": {
+          "event_id": {
+            "minLength": 1,
+            "title": "Event Id",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "source_change_fields": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Source Change Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event_id",
+          "plan_id"
+        ],
+        "title": "ReplanningEvidence",
+        "type": "object"
+      },
+      "ReplanningOutcome": {
+        "enum": [
+          "replan",
+          "keep_current_plan",
+          "undetermined"
+        ],
+        "title": "ReplanningOutcome",
+        "type": "string"
+      },
+      "ReplanningReasonCode": {
+        "enum": [
+          "target_mismatch",
+          "relevant_plan_target",
+          "plan_dependency_matched",
+          "plan_dependency_not_represented",
+          "observation_only_event",
+          "target_track_removed",
+          "no_relevant_plan_element",
+          "unrelated_track_change",
+          "no_plan_impact",
+          "structural_revision_supported",
+          "revision_not_representable",
+          "impact_undetermined",
+          "confirmed_plan_impact",
+          "confirmed_impact_with_unresolved_remainder"
+        ],
+        "title": "ReplanningReasonCode",
+        "type": "string"
+      },
+      "ScopeState": {
+        "enum": [
+          "known",
+          "unresolved",
+          "partially_resolved"
+        ],
+        "title": "ScopeState",
+        "type": "string"
+      },
+      "SkillGapItem": {
+        "additionalProperties": false,
+        "description": "A supplied per-skill conclusion, with separate requirement/student audit.\n\nNo numeric gap is defined for the ordinal SkillLevel scale. The compatibility\ntable only rejects contradictory snapshots; it does not produce a result.",
+        "properties": {
+          "reason_codes": {
+            "items": {
+              "$ref": "#/$defs/SkillGapReasonCode"
+            },
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "requirement": {
+            "$ref": "#/$defs/SkillRequirement"
+          },
+          "status": {
+            "$ref": "#/$defs/SkillGapItemStatus"
+          },
+          "student_evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/_EvidenceSnapshot"
+            },
+            "title": "Student Evidence",
+            "type": "array"
+          },
+          "student_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "requirement",
+          "status",
+          "reason_codes"
+        ],
+        "title": "SkillGapItem",
+        "type": "object"
+      },
+      "SkillGapItemStatus": {
+        "enum": [
+          "satisfied",
+          "gap",
+          "unknown"
+        ],
+        "title": "SkillGapItemStatus",
+        "type": "string"
+      },
+      "SkillGapPlanningAudit": {
+        "additionalProperties": false,
+        "description": "Small supplied P7 decision projection, not a second gap evaluation.\n\nCaller retains the original decision and supplies its exact target, coverage,\noverall status and reasons. Need-local SkillGapItem snapshots retain source\nfacts/evidence without embedding a complete decision in every need.",
+        "properties": {
+          "coverage": {
+            "$ref": "#/$defs/SkillRequirementCoverage"
+          },
+          "gap_status": {
+            "$ref": "#/$defs/SkillGapStatus"
+          },
+          "reason_codes": {
+            "items": {
+              "$ref": "#/$defs/SkillGapReasonCode"
+            },
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "target": {
+            "$ref": "#/$defs/SkillRequirementTarget"
+          }
+        },
+        "required": [
+          "target",
+          "coverage",
+          "gap_status",
+          "reason_codes"
+        ],
+        "title": "SkillGapPlanningAudit",
+        "type": "object"
+      },
+      "SkillGapReasonCode": {
+        "enum": [
+          "REQUIREMENT_SATISFIED",
+          "SKILL_BELOW_REQUIREMENT",
+          "STUDENT_SKILL_DATA_MISSING",
+          "REQUIREMENT_DATA_MISSING",
+          "PARTIAL_REQUIREMENT_COVERAGE",
+          "REQUIREMENT_PROFICIENCY_UNSPECIFIED"
+        ],
+        "title": "SkillGapReasonCode",
+        "type": "string"
+      },
+      "SkillGapStatus": {
+        "enum": [
+          "no_gap",
+          "gap_identified",
+          "undetermined"
+        ],
+        "title": "SkillGapStatus",
+        "type": "string"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
+      },
+      "SkillRequirement": {
+        "additionalProperties": false,
+        "description": "Structured skill fact; target/scope belongs to its requirement set.\n\nSkill identity references the existing Skill.id vocabulary. Required\nproficiency uses StudentSkill.level. None means a known requirement with\nunspecified threshold, never missing requirement data or SkillLevel.UNKNOWN.",
+        "properties": {
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/_EvidenceSnapshot"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "presence_evidence": {
+            "items": {
+              "$ref": "#/$defs/_EvidenceSnapshot"
+            },
+            "minItems": 1,
+            "title": "Presence Evidence",
+            "type": "array"
+          },
+          "required_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requirement_type": {
+            "$ref": "#/$defs/SkillRequirementType"
+          },
+          "skill_id": {
+            "minLength": 1,
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id",
+          "required_level",
+          "requirement_type",
+          "presence_evidence"
+        ],
+        "title": "SkillRequirement",
+        "type": "object"
+      },
+      "SkillRequirementCoverage": {
+        "enum": [
+          "complete",
+          "partial",
+          "missing"
+        ],
+        "title": "SkillRequirementCoverage",
+        "type": "string"
+      },
+      "SkillRequirementScope": {
+        "enum": [
+          "edition",
+          "track"
+        ],
+        "title": "SkillRequirementScope",
+        "type": "string"
+      },
+      "SkillRequirementTarget": {
+        "additionalProperties": false,
+        "description": "An exact edition or track; no inheritance across targets.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/$defs/SkillRequirementScope"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id",
+          "scope"
+        ],
+        "title": "SkillRequirementTarget",
+        "type": "object"
+      },
+      "SkillRequirementType": {
+        "enum": [
+          "required",
+          "desired"
+        ],
+        "title": "SkillRequirementType",
+        "type": "string"
+      },
+      "SnapshotDiff": {
+        "additionalProperties": false,
+        "description": "Directed low-level changes only. Not an Event or impact assessment.\n\nChanges are supplied, not inferred. P9.3 verifies them against the referenced\nsnapshots. Empty changes are legal for observations of unchanged state.",
+        "properties": {
+          "after": {
+            "$ref": "#/$defs/SnapshotReference"
+          },
+          "before": {
+            "$ref": "#/$defs/SnapshotReference"
+          },
+          "changes": {
+            "default": [],
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "competition_window": "#/$defs/TimeWindowChange",
+                  "competition_window.end_at": "#/$defs/WindowEndpointChange",
+                  "competition_window.start_at": "#/$defs/WindowEndpointChange",
+                  "registration_window": "#/$defs/TimeWindowChange",
+                  "registration_window.end_at": "#/$defs/WindowEndpointChange",
+                  "registration_window.start_at": "#/$defs/WindowEndpointChange",
+                  "track_membership": "#/$defs/TrackMembershipChange"
+                },
+                "propertyName": "field"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/TimeWindowChange"
+                },
+                {
+                  "$ref": "#/$defs/WindowEndpointChange"
+                },
+                {
+                  "$ref": "#/$defs/TrackMembershipChange"
+                }
+              ]
+            },
+            "title": "Changes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "SnapshotDiff",
+        "type": "object"
+      },
+      "SnapshotReference": {
+        "additionalProperties": false,
+        "description": "Small audit reference, not a duplicate complete snapshot.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "minLength": 1,
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "target",
+          "observed_at"
+        ],
+        "title": "SnapshotReference",
+        "type": "object"
+      },
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Immutable provenance and verification state for a competition fact.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_type": {
+            "$ref": "#/$defs/SourceType"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "source_url",
+          "source_type",
+          "observed_at",
+          "verification_status"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "TimeWindow": {
+        "additionalProperties": false,
+        "description": "A time interval whose endpoints may be unknown.",
+        "properties": {
+          "end_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End At"
+          },
+          "start_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start At"
+          }
+        },
+        "title": "TimeWindow",
+        "type": "object"
+      },
+      "TimeWindowChange": {
+        "additionalProperties": false,
+        "description": "Whole-window observation or presence change, never an endpoint change.",
+        "properties": {
+          "after": {
+            "$ref": "#/$defs/ObservedTimeWindow"
+          },
+          "before": {
+            "$ref": "#/$defs/ObservedTimeWindow"
+          },
+          "field": {
+            "enum": [
+              "registration_window",
+              "competition_window"
+            ],
+            "title": "Field",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/$defs/FactChangeKind"
+          }
+        },
+        "required": [
+          "kind",
+          "field",
+          "before",
+          "after"
+        ],
+        "title": "TimeWindowChange",
+        "type": "object"
+      },
+      "TrackMembershipChange": {
+        "additionalProperties": false,
+        "description": "Known set-to-set changes expose IDs safely; UNKNOWN never asserts removal.\n\nAdded/removed member computation belongs to P9.3, not this contract.",
+        "properties": {
+          "after": {
+            "$ref": "#/$defs/ObservedTrackMembership"
+          },
+          "before": {
+            "$ref": "#/$defs/ObservedTrackMembership"
+          },
+          "field": {
+            "const": "track_membership",
+            "title": "Field",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/$defs/FactChangeKind"
+          }
+        },
+        "required": [
+          "kind",
+          "field",
+          "before",
+          "after"
+        ],
+        "title": "TrackMembershipChange",
+        "type": "object"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      },
+      "WindowEndpointChange": {
+        "additionalProperties": false,
+        "description": "Typed start/end change; unknown endpoint -> known is observation change.",
+        "properties": {
+          "after": {
+            "$ref": "#/$defs/ObservedInstant"
+          },
+          "before": {
+            "$ref": "#/$defs/ObservedInstant"
+          },
+          "field": {
+            "enum": [
+              "registration_window.start_at",
+              "registration_window.end_at",
+              "competition_window.start_at",
+              "competition_window.end_at"
+            ],
+            "title": "Field",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/$defs/FactChangeKind"
+          }
+        },
+        "required": [
+          "kind",
+          "field",
+          "before",
+          "after"
+        ],
+        "title": "WindowEndpointChange",
+        "type": "object"
+      },
+      "_EvidenceSnapshot": {
+        "additionalProperties": false,
+        "description": "Reuse shared evidence fields while protecting the P7 audit snapshot.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Field"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SourceMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "_EvidenceSnapshot",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Auditable supplied before/after Plans, not a Diff computation engine.\n\nStructural scope is milestones or controlled target-removal cancellation.\nTarget/student/needs/audit/horizon stay the same. Revised identity is\nlineage-sensitive; no-op reuses the exact old Plan, including metadata.",
+    "properties": {
+      "after": {
+        "$ref": "#/$defs/CompetitionPlan"
+      },
+      "before": {
+        "$ref": "#/$defs/CompetitionPlan"
+      },
+      "changes": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/PlanMilestonesChange"
+        },
+        "maxItems": 1,
+        "title": "Changes",
+        "type": "array"
+      },
+      "decision": {
+        "$ref": "#/$defs/ReplanningDecision"
+      },
+      "evaluated_at": {
+        "format": "date-time",
+        "title": "Evaluated At",
+        "type": "string"
+      },
+      "status_change": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/PlanStatusChange"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "before",
+      "after",
+      "decision",
+      "evaluated_at"
+    ],
+    "title": "PlanDiff",
+    "type": "object"
+  },
+  "RecommendationEvaluation": {
+    "$defs": {
+      "EligibilityReasonCode": {
+        "enum": [
+          "RULE_SATISFIED",
+          "RULE_VIOLATED",
+          "PROFILE_DATA_MISSING",
+          "RULE_DATA_MISSING"
+        ],
+        "title": "EligibilityReasonCode",
+        "type": "string"
+      },
+      "EligibilityScope": {
+        "enum": [
+          "competition",
+          "edition",
+          "track"
+        ],
+        "title": "EligibilityScope",
+        "type": "string"
+      },
+      "EligibilityStatus": {
+        "enum": [
+          "eligible",
+          "ineligible",
+          "unknown"
+        ],
+        "title": "EligibilityStatus",
+        "type": "string"
+      },
+      "Evidence": {
+        "additionalProperties": false,
+        "description": "A structured piece of evidence cited by a business conclusion.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Field"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SourceMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Evidence",
+        "type": "object"
+      },
+      "RecommendationCandidate": {
+        "additionalProperties": false,
+        "description": "Stable identity of one competition, edition, and optional track.",
+        "properties": {
+          "competition_id": {
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "RecommendationCandidate",
+        "type": "object"
+      },
+      "RecommendationEligibilitySnapshot": {
+        "additionalProperties": false,
+        "description": "Immutable P6 copy of a P5 decision, with its original semantics and audit.\n\nAdds no eligibility fields or rules; inherits all P5 decision invariants.",
+        "properties": {
+          "competition_id": {
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/Evidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "rule_evaluations": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/_RuleEvaluationSnapshot"
+            },
+            "title": "Rule Evaluations",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/$defs/EligibilityStatus"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "status",
+          "reason_codes",
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "RecommendationEligibilitySnapshot",
+        "type": "object"
+      },
+      "RecommendationScoreComponent": {
+        "additionalProperties": false,
+        "description": "One future soft-suitability contribution, without a prescribed weight.",
+        "properties": {
+          "component_id": {
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Component Id",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/$defs/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "score": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "component_id",
+          "score",
+          "reason_code",
+          "message",
+          "evidence"
+        ],
+        "title": "RecommendationScoreComponent",
+        "type": "object"
+      },
+      "RecommendationStatus": {
+        "enum": [
+          "recommended",
+          "not_recommended",
+          "suitability_undetermined",
+          "eligibility_uncertain",
+          "eligibility_blocked"
+        ],
+        "title": "RecommendationStatus",
+        "type": "string"
+      },
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Immutable provenance and verification state for a competition fact.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_type": {
+            "$ref": "#/$defs/SourceType"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "source_url",
+          "source_type",
+          "observed_at",
+          "verification_status"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      },
+      "_RuleEvaluationSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "items": {
+              "$ref": "#/$defs/Evidence"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "reason_code": {
+            "$ref": "#/$defs/EligibilityReasonCode"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/$defs/EligibilityScope"
+          },
+          "status": {
+            "$ref": "#/$defs/EligibilityStatus"
+          },
+          "target_id": {
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "scope",
+          "target_id",
+          "status",
+          "reason_code",
+          "message",
+          "evidence"
+        ],
+        "title": "_RuleEvaluationSnapshot",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Final result for one candidate, with P5 eligibility kept intact.\n\nA score describes soft suitability on [0, 1], never eligibility probability.\nNo ranking position, candidate comparison, or scoring formula is defined.",
+    "properties": {
+      "candidate": {
+        "$ref": "#/$defs/RecommendationCandidate"
+      },
+      "eligibility_decision": {
+        "$ref": "#/$defs/RecommendationEligibilitySnapshot"
+      },
+      "evidence": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "title": "Evidence",
+        "type": "array"
+      },
+      "reason_codes": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Reason Codes",
+        "type": "array"
+      },
+      "score_components": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/RecommendationScoreComponent"
+        },
+        "title": "Score Components",
+        "type": "array"
+      },
+      "status": {
+        "$ref": "#/$defs/RecommendationStatus"
+      },
+      "suitability_score": {
+        "anyOf": [
+          {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Suitability Score"
+      }
+    },
+    "required": [
+      "status",
+      "reason_codes",
+      "candidate",
+      "eligibility_decision"
+    ],
+    "title": "RecommendationEvaluation",
+    "type": "object"
+  },
+  "SkillGapDecision": {
+    "$defs": {
+      "SkillGapItem": {
+        "additionalProperties": false,
+        "description": "A supplied per-skill conclusion, with separate requirement/student audit.\n\nNo numeric gap is defined for the ordinal SkillLevel scale. The compatibility\ntable only rejects contradictory snapshots; it does not produce a result.",
+        "properties": {
+          "reason_codes": {
+            "items": {
+              "$ref": "#/$defs/SkillGapReasonCode"
+            },
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "requirement": {
+            "$ref": "#/$defs/SkillRequirement"
+          },
+          "status": {
+            "$ref": "#/$defs/SkillGapItemStatus"
+          },
+          "student_evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/_EvidenceSnapshot"
+            },
+            "title": "Student Evidence",
+            "type": "array"
+          },
+          "student_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "requirement",
+          "status",
+          "reason_codes"
+        ],
+        "title": "SkillGapItem",
+        "type": "object"
+      },
+      "SkillGapItemStatus": {
+        "enum": [
+          "satisfied",
+          "gap",
+          "unknown"
+        ],
+        "title": "SkillGapItemStatus",
+        "type": "string"
+      },
+      "SkillGapReasonCode": {
+        "enum": [
+          "REQUIREMENT_SATISFIED",
+          "SKILL_BELOW_REQUIREMENT",
+          "STUDENT_SKILL_DATA_MISSING",
+          "REQUIREMENT_DATA_MISSING",
+          "PARTIAL_REQUIREMENT_COVERAGE",
+          "REQUIREMENT_PROFICIENCY_UNSPECIFIED"
+        ],
+        "title": "SkillGapReasonCode",
+        "type": "string"
+      },
+      "SkillGapStatus": {
+        "enum": [
+          "no_gap",
+          "gap_identified",
+          "undetermined"
+        ],
+        "title": "SkillGapStatus",
+        "type": "string"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
+      },
+      "SkillRequirement": {
+        "additionalProperties": false,
+        "description": "Structured skill fact; target/scope belongs to its requirement set.\n\nSkill identity references the existing Skill.id vocabulary. Required\nproficiency uses StudentSkill.level. None means a known requirement with\nunspecified threshold, never missing requirement data or SkillLevel.UNKNOWN.",
+        "properties": {
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/_EvidenceSnapshot"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "presence_evidence": {
+            "items": {
+              "$ref": "#/$defs/_EvidenceSnapshot"
+            },
+            "minItems": 1,
+            "title": "Presence Evidence",
+            "type": "array"
+          },
+          "required_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requirement_type": {
+            "$ref": "#/$defs/SkillRequirementType"
+          },
+          "skill_id": {
+            "minLength": 1,
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id",
+          "required_level",
+          "requirement_type",
+          "presence_evidence"
+        ],
+        "title": "SkillRequirement",
+        "type": "object"
+      },
+      "SkillRequirementCoverage": {
+        "enum": [
+          "complete",
+          "partial",
+          "missing"
+        ],
+        "title": "SkillRequirementCoverage",
+        "type": "string"
+      },
+      "SkillRequirementScope": {
+        "enum": [
+          "edition",
+          "track"
+        ],
+        "title": "SkillRequirementScope",
+        "type": "string"
+      },
+      "SkillRequirementSet": {
+        "additionalProperties": false,
+        "description": "Explicit coverage assessment, not inferred from item count or parsing.\n\nEmpty sets represent MISSING only; no implicit 'no skill requirements'.\nA skill appears once per exact target, including across REQUIRED/DESIRED,\navoiding ambiguous level/type precedence.",
+        "properties": {
+          "coverage": {
+            "$ref": "#/$defs/SkillRequirementCoverage"
+          },
+          "coverage_note": {
+            "minLength": 1,
+            "title": "Coverage Note",
+            "type": "string"
+          },
+          "requirements": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/SkillRequirement"
+            },
+            "title": "Requirements",
+            "type": "array"
+          },
+          "target": {
+            "$ref": "#/$defs/SkillRequirementTarget"
+          }
+        },
+        "required": [
+          "target",
+          "coverage",
+          "coverage_note"
+        ],
+        "title": "SkillRequirementSet",
+        "type": "object"
+      },
+      "SkillRequirementTarget": {
+        "additionalProperties": false,
+        "description": "An exact edition or track; no inheritance across targets.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/$defs/SkillRequirementScope"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id",
+          "scope"
+        ],
+        "title": "SkillRequirementTarget",
+        "type": "object"
+      },
+      "SkillRequirementType": {
+        "enum": [
+          "required",
+          "desired"
+        ],
+        "title": "SkillRequirementType",
+        "type": "string"
+      },
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Immutable provenance and verification state for a competition fact.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_type": {
+            "$ref": "#/$defs/SourceType"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "source_url",
+          "source_type",
+          "observed_at",
+          "verification_status"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      },
+      "_EvidenceSnapshot": {
+        "additionalProperties": false,
+        "description": "Reuse shared evidence fields while protecting the P7 audit snapshot.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Field"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SourceMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "_EvidenceSnapshot",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Gap existence and requirement coverage remain independent facts.\n\nNO_GAP confirms all declared skills (REQUIRED and DESIRED) have specified\nthresholds and are satisfied, with COMPLETE coverage. GAP_IDENTIFIED can retain\nPARTIAL coverage or unknown student/threshold facts for other skills. An\nengine must later compute the supplied status and individual conclusions.",
+    "properties": {
+      "audit_evidence": {
+        "items": {
+          "$ref": "#/$defs/_EvidenceSnapshot"
+        },
+        "minItems": 1,
+        "title": "Audit Evidence",
+        "type": "array"
+      },
+      "gap_status": {
+        "$ref": "#/$defs/SkillGapStatus"
+      },
+      "items": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/SkillGapItem"
+        },
+        "title": "Items",
+        "type": "array"
+      },
+      "reason_codes": {
+        "items": {
+          "$ref": "#/$defs/SkillGapReasonCode"
+        },
+        "minItems": 1,
+        "title": "Reason Codes",
+        "type": "array"
+      },
+      "requirements": {
+        "$ref": "#/$defs/SkillRequirementSet"
+      },
+      "target": {
+        "$ref": "#/$defs/SkillRequirementTarget"
+      }
+    },
+    "required": [
+      "target",
+      "requirements",
+      "gap_status",
+      "reason_codes",
+      "audit_evidence"
+    ],
+    "title": "SkillGapDecision",
+    "type": "object"
+  },
+  "SourceMetadata": {
+    "$defs": {
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Immutable provenance and verification state for a competition fact.",
+    "properties": {
+      "observed_at": {
+        "format": "date-time",
+        "title": "Observed At",
+        "type": "string"
+      },
+      "source_type": {
+        "$ref": "#/$defs/SourceType"
+      },
+      "source_url": {
+        "format": "uri",
+        "maxLength": 2083,
+        "minLength": 1,
+        "title": "Source Url",
+        "type": "string"
+      },
+      "verification_status": {
+        "$ref": "#/$defs/VerificationStatus"
+      }
+    },
+    "required": [
+      "source_url",
+      "source_type",
+      "observed_at",
+      "verification_status"
+    ],
+    "title": "SourceMetadata",
+    "type": "object"
+  }
+}

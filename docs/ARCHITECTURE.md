@@ -1866,7 +1866,7 @@ Frontend (future UI)
   -> RuntimeInvocationClient (JSON projection, validation, safe error normalization)
   -> RuntimeTransport
        |-- LocalRuntimeTransport (HTTP adapter)
-       `-- AgentArtsRuntimeTransport interface
+       `-- AgentArtsRuntimeTransport (trusted bridge adapter)
   -> P12 Runtime Adapter -> Agent -> Graph -> same Capability Facade
 ```
 
@@ -1905,7 +1905,7 @@ fake tests; Gate E is CONTRACT_PASS_REAL_RUNTIME_DEFERRED. Local transport/UI/ho
 Frontend App Shell -> Conversation State -> RuntimeInvocationClient.exchange
                                            -> Fake transport (offline presets)
                                            -> Local transport (active when configured)
-                                           -> AgentArts transport (P14.6)
+                                           -> AgentArts transport (trusted bridge, configurable)
 ```
 
 A single React/Vite workspace uses a pure reducer and built-in hooks. ConversationEntry
@@ -1968,7 +1968,7 @@ request disables old controls without claiming server cancellation/rejection.
 Only public continuation data is held in current-page memory, never GraphInput.
 
 Fake sequences cover clarification/completion, approve/completion, reject/completion
-and continuation errors without computing business outcomes. Local hosting is described below; AgentArts hosting remains P14.6. Gate M (HITL Authority Preservation) requires expressions
+and continuation errors without computing business outcomes. Local hosting is described below; AgentArts hosting compatibility is described below. Gate M (HITL Authority Preservation) requires expressions
 without browser-created authority; Gate N (Continuation Identity Integrity) requires
 current request/proposal/handle binding and stale/replay protection. Offline tests
 prove these UI guards; real Runtime parity remains deferred.
@@ -2064,7 +2064,7 @@ catalogue and continuation state reset on restart; no durable Plan persistence.
 
 Loopback binding, exact development origins, request limits and sanitized errors
 support local testing. Responses expose no Python traceback, environment or secret.
-Production IAM/auth, deployment and hardening remain P16; AgentArts remains P14.6.
+Production IAM/auth, deployment and hardening remain P16; AgentArts compatibility is described below; production deployment remains P16.
 Startup/config commands are in backend/README.md and frontend/README.md. Fixtures and
 reproducible generation are described in data/local_runtime/README.md.
 
@@ -2074,6 +2074,97 @@ Gate S (Local End-to-End Semantic Fidelity) replays captured actual Local respon
 through FakeRuntimeTransport and compares validated responses and rendered result/HITL
 semantics. Real local HTTP tests use loopback only, deterministic intent models and
 actual services; they do not claim cloud parity or production authorization.
+
+### AgentArts invocation compatibility and trusted transport boundary
+
+```text
+                         Frontend Workspace / HITL / Result rendering
+                                          |
+                              RuntimeInvocationClient
+                               /                    \
+                  LocalRuntimeTransport       AgentArtsRuntimeTransport
+                           |                         |
+                    Local HTTP Adapter       Trusted server transport bridge
+                           |                         |
+                           |              POST /runtimes/{runtime_name}/invocations
+                           |                         |
+                           |             AgentArts hosted public projection
+                           \                         /
+                             P12.7 pure runtime boundary
+                                         |
+                             CompetitionCopilotAgent
+                                         |
+                                      LangGraph
+                                         |
+                                  CapabilityFacade
+                                         |
+                                       P4-P11
+
+Separate P13 capability path:
+AgentArts MCP Gateway -> P13 MCP Server -> CapabilityFacade
+```
+
+The browser AgentArtsRuntimeTransport sends the unchanged P12.7 envelope to its
+configured bridge at /runtime/agentarts/{runtimeName}/invoke. The same generic client
+validates responses; components have no gateway/auth dependency. Public configuration
+contains only mode, bridge base URL and runtime name. Session UUID is transport
+correlation metadata, not a request, student, Plan, approval, actor or continuation.
+No browser Authorization, credential, secret environment variable or direct cloud URL.
+
+The bridge accepts only its server-configured runtime name. It reuses the Local
+HTTP parser/body-drain/origin/error handling without modifying Local HTTP semantics.
+It validates the existing P12 envelope and forwards its JSON without field rewriting.
+The server client constructs the official path, Authorization and AgentArts session
+header. Optional endpoint/version and gateway user metadata are server-controlled.
+Credentials come only from server environment. API Key/OAuth Bearer forwarding is
+supported here; IAM signing, credential acquisition/rotation and production auth remain
+P16. Authentication does not grant Domain ownership, human consent or mutation authority.
+
+HTTPS verifies certificates; HTTP is allowed only by an explicit loopback test option.
+The upstream URL cannot be supplied by browser input, carry userinfo/query credentials
+or arbitrary paths. One action makes one upstream request. Redirects, retries and
+credential logging are absent. 401/403 map to AGENTARTS_AUTH_ERROR; 404 to
+AGENTARTS_RUNTIME_NOT_FOUND; 5xx to AGENTARTS_SERVER_ERROR; other non-200 to
+AGENTARTS_HTTP_ERROR. Network and timeout map separately. Only stable transport codes
+leave the bridge, never upstream error prose/traceback/headers. Browser generic client
+classifies these as TRANSPORT_ERROR, never business negatives. Valid runtime errors
+remain RUNTIME_ERROR, invalid/private/streaming payloads fail CONTRACT_ERROR. Cancellation
+is ABORTED, not REJECT or proof of server non-execution. No continuation auto replay.
+
+The optional SDK hosting factory reuses P12.7 create_app and the existing private
+LocalInvocationHost projection. That host calls the original pure adapter, real Agent,
+Graph and Facade and retains GraphInput behind opaque expiring single-use handles.
+It exposes the existing public runtime/presentation delivery, never internal state.
+Raw internal P12 continuation output is rejected at the bridge rather than released.
+P12.5 still binds actor/current Plan/time and creates authority. Session/gateway metadata
+never populates those dependencies. Existing P14.4 renderers use only returned artifacts.
+There is no second Agent/AgentResponse, business API, MCP shortcut or computed PlanDiff.
+
+Current official contract was checked on 2026-10-20: ExecuteRuntime documentation
+(updated 2026-09-30) specifies the path, name/header limits and 200/401/404/500 semantics:
+https://support.huaweicloud.com/api-agentarts/InvokeRuntime1.html
+Application-defined request/response pass-through and API Key/IAM/OAuth authentication:
+https://support.huaweicloud.com/highcode-agentarts/agentarts_10_130.html
+HTTP JSON/non-streaming and SSE streaming capability:
+https://support.huaweicloud.com/highcode-agentarts/agentarts_10_070.html
+This client remains NON_STREAMING_PRIMARY; no MCP headers or alternate streaming
+business protocol. Runtime deployment and gateway availability are not claimed.
+
+Offline compatibility tests use an official-shape loopback gateway harness forwarding
+to the actual P12/Agent/Graph/Facade host. Only time/nonces are deterministic test
+injections, never production host changes or business computations. Exact request,
+validated response, artifacts and rendered HITL/result equality cover completed,
+negative/uncertain, diagnosis/planning/ranking, clarification/resume and APPROVE/REJECT
+with actual P11 Diff. Unknown reason codes retain fallback. Tests include single-call
+failures, private-output rejection, session changes/replay, duplicate UI actions and
+credential isolation. No real credential/cloud/network or optional real smoke required.
+
+Gate E: LOCAL_AGENTARTS_RUNTIME_PARITY_PASS (official-shape offline compatibility,
+not a real-cloud or production-deployment claim). Gate T: AgentArts Runtime Transport
+Compatibility. Gate U: Local / AgentArts Runtime Semantic Parity. Gate V: AgentArts
+Credential Isolation. Gate W: AgentArts Session Authority Isolation. Gates R/S retain
+Local regression evidence. Broader frontend acceptance remains P14.7, systematic
+cross-runtime evaluation P15, production deployment/hardening P16.
 
 ## 14. Repository Structure
 

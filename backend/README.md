@@ -41,8 +41,52 @@ unchanged, and restarting resets all local pending/current-Plan metadata.
 Targeted tests: `.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_local_runtime.py`
 from repository root. Frontend `npm run test:local --prefix frontend` launches a real
 temporary loopback server and closes it afterwards. External LLM/network/cloud are
-not required. AgentArts invocation remains P14.6; production auth/deployment/hardening
+not required. AgentArts-compatible invocation is described below; production auth/deployment/hardening
 and durable storage remain P16.
+
+## AgentArts invocation transport compatibility
+
+The server-only bridge implements official ExecuteRuntime forwarding; it does not
+start a second Agent or deploy cloud resources. It reuses the existing Local HTTP
+parser/drain behavior and forwards unchanged P12 JSON to the configured Runtime.
+Server environment names are documented in backend/.env.example (reference only;
+the CLI reads the process environment and does not auto-load .env files).
+
+Required server environment: COPILOT_AGENTARTS_GATEWAY_URL (HTTPS access-domain origin),
+COPILOT_AGENTARTS_RUNTIME_NAME and COPILOT_AGENTARTS_AUTHORIZATION (Bearer credential,
+from your server environment only). Optional COPILOT_AGENTARTS_ENDPOINT selects a
+version and COPILOT_AGENTARTS_GATEWAY_USER_ID is transport correlation only. Do not
+put any credential in frontend environment, checked-in files, command logs or responses.
+This compatibility adapter supports API Key/OAuth Bearer transport. IAM signing and
+production credential acquisition/rotation remain P16.
+
+From repository root:
+
+```powershell
+.\backend\.venv\Scripts\python scripts/run_agentarts_bridge.py
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_agentarts_transport.py
+```
+
+The local trusted endpoint is POST /runtime/agentarts/{configured_runtime_name}/invoke
+on loopback port 8766. Browser-supplied URLs/credentials/gateway user headers are not
+forwarded. Only validated session correlation is passed to X-Hw-Agentarts-Session-Id.
+No session/user metadata becomes Domain identity, actor, consent or trusted continuation.
+Local Runtime on port 8765 and its endpoint/404/403/415 behavior remain unchanged.
+
+The optional `create_hosted_app(host)` factory reuses the P12.7 SDK app entrypoint and
+accepts the existing private LocalInvocationHost. That host calls the existing pure
+adapter/CompetitionCopilotAgent/LangGraph/Facade/authorities and returns only public
+runtime/presentation data with opaque handles. This factory adds no default global
+application, credentials, business logic or cloud startup. Existing Local development
+composition remains the bounded synthetic offline-intent example; production runtime
+composition is caller-owned. Never expose raw GraphInput to browsers.
+
+Tests use backend/tests/agentarts_gateway_harness.py, an official-shape loopback gateway
+with synthetic authorization, deterministic time/nonces and the real core. It contains
+no decision/PlanDiff implementation. It is test-only and not packaged as a production
+server. Default tests require no external network, cloud or real credentials. No real
+cloud smoke is implemented. P13 MCP stays separate; production deployment/auth remain
+P16. Official source audit and transport/security gates are in docs/ARCHITECTURE.md.
 
 ## P11 Adaptive Replanning - Phase Closure
 

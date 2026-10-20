@@ -5,20 +5,34 @@ import { createDemoClient, readDemoArtifacts } from './demo/client.ts';
 import type { DemoScenario } from './demo/client.ts';
 import './styles.css';
 import { createLocalClient } from './localClient.ts';
+import { createAgentArtsClient } from './agentartsClient.ts';
 import localPlan from './demo/local-plan.json' with { type: 'json' };
 import type { PlanReference } from './runtime/generated/contracts.ts';
 
-function LocalApp() {
+function RuntimeApp() {
+  const agentarts = import.meta.env.VITE_RUNTIME_MODE === 'AGENTARTS';
   const composition = useMemo(
-    () => createLocalClient(import.meta.env.VITE_LOCAL_RUNTIME_BASE_URL || window.location.origin),
+    () =>
+      agentarts
+        ? createAgentArtsClient(
+            import.meta.env.VITE_AGENTARTS_BRIDGE_BASE_URL || window.location.origin,
+            import.meta.env.VITE_AGENTARTS_RUNTIME_NAME,
+          )
+        : createLocalClient(import.meta.env.VITE_LOCAL_RUNTIME_BASE_URL || window.location.origin),
     [],
   );
   return (
     <Workspace
       {...composition}
       localPlan={localPlan as PlanReference}
-      runtimeLabel="LOCAL · 离线 Agent / 真实业务服务"
-      invocationNote="使用真实本地业务服务与离线意图提案；示例画像/受控事件不代表真实个人或赛事历史。"
+      runtimeLabel={
+        agentarts ? 'AGENTARTS · Runtime transport' : 'LOCAL · 离线 Agent / 真实业务服务'
+      }
+      invocationNote={
+        agentarts
+          ? '通过受信服务端边界调用 Runtime；业务结论以返回的验证结果为准。'
+          : '使用真实本地业务服务与离线意图提案；示例画像/受控事件不代表真实个人或赛事历史。'
+      }
     />
   );
 }
@@ -76,6 +90,9 @@ function DemoApp() {
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing application root');
-if (import.meta.env.VITE_RUNTIME_MODE && import.meta.env.VITE_RUNTIME_MODE !== 'LOCAL')
-  throw new Error('Unsupported Runtime mode; AgentArts integration is deferred to P14.6');
-createRoot(root).render(import.meta.env.VITE_RUNTIME_MODE === 'LOCAL' ? <LocalApp /> : <DemoApp />);
+if (
+  import.meta.env.VITE_RUNTIME_MODE &&
+  !['LOCAL', 'AGENTARTS'].includes(import.meta.env.VITE_RUNTIME_MODE)
+)
+  throw new Error('Unsupported Runtime mode');
+createRoot(root).render(import.meta.env.VITE_RUNTIME_MODE ? <RuntimeApp /> : <DemoApp />);

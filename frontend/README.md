@@ -3,10 +3,10 @@
 The single React + TypeScript + Vite workspace presents current-page conversation,
 structured workflow states, clarification forms and explicit approval controls.
 The same RuntimeInvocationClient supports offline fake presets or the real local
-Agent invocation path, selected at the composition root.
+Agent invocation path or AgentArts-compatible trusted bridge, selected at the composition root.
 The result panel presents supplied result artifacts, evidence, sources and PlanDiff.
-Local hosting retains scoped public continuation/artifact data. Real AgentArts
-invocation and production authentication/deployment remain deferred.
+Trusted hosting retains scoped public continuation/artifact data. AgentArts transport
+compatibility is covered offline; real-cloud smoke and production deployment are not claimed.
 Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`.
 
 ## Toolchain and commands
@@ -21,6 +21,7 @@ npm test --prefix frontend
 npm run test:hitl --prefix frontend
 npm run test:results --prefix frontend
 npm run test:local --prefix frontend
+npm run test:agentarts --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
 npm run format --prefix frontend
@@ -53,7 +54,7 @@ and run `npm run dev --prefix frontend`. The only public config is
 `VITE_RUNTIME_MODE=LOCAL` and optional `VITE_LOCAL_RUNTIME_BASE_URL`; empty base URL
 uses the same-origin Vite proxy. `LOCAL_RUNTIME_PROXY_TARGET` is Vite server config,
 defaulting to http://127.0.0.1:8765. No secret belongs in any public variable. Removing
-VITE_RUNTIME_MODE retains fake mode. AGENTARTS mode is explicitly deferred to P14.6.
+VITE_RUNTIME_MODE retains fake mode. AGENTARTS mode selects the trusted bridge described below.
 
 Try these bounded offline intent-model phrases (business results are real):
 
@@ -106,6 +107,43 @@ The backend Windows virtualenv path is the repository convention (tests use Node
 >=24.12); no external network/cloud/LLM is used. `test` includes these tests plus
 P14.1-P14.4 regressions. Gates R/S cover the actual local chain and delivery/UI parity;
 Gate E is LOCAL_RUNTIME_PASS_AGENTARTS_DEFERRED at this boundary.
+
+## AgentArts-compatible transport
+
+Use VITE_RUNTIME_MODE=AGENTARTS and VITE_AGENTARTS_RUNTIME_NAME matching the trusted
+server configuration. VITE_AGENTARTS_BRIDGE_BASE_URL is only the bridge address;
+empty selects the same-origin Vite proxy. AGENTARTS_BRIDGE_PROXY_TARGET defaults
+to http://127.0.0.1:8766. No cloud URL, Authorization or credential is public config.
+The UI and HITL/result components are identical across modes.
+
+Start the trusted bridge from root after setting its server environment per
+backend/.env.example (see backend README):
+
+```powershell
+.\backend\.venv\Scripts\python scripts/run_agentarts_bridge.py
+npm run dev --prefix frontend
+```
+
+The bridge forwards to an already configured Runtime's official ExecuteRuntime path;
+it does not deploy a Runtime. The hosted entrypoint must use the safe public hosting
+projection factory in integrations/agentarts_transport/hosting.py, around the existing
+P12.7 adapter/private host. Raw internal GraphInput responses are rejected. Both paths
+still use the same P14.1 response validator and P14.4 artifact guard.
+
+Session UUID remains transport metadata and never supplies business identity or consent.
+Only explicit P14.3 typed continuation controls send clarification/approval decisions.
+Auth/resource/server/network/timeout failures remain transport errors, business negative
+responses remain normal results, invalid/private responses are contract errors. No
+automatic retry or redirect. AbortSignal does not imply rejection or non-execution.
+
+`npm run test:agentarts --prefix frontend` launches only the loopback official-shape
+harness and trusted bridge with synthetic test authorization. Actual Agent/Graph/Facade
+and Domain services execute. Time/nonces are fixed only in that test harness so complete
+responses/artifacts and rendering can be compared exactly with Local. All tests remain
+offline. No real cloud smoke is implemented or required. Gate E is
+LOCAL_AGENTARTS_RUNTIME_PARITY_PASS at this compatibility boundary; Gates T/U/V/W cover
+transport compatibility, semantic parity, credential isolation and session authority
+isolation. Production auth/deployment is P16; broad acceptance is P14.7.
 
 ## Workspace behavior and boundaries
 
@@ -179,8 +217,8 @@ No MCP dependency or capability-specific business clients are introduced.
 `invoke(AgentRequest)` returns a validated AgentResponse. `resume` submits the
 existing typed continuation envelope. `exchange` returns the safe transport wrapper
 including an opaque continuation_ref, retained explicitly by the HITL UI.
-AgentArtsRuntimeTransport remains an interface only. LocalRuntimeTransport implements
-the existing interface via HTTP; FakeRuntimeTransport remains preset-only.
+AgentArtsRuntimeTransport and LocalRuntimeTransport implement
+the same interface via isolated HTTP adapters; FakeRuntimeTransport remains preset-only.
 
 Request validation preserves caller request IDs, explicit context and typed replies;
 it adds no defaults or authority. Response validation is strict, including enum,
@@ -276,7 +314,7 @@ never becomes Agent context or approval. Config chooses transport, not business 
 Cancellation is an AbortSignal transport concern, never ApprovalResponse(REJECT),
 and cannot guarantee server execution was canceled. AUTO_RETRY=OFF.
 NON_STREAMING_PRIMARY: one complete AgentResponse, no simulated token streaming.
-Local invocation is implemented; P14.6 owns AgentArts integration and P15 owns systematic evaluation.
+Local and AgentArts invocation compatibility are implemented; P15 owns systematic evaluation.
 
 ## Public validator behavioral parity
 

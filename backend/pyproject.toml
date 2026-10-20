@@ -27,6 +27,7 @@ packages = [
     "competition_copilot.infrastructure.repositories",
     "competition_copilot.integrations",
     "competition_copilot.integrations.agentarts",
+    "competition_copilot.integrations.agentarts_transport",
     "competition_copilot.integrations.local_runtime",
     "competition_copilot.integrations.mcp",
     "competition_copilot.repositories",

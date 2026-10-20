@@ -11,20 +11,28 @@ type Values = {
   PlanDiff: Models.PlanDiff;
   Evidence: Models.Evidence;
   SourceMetadata: Models.SourceMetadata;
+  ListCompetitionsOutput: Models.ListCompetitionsOutput;
+  GetCompetitionOutput: Models.GetCompetitionOutput;
+  CompetitionPlan: Models.CompetitionPlan;
+  RecommendationRankingResult: Models.RecommendationRankingResult;
 };
 export type LinkedArtifact = {
   [K in keyof Values]: { ref: ResultReference; model: K; value: Values[K] };
 }[keyof Values];
 // Optional readonly hosting projection, NOT an extension of P12 AgentResponse.
-// P14.4 injects only preset data; real authorized resolution remains P14.5.
+// Fake composition supplies presets; Local hosting supplies validated receipt projections.
 export type ArtifactReader = (response: AgentResponse) => unknown;
-const kinds: Record<keyof Values, string> = {
-  EligibilityDecision: 'ELIGIBILITY_RESULT',
-  RecommendationEvaluation: 'RECOMMENDATION_RESULT',
-  SkillGapDecision: 'SKILL_GAP_RESULT',
-  PlanDiff: 'PLAN_DIFF',
-  Evidence: 'EVIDENCE',
-  SourceMetadata: 'SOURCE',
+const kinds: Record<keyof Values, string[]> = {
+  EligibilityDecision: ['ELIGIBILITY_RESULT', 'TOOL_RESULT'],
+  RecommendationEvaluation: ['RECOMMENDATION_RESULT'],
+  SkillGapDecision: ['SKILL_GAP_RESULT', 'TOOL_RESULT'],
+  PlanDiff: ['PLAN_DIFF'],
+  Evidence: ['EVIDENCE'],
+  SourceMetadata: ['SOURCE'],
+  ListCompetitionsOutput: ['TOOL_RESULT'],
+  GetCompetitionOutput: ['TOOL_RESULT'],
+  CompetitionPlan: ['TOOL_RESULT'],
+  RecommendationRankingResult: ['TOOL_RESULT'],
 };
 const ajv = new Ajv2020({ strict: true, coerceTypes: false, useDefaults: false });
 addFormats(ajv);
@@ -57,7 +65,7 @@ export function validateArtifacts(response: AgentResponse, raw?: unknown): Linke
       !Object.hasOwn(validators, entry.model) ||
       !record(entry.ref) ||
       !exact(entry.ref, ['kind', 'ref_id']) ||
-      entry.ref.kind !== kinds[entry.model as keyof Values] ||
+      !kinds[entry.model as keyof Values].includes(entry.ref.kind as string) ||
       !response.audit?.results?.some(
         (ref) =>
           ref.kind === (entry.ref as Record<string, unknown>).kind &&

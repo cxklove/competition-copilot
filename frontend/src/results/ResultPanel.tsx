@@ -136,6 +136,81 @@ function ArtifactView({ artifact }: { artifact: LinkedArtifact }) {
       return <EvidenceList evidence={[artifact.value]} />;
     case 'SourceMetadata':
       return <SourceMetadata source={artifact.value} />;
+    case 'ListCompetitionsOutput':
+    case 'GetCompetitionOutput': {
+      const competitions =
+        artifact.model === 'ListCompetitionsOutput'
+          ? artifact.value.competitions
+          : [artifact.value.competition];
+      return (
+        <ul aria-label="赛事结果">
+          {competitions.map((item) => (
+            <li key={item.id}>
+              <strong>{item.name}</strong>
+              <p>竞赛 ID：{item.id}</p>
+              {item.description && <p>{item.description}</p>}
+              {item.official_url && <SourceLink url={item.official_url} />}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    case 'CompetitionPlan': {
+      const plan = artifact.value;
+      return (
+        <>
+          <p>
+            方案：{plan.id} · 版本 {plan.version} · {plan.status}
+          </p>
+          <p>
+            目标：{plan.competition_id} · {plan.edition_id} · {plan.track_id}
+          </p>
+          <ul aria-label="规划需求">
+            {plan.planning_needs?.map((need) => (
+              <li key={need.id}>
+                {need.id} · {need.kind}
+                <ReasonList codes={need.reason_codes} />
+              </li>
+            ))}
+          </ul>
+          <ul aria-label="计划里程碑">
+            {plan.milestones?.map((item) => (
+              <li key={item.id}>
+                {item.title}
+                <p>{item.due_at ?? '未提供日期'}</p>
+              </li>
+            ))}
+          </ul>
+        </>
+      );
+    }
+    case 'RecommendationRankingResult':
+      return (
+        <>
+          {(['confirmed', 'uncertain', 'blocked'] as const).map((bucket) => (
+            <section key={bucket} aria-label={bucket}>
+              <h5>{bucket}</h5>
+              <ol>
+                {artifact.value[bucket]?.map((entry, index) => {
+                  const evaluation = 'evaluation' in entry ? entry.evaluation : entry;
+                  return (
+                    <li key={index}>
+                      {'rank' in entry && <p>返回排序：{entry.rank}</p>}
+                      <ArtifactView
+                        artifact={{
+                          ref: artifact.ref,
+                          model: 'RecommendationEvaluation',
+                          value: evaluation,
+                        }}
+                      />
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ))}
+        </>
+      );
   }
 }
 

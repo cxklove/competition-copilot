@@ -6,6 +6,7 @@ import { workflowLabel } from './state.ts';
 import { HitlPanel } from './HitlPanel.tsx';
 import { ResultPanel } from '../results/ResultPanel.tsx';
 import type { ArtifactReader } from '../results/artifacts.ts';
+import type { PlanReference } from '../runtime/generated/contracts.ts';
 
 const errors = {
   TRANSPORT_ERROR: '连接未完成，请检查后重试。请求不会自动重发。',
@@ -27,11 +28,17 @@ export function Workspace({
   nextRequestId = newRequestId,
   now,
   readArtifacts,
+  localPlan,
+  runtimeLabel = 'FAKE · 演示环境',
+  invocationNote = '演示回复为预设内容，不代表真实业务判断。',
 }: {
   client: InvocationClient;
   nextRequestId?: () => string;
   now?: () => string;
   readArtifacts?: ArtifactReader;
+  localPlan?: PlanReference;
+  runtimeLabel?: string;
+  invocationNote?: string;
 }) {
   const { state, submit, retry, startNew, clarify, decide } = useConversation(
     client,
@@ -40,6 +47,9 @@ export function Workspace({
   );
   const [input, setInput] = useState('');
   const [studentId, setStudentId] = useState('');
+  const [competitionId, setCompetitionId] = useState('');
+  const [editionId, setEditionId] = useState('');
+  const [useLocalPlan, setUseLocalPlan] = useState(false);
   const pending = state.uiStatus === 'SUBMITTING';
   const response = state.response;
   const needs = response?.outcome === 'NEEDS_CLARIFICATION';
@@ -49,7 +59,11 @@ export function Workspace({
   function send(event: FormEvent) {
     event.preventDefault();
     if (!input.trim() || locked) return;
-    void submit(input, studentId);
+    void submit(input, studentId, {
+      ...(competitionId.trim() ? { competition_id: competitionId.trim() } : {}),
+      ...(editionId.trim() ? { edition_id: editionId.trim() } : {}),
+      ...(useLocalPlan && localPlan ? { plan_ref: localPlan } : {}),
+    });
     setInput('');
   }
 
@@ -66,7 +80,7 @@ export function Workspace({
         </a>
         <span className="runtime-badge">
           <span aria-hidden="true" />
-          FAKE · 演示环境
+          {runtimeLabel}
         </span>
       </header>
       <main id="workspace" className="workspace">
@@ -193,10 +207,44 @@ export function Workspace({
                   <span aria-hidden="true">↑</span>
                 </button>
               </div>
+              {localPlan && (
+                <details className="local-context">
+                  <summary>本地调用的显式上下文</summary>
+                  <label htmlFor="competition-id">竞赛 ID</label>
+                  <input
+                    id="competition-id"
+                    value={competitionId}
+                    disabled={locked}
+                    required={!!editionId.trim()}
+                    onChange={(e) => setCompetitionId(e.target.value)}
+                  />
+                  <label htmlFor="edition-id">届次 ID</label>
+                  <input
+                    id="edition-id"
+                    value={editionId}
+                    disabled={locked}
+                    onChange={(e) => setEditionId(e.target.value)}
+                  />
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={useLocalPlan}
+                      disabled={locked}
+                      onChange={(e) => setUseLocalPlan(e.target.checked)}
+                    />
+                    使用本地受控修订示例方案（非真实赛事变化）
+                  </label>
+                  <p>
+                    方案引用：{localPlan.plan_id} · 版本 {localPlan.version} · 学生{' '}
+                    {localPlan.student_id}
+                  </p>
+                  <p>选择仅提供公开 PlanRef，不表示批准。修订示例请清空不匹配的学生/赛事字段。</p>
+                </details>
+              )}
               <p className="composer-hint" id="composer-hint">
                 {needs || waits
                   ? '请使用上方对应的补充信息或明确批准/拒绝控件。普通文字不会自动产生批准决定。'
-                  : 'Enter 换行，Ctrl / ⌘ + Enter 发送。演示回复为预设内容，不代表真实业务判断。'}
+                  : `Enter 换行，Ctrl / ⌘ + Enter 发送。${invocationNote}`}
               </p>
             </form>
           </section>

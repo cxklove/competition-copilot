@@ -4,6 +4,24 @@ import { Workspace } from './workspace/Workspace.tsx';
 import { createDemoClient, readDemoArtifacts } from './demo/client.ts';
 import type { DemoScenario } from './demo/client.ts';
 import './styles.css';
+import { createLocalClient } from './localClient.ts';
+import localPlan from './demo/local-plan.json' with { type: 'json' };
+import type { PlanReference } from './runtime/generated/contracts.ts';
+
+function LocalApp() {
+  const composition = useMemo(
+    () => createLocalClient(import.meta.env.VITE_LOCAL_RUNTIME_BASE_URL || window.location.origin),
+    [],
+  );
+  return (
+    <Workspace
+      {...composition}
+      localPlan={localPlan as PlanReference}
+      runtimeLabel="LOCAL · 离线 Agent / 真实业务服务"
+      invocationNote="使用真实本地业务服务与离线意图提案；示例画像/受控事件不代表真实个人或赛事历史。"
+    />
+  );
+}
 
 const scenarios: { value: DemoScenario; label: string }[] = [
   { value: 'completed', label: '完成回复' },
@@ -58,4 +76,6 @@ function DemoApp() {
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing application root');
-createRoot(root).render(<DemoApp />);
+if (import.meta.env.VITE_RUNTIME_MODE && import.meta.env.VITE_RUNTIME_MODE !== 'LOCAL')
+  throw new Error('Unsupported Runtime mode; AgentArts integration is deferred to P14.6');
+createRoot(root).render(import.meta.env.VITE_RUNTIME_MODE === 'LOCAL' ? <LocalApp /> : <DemoApp />);

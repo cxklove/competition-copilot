@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { RuntimeClientError } from '../runtime/client.ts';
+import { validateInput } from '../runtime/validation.ts';
 import type { RuntimeInvocationClient, ResumeEnvelope } from '../runtime/client.ts';
 import type {
   AgentContext,
@@ -46,13 +47,24 @@ export function useConversation(
       renderKind: 'CLARIFICATION_RESPONSE' | 'APPROVAL_RESPONSE';
     },
   ): Promise<InteractionResult> {
-    const freshRequest = 'user_message' in request ? request : undefined;
+    let freshRequest = 'user_message' in request ? request : undefined;
     if (!continuation && !freshRequest) return { accepted: false, error: '缺少请求内容。' };
     if (pending.current || !mounted.current)
       return { accepted: false, error: '当前请求正在处理或已失效。' };
     pending.current = true;
     current.current = null;
     const attempt = ++generation.current;
+    if (freshRequest) {
+      try {
+        freshRequest = validateInput({ request: freshRequest }).request!;
+        request = freshRequest;
+      } catch {
+        dispatch({ type: 'SUBMIT', attempt, request: freshRequest, retry });
+        dispatch({ type: 'ERROR', attempt, request: freshRequest, code: 'CONTRACT_ERROR' });
+        pending.current = false;
+        return { accepted: false, error: '请检查公开请求的字段与格式。' };
+      }
+    }
     const abort = new AbortController();
     controller.current = abort;
     if (continuation)
@@ -92,7 +104,7 @@ export function useConversation(
     return { accepted: true };
   }
 
-  function submit(text: string, studentId: string) {
+  function submit(text: string, studentId: string, explicitContext: AgentContext = {}) {
     if (
       !text.trim() ||
       pending.current ||
@@ -106,7 +118,10 @@ export function useConversation(
       {
         request_id: nextRequestId(),
         user_message: text.trim(),
-        ...(studentId.trim() ? { context: { student_id: studentId.trim() } } : {}),
+        context: {
+          ...explicitContext,
+          ...(studentId.trim() ? { student_id: studentId.trim() } : {}),
+        },
       },
       false,
     );

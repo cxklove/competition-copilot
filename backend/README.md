@@ -1,5 +1,49 @@
 # Backend
 
+## Local Agent Runtime development
+
+After installing the existing `agent` and development extras (no AgentArts SDK
+required), run from repository root:
+
+```powershell
+.\backend\.venv\Scripts\python scripts/run_local_runtime.py
+```
+
+This serves only POST `http://127.0.0.1:8765/runtime/invoke` using Python's standard
+library ThreadingHTTPServer. `--port 0` chooses an available loopback port and prints
+its URL. `--origin http://127.0.0.1:5173` selects an exact development browser origin
+(repeatable); defaults are 127.0.0.1/localhost:5173. The frontend Vite same-origin
+proxy is the normal development path; see frontend README and `.env.example`.
+
+The transport adapter calls the existing SDK-free P12.7 AgentArtsRuntimeAdapter,
+which enters CompetitionCopilotAgent/LangGraph/the same Capability Facade and real
+seed/policy authorities. No new Agent or business endpoint exists. The offline
+intent proposal model recognizes documented demo phrases only; deterministic P12.6
+grounded fallback and P5-P11 authorities supply all factual outcomes. Prepared P5/P7
+prerequisites use the same Facade before P6/P8 invocation, never browser computation.
+
+Request JSON remains the existing new-request/structured continuation envelope.
+HTTP delivery wraps `runtime` (unchanged public AgentResponse/error plus opaque
+continuation_ref when pending) and `presentation` (bound readonly public artifact
+data). Internal GraphInput/trusted execution context never leaves the server. Runtime
+errors have stable sanitized codes; business negatives are HTTP 200 normal results.
+
+Hosting is an ephemeral, single-authorized-local-operator development boundary,
+not production IAM or multi-user authentication. Bounded/expiring single-use handles,
+exact P12 request/interaction validation and current Plan refs protect continuations.
+Approval validation/execution is serialized; the actor and current Plan come from
+server dependencies, never cookies/headers/browser roles. The controlled revision
+fixture under `data/local_runtime` is synthetic, uses unchanged P8/P11 constructors,
+and is not official history or consent. Only P12.5's explicit bridge grants new
+execution authority; P11 produces the actual result. Repository/fixture files are
+unchanged, and restarting resets all local pending/current-Plan metadata.
+
+Targeted tests: `.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_local_runtime.py`
+from repository root. Frontend `npm run test:local --prefix frontend` launches a real
+temporary loopback server and closes it afterwards. External LLM/network/cloud are
+not required. AgentArts invocation remains P14.6; production auth/deployment/hardening
+and durable storage remain P16.
+
 ## P11 Adaptive Replanning - Phase Closure
 
 Status: CLOSED. Final Review: PASS. Frozen: YES / FROZEN FOR DOWNSTREAM USE.

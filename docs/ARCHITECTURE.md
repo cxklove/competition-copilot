@@ -1865,12 +1865,12 @@ security/cost hardening. The baseline itself adds no app, client, endpoint or de
 Frontend (future UI)
   -> RuntimeInvocationClient (JSON projection, validation, safe error normalization)
   -> RuntimeTransport
-       |-- LocalRuntimeTransport interface
+       |-- LocalRuntimeTransport (HTTP adapter)
        `-- AgentArtsRuntimeTransport interface
   -> P12 Runtime Adapter -> Agent -> Graph -> same Capability Facade
 ```
 
-The client contract is implemented without UI or live HTTP/cloud mechanics. invoke
+The original client contract is independent of UI/HTTP/cloud mechanics; Local HTTP hosting is described below. invoke
 accepts unchanged AgentRequest; resume accepts the actual typed P12 continuation
 input. exchange retains only the safe public response wrapper/opaque continuation_ref.
 Both transports consume identical schemas and semantics. FakeRuntimeTransport is a
@@ -1882,8 +1882,8 @@ compare them exactly. Ajv validates without coercion/default injection/extra rem
 contract guards enforce identity, outcome/HITL consistency and audit binding.
 AgentState/GraphInput/HumanResume are excluded. PublicRuntimeResult reuses P12
 AgentResponse/RuntimeError and requires an opaque continuation_ref for pending HITL;
-raw internal continuation fails closed. Trusted hosting must implement authorized
-handle retention/resolution later, without changing P12 or trusting browser state.
+raw internal continuation fails closed. Local hosting implements private
+handle retention/resolution as described below, without changing P12 or trusting browser state.
 
 AgentResponse contains authoritative refs, not full evidence/result/PlanDiff bodies.
 The client preserves supplied refs/time/URL strings and never invents missing facts.
@@ -1897,15 +1897,14 @@ Public mode/baseUrl/runtimeName config excludes secrets/credential URLs/query to
 production auth stays outside the browser. Metadata never enters business data.
 AbortSignal is transport cancellation, not approval rejection or proof of no execution.
 Primary contract is non-streaming. Contract-level Gates A-D/F-J have evidence from
-fake tests; Gate E is CONTRACT_PASS_REAL_RUNTIME_DEFERRED. Real transports, UI,
-authorized hosting and production deployment remain distinct later work.
+fake tests; Gate E is CONTRACT_PASS_REAL_RUNTIME_DEFERRED. Local transport/UI/hosting are described below; cloud integration and production deployment remain separate work.
 
 ### Frontend workspace presentation boundary
 
 ```text
 Frontend App Shell -> Conversation State -> RuntimeInvocationClient.exchange
-                                           -> Fake transport (active)
-                                           -> Local transport (P14.5)
+                                           -> Fake transport (offline presets)
+                                           -> Local transport (active when configured)
                                            -> AgentArts transport (P14.6)
 ```
 
@@ -1929,7 +1928,7 @@ All state is in memory, without durable session, storage, approval or mutation a
 Clarification/approval controls send public typed continuations without creating
 authority. Completed results use the readonly result presentation described below.
 Dev-only preset selection remounts the fake workspace; production bundles
-hide that selector while still using fake presets. Build success does not imply a
+hide that selector; unset runtime mode retains fake presets, while LOCAL selects the real local chain. Build success does not imply a
 real Runtime connection or production deployment. Minimal labels/live status/alerts
 and a single-column narrow layout support the MVP workspace.
 
@@ -1969,8 +1968,7 @@ request disables old controls without claiming server cancellation/rejection.
 Only public continuation data is held in current-page memory, never GraphInput.
 
 Fake sequences cover clarification/completion, approve/completion, reject/completion
-and continuation errors without computing business outcomes. Local and AgentArts
-hosting remain P14.5/P14.6. Gate M (HITL Authority Preservation) requires expressions
+and continuation errors without computing business outcomes. Local hosting is described below; AgentArts hosting remains P14.6. Gate M (HITL Authority Preservation) requires expressions
 without browser-created authority; Gate N (Continuation Identity Integrity) requires
 current request/proposal/handle binding and stale/replay protection. Offline tests
 prove these UI guards; real Runtime parity remains deferred.
@@ -1990,8 +1988,7 @@ Validated AgentResponse (message + audit refs + plan_refs)
 P12 exposes references rather than artifact bodies. An optional readonly presentation
 snapshot supplies selected existing Domain artifacts keyed by current request ID and
 exact retained ResultReference. This stays outside the unchanged Runtime envelope.
-Only fake composition provides it here; P14.5 trusted hosting must authorize actual
-resolution and validate full Domain semantics. Components never fetch, invoke Runtime,
+Fake composition supplies presets; Local hosting resolves actual retained receipts and validates original Domain models as described below. Components never fetch, invoke Runtime,
 approve, re-explain with LLMs or compute decisions. Unavailable references stay visible
 without invented content. The synchronous consumer guard rejects wrong request/ref,
 kind/model/schema or duplicates, clears stale content and reports attachment contract
@@ -2016,7 +2013,67 @@ Gate O - Grounded Rendering Integrity: visible claims trace to current supplied
 explanation/artifact/audit data; missing content is never inferred. Gate P - PlanDiff
 Authority Integrity: render only the actual supplied diff. Gate Q - Source Presentation
 Safety: source/evidence data cannot execute script/HTML or dangerous URL schemes.
-Gate E remains CONTRACT_PASS_REAL_RUNTIME_DEFERRED. P14.5/P14.6 own real integration.
+Gate E for the Local path is LOCAL_RUNTIME_PASS_AGENTARTS_DEFERRED; cloud integration remains P14.6.
+
+### Local Runtime HTTP composition
+
+```text
+Frontend Workspace / Conversation / HITL
+  -> RuntimeInvocationClient (unchanged P12 validation)
+  -> LocalRuntimeTransport
+  -> POST /runtime/invoke (loopback stdlib HTTP adapter)
+  -> P12.7 pure runtime handler (no AgentArts SDK app)
+  -> CompetitionCopilotAgent -> compiled LangGraph
+  -> same CapabilityFacade -> P4-P11 authorities / Repository abstractions
+```
+
+The local adapter is the sole new HTTP invocation route. It parses/validates the
+unchanged P12 envelope, calls the existing pure handler, sanitizes transport failures
+and serializes results. No second Agent, business API, MCP shortcut or cloud SDK.
+Server composition uses real seed Repository/policy/skill providers and Domain services.
+Offline intent proposals only select approved capabilities; P12.6 fallback explains
+returned evidence. P5/P7 prerequisite preparation for P6/P8 uses the same Facade.
+No local or frontend calculation substitutes for eligibility, ranking, diagnosis,
+planning, replanning or revision authority.
+
+Frontend composition selects LOCAL and injects the client; components never fetch.
+Public base URL config and a same-origin Vite development proxy isolate HTTP details.
+The request carries explicitly entered target/profile refs or an explicitly selected
+public demo PlanRef; HTTP sessions/cookies/correlation metadata never supply identities.
+Canonical request normalization precedes transport and conversation correlation.
+Cancellation is not approval rejection or proof that the server did not execute.
+There is no silent retry. Existing pending locks protect normal and HITL submissions.
+
+The delivery object separates unchanged public runtime result from an optional readonly
+presentation attachment. Server-side exact audit-ref receipt resolution revalidates
+original public Domain models. Frontend P14.1 validates runtime before state updates;
+P14.4 validates attachment schema/current request/ref binding. TOOL_RESULT projection
+supports real P4 details, P5 eligibility, P6 rankings, P7 diagnosis and P8 Plans.
+Missing receipts stay missing. PlanDiff is only the actual P11 result, never a comparison
+computed by HTTP adapter or browser. Source strings, aware times and enums survive JSON.
+
+Hosting is for one local developer operator, not production/multi-user authentication.
+Random single-use continuation handles retain canonical private GraphInput in bounded,
+expiring server memory. Browser supplies public typed continuation only; core P12.5
+validates request/proposal/Plan identity and creates authority. A server-owned current
+PlanRef catalogue and serialized invocations block stale/replayed approvals. No browser
+HUMAN_APPROVED, mutation endpoint, optimistic update or trusted browser continuation.
+Controlled synthetic revision inputs are not official historical facts; exact public
+PlanRef selection and explicit APPROVE are required before real P11 execution. The
+catalogue and continuation state reset on restart; no durable Plan persistence.
+
+Loopback binding, exact development origins, request limits and sanitized errors
+support local testing. Responses expose no Python traceback, environment or secret.
+Production IAM/auth, deployment and hardening remain P16; AgentArts remains P14.6.
+Startup/config commands are in backend/README.md and frontend/README.md. Fixtures and
+reproducible generation are described in data/local_runtime/README.md.
+
+Gate E: LOCAL_RUNTIME_PASS_AGENTARTS_DEFERRED. Gate R (Local Runtime Integration
+Integrity) checks the complete client/HTTP/pure-handler/Agent/Graph/Facade chain.
+Gate S (Local End-to-End Semantic Fidelity) replays captured actual Local responses
+through FakeRuntimeTransport and compares validated responses and rendered result/HITL
+semantics. Real local HTTP tests use loopback only, deterministic intent models and
+actual services; they do not claim cloud parity or production authorization.
 
 ## 14. Repository Structure
 

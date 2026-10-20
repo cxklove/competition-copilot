@@ -566,6 +566,30 @@ input::placeholder {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.local-context {
+  margin-top: 14px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.local-context summary {
+  cursor: pointer;
+}
+.local-context > label {
+  display: block;
+  margin-top: 10px;
+}
+.local-context > input {
+  width: 100%;
+  margin-top: 4px;
+}
+.local-context input[type='checkbox'] {
+  width: auto;
+  margin-right: 7px;
+}
+.local-context p {
+  color: #647980;
+  line-height: 1.6;
+}
 .workspace-grid.has-result {
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
 }

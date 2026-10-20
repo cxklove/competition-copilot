@@ -1,10 +1,12 @@
 # Frontend workspace and runtime invocation contract
 
 The single React + TypeScript + Vite workspace presents current-page conversation,
-structured workflow states, clarification forms and explicit approval controls. It runs entirely on
-FakeRuntimeTransport presets through the existing RuntimeInvocationClient.
+structured workflow states, clarification forms and explicit approval controls.
+The same RuntimeInvocationClient supports offline fake presets or the real local
+Agent invocation path, selected at the composition root.
 The result panel presents supplied result artifacts, evidence, sources and PlanDiff.
-There is no real backend/AgentArts connection or authorized artifact hosting.
+Local hosting retains scoped public continuation/artifact data. Real AgentArts
+invocation and production authentication/deployment remain deferred.
 Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`.
 
 ## Toolchain and commands
@@ -18,6 +20,7 @@ npm run dev --prefix frontend
 npm test --prefix frontend
 npm run test:hitl --prefix frontend
 npm run test:results --prefix frontend
+npm run test:local --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
 npm run format --prefix frontend
@@ -25,7 +28,7 @@ npm run format --prefix frontend
 .\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
 ```
 
-`dev` serves Vite on 127.0.0.1 (default 5173, chooses an available port if busy).
+`dev` serves Vite on 127.0.0.1:5173, failing visibly if the port is busy.
 `preview` previews the built frontend on 127.0.0.1; neither command hosts a Runtime.
 `test` retains the Node test runner, using tsx to load TS/JSX; jsdom and Testing
 Library exercise the DOM offline. `lint` runs TypeScript and Prettier over existing
@@ -34,6 +37,75 @@ real Vite bundle in ignored dist/. No React framework/plugin or state library is
 needed beyond React's built-in reducer/hooks. Versions are pinned in package/lock;
 jsdom 26.1.0 supports the existing Node version. Installation needs npm registry
 access; default tests/build require no external network or credentials.
+
+## Real Local Runtime development
+
+Install the existing backend `agent`/development dependencies per backend README;
+AgentArts SDK, cloud credentials and an external LLM are not required.
+From the repository root, start the backend in one terminal:
+
+```powershell
+.\backend\.venv\Scripts\python scripts/run_local_runtime.py
+```
+
+In another terminal, copy `frontend/.env.example` to ignored `frontend/.env.local`
+and run `npm run dev --prefix frontend`. The only public config is
+`VITE_RUNTIME_MODE=LOCAL` and optional `VITE_LOCAL_RUNTIME_BASE_URL`; empty base URL
+uses the same-origin Vite proxy. `LOCAL_RUNTIME_PROXY_TARGET` is Vite server config,
+defaulting to http://127.0.0.1:8765. No secret belongs in any public variable. Removing
+VITE_RUNTIME_MODE retains fake mode. AGENTARTS mode is explicitly deferred to P14.6.
+
+Try these bounded offline intent-model phrases (business results are real):
+
+- `discovery` / `有哪些比赛？`: real repository discovery.
+- `detail` / `赛事详情`: real clarification asks for competition ID; enter `huawei-ict`.
+- `eligibility` / `检查资格`: explicit student `local-graduate`, competition
+  `gcxl-engineering-practice-innovation`, edition
+  `gcxl-engineering-practice-innovation-2027` returns real INELIGIBLE; `local-unknown`
+  preserves UNKNOWN. The local profiles are synthetic server-owned input facts.
+- `skill` / `plan`: student `local-graduate`, competition `comap-mcm`, edition
+  `comap-mcm-2027` runs real P7/P8 with formal requirement data and uncertainty.
+- `recommend`: the same explicit target context runs P5 then P6; no suitability
+  signal is configured, so the existing P6 authority preserves missing-score semantics.
+- `controlled revision`: clear unrelated student/target fields, explicitly select
+  the local controlled PlanRef checkbox. Review the real ApprovalRequest, then
+  APPROVE or REJECT. Only P12.5 creates new bound authority; P11 returns the actual
+  immutable cancelled Plan/PlanDiff on approval. The synthetic event is not an
+  official competition change. Restart the backend to reset this controlled case.
+
+POST `/runtime/invoke` receives the unchanged P12 new-request or continuation
+envelope. HTTP delivery is `{runtime: <safe P12-compatible public result>,
+presentation: <readonly current request/ref artifact snapshot>}`. LocalRuntimeTransport
+only sends JSON, forwards AbortSignal, unwraps this delivery and passes unknown
+presentation data to composition. The unchanged RuntimeInvocationClient validates
+the runtime portion; P14.4 validates attachment structure/ref binding. No UI fetch,
+MCP shortcut, second Agent contract, direct mutation, business interpretation or retry
+exists in transport. UI correlation uses the existing P12 canonical input projection
+before dispatch, including whitespace request IDs.
+
+Server artifacts are selected from actual Facade receipts, revalidated by their
+original Pydantic models and resolved only at retained audit JSON pointers. Real P12
+root result refs are TOOL_RESULT; the consumer accepts that kind for explicitly
+selected model types instead of inventing new response refs. Discovery/Plan/ranking
+schemas are generated from existing P4/P6/P8 models. No receipt authority/GraphInput
+or secret is delivered. Full validation/authorization remains server-side.
+
+The loopback host represents one explicitly authorized local development operator,
+not multi-user production auth. Cookies, sessions, request headers and roles never
+supply student/Plan/approval identity or consent. Opaque handles expire, are bounded,
+and are consumed once; server execution is serialized to preserve current-Plan checks.
+State is ephemeral, fixtures/repository files are never modified, and restart loses
+pending handles. HTTP cancellation cannot prove server non-execution. No automatic
+retry exists, especially for uncertain continuation outcomes. Vite uses a same-origin
+development proxy; the backend restricts browser Origin to configured exact local
+origins (`--origin` can be repeated). Production IAM/auth/CORS/persistence are P16.
+
+`test:local` starts a temporary real Python HTTP server on a random loopback port,
+uses the real TypeScript client/transport and DOM UI, then terminates the server.
+The backend Windows virtualenv path is the repository convention (tests use Node
+>=24.12); no external network/cloud/LLM is used. `test` includes these tests plus
+P14.1-P14.4 regressions. Gates R/S cover the actual local chain and delivery/UI parity;
+Gate E is LOCAL_RUNTIME_PASS_AGENTARTS_DEFERRED at this boundary.
 
 ## Workspace behavior and boundaries
 
@@ -76,7 +148,7 @@ access; default tests/build require no external network or credentials.
 Manual fake demos: in dev only, expand the small 'development demo scenario' control
 at the bottom right to choose completed, business negative, clarification, approval,
 transport/runtime/contract error. Switching remounts/clears the demo workspace.
-Production builds omit that developer control and still use fake completed presets;
+Production builds omit that developer control; unset runtime mode uses fake completed presets, while LOCAL selects the local client;
 a Vite production build is not a production AgentArts deployment. Presets are
 synthetic examples based on the existing contract fixtures, never decisions computed
 from the user's text/profile. The UI explicitly labels this fake environment.
@@ -107,8 +179,8 @@ No MCP dependency or capability-specific business clients are introduced.
 `invoke(AgentRequest)` returns a validated AgentResponse. `resume` submits the
 existing typed continuation envelope. `exchange` returns the safe transport wrapper
 including an opaque continuation_ref, retained explicitly by the HITL UI.
-LocalRuntimeTransport/AgentArtsRuntimeTransport are interfaces only; the deterministic
-FakeRuntimeTransport returns preset payloads and records calls without business logic.
+AgentArtsRuntimeTransport remains an interface only. LocalRuntimeTransport implements
+the existing interface via HTTP; FakeRuntimeTransport remains preset-only.
 
 Request validation preserves caller request IDs, explicit context and typed replies;
 it adds no defaults or authority. Response validation is strict, including enum,
@@ -142,8 +214,8 @@ and selected generated schema are checked before display. Invalid attachments sh
 ARTIFACT_CONTRACT_ERROR and no body; a new response replaces the old presentation.
 Without a matching attachment, the UI shows the references and unavailable-body text.
 
-Only the demo composition currently supplies attachments, from fixed Pydantic-validated
-fixtures. Real authorized retrieval and final Domain model validation remain P14.5.
+Fake composition supplies fixed Pydantic-validated attachments; Local composition
+supplies revalidated actual receipt data through scoped local hosting.
 JSON Schema guards structure only; they do not establish factual truth or duplicate
 Domain behavioral rules. P12/P13/P14.1 contracts are unchanged. No browser object is
 trusted authority. Generated schemas/types for selected existing EligibilityDecision,
@@ -174,9 +246,9 @@ CONTRACT_PASS_REAL_RUNTIME_DEFERRED; no real Runtime or production deployment cl
 
 PublicRuntimeResult reuses unchanged P12 AgentResponse/RuntimeError and adds a safe
 continuation_ref transport projection. Pending raw P12 GraphInput output is rejected.
-P14.5 trusted hosting must retain/authorize internal continuations, return scoped
-opaque handles and resolve them through the existing P12 continuation_ref input.
-That hosting/authorization is not implemented here. Completed wire continuation:null
+Local trusted hosting retains internal continuations, returns scoped opaque handles
+and resolves them through the existing P12 continuation_ref input under its local
+operator policy. Production multi-user authorization is not implemented. Completed wire continuation:null
 is accepted. All browser handles/replies remain client-controlled and require server
 validation of identity, actor, scope and Plan version. No browser HUMAN_APPROVED.
 Clarification sends existing clarification_id/source_request_id plus only requested
@@ -190,7 +262,7 @@ not decision-dependent Plan calculations or a real authorized continuation store
 Frontend Gate M (HITL Authority Preservation): controls collect expressions only;
 P12.5/core still creates authority. Gate N (Continuation Identity Integrity): current
 request/proposal/handle binding, stale replacement and consumed-action guards are
-covered by offline tests. Real hosting and final authorization remain P14.5/P14.6.
+covered by offline tests. Local hosting now retains private continuations and validates core authority; AgentArts remains P14.6 and production authorization remains P16.
 
 Public config selects LOCAL/AGENTARTS and supplies baseUrl/runtimeName. Unknown config
 keys, missing/non-string required values, credential-bearing URLs and
@@ -204,7 +276,7 @@ never becomes Agent context or approval. Config chooses transport, not business 
 Cancellation is an AbortSignal transport concern, never ApprovalResponse(REJECT),
 and cannot guarantee server execution was canceled. AUTO_RETRY=OFF.
 NON_STREAMING_PRIMARY: one complete AgentResponse, no simulated token streaming.
-P14.5/P14.6 own real Local/AgentArts integration; P15 owns systematic evaluation.
+Local invocation is implemented; P14.6 owns AgentArts integration and P15 owns systematic evaluation.
 
 ## Public validator behavioral parity
 

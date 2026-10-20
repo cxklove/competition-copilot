@@ -1,0 +1,15 @@
+{
+  "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+  "student_id": "test-only-p11-5-student",
+  "target": {
+    "competition_id": "huawei-ict",
+    "edition_id": "huawei-ict-2026",
+    "track_id": "huawei-ict-2026-innovation"
+  },
+  "version": 1,
+  "updated_at": "2020-01-01T00:00:00Z",
+  "milestone_ids": [
+    "baseline-milestone-v1:466e3dc47038b9949c1b42ad4f76d6c4a3ca6ea3ed7efea33174853443f4feb3"
+  ],
+  "content_digest": "3737d251187b690bd72171234fb552f3fe9e3be91d4218e99881ca1ec5517e62"
+}

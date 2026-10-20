@@ -1,0 +1,279 @@
+{
+  "notice": "SYNTHETIC LOCAL DEMO: not an official change or real human approval",
+  "student": {
+    "id": "test-only-p11-5-student",
+    "education_level": null,
+    "grade": null,
+    "school": null,
+    "major": null,
+    "interests": [],
+    "goals": [],
+    "weekly_available_hours": null,
+    "skills": []
+  },
+  "proposal": {
+    "before": {
+      "id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+      "student_id": "test-only-p11-5-student",
+      "competition_id": "huawei-ict",
+      "edition_id": "huawei-ict-2026",
+      "track_id": "huawei-ict-2026-innovation",
+      "planning_horizon": {
+        "start_at": "2020-01-01T00:00:00Z",
+        "end_at": "2020-01-31T00:00:00Z"
+      },
+      "skill_gap_audit": {
+        "target": {
+          "competition_id": "huawei-ict",
+          "edition_id": "huawei-ict-2026",
+          "track_id": "huawei-ict-2026-innovation",
+          "scope": "track"
+        },
+        "coverage": "missing",
+        "gap_status": "undetermined",
+        "reason_codes": [
+          "REQUIREMENT_DATA_MISSING"
+        ]
+      },
+      "planning_needs": [
+        {
+          "id": "test-only-existing-uncertainty-need",
+          "kind": "uncertainty_resolution",
+          "reason_codes": [
+            "REQUIREMENT_DATA_MISSING"
+          ],
+          "source_item": null
+        }
+      ],
+      "status": "active",
+      "version": 1,
+      "milestones": [
+        {
+          "id": "baseline-milestone-v1:466e3dc47038b9949c1b42ad4f76d6c4a3ca6ea3ed7efea33174853443f4feb3",
+          "title": "Resolve competition requirement uncertainty",
+          "description": null,
+          "start_at": null,
+          "due_at": null,
+          "estimated_hours": null,
+          "dependency_ids": [],
+          "status": "pending",
+          "source_need_id": "test-only-existing-uncertainty-need"
+        }
+      ],
+      "created_at": "2020-01-01T00:00:00Z",
+      "updated_at": "2020-01-01T00:00:00Z"
+    },
+    "decision": {
+      "impacts": [
+        {
+          "event": {
+            "id": "competition-event-v1:09ed8e3df8ad638b928dfcd1fce6241594ea3519740d3bca084e3d637cec4580",
+            "competition_id": "huawei-ict",
+            "edition_id": "huawei-ict-2026",
+            "event_type": "track_membership_changed",
+            "occurred_at": null,
+            "observed_at": "2020-01-02T00:00:00Z",
+            "source": {
+              "source_url": "https://example.invalid/test-only-p11-5-controlled-scenario",
+              "source_type": "manual",
+              "observed_at": "2020-01-02T00:00:00Z",
+              "verification_status": "verified"
+            },
+            "description": null,
+            "track_id": null,
+            "source_diff": {
+              "before": {
+                "snapshot_id": "test-only-replan-before",
+                "target": {
+                  "competition_id": "huawei-ict",
+                  "edition_id": "huawei-ict-2026",
+                  "track_id": null
+                },
+                "observed_at": "2020-01-01T00:00:00Z"
+              },
+              "after": {
+                "snapshot_id": "test-only-replan-after",
+                "target": {
+                  "competition_id": "huawei-ict",
+                  "edition_id": "huawei-ict-2026",
+                  "track_id": null
+                },
+                "observed_at": "2020-01-02T00:00:00Z"
+              },
+              "changes": [
+                {
+                  "kind": "value_changed",
+                  "field": "track_membership",
+                  "before": {
+                    "state": "known_value",
+                    "sources": [
+                      {
+                        "source_url": "https://example.invalid/test-only-p11-5-controlled-scenario",
+                        "source_type": "manual",
+                        "observed_at": "2020-01-02T00:00:00Z",
+                        "verification_status": "verified"
+                      }
+                    ],
+                    "value": [
+                      "huawei-ict-2026-challenge",
+                      "huawei-ict-2026-elite",
+                      "huawei-ict-2026-innovation",
+                      "huawei-ict-2026-operator",
+                      "huawei-ict-2026-practice",
+                      "huawei-ict-2026-programming",
+                      "huawei-ict-2026-teaching"
+                    ]
+                  },
+                  "after": {
+                    "state": "known_value",
+                    "sources": [
+                      {
+                        "source_url": "https://example.invalid/test-only-p11-5-controlled-scenario",
+                        "source_type": "manual",
+                        "observed_at": "2020-01-02T00:00:00Z",
+                        "verification_status": "verified"
+                      }
+                    ],
+                    "value": [
+                      "huawei-ict-2026-challenge",
+                      "huawei-ict-2026-elite",
+                      "huawei-ict-2026-operator",
+                      "huawei-ict-2026-practice",
+                      "huawei-ict-2026-programming",
+                      "huawei-ict-2026-teaching"
+                    ]
+                  }
+                }
+              ]
+            },
+            "source_change_fields": [
+              "track_membership"
+            ]
+          },
+          "plan": {
+            "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+            "student_id": "test-only-p11-5-student",
+            "target": {
+              "competition_id": "huawei-ict",
+              "edition_id": "huawei-ict-2026",
+              "track_id": "huawei-ict-2026-innovation"
+            },
+            "version": 1,
+            "updated_at": "2020-01-01T00:00:00Z",
+            "milestone_ids": [
+              "baseline-milestone-v1:466e3dc47038b9949c1b42ad4f76d6c4a3ca6ea3ed7efea33174853443f4feb3"
+            ],
+            "content_digest": "3737d251187b690bd72171234fb552f3fe9e3be91d4218e99881ca1ec5517e62"
+          },
+          "student_id": "test-only-p11-5-student",
+          "evaluated_at": "2020-01-03T00:00:00Z",
+          "outcome": "affects_plan",
+          "scope": {
+            "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+            "state": "known",
+            "whole_plan": true,
+            "milestone_ids": []
+          },
+          "reason_codes": [
+            "target_track_removed"
+          ],
+          "evidence": [
+            {
+              "event_id": "competition-event-v1:09ed8e3df8ad638b928dfcd1fce6241594ea3519740d3bca084e3d637cec4580",
+              "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+              "milestone_ids": [],
+              "source_change_fields": [
+                "track_membership"
+              ]
+            }
+          ]
+        }
+      ],
+      "evaluated_at": "2020-01-04T00:00:00Z",
+      "outcome": "replan",
+      "scope": {
+        "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+        "state": "known",
+        "whole_plan": true,
+        "milestone_ids": []
+      },
+      "reason_codes": [
+        "confirmed_plan_impact"
+      ]
+    },
+    "supplied_at": "2020-01-05T00:00:00Z",
+    "status": "executable",
+    "instructions": [],
+    "plan_status_instruction": {
+      "operation": "update_plan_status",
+      "source_decision_fingerprint": "5e6bdbb855745449691fa77b4afc66601e90e039760c7a0f6e2f07b8d88eb36c",
+      "expected_plan": {
+        "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+        "student_id": "test-only-p11-5-student",
+        "target": {
+          "competition_id": "huawei-ict",
+          "edition_id": "huawei-ict-2026",
+          "track_id": "huawei-ict-2026-innovation"
+        },
+        "version": 1,
+        "updated_at": "2020-01-01T00:00:00Z",
+        "milestone_ids": [
+          "baseline-milestone-v1:466e3dc47038b9949c1b42ad4f76d6c4a3ca6ea3ed7efea33174853443f4feb3"
+        ],
+        "content_digest": "3737d251187b690bd72171234fb552f3fe9e3be91d4218e99881ca1ec5517e62"
+      },
+      "original_scope": {
+        "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+        "state": "known",
+        "whole_plan": true,
+        "milestone_ids": []
+      },
+      "expected_before_status": "active",
+      "desired_after_status": "cancelled",
+      "authority": {
+        "kind": "human_approved",
+        "approval_ref": "test-only-approved-plan-cancellation",
+        "approved_by_ref": "test-only-human",
+        "instruction_source_ref": "test-only-explicit-cancel-request",
+        "approved_at": "2020-01-05T00:00:00Z"
+      }
+    },
+    "scope_resolution": {
+      "expected_plan": {
+        "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+        "student_id": "test-only-p11-5-student",
+        "target": {
+          "competition_id": "huawei-ict",
+          "edition_id": "huawei-ict-2026",
+          "track_id": "huawei-ict-2026-innovation"
+        },
+        "version": 1,
+        "updated_at": "2020-01-01T00:00:00Z",
+        "milestone_ids": [
+          "baseline-milestone-v1:466e3dc47038b9949c1b42ad4f76d6c4a3ca6ea3ed7efea33174853443f4feb3"
+        ],
+        "content_digest": "3737d251187b690bd72171234fb552f3fe9e3be91d4218e99881ca1ec5517e62"
+      },
+      "source_decision_fingerprint": "5e6bdbb855745449691fa77b4afc66601e90e039760c7a0f6e2f07b8d88eb36c",
+      "original_scope": {
+        "plan_id": "baseline-plan-v1:2a2563f5e1ee5491481d6b803f55fa8afd438f0988876bc1e8d9060e24be8812",
+        "state": "known",
+        "whole_plan": true,
+        "milestone_ids": []
+      },
+      "status": "complete",
+      "coverage": "cancel_target_removed_plan",
+      "executable_milestone_ids": [],
+      "instruction_ids": [
+        "replanning-instruction-v1:8d6f05bf7df6c27c791499485236e00d09b8c89ab772d766483f9b70554be465"
+      ],
+      "authority": {
+        "kind": "human_approved",
+        "approval_ref": "test-only-approved-plan-cancellation",
+        "approved_by_ref": "test-only-human",
+        "instruction_source_ref": "test-only-explicit-cancel-request",
+        "approved_at": "2020-01-05T00:00:00Z"
+      }
+    }
+  }
+}

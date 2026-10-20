@@ -22,6 +22,7 @@ npm run test:hitl --prefix frontend
 npm run test:results --prefix frontend
 npm run test:local --prefix frontend
 npm run test:agentarts --prefix frontend
+npm run test:e2e --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
 npm run format --prefix frontend
@@ -144,6 +145,47 @@ offline. No real cloud smoke is implemented or required. Gate E is
 LOCAL_AGENTARTS_RUNTIME_PARITY_PASS at this compatibility boundary; Gates T/U/V/W cover
 transport compatibility, semantic parity, credential isolation and session authority
 isolation. Production auth/deployment is P16; broad acceptance is P14.7.
+
+## Real frontend E2E and cross-runtime matrix
+
+`npm run test:e2e --prefix frontend` uses the actual Workspace/useConversation,
+RuntimeInvocationClient and both real HTTP transports. The test-only Python host
+starts real Local and AgentArts-compatible Agent/LangGraph/Facade/Domain chains;
+no client stub, cloud credential, external network or LLM is required. Existing
+backend agent dependencies must be installed. Default `npm test` includes this suite.
+
+Both modes run discovery, eligibility negative/unknown, undetermined diagnosis,
+recommendation/planning, structured clarification/resume, approval wait and explicit
+APPROVE/REJECT. The actual P11 status PlanDiff appears only after approval returns;
+reject/no-change creates none. Tests cover one invocation per action, backend replay,
+stale callbacks and identity tampering, reversed delivery order, independent frontend
+roots, unmount/abort, evidence/source grounding and safe unknown-reason fallback.
+The test-only comparator retains public business identities, full artifacts and UI
+workflow/conversation/HITL semantics, excluding only transport metadata.
+
+HTTP fault controls in `backend/tests/agentarts_gateway_harness.py` can reset serial
+test scenarios or supply malformed/error/security payloads. Those controls exist
+only in the test harness, never in Local/AgentArts product servers. Injected hostile
+text or invalid payloads test presentation/validation, not Domain business truth.
+Normal scenarios continue through real authorities. Runtime reference failures,
+unavailable sockets, auth, timeout and contract errors stay distinct from negatives;
+neither transport retries automatically.
+
+For actual layout verification using an installed Chrome (no new browser framework),
+leave port 5173 free and run from the repository root:
+
+```powershell
+# Optional: set COPILOT_CHROME to an installed Chrome executable outside Windows default.
+npm run test:responsive --prefix frontend
+```
+
+The script uses native CDP and actual Vite composition/proxies in both modes, checks
+desktop/390px rendering, HITL control bounds, POST counts and browser exceptions,
+and saves screenshots/results under ignored `tmp/p14-7-e2e/`. It requires Chrome
+process permission; a startup/layout failure fails visibly. This is separate from
+the default React semantic suite; jsdom does not assert browser layout.
+Gates X/Y/Z cover real frontend E2E, cross-runtime workflow parity and authority
+preservation. Production deployment/IAM, cloud certification and load testing remain P16.
 
 ## Workspace behavior and boundaries
 

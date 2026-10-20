@@ -2166,6 +2166,60 @@ Credential Isolation. Gate W: AgentArts Session Authority Isolation. Gates R/S r
 Local regression evidence. Broader frontend acceptance remains P14.7, systematic
 cross-runtime evaluation P15, production deployment/hardening P16.
 
+### Real frontend E2E and workflow parity verification
+
+The same Workspace, useConversation state, RuntimeInvocationClient and typed
+continuations run against both real transport classes. Local HTTP reaches the
+existing P12.7 core directly; the AgentArts-compatible loopback gateway forwards
+through the trusted bridge to the same real Agent/LangGraph/Facade/Domain chain.
+The independent P13 MCP entrypoint remains separate. This adds verification, not
+a new Agent, business endpoint, authority mechanism or runtime contract.
+
+`frontend/tests/e2e.test.tsx` starts at actual React input/submit/HITL controls.
+Its test-only semantic comparator retains complete business payloads, request and
+interaction identities, authoritative results/artifacts, conversation entries,
+workflow state and rendered result/HITL sections. HTTP headers, cloud session IDs,
+latency and gateway correlation metadata do not participate in business parity.
+Fixed time/nonces are injected only by the existing offline test host.
+
+The shared scenario matrix covers discovery, ineligible/unknown/undetermined,
+recommendation, diagnosis/planning, clarification/resume, approval wait and explicit
+APPROVE/REJECT. Actual P11 approval produces the authoritative status PlanDiff;
+rejection produces no invented diff. Pending duplicate actions are blocked, old
+workflow callbacks and modified public identities cannot submit, and backend
+replay fails closed. No frontend or transport can create HUMAN_APPROVED.
+
+Test-only HTTP fault controls cover malformed responses, upstream HTTP/auth/timeout
+errors, unknown reason codes and malicious presentation strings. Runtime reference
+validation failures and unavailable sockets are also exercised. Fault-injected
+data tests consumer/security behavior; it is not asserted as Domain-produced truth.
+All normal business scenarios use real authorities. Neither fault controls nor
+the comparator is imported by product code or exposed by product servers.
+
+Separate frontend roots, reversed delivery order, unmount/abort and new requests
+verify result/evidence/continuation isolation. No localStorage AgentState, durable
+browser continuation or workflow persistence guarantee is added. Explanation
+wording does not select workflow/business status. Source text remains escaped and
+unsafe URL schemes remain inactive. Default tests require no external cloud, LLM,
+credential or network.
+
+An optional installed-Chrome smoke (`scripts/frontend_responsive_smoke.mjs`) uses
+native CDP and the real Vite composition/proxy in both modes. It checks desktop and
+390px layouts, visible HITL control bounds, actual clarification/approval/diff
+rendering, invocation counts, browser credential isolation and browser exceptions.
+Screenshots/results live only in ignored `tmp/p14-7-e2e`; jsdom does not claim to
+measure layout. No additional browser automation framework is required.
+
+Frontend Gate X - Real Frontend End-to-End Integrity requires actual frontend
+actions through runtime/Agent/Domain and back to rendering. Gate Y - Cross-runtime
+Workflow Parity requires equivalent business/HITL/grounding/diff/error semantics
+for the shared matrix. Gate Z - Cross-runtime Authority Preservation requires
+P5-P11 business truth and P12.5/P11 approval authority independent of transport.
+These extend A-W; Gate E remains LOCAL_AGENTARTS_RUNTIME_PARITY_PASS at the offline
+compatible-runtime boundary. Real cloud/deployment certification, performance/load
+and production IAM/hardening remain outside this verification, with production
+work owned by P16.
+
 ## 14. Repository Structure
 
 顶层目录约定：`backend/` 承载服务端，`frontend/` 承载界面，`data/` 承载可共享样例，`docs/` 承载设计，`evals/` 承载评测，`scripts/` 承载可复用操作。已完成的 Domain 与 P2 ingestion 实现位于 `backend/competition_copilot/`，真实 Raw、Review Manifest 和 Verified Seed 位于 `data/`。P3 只读接口位于 `backend/competition_copilot/repositories/`，当前 JSON Verified Seed Adapter 位于 `backend/competition_copilot/infrastructure/repositories/`。后续 `backend/` 可按 `application/`（用例及流程）、`tools/`（工具契约）、`agents/`（平台无关运行与编排）、`adapters/`（其他持久化、外部能力、MCP、AgentArts 实现）、`api/`（协议入口）扩展。

@@ -8,15 +8,17 @@
   },
   "scripts": {
     "test": "tsx --test tests/*.test.ts tests/*.test.tsx",
-    "lint": "tsc --noEmit && prettier --check src/runtime/*.ts tests/runtime.test.ts src/workspace src/results/*.ts src/results/*.tsx src/demo/client.ts src/main.tsx src/localClient.ts src/agentartsClient.ts vite.config.ts src/styles.css index.html tests/workspace.test.tsx tests/hitl.test.tsx tests/results.test.tsx tests/local.test.tsx tests/agentarts.test.tsx",
-    "format": "prettier --write src/workspace src/results/*.ts src/results/*.tsx src/demo/client.ts src/main.tsx src/localClient.ts src/agentartsClient.ts src/runtime/local.ts vite.config.ts src/styles.css index.html tests/workspace.test.tsx tests/hitl.test.tsx tests/results.test.tsx tests/local.test.tsx tests/agentarts.test.tsx",
+    "lint": "tsc --noEmit && prettier --check src/runtime/*.ts tests/runtime.test.ts src/workspace src/results/*.ts src/results/*.tsx src/demo/client.ts src/main.tsx src/localClient.ts src/agentartsClient.ts vite.config.ts src/styles.css index.html tests/workspace.test.tsx tests/hitl.test.tsx tests/results.test.tsx tests/local.test.tsx tests/agentarts.test.tsx tests/e2e.test.tsx tests/e2e/*.ts ../scripts/frontend_responsive_smoke.mjs",
+    "format": "prettier --write src/workspace src/results/*.ts src/results/*.tsx src/demo/client.ts src/main.tsx src/localClient.ts src/agentartsClient.ts src/runtime/local.ts vite.config.ts src/styles.css index.html tests/workspace.test.tsx tests/hitl.test.tsx tests/results.test.tsx tests/local.test.tsx tests/agentarts.test.tsx tests/e2e.test.tsx tests/e2e/*.ts ../scripts/frontend_responsive_smoke.mjs",
     "build": "tsc --noEmit && vite build",
     "dev": "vite --host 127.0.0.1",
     "preview": "vite preview --host 127.0.0.1",
     "test:hitl": "tsx --test tests/hitl.test.tsx",
     "test:results": "tsx --test tests/results.test.tsx",
     "test:local": "tsx --test tests/local.test.tsx",
-    "test:agentarts": "tsx --test tests/agentarts.test.tsx"
+    "test:agentarts": "tsx --test tests/agentarts.test.tsx",
+    "test:e2e": "tsx --test tests/e2e.test.tsx",
+    "test:responsive": "node ../scripts/frontend_responsive_smoke.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

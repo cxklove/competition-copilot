@@ -37,6 +37,9 @@ LOCK = threading.Lock()
 
 class DeterministicHost:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.host = create_local_host(ROOT, clock=lambda: NOW)
         self.sequence = 0
 
@@ -81,6 +84,13 @@ def running():
             if not 0 < size <= 1024 * 1024:
                 return self.reply(413, {})
             body = json.loads(self.rfile.read(size))
+            if self.path == "/__test__/reset":
+                # Between serial frontend scenarios only; never a product route.
+                local.reset()
+                remote.reset()
+                records.clear()
+                self.server.fault = local_server.fault = None
+                return self.reply(200, {})
             if self.path == "/__test__/control":
                 self.server.fault = body
                 return self.reply(200, {})
@@ -111,6 +121,26 @@ def running():
     client = AgentArtsGatewayClient(config)
     bridge = create_bridge_server(client, port=0)
     local_server = create_server(local, port=0)
+    local_server.fault = None
+    local_handler = local_server.RequestHandlerClass
+
+    class LocalFaultHandler(local_handler):
+        """Test-only HTTP fault injection; normal calls retain the real host."""
+
+        def do_POST(self):
+            if self.path == "/__test__/control":
+                size = int(self.headers.get("Content-Length", 0))
+                if not 0 < size <= 1024 * 1024:
+                    return self.reply(413, {})
+                self.server.fault = json.loads(self.rfile.read(size))
+                return self.reply(200, {})
+            if self.path == "/runtime/invoke" and self.server.fault is not None:
+                fault, self.server.fault = self.server.fault, None
+                self.discard_request_body()
+                return self.reply(fault.get("status", 200), fault.get("body"))
+            return super().do_POST()
+
+    local_server.RequestHandlerClass = LocalFaultHandler
     servers = (gateway, bridge, local_server)
     threads = [threading.Thread(target=s.serve_forever, daemon=True) for s in servers]
     for thread in threads:

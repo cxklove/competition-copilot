@@ -1332,7 +1332,7 @@ human approval retains mutation authorization. P1-P11 frozen semantics are uncha
 | Deferred stage | Owned scope | Status |
 |---|---|---|
 | P13 | MCP + AgentArts MCP compatibility | CLOSED_FROZEN |
-| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.7 real frontend E2E and cross-runtime parity) |
+| P14 | Frontend + Runtime invocation compatibility | CLOSED_FROZEN |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening: ARM64 image, SWR, IAM, Secrets, MaaS configuration, observability backend, scaling and load testing | NOT_STARTED |
 
@@ -2481,7 +2481,7 @@ data changed; no cloud resource, real Gateway smoke or git commit.
 ### P13.6 Real MCP Integration & Authority Preservation
 
 Status: REVIEW_PASS. P13 CLOSED_FROZEN; P13.0-P13.5 REVIEW_PASS.
-P13 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 IN_PROGRESS (P14.7 real frontend E2E and cross-runtime parity). P12 CLOSED_FROZEN.
+P13 Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 CLOSED_FROZEN. P12 CLOSED_FROZEN.
 This is integration evidence, not P13 Final Review or phase closure.
 
 No new MCP surface or business implementation. The same eight P13.1 tools and
@@ -2581,7 +2581,7 @@ Deferred scope is downstream work, not incomplete P13:
 
 | Phase | Deferred scope | Status |
 |---|---|---|
-| P14 | Frontend + Runtime invocation compatibility | IN_PROGRESS (P14.7 real frontend E2E and cross-runtime parity) |
+| P14 | Frontend + Runtime invocation compatibility | CLOSED_FROZEN |
 | P15 | Evaluation + Local/AgentArts semantic parity evaluation | NOT_STARTED |
 | P16 | Production AgentArts deployment/hardening; production IAM, SWR, Secrets, observability, scaling, load testing and security hardening | NOT_STARTED |
 
@@ -2591,7 +2591,7 @@ P12 remains CLOSED_FROZEN; P4-P12 frozen semantics are unchanged.
 
 ## P14 - Agent-native Frontend & Runtime Invocation Compatibility
 
-- **Status:** IN_PROGRESS; P14.0-P14.6 REVIEW_PASS; P14.7 REVIEW_PASS. P12/P13 remain CLOSED_FROZEN.
+- **Status:** CLOSED_FROZEN; P14.0-P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12/P13 remain CLOSED_FROZEN.
 - **Goal:** evidence-grounded user journey via stable API/AgentRequest/AgentResponse.
 - **Deliverables:** Workspace/Discover/Journey/Profile interfaces and compatible local/runtime invocation.
 - **Acceptance:** evidence, clarification/approval/resume and errors survive transport; API/UI never invent Domain truth.
@@ -2613,8 +2613,8 @@ Commit provenance stays in Git. Baseline definitions do not claim later delivera
 | P14.5 Local Runtime Invocation Integration | Trusted local composition/hosting of existing P12 invocation handler; safe browser projections, authorized continuation/artifact resolution and real Agent calls | REVIEW_PASS |
 | P14.6 AgentArts Runtime Invocation Compatibility | Same client contract through configured AgentArts transport; local compatibility tests, no required production cloud deployment | REVIEW_PASS |
 | P14.7 Real Frontend E2E & Cross-runtime Parity | Discovery/eligibility/clarification/recommendation/skill-gap/plan/approval/reject/error/fallback flows and key Local/AgentArts semantic comparisons | REVIEW_PASS |
-| P14 Final Review | Whole-phase frontend/contract/HITL/transport/authority audit | NOT_STARTED |
-| P14 Closure | Status/documentation finalization after Final Review PASS | NOT_STARTED |
+| P14 Final Review | Whole-phase frontend/contract/HITL/transport/authority audit | REVIEW_PASS |
+| P14 Closure | Status/documentation finalization after Final Review PASS | CLOSED_FROZEN |
 
 ### P14.0 audit and compatibility baseline
 
@@ -2810,8 +2810,7 @@ changed; no production code, tests, dependencies, runtime routes or UI files add
 ### P14.1 Runtime Invocation Client Contract
 
 Status: REVIEW_PASS. P14.0 remains REVIEW_PASS; P14.2 REVIEW_PASS;
-P14.3 is REVIEW_PASS; P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review and Closure
-remain NOT_STARTED. P12/P13 remain CLOSED_FROZEN.
+P14.3 is REVIEW_PASS; P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12/P13 remain CLOSED_FROZEN.
 
 The previously empty frontend now has a contract-only TypeScript/npm toolchain,
 not a React/Vite app or UI. Versions are locked; Node's test runner supplies offline
@@ -2902,13 +2901,12 @@ backend behavioral/drift tests 49 passed; full suite 2409 passed, zero skipped.
 Ruff, generated --check and git diff --check PASS. Review reproduction inputs now
 reject invalid messages/milestones/config and accept canonical request identity.
 P14.1 REVIEW_PASS; P14.2 REVIEW_PASS. See P14.3 below for current continuation status;
-P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review and Closure remain NOT_STARTED.
+P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN.
 
 ### P14.2 Frontend App Shell & Conversation State
 
-Status: REVIEW_PASS. P14 remains IN_PROGRESS; P14.0/P14.1 REVIEW_PASS.
-P14.3 is REVIEW_PASS; P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review and Closure
-remain NOT_STARTED. P12/P13 CLOSED_FROZEN.
+Status: REVIEW_PASS. P14 remains CLOSED_FROZEN; P14.0/P14.1 REVIEW_PASS.
+P14.3 is REVIEW_PASS; P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12/P13 CLOSED_FROZEN.
 
 Implemented the previously selected React + TypeScript + Vite single workspace,
 retaining npm/package-lock and the Node test runner (tsx supplies JSX loading).
@@ -2960,8 +2958,8 @@ No backend production, P12/P13 contract or business changes; no Git commit.
 
 ### P14.3 Clarification + Human Approval UX
 
-Status: REVIEW_PASS. P14 IN_PROGRESS; P14.0-P14.2 REVIEW_PASS.
-P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review and Closure NOT_STARTED.
+Status: REVIEW_PASS. P14 CLOSED_FROZEN; P14.0-P14.2 REVIEW_PASS.
+P14.4 REVIEW_PASS; P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN.
 P12/P13 CLOSED_FROZEN.
 
 Re-audited unchanged P12 public models and P12.7 envelope, including real validators:
@@ -3019,8 +3017,8 @@ contract changes, new dependency, real Runtime connection or Git commit.
 
 ### P14.4 Grounded Result / Evidence / PlanDiff Rendering
 
-Status: REVIEW_PASS. P14 IN_PROGRESS; P14.0-P14.3 REVIEW_PASS.
-P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review and Closure NOT_STARTED; P12/P13 CLOSED_FROZEN.
+Status: REVIEW_PASS. P14 CLOSED_FROZEN; P14.0-P14.3 REVIEW_PASS.
+P14.5 REVIEW_PASS; P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P12/P13 CLOSED_FROZEN.
 
 Actual contract audit:
 
@@ -3083,8 +3081,8 @@ ignored local artifacts. No P12/P13/P14.1 runtime production changes or Git comm
 
 ### P14.5 Local Runtime Invocation Integration
 
-Status: REVIEW_PASS. P14 IN_PROGRESS; P14.0-P14.4 REVIEW_PASS.
-P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review and Closure NOT_STARTED. P12/P13 CLOSED_FROZEN.
+Status: REVIEW_PASS. P14 CLOSED_FROZEN; P14.0-P14.4 REVIEW_PASS.
+P14.6 REVIEW_PASS; P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN. P12/P13 CLOSED_FROZEN.
 P14.4 was cleanly committed (5b7b68c) before implementation; no commit in this phase.
 
 Audit found no existing local HTTP application or route. The new SDK-free stdlib
@@ -3153,8 +3151,8 @@ Temporary browser/backend/Vite processes closed; screenshots remain ignored unde
 
 ### P14.6 AgentArts Runtime Invocation Compatibility
 
-Status: REVIEW_PASS. P14 IN_PROGRESS; P14.0-P14.5 REVIEW_PASS.
-P14.7 REVIEW_PASS; Final Review and Closure NOT_STARTED; P12/P13 CLOSED_FROZEN. P15/P16 unchanged.
+Status: REVIEW_PASS. P14 CLOSED_FROZEN; P14.0-P14.5 REVIEW_PASS.
+P14.7 REVIEW_PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN; P12/P13 CLOSED_FROZEN. P15/P16 unchanged.
 Entry gate: P14.5 was cleanly committed as 1b0487c and working tree was clean.
 No commit made in this phase.
 
@@ -3224,8 +3222,8 @@ and P16 production hardening remain NOT_STARTED.
 
 ### P14.7 Real Frontend E2E & Cross-runtime Parity
 
-Status: REVIEW_PASS. P14 IN_PROGRESS; P14.0-P14.6 REVIEW_PASS.
-P14 Final Review and P14 Closure NOT_STARTED. P12/P13 CLOSED_FROZEN; P15/P16 unchanged.
+Status: REVIEW_PASS. P14 CLOSED_FROZEN; P14.0-P14.6 REVIEW_PASS.
+P14 Final Review REVIEW_PASS; P14 Closure CLOSED_FROZEN. P12/P13 CLOSED_FROZEN; P15/P16 unchanged.
 Entry gate: P14.6 cleanly committed as 012eda3; working tree was clean before work.
 No commit made in this phase. Implementation completion does not close P14 or grant
 its Final Review/Closure; P14.7 Review PASS does not grant whole-phase closure.
@@ -3298,8 +3296,27 @@ passed, zero skipped; lint/build PASS. `npm run test:responsive --prefix fronten
 PASS with the installed Chrome and process permission. Backend AgentArts/Local
 targeted tests 53 passed; full pytest 2474 passed, zero skipped; Ruff and git diff
 --check PASS. The unchanged default bundle retains its non-blocking 524 kB chunk
-warning. P14.7 Review PASS; P14 Final Review and Closure
-remain NOT_STARTED.
+warning. P14.7 Review PASS; Final Review REVIEW_PASS; Closure CLOSED_FROZEN.
+
+### P14 Closure - Frozen Frontend and Runtime Boundaries
+
+P14 Frontend + Runtime Invocation Compatibility is completed and CLOSED_FROZEN.
+P14.0-P14.7 are REVIEW_PASS; P14 Final Review is REVIEW_PASS; P14 Closure is
+CLOSED_FROZEN. P12/P13 remain CLOSED_FROZEN. P15 and P16 remain NOT_STARTED.
+
+Frozen scope includes the typed RuntimeInvocationClient, conversation/app shell,
+structured clarification and explicit APPROVE/REJECT, grounded result/evidence/
+source/PlanDiff presentation, real Local invocation, AgentArts-compatible trusted
+transport and cross-runtime frontend workflow parity. Both transports reuse the
+same P12.7 boundary, CompetitionCopilotAgent, LangGraph, CapabilityFacade and P4-P11
+authorities; P13 MCP remains an independent capability entrypoint.
+
+Frontend/transport never create business truth, human approval authority or PlanDiff.
+P12.5/P11 retain approval/mutation authority; cloud credentials stay server-side,
+session metadata grants no identity/authority, and continuations are not retried
+automatically. Source/evidence stays untrusted presentation data. Closure does not
+claim real-cloud certification, durable workflow storage or production hardening.
+P15 owns subsequent evaluation; P16 owns production deployment/IAM/security work.
 
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 

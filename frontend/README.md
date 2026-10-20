@@ -7,7 +7,9 @@ Agent invocation path or AgentArts-compatible trusted bridge, selected at the co
 The result panel presents supplied result artifacts, evidence, sources and PlanDiff.
 Trusted hosting retains scoped public continuation/artifact data. AgentArts transport
 compatibility is covered offline; real-cloud smoke and production deployment are not claimed.
-Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`.
+P14 Frontend + Runtime Invocation Compatibility is completed and CLOSED_FROZEN.
+Canonical lifecycle status: `docs/DEVELOPMENT_PLAN.md`. P15 evaluation and P16
+production deployment/hardening remain deferred.
 
 ## Toolchain and commands
 

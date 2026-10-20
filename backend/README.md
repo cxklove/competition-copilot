@@ -1,5 +1,10 @@
 # Backend
 
+P14 Frontend + Runtime Invocation Compatibility is completed and CLOSED_FROZEN;
+P12/P13 remain CLOSED_FROZEN. Local/AgentArts-compatible invocation shares the frozen
+runtime/core and business authorities. P15 evaluation and P16 production deployment/
+hardening remain deferred. Canonical lifecycle status: docs/DEVELOPMENT_PLAN.md.
+
 ## Local Agent Runtime development
 
 After installing the existing `agent` and development extras (no AgentArts SDK
@@ -1970,15 +1975,18 @@ official data unchanged, including attack, concurrency and exception cases.
 MCP Gates M/N cover final authority lineage and cross-entry consistency. No production
 code, dependency or install/run command changes. Real Gateway smoke NOT_RUN; no cloud
 deployment, durable session, MCP mutation or frontend support is claimed. P13 Final
-Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 baseline IN_PROGRESS.
+Review REVIEW_PASS; Closure CLOSED_FROZEN; P14 CLOSED_FROZEN.
 
 ## P14.0 Frontend & Runtime Invocation Compatibility Baseline
 
-P12/P13 remain CLOSED_FROZEN. P14 is IN_PROGRESS; P14.0 REVIEW_PASS.
-The frontend directory has documentation only; no app, runtime client, new endpoint
-or Local/AgentArts frontend connection is implemented. Inventory, actual contract
-fields, security boundaries, roadmap and Frontend Gates A-J are canonical in
-DEVELOPMENT_PLAN; `frontend/README.md` records the empty-directory baseline.
+P12/P13/P14 remain CLOSED_FROZEN; P14.0-P14.7 REVIEW_PASS;
+P14 Final Review REVIEW_PASS; P14 Closure CLOSED_FROZEN.
+The following inventory records the historical P14.0 baseline; completed frontend
+and runtime behavior is described above and in frontend/README.md.
+At that baseline the frontend directory had documentation only; no app, runtime
+client, new endpoint or Local/AgentArts frontend connection had been implemented.
+Inventory, actual contract fields, security boundaries, roadmap and Frontend Gates
+A-J were recorded in DEVELOPMENT_PLAN and the then-current frontend/README.md.
 
 Frontend's planned primary path is RuntimeInvocationClient -> Local/AgentArts
 transport -> existing P12 Runtime Adapter -> Agent/Graph -> Facade. MCP remains a

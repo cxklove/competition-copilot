@@ -1781,7 +1781,13 @@ workflow envelopes and transport metadata. Test data hashes guard official seed,
 policy and skill requirements; concurrency/context attacks retain input isolation.
 No production implementation, persistent state, cloud deployment or new dependencies.
 
-### Frontend and Runtime invocation boundary (P14 design baseline)
+### Frontend and Runtime invocation boundary (P14 frozen scope)
+
+P14 Frontend + Runtime Invocation Compatibility is completed and CLOSED_FROZEN.
+Runtime client, frontend/HITL/result presentation and Local/AgentArts-compatible
+invocation boundaries below are frozen for downstream use. P12/P13 remain frozen;
+P15 evaluation and P16 production deployment/hardening remain deferred. Canonical
+lifecycle status is maintained in DEVELOPMENT_PLAN.md.
 
 ```text
                          Frontend
@@ -1805,7 +1811,7 @@ No production implementation, persistent state, cloud deployment or new dependen
 MCP Client / AgentArts MCP Gateway -> MCP Server -> Registry -> Dispatcher -> same Facade
 ```
 
-P14 designs user-visible presentation and Runtime invocation compatibility. The MCP
+P14 provides user-visible presentation and Runtime invocation compatibility. The MCP
 boundary remains for structured capability consumers; frontend does not use tools/list
 or tools/call to replace the complete Agent/HITL workflow. Runtime mode selects a
 transport adapter, not separate Local/AgentArts business clients or UI semantics.
@@ -1821,7 +1827,7 @@ are client-controlled; core/server must revalidate request/interaction IDs and e
 Plan action/version/scope/actor. P12 contracts are not redesigned by this baseline.
 
 AgentResponse contains audit/result/PlanDiff refs, not every structured artifact body.
-Future authorized presentation projection at invocation composition must retain actual
+The P14.4/P14.5 presentation projection at invocation composition retains actual
 canonical receipts/evidence/sources/diffs without re-executing capabilities, inventing
 facts or assuming an existing artifact API. A missing artifact remains unavailable.
 Views can wrap/rename fields but cannot create another business truth contract.

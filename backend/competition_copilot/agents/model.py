@@ -15,11 +15,28 @@ from competition_copilot.agents.prompts import (
 from competition_copilot.agents.routing import IntentModelInput, IntentRoutingProposal
 
 
+def _structured_model(chat_model, schema, method):
+    if method not in (None, "json_schema", "function_calling", "json_mode"):
+        raise ValueError("INVALID_STRUCTURED_METHOD")
+    # Omit the option entirely to preserve the caller/provider's existing default.
+    options = {} if method is None else {"method": method}
+    structured = chat_model.with_structured_output(schema, **options)
+    if method == "json_mode":
+        # JSON mode supplies no schema to the provider. Include the same public
+        # output schema in its instructions; the returned data is still validated.
+        instruction = SystemMessage(content="Return JSON matching this OUTPUT SCHEMA: "
+                                    + json.dumps(schema.model_json_schema(), sort_keys=True))
+        from langchain_core.runnables import RunnableLambda
+
+        return RunnableLambda(lambda messages: [*messages, instruction]) | structured
+    return structured
+
+
 class LangChainIntentModel:
     """One structured model call, no capability binding or tool execution loop."""
 
-    def __init__(self, chat_model: BaseChatModel):
-        self._structured = chat_model.with_structured_output(IntentRoutingProposal)
+    def __init__(self, chat_model: BaseChatModel, *, structured_method: str | None = None):
+        self._structured = _structured_model(chat_model, IntentRoutingProposal, structured_method)
 
     def propose(self, value: IntentModelInput) -> IntentRoutingProposal:
         messages = [SystemMessage(content=INTENT_ROUTING_PROMPT),
@@ -29,8 +46,8 @@ class LangChainIntentModel:
 
 class LangChainHumanResponseInterpreter:
     """Optional clarification interpreter; approval uses no model inference."""
-    def __init__(self, chat_model: BaseChatModel):
-        self._structured = chat_model.with_structured_output(ClarificationResolutionProposal)
+    def __init__(self, chat_model: BaseChatModel, *, structured_method: str | None = None):
+        self._structured = _structured_model(chat_model, ClarificationResolutionProposal, structured_method)
 
     def clarify(self, message, question, options):
         payload = {"message": message.model_dump(mode="json"),
@@ -43,8 +60,8 @@ class LangChainHumanResponseInterpreter:
 
 class LangChainExplanationModel:
     """Optional injected model; schema-constrained composition, no tool binding."""
-    def __init__(self, chat_model: BaseChatModel):
-        self._structured = chat_model.with_structured_output(ExplanationDraft)
+    def __init__(self, chat_model: BaseChatModel, *, structured_method: str | None = None):
+        self._structured = _structured_model(chat_model, ExplanationDraft, structured_method)
 
     def explain(self, context: ExplanationContext) -> ExplanationDraft:
         projection = context.model_dump(mode="json")

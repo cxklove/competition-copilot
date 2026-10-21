@@ -3,6 +3,8 @@
 import json
 import unicodedata
 
+from pydantic import AwareDatetime, TypeAdapter
+
 from competition_copilot.agents.contracts import (
     AgentContext,
     AgentIntent,
@@ -22,10 +24,13 @@ from competition_copilot.agents.human_contracts import (
     HumanMessage,
 )
 from competition_copilot.agents.state import AgentState
+from competition_copilot.application.instruction_preparation import PlanRevisionProposal
 from competition_copilot.domain.replanning import PlanReference
 from competition_copilot.domain.replanning_input import (
+    AuthorizedScopeResolution,
     ReplanningInput,
     RevisionAuthority,
+    UpdatePlanStatusInstruction,
     replanning_decision_fingerprint,
 )
 
@@ -161,8 +166,11 @@ def _ref(kind, value):
     return ResultReference(kind=kind, ref_id=value)
 
 
-def prepare_approval(source: ReplanningInput, request, invocation, *, approval_request_id, created_at):
+def prepare_approval(source: ReplanningInput | PlanRevisionProposal, request, invocation, *, approval_request_id, created_at):
     """Project an existing formal caller proposal, never manufacture prior authority."""
+    if isinstance(source, PlanRevisionProposal):
+        return _prepare_proposed_approval(source, request, invocation,
+            approval_request_id=approval_request_id, created_at=created_at)
     source = ReplanningInput.model_validate(source)
     if source.status != "executable" or source.decision.outcome != "replan":
         raise ValueError("Only executable REPLAN operations request mutation approval")
@@ -192,6 +200,38 @@ def prepare_approval(source: ReplanningInput, request, invocation, *, approval_r
         audit=audit, created_at=created_at)
 
 
+def _prepare_proposed_approval(source, request, invocation, *, approval_request_id, created_at):
+    """Project authority-free preparation into the unchanged public approval type."""
+    source = PlanRevisionProposal.model_validate(source)
+    reference = source.operation.expected_plan
+    if (invocation is None or invocation.capability != "revise_plan" or not invocation.requires_approval
+        or invocation.intent != "REQUEST_PLAN_REVISION"
+        or invocation.source_request_id != request.request_id):
+        raise ValueError("Approval must bind the exact mutating request/invocation")
+    if request.context.plan_ref != reference or created_at < source.prepared_at:
+        raise ValueError("Proposal must bind exact Plan and explicit preparation time")
+    for key, expected in (("student_id", reference.student_id),
+                          ("competition_id", reference.target.competition_id),
+                          ("edition_id", reference.target.edition_id),
+                          ("track_id", reference.target.track_id)):
+        supplied = getattr(request.context, key)
+        if supplied is not None and supplied != expected:
+            raise ValueError("Approval context identity mismatch")
+    decision_ref = _ref("REPLANNING_DECISION", source.operation.source_decision_fingerprint)
+    refs = (decision_ref, _ref("EVIDENCE", source.id + "#/decision/impacts"),
+            *(_ref("EVENT", event_id) for event_id in source.decision.trigger_event_ids))
+    audit = AuditReferences(results=refs, reasons=tuple(ReasonReference(result=decision_ref,
+        reason_code=reason.value) for reason in source.decision.reason_codes))
+    return ApprovalRequest(approval_request_id=approval_request_id, source_request_id=request.request_id,
+        invocation_id=invocation.invocation_id, action="PLAN_REVISION", before_plan=reference,
+        summary=f"{source.policy_id}: Plan {reference.plan_id}, version {reference.version}: "
+                f"status {source.operation.before_value.value} -> {source.operation.after_value.value}",
+        decision_ref=decision_ref, affected_scope_ref=_ref("AFFECTED_SCOPE", source.id + "#/decision/scope"),
+        proposed_input_ref=_ref("REPLANNING_INPUT", source.id),
+        instruction_refs=(_ref("REVISION_INSTRUCTION", source.operation.id),),
+        audit=audit, created_at=created_at)
+
+
 def validate_pending_revision(pending, source, request, invocation):
     """Shared entry/resume preconditions: executable REPLAN and exact binding.
 
@@ -215,15 +255,34 @@ def validate_explicit_approval(pending, response, source, request, invocation, c
 
 
 def build_approved_replanning_input(pending, response, source, request, invocation, *,
-                                    current_plan, approved_by_ref):
+                                    current_plan, approved_by_ref, executed_at=None):
     """Rebind authority and its dependent IDs only; P11 validates all semantics."""
+    if isinstance(source, PlanRevisionProposal):
+        source = PlanRevisionProposal.model_validate(source)
+        response = ApprovalResponse.model_validate(response)
     validate_explicit_approval(pending, response, source, request, invocation, current_plan)
     if response.decision != "APPROVE" or not approved_by_ref:
         raise ValueError("Explicit APPROVE and trusted caller actor are required")
+    if isinstance(source, PlanRevisionProposal):
+        if executed_at is None or TypeAdapter(AwareDatetime).validate_python(executed_at) < response.submitted_at:
+            raise ValueError("Explicit execution time must follow approval")
     authority = RevisionAuthority(kind="human_approved", approval_ref=pending.approval_request_id,
         approved_by_ref=approved_by_ref,
         instruction_source_ref=pending.approval_request_id + "/response/" + response.submitted_at.isoformat(),
         approved_at=response.submitted_at)
+    if isinstance(source, PlanRevisionProposal):
+        instruction = UpdatePlanStatusInstruction(operation=source.operation.operation,
+            source_decision_fingerprint=source.operation.source_decision_fingerprint,
+            expected_plan=source.operation.expected_plan, original_scope=source.decision.scope,
+            expected_before_status=source.operation.before_value,
+            desired_after_status=source.operation.after_value, authority=authority)
+        resolution = AuthorizedScopeResolution(expected_plan=source.operation.expected_plan,
+            source_decision_fingerprint=source.operation.source_decision_fingerprint,
+            original_scope=source.decision.scope, status="complete", coverage="cancel_target_removed_plan",
+            instruction_ids=(instruction.id,), authority=authority)
+        return ReplanningInput(before=source.before, decision=source.decision,
+            supplied_at=response.submitted_at, status="executable",
+            plan_status_instruction=instruction, scope_resolution=resolution)
     updates = tuple(type(i)(**{**i.model_dump(), "authority": authority}) for i in source.instructions)
     status = source.plan_status_instruction
     if status is not None:

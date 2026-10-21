@@ -19,6 +19,13 @@ library ThreadingHTTPServer. `--port 0` chooses an available loopback port and p
 its URL. `--origin http://127.0.0.1:5173` selects an exact development browser origin
 (repeatable); defaults are 127.0.0.1/localhost:5173. The frontend Vite same-origin
 proxy is the normal development path; see frontend README and `.env.example`.
+Direct browser connections also support CORS using the same exact `--origin`
+allowlist: OPTIONS /runtime/invoke permits POST with Content-Type and returns 204
+without invoking the runtime. Allowed-origin POST responses and public errors
+include the matching Access-Control-Allow-Origin and Vary: Origin. Forbidden origins
+receive no allow-origin header; wildcard origins and credentialed CORS are not enabled.
+No-Origin non-browser POST behavior is unchanged. Restart the Local server after
+updating the HTTP adapter before browser re-smoke.
 
 The transport adapter calls the existing SDK-free P12.7 AgentArtsRuntimeAdapter,
 which enters CompetitionCopilotAgent/LangGraph/the same Capability Facade and real
@@ -48,6 +55,218 @@ from repository root. Frontend `npm run test:local --prefix frontend` launches a
 temporary loopback server and closes it afterwards. External LLM/network/cloud are
 not required. AgentArts-compatible invocation is described below; production auth/deployment/hardening
 and durable storage remain P16.
+
+## Independent Local Demo - optional provider-neutral cloud LLM
+
+This demo wiring is separate from P15, which remains NOT_STARTED. P5-P11 truth,
+P12 contracts/grounding/approval authority and P14 frontend/runtime contracts are
+unchanged. Only backend Local composition can opt into a provider. The existing
+offline Local/AgentArts compatibility harnesses still use deterministic models.
+
+### Offline Local Demo (default)
+
+After installing the existing Agent/development dependencies, start from root:
+
+```powershell
+.\backend\.venv\Scripts\python -m competition_copilot.integrations.local_runtime
+```
+
+The existing `scripts/run_local_runtime.py` command is equivalent. With no mode
+environment variable, startup is offline even if OPENAI_API_KEY exists. To return
+from a cloud demo explicitly, set COMPETITION_COPILOT_LLM_MODE=offline. Offline
+startup does not import/construct langchain-openai or require an API credential.
+Both modes use the same loopback endpoint and port/origin flags.
+
+### Cloud LLM Local Demo (explicit opt-in)
+
+Install the optional provider overlay without upgrading frozen Agent dependencies:
+
+```powershell
+.\backend\.venv\Scripts\python -m pip install -r backend/requirements-cloud-llm.lock
+.\backend\.venv\Scripts\python -m pip install --no-deps --no-build-isolation -e ".\backend[agent,cloud-llm,dev]"
+.\backend\.venv\Scripts\python -m pip check
+```
+
+The overlay pins langchain-openai 1.7.2, whose published requirement accepts the
+unchanged langchain-core 1.6.10; LangGraph remains 1.2.15. ChatOpenAI is the only
+provider entry. No application code calls the bare OpenAI SDK. Its SDK is an
+ordinary transitive provider dependency. Existing Agent/AgentArts locks are unchanged.
+
+Backend process configuration (not frontend/public configuration):
+
+| Variable | Meaning |
+|---|---|
+| COMPETITION_COPILOT_LLM_MODE | offline by default; cloud is explicit opt-in |
+| COMPETITION_COPILOT_LLM_PROVIDER | openai (default), bigmodel or deepseek only |
+| COMPETITION_COPILOT_LLM_MODEL | Required in cloud mode; an accessible model supporting the selected output method |
+| COMPETITION_COPILOT_LLM_BASE_URL | Optional explicit HTTPS API base path on the selected provider's official origin; blank uses the default below |
+| COMPETITION_COPILOT_LLM_STRUCTURED_METHOD | json_schema, function_calling or json_mode; blank uses the provider default below |
+| COMPETITION_COPILOT_LLM_INTENT_STRUCTURED_METHOD | Intent-only override; blank selects BigModel json_mode, otherwise inherits the generic method |
+| COMPETITION_COPILOT_LLM_INTENT_TEMPERATURE | Intent-only temperature; finite number strictly between 0 and 1; blank selects BigModel 0.1, otherwise retains provider default |
+| COMPETITION_COPILOT_LLM_TIMEOUT_SECONDS | Per-model-call timeout, default 30; finite and greater than zero, at most 120 |
+| COMPETITION_COPILOT_LLM_API_KEY | Selected provider's backend-only API credential; required in cloud mode |
+| OPENAI_API_KEY | Backward compatible fallback for openai only if the unified key is unset (not blank); never used for BigModel/DeepSeek |
+
+Provider defaults (model IDs remain operator configuration, never business code):
+
+| Provider | Base URL | Intent method / temperature | Explanation and clarification method |
+|---|---|---|---|
+| openai | https://api.openai.com/v1 | Existing ChatOpenAI default / provider default | Existing ChatOpenAI default |
+| bigmodel | https://open.bigmodel.cn/api/paas/v4/ | json_mode / 0.1 | function_calling |
+| deepseek | https://api.deepseek.com | function_calling / provider default | function_calling |
+
+OpenAI Example: select `openai`; leave base URL and structured method unset/blank
+to retain the existing official configuration. BigModel Example: select `bigmodel`
+and an accessible GLM model supporting JSON mode and Tool Calling. DeepSeek Example:
+select `deepseek` and an accessible Tool Calling model. BigModel Intent uses JSON
+mode with the existing IntentRoutingProposal schema instructions and Pydantic
+validation, without depending on an optional tool call. Intent-only temperature
+0.1 uses a separate ChatOpenAI client configuration; constructing two clients does
+not invoke either model. Explanation/clarification keep their original temperature.
+The generic STRUCTURED_METHOD continues to configure explanation/clarification.
+For BigModel, only INTENT_STRUCTURED_METHOD overrides the intent default, so an
+existing generic function_calling setting cannot accidentally restore the old intent
+failure path. For OpenAI/DeepSeek, intent inherits generic settings unless explicitly
+overridden; their existing defaults remain unchanged.
+
+The intent prompt distinguishes a known requested task from missing business context:
+participation-eligibility questions select CHECK_ELIGIBILITY / check_eligibility,
+with missing profile/competition/edition fields handled by the existing validator.
+No model decides eligibility truth. The frozen graph may still expose intent UNKNOWN
+while clarification is pending; verify the proposal and requested business fields,
+not that public intent field alone. Missing context must not request INTENT merely
+because a competition/student/edition was not provided.
+Hard admission/registration questions select CHECK_ELIGIBILITY. Personal suitability,
+comparison, recommendation and preparation priority select GET_RECOMMENDATIONS.
+When a request combines eligibility with recommendation/priority, recommendation
+takes precedence: the existing Local workflow prepares real P5 eligibility through
+the Facade before P6 scoring/ranking. Such a subsumed prerequisite does not make
+the request ambiguous or MULTI_STEP. Truly independent operations retain the existing
+ambiguity policy. This prompt policy does not change Domain scoring or validator rules.
+
+BigModel explanation/clarification and DeepSeek still use Function/Tool Calling by
+default, not OpenAI json_schema response format. BigModel documents auto-only tool choice;
+DeepSeek thinking mode also rejects forced tool choice. Both therefore omit forced
+tool choice and parallel-tool options. A missing/invalid tool response fails closed
+(or uses the existing grounded explanation fallback), without a second model call.
+Tool schemas describe untrusted proposals/drafts only; they execute no business tools.
+An explicit json_mode adds the same public output schema as JSON instructions;
+all three methods still apply the existing Pydantic model validation.
+
+The CLI reads process environment; backend/.env.example is a reference, not an
+automatically loaded secrets file. Enter a model ID available to your provider account.
+The following PowerShell startup avoids printing the key or placing it in history:
+
+```powershell
+$env:COMPETITION_COPILOT_LLM_MODE = 'cloud'
+$env:COMPETITION_COPILOT_LLM_PROVIDER = Read-Host 'Provider: openai, bigmodel or deepseek'
+$env:COMPETITION_COPILOT_LLM_MODEL = Read-Host 'Accessible structured-output/Tool Calling model ID'
+# Clear overrides when switching providers; the matching safe defaults apply.
+Remove-Item Env:COMPETITION_COPILOT_LLM_BASE_URL -ErrorAction SilentlyContinue
+Remove-Item Env:COMPETITION_COPILOT_LLM_STRUCTURED_METHOD -ErrorAction SilentlyContinue
+Remove-Item Env:COMPETITION_COPILOT_LLM_INTENT_STRUCTURED_METHOD -ErrorAction SilentlyContinue
+Remove-Item Env:COMPETITION_COPILOT_LLM_INTENT_TEMPERATURE -ErrorAction SilentlyContinue
+$env:COMPETITION_COPILOT_LLM_TIMEOUT_SECONDS = '30'
+$demoSecret = Read-Host 'Selected provider API key (backend process only)' -AsSecureString
+try {
+    $env:COMPETITION_COPILOT_LLM_API_KEY = [System.Net.NetworkCredential]::new('', $demoSecret).Password
+    .\backend\.venv\Scripts\python -m competition_copilot.integrations.local_runtime
+} finally {
+    Remove-Item Env:COMPETITION_COPILOT_LLM_API_KEY -ErrorAction SilentlyContinue
+    $demoSecret.Dispose()
+}
+```
+
+Start the frontend from a separate terminal using its existing LOCAL-mode setup:
+`npm run dev --prefix frontend`. Browser code/config never receives the key.
+Startup prints only the loopback URL, LLM mode and model name. Missing credentials,
+invalid configuration or unavailable provider fail fast with sanitized codes.
+ChatGPT subscription is not an OpenAI API credential; use an API project/key and
+its separate API usage/billing. No live provider invocation is part of required tests.
+
+### Model and authority boundaries
+
+Cloud mode constructs ChatOpenAI with the selected provider's official endpoint,
+configured model/timeout and max_retries=0. The app-owned BASE_URL option accepts
+only the selected official HTTPS origin (no userinfo/query/fragment or alternate
+port), so credentials cannot be redirected across providers. Generic OPENAI_BASE_URL
+is ignored. Changing provider never changes request/Domain/approval contracts. Neither
+transport nor model invocation automatically retries a failed/unknown execution.
+
+Each initial request uses LangChainIntentModel once. The resulting typed untrusted
+proposal is admitted through the existing P12 routing catalog/validator, used to
+prepare arguments solely from explicit caller/server context, then reused by the
+same graph. The final P12 validator still authorizes routing with the completed
+payload. There is no second graph/model route, new business validator or inferred
+target ID. A failed intent model produces the normal sanitized P12 failure.
+
+Cloud model missing_context is advisory, never input-existence authority. The
+prepared boundary validates the typed proposal, then normalizes missing_context
+to an empty tuple before both preflight and graph validation. Intent, capability,
+ambiguity and asserted targets remain unchanged. The existing validator derives
+required missing fields from the published input schema and actual prepared
+arguments/bindings. It still rejects asserted target conflicts and clarifies genuine
+intent ambiguity. No P12 contract or validator changes are needed.
+
+An existing local-unknown StudentProfile with unknown education attributes is
+present input, so P5 decides its unknown eligibility result. An unresolvable profile
+ID contributes no invented StudentProfile; existing local bindings leave the required
+student input absent and request STUDENT_PROFILE. Complete local-graduate context
+executes P5 even when the model claims STUDENT_PROFILE is missing.
+The Local server loads Python modules at startup and does not auto-reload changes.
+After updating demo wiring, stop it with Ctrl+C and restart the documented command
+before re-smoke. Restarting discards ephemeral pending workflows; begin a new request
+rather than replaying an old continuation. Check the launched environment/source path
+if an older process still reports a profile missing with otherwise complete context.
+
+Structured clarification continues through existing P12 resolution. The normalized
+prepared proposal is reused without another intent LLM call; core validates the
+accepted clarification fields and arguments. LangChainHumanResponseInterpreter handles language only
+against caller-owned P4 competition read choices and P12's exact-label validation.
+Unknown/ambiguous choices remain unresolved; other fields use structured input.
+The current frozen frontend continues to show structured clarification controls;
+this does not introduce a natural-language approval UI or a new continuation contract.
+
+LangChainExplanationModel receives only the existing authoritative explanation
+projection/evidence/source data. P12.6 validates the draft and retains its grounded
+fallback on invalid output/model failure. Eligibility, scores, skill gaps, planning,
+replanning and PlanDiff still come from P5-P11. Approval never invokes a language
+interpreter: explicit typed APPROVE/REJECT and P12.5/P11 remain authoritative.
+
+Required offline checks:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_model_context_authority.py backend/tests/integration/test_bigmodel_intent.py backend/tests/integration/test_local_llm_providers.py backend/tests/integration/test_local_cloud_llm.py backend/tests/integration/test_local_runtime.py
+.\backend\.venv\Scripts\python -m pytest
+.\backend\.venv\Scripts\python -m ruff check .
+```
+
+Cloud wiring tests use a fake BaseChatModel plus real core/Domain services and block
+external sockets. Frontend regression subprocesses explicitly select offline even
+when the calling demo shell has cloud mode set. Tests never need a real API key.
+Manual cloud smoke is optional: use the secure startup above with the selected
+provider, then submit discovery and eligibility requests through the normal LOCAL
+frontend. Check the authoritative structured results, clarification and typed approval
+controls. This intentionally makes billable external calls only after operator opt-in;
+no required pytest or CI job runs it. Account/model access must be checked by the
+demo operator; offline compatibility tests do not certify live account availability.
+BigModel re-smoke should repeat both discovery and eligibility prompts, recording
+structural failures separately from wrong-intent/INTENT-field clarifications. The
+scripted offline responses verify prompt delivery, parsing and core behavior; they
+do not measure a real model's semantic accuracy. Invalid JSON/proposals still fail
+closed with sanitized INTENT_MODEL_FAILED, with no retry or OfflineIntentModel fallback.
+Never place credentials in VITE_/NEXT_PUBLIC_ variables,
+fixtures, logs, URLs, screenshots or checked-in files. Explicit cloud mode sends
+the request/context and authoritative result projections to the selected provider for the requested
+intent/clarification/explanation calls; use the supplied synthetic local demo data.
+
+References: [OpenAI authentication](https://developers.openai.com/api/reference/overview),
+[LangChain ChatOpenAI](https://docs.langchain.com/oss/python/integrations/chat/openai),
+[provider package metadata](https://pypi.org/project/langchain-openai/1.7.2/),
+[BigModel OpenAI compatibility](https://docs.bigmodel.cn/cn/guide/develop/openai/introduction),
+[BigModel Tool Calling](https://docs.bigmodel.cn/cn/guide/capabilities/function-calling),
+[DeepSeek API](https://api-docs.deepseek.com/),
+[DeepSeek Tool Calling](https://api-docs.deepseek.com/guides/tool_calls/).
 
 ## AgentArts invocation transport compatibility
 
@@ -2233,3 +2452,223 @@ projection requires trusted hosting/authorization in P14.5; it does not expose t
 current internal P12 GraphInput output to browsers. AgentResponse refs remain refs;
 no new business result/evidence bodies are fabricated. Frontend commands and error,
 config, cancellation and continuation contracts are documented in frontend/README.md.
+
+
+## Multi-candidate recommendation assembly
+
+`application/recommendation.py` owns `RecommendationContextAssembler`, shared
+Application orchestration over the abstract formal CompetitionRepository and a
+P5 evaluator. It enumerates every formal edition (there is no current/latest
+edition policy), uses edition-level alternatives, retains the exact optional
+anchor including its explicit track, deduplicates and sorts by
+`(competition_id, edition_id, track_id or "")`. No raw ingestion candidates or
+model-generated competitions enter this collection.
+
+Local Runtime calls this assembler through a thin Facade P5 bridge with distinct
+invocation/argument/result references per candidate, then invokes P6 once with
+all contexts. The AgentArts-compatible demo uses the same host composition.
+P5 UNKNOWN is retained; a failed prerequisite aborts assembly, without partial
+ranking or an invented UNKNOWN. A blocked anchor does not stop alternatives.
+The P6 identity guard admits a complete anchor as batch membership only for
+multi-candidate get_recommendations; student identity, internal target coherence,
+and all plan/approval paths retain their guards. No public schema changes.
+
+The demo wires one real presence-only component, verified-skill-overlap-v1,
+with the sole component's default weight 1.0. Existing aggregation and bucket
+policies remain unchanged. Original profiles without explicit skill records
+still have unavailable soft scores; the separate recommendation fixture can
+produce evidence-backed partial skill overlap. No other soft signals are scored.
+
+Targeted verification from repository root:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/application/test_recommendation_assembler.py backend/tests/integration/test_multi_candidate_recommendation.py
+```
+
+
+## Verified skill route: recommendation data foundation
+
+The reviewed skill route combines exact-target requirement facts with explicit
+StudentProfile.skills. Data artifacts themselves contain no score. The first
+component built on this foundation is documented below; P5 truth and the existing
+P6 aggregation/bucket/missing-signal semantics remain unchanged.
+
+`data/local_runtime/recommendation_demo.json` supplies the additive, synthetic
+`local-recommendation-demo` profile and a four-edition curated audit set (GCXL,
+COMAP, C4 and China Graduate Mathematical Modeling). Runtime candidate expansion
+continues to use the full formal repository, not this audit set. The original
+three demo profiles retain their exact facts. Non-skill profile fields are not
+scoring inputs. Requirement membership must come from independently reviewed
+source-backed artifacts, with PARTIAL coverage and null thresholds where the
+source does not define proficiency. Drafts in data/review are never loaded by
+the formal requirement provider.
+
+RecommendationContext.skill_requirements is optional and defaults to None.
+Application prepares an immutable RecommendationSkillRequirements containing
+requirement_version and the existing SkillRequirementSet (which already owns
+target, coverage and evidence). Both Application and Context check exact target
+binding; no edition-to-track inheritance occurs. The provider version and lookup
+facts must agree. Domain performs no IO. P7 diagnosis is not converted to a score.
+
+Data-foundation verification from repository root:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_recommendation_data_foundation.py
+```
+
+
+The approved skill-route snapshot currently covers COMAP 2027, C4 2026 and
+China Graduate Mathematical Modeling 2026: 3/4 curated editions, 3/12 formal
+editions, all PARTIAL and with unspecified proficiency. GCXL remains unavailable.
+The new stable Skill ID is machine-learning-modeling; mathematical-modeling is
+reused unchanged. The review record and official source references live in
+`data/review/p6-skill-route/README.md`. The demo has mathematical-modeling only,
+so exact-ID presence overlaps two curated sets and is absent from the C4 set;
+absence means unknown student capability, never zero proficiency or a score.
+All four curated demo P5 results remain UNKNOWN. This data snapshot enables
+future policy work but does not make confirmed eligibility or ranking claims.
+
+
+## Verified skill overlap V1
+
+`domain/verified_skill_overlap.py` implements the sole real component:
+component_id and policy_version are `verified-skill-overlap-v1`. It returns 1.0
+only when every currently verified official REQUIRED skill has an exact profile
+record with a non-UNKNOWN level and all REQUIRED thresholds are unspecified.
+BEGINNER counts as explicit presence; it never proves sufficient proficiency.
+DESIRED requirements are not scored. Absent requirements, no verified REQUIRED
+facts, absent/UNKNOWN profile skill or any non-null REQUIRED threshold produce
+None, never zero. It does not compare levels or infer a missing skill's ability.
+
+`unavailability_reason(context)` exposes stateless policy diagnostics, including
+SKILL_LEVEL_POLICY_UNSUPPORTED for non-null thresholds. The unchanged scorer
+protocol returns Component | None; the unchanged aggregation engine records its
+existing SOFT_SIGNAL_UNAVAILABLE / NO_ACTIVE_SOFT_SIGNALS audit for None. No
+exception, invented component or mutable diagnostic state is used for absence.
+
+Positive component evidence retains policy and requirement versions, exact
+candidate identity, coverage, each matched skill ID, original verified presence
+evidence, and actual profile level/self_assessed/note facts. Self-assessment is
+not external verification. Coverage currently is 3/12, all PARTIAL: 1.0 is only
+recorded-ID overlap over current verified REQUIRED facts, not eligibility, overall
+fit, complete requirements satisfaction, proficiency sufficiency or win probability.
+
+For local-recommendation-demo, COMAP and China Graduate Mathematical Modeling
+receive 1.0 in uncertain; C4 and GCXL receive None. The original eligibility and
+eligibility_buckets_score_desc_target_id_v1 ranking policies remain authoritative.
+Existing tie order places China Graduate Mathematical Modeling before COMAP,
+followed by unavailable scores. No confirmed promotion, retry, fallback or second
+component is introduced. Restart Local Runtime to load current composition.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/domain/test_verified_skill_overlap.py backend/tests/application/test_recommendation_skill_preparation.py backend/tests/integration/test_verified_skill_recommendation.py
+```
+## Local profile evidence preparation
+
+`data/local_runtime/recommendation_demo.json` explicitly declares the demo
+student's self-assessed skill evidence. Application's
+`prepare_student_skill_evidence` validates its student/skill identity, actual
+level and self-assessment before Local Runtime passes the existing `Evidence`
+objects into P7 and P8's P7 prerequisite. Student facts have `source=None` and
+retain `self_assessed=true`; they are simulated profile declarations, not
+externally verified abilities. Missing declarations are never synthesized.
+P7's known-skill evidence completeness protection and unknown-threshold/partial
+coverage semantics remain unchanged. Restart Local Runtime to load fixture edits.
+
+## Session plan registry and explicit selection
+
+Application `PlanRegistry` defines full-plan registration, exact-reference
+resolution, current-head lookup and atomic compare-and-swap replacement with
+retained PlanDiff/history. The Local Runtime `InMemoryPlanRegistry` adapter
+stores both the controlled fixture and successful P8 generated plans. No Domain
+service performs persistence. Duplicate canonical registration is idempotent;
+conflicting content/version under an existing ID rejects. Historical IDs remain
+resolvable and point to their lineage's current head for stale checks.
+
+The frontend offers generated plans only when validated CompetitionPlan artifacts
+match server-supplied `plan_refs`. Select a plan explicitly in the context area;
+no plan is selected automatically. The browser retains only references and display
+metadata, never recalculates digest/version and never supplies plan bodies for
+registration. Selection does not approve or create a revision proposal.
+
+Generated COMAP plans have no target-consistent executable ReplanningInput yet.
+A revision attempt with a valid selected reference returns existing runtime error
+category `CORE_VALIDATION_ERROR` with the public message
+`NO_TARGET_CONSISTENT_REPLANNING_INPUT`. No event, impact or instruction is fabricated.
+The controlled fixture APPROVE/REJECT path continues through existing P12/P11
+guards. Replacement retains the full before/after and authoritative PlanDiff.
+
+Storage is per host and in memory: new requests share registered plans; server
+restart discards generated plans/history and restores the controlled fixture.
+Page reload loses frontend choices. Old browser references after server restart
+fail closed; regenerate/reselect. Production persistence is outside this demo.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_plan_registry.py backend/tests/integration/test_local_runtime.py
+```
+
+## Instruction preparation policy V1
+
+Application `TargetTrackRemovedCancellationPolicy` returns a typed authority-free
+`PlanRevisionProposal` for `target-track-removed-cancel-v1`, or typed UNSUPPORTED
+with `NO_SUPPORTED_INSTRUCTION_POLICY`. It proposes draft/active -> cancelled only
+for exact target-track removal, a known whole-plan REPLAN and no unresolved impact.
+The proposal retains original Plan/Decision/Event lineage and policy version.
+An edition-level Event is not an exact track-level match for this policy.
+
+`prepare_approval` and `build_approved_replanning_input` support this proposal in
+addition to their existing compatibility path. The new path requires explicit
+APPROVE, trusted server-supplied `approved_by_ref`, current exact PlanReference and
+execution time. Before approval and on REJECT there is no executable instruction
+or invented human authority. The unchanged P11 executor consumes the authorized
+input after the bridge. Pure helpers do not replace runtime authentication,
+single-use continuation, host lock or registry CAS.
+
+The policy/bridge is independently testable. The generated Huawei composition
+described below reuses it without changing preparation or authorization rules.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/application/test_instruction_preparation.py backend/tests/integration/test_prepared_instruction_approval.py
+```
+
+## Generated Huawei same-plan local demo
+
+After independent acceptance of the policy, the same-plan path is now composed
+through Application `ControlledPlanRevisionPreparer`. Generate a plan using:
+student `local-recommendation-demo`, competition `huawei-ict`, edition
+`huawei-ict-2026`, track `huawei-ict-2026-innovation`. Missing reviewed requirements
+are explicitly prepared as MISSING; P7/P8 preserve uncertainty-resolution needs.
+No Huawei skill requirement is invented.
+
+Select that generated plan explicitly and request revision. The preparer reads
+the separately declared `CONTROLLED DEMO OBSERVATION` in
+`data/local_runtime/generated_huawei_observation.json`, checks its before-membership
+against the Repository-backed `CompetitionSnapshotBuilder` baseline, and constructs
+new exact-track manual before/after snapshots from the explicit observation.
+This does not relabel an edition-level official Event or weaken the baseline
+builder's edition-only guard. Unchanged windows retain their baseline provenance;
+the changed membership carries only the manual demo source.
+`SnapshotDiffEngine` and `CompetitionEventEngine` derive new lineage/identity,
+then the real impact analyzer and Decision service feed the accepted
+`target-track-removed-cancel-v1` policy. Local composition contains no cancellation rule.
+Complete manual snapshot/Diff/Event/Impact/Decision preparation bundles are retained
+in memory for the host lifetime; approved PlanDiff/history stays in PlanRegistry.
+
+The graph holds the authority-free proposal in a private typed preparation channel,
+with a strictly bound before-only argument artifact. No executable ReplanningInput
+is constructed until explicit APPROVE via the existing authority bridge. REJECT
+does not invoke P11; APPROVE executes P11 once and CAS-updates the generated plan's
+lineage. Public P12/P14 envelopes and Domain execution rules are unchanged.
+
+**This is not a real Huawei announcement or official track deletion.** The manual
+source's `verified` status validates the synthetic scenario input for the existing
+observation contract; it does not verify a real-world change. The original
+`controlled_revision.json` remains a separate low-level regression scenario.
+COMAP and other targets without matching executable preparation still fail closed.
+Restart Local Runtime to load this composition; generated state is not durable.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_generated_huawei_replanning.py
+cd frontend
+npm run test:local
+```

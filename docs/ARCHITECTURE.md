@@ -2955,3 +2955,174 @@ P12.7 overlay. Native transitive packages
 wheels in a binary-only resolver dry-run. That is wheel availability evidence, not Linux
 execution/image/runtime certification; environment markers and container tests remain
 Gate F DEFERRED. Core lock/Domain signatures remain frozen and framework-independent.
+
+
+### Shared recommendation candidate assembly
+
+Application `RecommendationContextAssembler` reads only the formal repository,
+enumerates all editions without guessing a latest edition, adds the exact anchor,
+and produces stable deduplicated P6 contexts. Alternatives are edition-level;
+only an explicit anchor carries a track. Each context contains a real P5
+EligibilityDecision; prerequisite execution failure fails closed. One P6 call
+owns filtering, scoring and ranking of the entire collection. Local and
+AgentArts-compatible demo composition share this assembler and authority path;
+P13 MCP remains a separate entrypoint with its existing capability exposure.
+
+A complete recommendation anchor constrains membership in a multi-candidate
+batch, rather than forcing all alternatives to share its competition/edition.
+This exception is scoped to get_recommendations, retains the exact anchor and
+single-student/internal-identity checks, and does not relax plan/approval scope.
+The request and public runtime schemas remain unchanged.
+
+The demo now wires exactly one deterministic presence-only skill component,
+verified-skill-overlap-v1, over reviewed prepared facts. Missing signals remain
+None. Eligibility buckets, weighted-average-v1 and stable identity tie ordering
+remain authoritative P5/P6 rules. Frontend renders returned facts without scoring
+or interpreting a 1.0 overlap as overall suitability.
+
+
+### Verified skill route data foundation
+
+Recommendation's first proposed concrete matching route uses reviewed exact-target
+skill requirement facts and explicit StudentProfile.skills. Data enrichment does
+not implement suitability scoring, weights or a scoring-policy version. A separate
+synthetic local recommendation profile is additive; existing demo profiles and
+P5/P6 authorities remain unchanged. Curated candidate identities define a small
+data-review/test set and do not replace full-repository candidate expansion.
+
+`RecommendationContext.skill_requirements` is an optional, default-None
+`RecommendationSkillRequirements` immutable snapshot of requirement_version and
+SkillRequirementSet. The existing set already owns target, coverage and evidence;
+only version needs the minimal wrapper. Application queries the abstract provider,
+binds the exact returned set to its artifact version, and prepares candidate-bound
+facts. Both Application and Context reject identity mismatch. Old contexts without
+requirements retain their missing-signal behavior. No raw JSON or IO enters scorer.
+
+### Verified skill overlap V1 component
+
+`domain/verified_skill_overlap.py` defines policy/component ID
+`verified-skill-overlap-v1`. Every currently verified official REQUIRED skill must
+have an exact, explicitly non-UNKNOWN StudentProfile record, and every REQUIRED
+threshold must be null, to return 1.0. DESIRED facts do not contribute. Missing
+requirements, unavailable verified REQUIRED facts, missing/UNKNOWN student skill,
+or unsupported non-null thresholds return None, never zero or inferred inability.
+The scorer's stateless unavailability_reason exposes policy diagnostics; the
+existing Component | None protocol and engine missing-signal audit are unchanged.
+
+The one default weight is 1.0; weighted-average-v1, threshold and ranking policy
+are unchanged. INELIGIBLE bypasses scoring; UNKNOWN plus 1.0 remains uncertain.
+Evidence retains source facts, exact target, requirement/policy versions, matched
+IDs, PARTIAL coverage and actual self-assessed profile facts. Current coverage is
+3/12 formal editions, all PARTIAL. This evidence-backed partial soft signal does
+not establish proficiency satisfaction, overall fit, complete requirement coverage,
+eligibility or winning probability. Domain never queries files/Repository/Provider.
+
+Local and AgentArts-compatible paths share this preparation and component.
+No interest/goal/major/time component, LLM inference, retry, approval change or
+Frontend computation is introduced. P13 remains a separate capability entrypoint.
+## Local demo student evidence boundary
+
+Local fixture declarations bind a student ID and exact skill ID to canonical
+`Evidence` field/value facts and explicit self-assessment metadata. Application
+preparation validates and forwards only supplied declarations; Local Runtime
+injects them into `SkillGapContext` for P7 and P8's P7 prerequisite. Domain does
+not read fixtures or create provenance. Demo student facts use `source=None`,
+retain self-assessment in their messages, and assert no external verification.
+Known relevant skills without explicit evidence still fail closed. Unknown
+requirement levels, PARTIAL coverage and absent student skill records retain
+their existing business uncertainty semantics.
+
+## Local generated-plan registry and selection
+
+Application `PlanRegistry` is a storage abstraction for full CompetitionPlan
+snapshots, exact PlanReference resolution, lineage history and atomic current-head
+replacement retaining authoritative PlanDiff. Local Runtime supplies the in-memory
+adapter, registers both controlled initial state and successful P8 outputs, and
+resolves pending approvals against the selected plan lineage. The existing host
+lock and P12 approval/version/content guards remain in force; storage grants no
+business or approval authority. P9/P10/P11 decisions and P8 planning are unchanged.
+
+Frontend session choices contain server-issued references plus display metadata,
+collected only from matching validated artifacts. Explicit selection passes the
+same reference into request.context; no digest calculation, implicit selection,
+plan registration endpoint or browser-owned current state is introduced.
+Registry resolution does not imply an executable ReplanningInput: generated
+COMAP plans currently have no supported target-consistent proposal. The runtime
+reports that limitation without generating events/instructions or requesting approval.
+Server restart resets generated state and restores the controlled fixture;
+browser reload resets choices. Production persistence remains deferred.
+
+## P11 deterministic instruction preparation policy V1
+
+```text
+CompetitionEvent
+  -> authoritative EventImpactAnalysis
+  -> ReplanningDecision
+  -> Application TargetTrackRemovedCancellationPolicy
+  -> authority-free PlanRevisionProposal / ProposedPlanOperation
+  -> P12 public ApprovalRequest + explicit Human Approval
+  -> authorized ReplanningInput
+  -> unchanged P11 executor / PlanDiff
+```
+
+Preparation is not authorization. Application policy
+`target-track-removed-cancel-v1` proposes only status draft/active -> cancelled
+for a known whole-plan REPLAN with confirmed target-track removal and no unresolved
+remainder. It retains the exact PlanReference, Decision fingerprint, scope and
+Event/Impact/Decision/Plan evidence references. Proposal models are immutable,
+JSON-safe and contain no actor, approval response or execution authority.
+Unsupported cases return typed `NO_SUPPORTED_INSTRUCTION_POLICY`, not fallback.
+Malformed input and forged bindings fail validation.
+
+V1 requires exact competition/edition/track equality between Events and the Plan,
+as well as a non-null plan track. Edition-scoped Events are not silently upgraded
+to exact track-scoped preparation, even where P10/P11 impact contracts allow their
+analysis. Impact/Decision truth is reused unchanged; policy checks applicability
+and never generates or rewrites those results. No competition-specific mapping,
+LLM inference, IO or Local Runtime business branch is introduced.
+
+The P12 approval bridge also accepts this authority-free preparation type while
+retaining its existing authorized-input compatibility path. The public approval
+schema is unchanged. Pending approval references the proposed operation and its
+policy; there is no AuthorizedScopeResolution or executable instruction yet.
+Only explicit matching APPROVE with trusted caller actor, exact current Plan and
+explicit execution time may construct RevisionAuthority, the existing cancellation
+instruction and COMPLETE scope resolution. REJECT creates none of them. P11 then
+validates and executes the existing ReplanningInput without rule changes.
+The pure bridge does not authenticate callers or consume continuation handles:
+single-use continuation, host locking and current-plan CAS remain required at
+the trusted runtime boundary. No new public actor input or Agent-selectable
+preparation/mutation authority capability is exposed.
+
+This policy/bridge is independently testable. The generated Huawei orchestration
+below reuses it after independent acceptance. Production code never imports test helpers.
+
+## Generated-plan controlled observation integration
+
+The accepted preparation policy is now integrated for the explicitly configured
+Huawei Innovation Track demo. Application `prepare_skill_gap_context` converts
+absent exact requirement artifacts into the existing typed MISSING input; Domain
+still decides uncertainty and P8 generates the actual Plan. Its authoritative
+receipt registers that complete plan in the shared PlanRegistry.
+
+Application `ControlledPlanRevisionPreparer` consumes an independently declared
+exact-track **CONTROLLED DEMO OBSERVATION**. It uses CompetitionSnapshotBuilder's
+verified edition baseline to validate before-membership and retain unchanged
+window facts, then builds new manual controlled snapshots with the explicitly
+declared track scope. It does not automatically promote an edition Event to a
+track Event, modify the baseline builder, or assert an official Huawei change.
+The existing SnapshotDiffEngine, CompetitionEventEngine, impact analyzer and
+ReplanningDecisionService compute the facts/results before the reviewed policy
+prepares an operation. Snapshot pairs and their Diff/Event lineage are retained
+per host. No test helper is imported by production.
+
+P12 GraphInput has a private typed prepared-revision channel. Its pre-approval
+artifact carries only the exact before Plan, never an executable mutation.
+Request/invocation/argument-ref/Plan binding precedes pending approval. On APPROVE,
+the existing bridge constructs authorized ReplanningInput, the graph rechecks it
+immediately before Facade execution, and PlanRegistry performs CAS with full
+PlanDiff history. REJECT performs no mutation. The former authorized-input
+compatibility path, single-use handles, host lock and stale checks remain intact.
+No public AgentRequest/AgentResponse contract, Domain truth, LLM provider or
+scoring rule changes. Frontend adds explicit track input and uses the existing
+plan selection/HITL/PlanDiff components without computing business results.

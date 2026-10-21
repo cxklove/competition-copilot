@@ -384,3 +384,27 @@ input and canonical output or rejection. Frontend tests exercise these through t
 client; backend tests and --check recompute expectations from unchanged P12 models.
 This extends the existing generation strategy, not a new source of truth. Consumer
 JSON schema remains strict: no general Pydantic scalar coercion is enabled.
+## Explicit generated plan selection
+
+In Local/AgentArts-compatible runtime sessions, successful CompetitionPlan
+artifacts with matching `plan_refs` appear under “当前计划 / 选择计划”. Choose a
+plan explicitly before a later request. The browser passes the exact returned
+reference; it does not recalculate digest/version, register plans or grant approval.
+The existing controlled-fixture checkbox remains available and is mutually
+exclusive with generated-plan selection. No plan is selected automatically.
+
+Choices last only for the current mounted page. Local server restart clears
+generated registry state and restores the controlled fixture; reload/regenerate
+before selecting a generated plan again. Registration alone does not provide
+replanning events, impact or instructions. Generated COMAP revision is currently
+rejected without entering WAITING_FOR_APPROVAL because no matching executable
+ReplanningInput exists. This is an in-memory local demo, not durable persistence.
+
+For the generated Huawei same-plan demo, explicitly enter student
+`local-recommendation-demo`, competition `huawei-ict`, edition `huawei-ict-2026`
+and track `huawei-ict-2026-innovation`, then generate a plan. Select that returned
+plan and request revision. REJECT preserves it; a new workflow's APPROVE displays
+the backend PlanDiff (draft -> cancelled, version +1). This uses a manual controlled
+observation, **not a real official Huawei track deletion**. The frontend creates no
+Event/Impact/instruction/authority and computes no diff. Restart Local Runtime
+after upgrading; previously generated references are not durable.

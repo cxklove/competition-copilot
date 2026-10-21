@@ -3318,9 +3318,40 @@ automatically. Source/evidence stays untrusted presentation data. Closure does n
 claim real-cloud certification, durable workflow storage or production hardening.
 P15 owns subsequent evaluation; P16 owns production deployment/IAM/security work.
 
+## Post-P14 Local Demo / End-to-End Integration
+
+**Status: CLOSED / VERIFIED.** This separately verified local demo integration is
+complete; it does not reopen P12, P13 or P14, all of which remain CLOSED_FROZEN.
+P15 remains NOT_STARTED; readiness is READY_TO_START, not implementation status.
+
+| Completed integration | Verified scope |
+|---|---|
+| Provider-neutral Cloud LLM | OpenAI / BigModel / DeepSeek; BigModel intent json_mode and temperature 0.1; single-call intent proposal reuse; no automatic retry; backend-only secrets; automated tests remain offline |
+| Multi-candidate recommendation | 12 formal candidates; P5 eligibility per candidate and one P6 ranking call; confirmed / uncertain / blocked; verified-skill-overlap-v1 never promotes P5 UNKNOWN through a soft score |
+| P7 Skill Gap | Canonical student skill evidence; absent profile facts are unknown, not deficits; PARTIAL requirements with required_level=null remain UNDETERMINED; browser smoke PASS |
+| P8 structured planning | Real P7 prerequisite, uncertainty_resolution planning and no invented deadlines; browser smoke PASS |
+| Generated PlanRegistry and selection | Full CompetitionPlan storage, exact PlanReference, CAS, history/lineage and same-host cross-request resolution; explicit frontend selection |
+| Instruction preparation policy V1 | target-track-removed-cancel-v1; authority-free PlanRevisionProposal; preparation is not authorization; APPROVE-only executable authority; independent REVIEW_PASS |
+| Generated Huawei same-plan E2E | Generated P8 Innovation plan -> registry -> controlled observation -> Snapshot / Diff / Event -> P10 AFFECTS_PLAN -> P11 REPLAN -> reviewed policy -> WAITING_FOR_APPROVAL; REJECT has no mutation; APPROVE produces actual draft-to-cancelled PlanDiff, version 1 -> 2; stale/replay/mismatch protections; real browser smoke PASS and independent REVIEW_PASS |
+
+### Verified demo boundaries and handoff
+
+- Huawei Innovation Track removal is a **manual CONTROLLED DEMO OBSERVATION**,
+  not a claim that Huawei officially removed the track. Observation provenance
+  and retained Snapshot/Diff/Event lineage remain explicit.
+- BigModel cloud/browser smoke is local demo validation, not production deployment
+  or cloud certification. Production deployment and hardening remain P16.
+- Local PlanRegistry is in-memory: generated plans persist across requests only
+  within the same host lifetime. Server restart discards generated plans and
+  restores the controlled fixture; frontend plan selection is session-scoped.
+- These are accepted demo boundaries, not open blockers. Detailed implementation
+  and run instructions remain in ARCHITECTURE and the backend/frontend READMEs.
+  P15 evaluation may start separately; no P15 implementation is claimed here.
+
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 
 - **Status:** NOT_STARTED.
+- **Readiness:** READY_TO_START after verified Post-P14 Local Demo / End-to-End Integration; implementation has not started.
 - **Goal:** reproducible hard-rule, workflow, evidence, approval and transport-parity evaluation.
 - **Deliverables:** fixed datasets/scripts, replayable model fixtures, failure/risk reports and local/adapter comparison.
 - **Acceptance:** semantic results/reasons/evidence match under controlled inputs; no Domain edits to game evaluations.

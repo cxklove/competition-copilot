@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "skill_requirement_set",
+  "requirement_version": "1.0",
+  "review_note": "HUMAN DECISION: APPROVE, explicitly supplied by the user on 2026-10-20 for the two-item P6 skill-route review packet. Approved reuse of mathematical-modeling and REQUIRED core-task interpretation, null proficiency and PARTIAL coverage. Official 2026 source was independently re-observed on 2026-10-20. REQUIRED is a reviewed system interpretation, not an official enum or P5 eligibility restriction. No scoring policy or proficiency threshold is approved. See data/review/p6-skill-route/README.md.",
+  "requirement_set": {
+    "target": {
+      "competition_id": "china-graduate-math-modeling",
+      "edition_id": "china-graduate-math-modeling-2026",
+      "track_id": null,
+      "scope": "edition"
+    },
+    "coverage": "partial",
+    "coverage_note": "System assessment: one source-supported task capability only, not a complete requirement set. Unspecified proficiency is independent of coverage.",
+    "requirements": [
+      {
+        "skill_id": "mathematical-modeling",
+        "required_level": null,
+        "requirement_type": "required",
+        "presence_evidence": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "The official 2026 invitation describes applying mathematical modeling in research/practice and building mathematical models to solve practical problems. This establishes mathematical-modeling task capability, not any ordinal proficiency or hard eligibility condition.",
+            "source": {
+              "source_url": "https://cpipc.acge.org.cn/cw/contestNews/detail/4/2c9080189dcfa24e019dddacc24a1314",
+              "source_type": "official",
+              "observed_at": "2026-10-20T15:17:50Z",
+              "verification_status": "verified"
+            },
+            "field": "requirements.mathematical-modeling.present",
+            "value": true
+          }
+        ],
+        "evidence": []
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "mathematical-modeling",
+      "name": "Mathematical Modeling",
+      "description": "使用数学模型表达现实问题，建立并解释求解方案的能力",
+      "aliases": []
+    }
+  ]
+}

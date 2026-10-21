@@ -1,0 +1,8 @@
+# Optional OpenAI Local Demo overlay; CPython 3.12 Windows resolution.
+# Existing Agent/core versions remain pinned and unchanged. No runtime API calls.
+-r requirements-agent.lock
+jiter==0.17.0
+langchain-openai==1.7.2
+openai==3.35.1
+regex==2026.9.29
+tiktoken==0.14.0

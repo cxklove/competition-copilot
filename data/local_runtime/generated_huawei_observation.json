@@ -1,0 +1,32 @@
+{
+  "fixture_kind": "CONTROLLED DEMO OBSERVATION",
+  "notice": "Demo-only manual scenario, not an official Huawei change.",
+  "target": {
+    "competition_id": "huawei-ict",
+    "edition_id": "huawei-ict-2026",
+    "track_id": "huawei-ict-2026-innovation"
+  },
+  "before_membership": [
+    "huawei-ict-2026-teaching",
+    "huawei-ict-2026-practice",
+    "huawei-ict-2026-innovation",
+    "huawei-ict-2026-challenge",
+    "huawei-ict-2026-programming",
+    "huawei-ict-2026-operator",
+    "huawei-ict-2026-elite"
+  ],
+  "after_membership": [
+    "huawei-ict-2026-teaching",
+    "huawei-ict-2026-practice",
+    "huawei-ict-2026-challenge",
+    "huawei-ict-2026-programming",
+    "huawei-ict-2026-operator",
+    "huawei-ict-2026-elite"
+  ],
+  "source": {
+    "source_url": "https://example.invalid/competition-copilot/controlled-demo/huawei-track-removal",
+    "source_type": "manual",
+    "observed_at": "2020-01-01T00:00:00Z",
+    "verification_status": "verified"
+  }
+}

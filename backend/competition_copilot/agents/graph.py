@@ -16,6 +16,7 @@ from typing_extensions import TypedDict
 from competition_copilot.agents.capabilities import (
     AgentCapabilityFacade,
     AgentCapabilityResult,
+    CapabilityArguments,
     CapabilityStatus,
 )
 from competition_copilot.agents.contracts import (
@@ -70,7 +71,9 @@ from competition_copilot.agents.routing import (
     routing_catalog,
 )
 from competition_copilot.agents.state import AgentState
+from competition_copilot.application.instruction_preparation import PlanRevisionProposal
 from competition_copilot.domain.digital_twin import StableId
+from competition_copilot.domain.plan import CompetitionPlan
 from competition_copilot.domain.replanning_input import ReplanningInput
 from competition_copilot.tools.contracts import ToolResult
 
@@ -94,7 +97,31 @@ class GraphInput(AgentContract):
     clarification_options: tuple[ClarificationOption, ...] = ()
     approval_request_id: StableId | None = None
     interaction_created_at: AwareDatetime | None = None
-    revision_proposal: ReplanningInput | None = None
+    revision_proposal: ReplanningInput | PlanRevisionProposal | None = None
+    prepared_revision: PlanRevisionProposal | None = None
+
+
+class _PreparedRevisionPayload(AgentContract):
+    before: CompetitionPlan
+
+
+def _revision_source(frame, state, facade):
+    if frame.prepared_revision is None:
+        checked = facade.validate_arguments(state.invocation, _arguments(frame))
+        source = checked.payload.replanning_input
+        if checked.payload.before != source.before:
+            raise ValueError("Execution Plan differs from proposed input")
+        return source
+    source = PlanRevisionProposal.model_validate(frame.prepared_revision)
+    checked = CapabilityArguments[_PreparedRevisionPayload].model_validate(_arguments(frame))
+    if (state.invocation is None or state.invocation.capability != "revise_plan"
+        or not state.invocation.requires_approval
+        or state.invocation.source_request_id != state.request.request_id
+        or checked.artifact_ref != state.invocation.arguments_ref
+        or checked.payload.before != source.before
+        or state.request.context.plan_ref != source.operation.expected_plan):
+        raise ValueError("Prepared operation binding mismatch")
+    return source
 
 
 class GraphTurn(AgentContract):
@@ -254,10 +281,7 @@ def build_competition_copilot_graph(
         state, frame = channels["state"], channels["frame"]
         reply, pending = frame.resume, state.approval_request
         try:
-            candidate = facade.validate_arguments(state.invocation, _arguments(frame))
-            source = candidate.payload.replanning_input
-            if candidate.payload.before != source.before:
-                raise ValueError("Current execution Plan differs from approved proposal")
+            source = _revision_source(frame, state, facade)
             # Pending interactions are candidates too, including ambiguous replies.
             validate_pending_revision(pending, source, state.request, state.invocation)
             if reply.current_plan is not None and reply.current_plan != pending.before_plan:
@@ -288,7 +312,8 @@ def build_competition_copilot_graph(
                     "response": result, "branch": "end", "human_resolution": "APPROVAL_REJECTED",
                     "explanation_context": context, "explanation_rendering": rendering}
             approved = build_approved_replanning_input(pending, response, source, state.request,
-                state.invocation, current_plan=reply.current_plan, approved_by_ref=reply.approved_by_ref)
+                state.invocation, current_plan=reply.current_plan, approved_by_ref=reply.approved_by_ref,
+                executed_at=reply.executed_at)
             if reply.executed_at is None or reply.executed_at < response.submitted_at:
                 raise ValueError("Explicit execution time must follow approval")
             audit = _merge_audit(audit, AuditReferences(results=(
@@ -349,8 +374,9 @@ def build_competition_copilot_graph(
                             source_request_id=state.request.request_id, intent=proposal.intent,
                             capability=proposal.candidate_capability, requires_approval=True,
                             arguments_ref=frame.routing_arguments_ref)
-                        checked = facade.validate_arguments(invocation, args)
-                        prepare_approval(checked.payload.replanning_input, state.request, invocation,
+                        prepared_state = _replace(state, intent=proposal.intent, invocation=invocation)
+                        source = _revision_source(frame, prepared_state, facade)
+                        prepare_approval(source, state.request, invocation,
                             approval_request_id=frame.approval_request_id, created_at=frame.interaction_created_at)
                         return {**trace, "state": _replace(state, intent=proposal.intent,
                             invocation=invocation, status=WorkflowStatus.READY_TO_ROUTE), "branch": "route"}
@@ -391,8 +417,18 @@ def build_competition_copilot_graph(
         elif not isinstance(args["payload"], dict):
             return _failure(state, AgentErrorCode.CAPABILITY_EXECUTION_FAILED, "INVALID_INPUT")
         else:
-            if context_conflicts(state.request, args["payload"], ProposedTargets()):
+            if context_conflicts(state.request, args["payload"], ProposedTargets(),
+                                 capability=state.invocation.capability):
                 return _failure(state, AgentErrorCode.INVALID_WORKFLOW_TRANSITION, "CONTEXT_CONFLICT")
+            if (frame.prepared_revision is not None and state.invocation.capability == "revise_plan"
+                and state.approval_response is None):
+                try:
+                    _revision_source(frame, state, facade)
+                    if frame.approval_request_id is None or frame.interaction_created_at is None:
+                        raise ValueError("Pending approval metadata required")
+                    return {"branch": "approval"}
+                except (ValueError, TypeError):
+                    return _failure(state, AgentErrorCode.APPROVAL_REQUIRED, "Invalid prepared operation")
             schema = json.loads(capability.input_schema_json)
             payload_schema = schema["properties"]["payload"]
             if "$ref" in payload_schema:
@@ -445,10 +481,7 @@ def build_competition_copilot_graph(
         state, frame = channels["state"], channels["frame"]
         proposal = state.approval_request or frame.approval_proposal
         try:
-            checked = facade.validate_arguments(state.invocation, _arguments(frame))
-            source = checked.payload.replanning_input
-            if checked.payload.before != source.before:
-                raise ValueError("Execution Plan differs from proposed input")
+            source = _revision_source(frame, state, facade)
             if proposal is None:
                 if source.decision.outcome == "keep_current_plan":
                     result = AgentResponse(request_id=state.request.request_id, intent=state.intent,
@@ -464,7 +497,7 @@ def build_competition_copilot_graph(
                         outcome="NEEDS_CLARIFICATION", message=question.question, clarification=question, audit=state.audit)
                     return {"state": _replace(state, status=WorkflowStatus.NEEDS_CLARIFICATION, clarification=question),
                             "response": result}
-                proposal = prepare_approval(checked.payload.replanning_input, state.request, state.invocation,
+                proposal = prepare_approval(source, state.request, state.invocation,
                     approval_request_id=frame.approval_request_id, created_at=frame.interaction_created_at)
             # New and supplied requests must match the same current P11 input.
             validate_pending_revision(proposal, source, state.request, state.invocation)
@@ -492,7 +525,8 @@ def build_competition_copilot_graph(
                     raise ValueError("Mutation requires a validated approval continuation")
                 expected = build_approved_replanning_input(state.approval_request,
                     state.approval_response, frame.revision_proposal, state.request, state.invocation,
-                    current_plan=frame.resume.current_plan, approved_by_ref=frame.resume.approved_by_ref)
+                    current_plan=frame.resume.current_plan, approved_by_ref=frame.resume.approved_by_ref,
+                    executed_at=frame.resume.executed_at)
                 if (checked.payload.replanning_input != expected or checked.payload.before != expected.before
                     or checked.payload.executed_at != frame.resume.executed_at):
                     raise ValueError("Approved operation changed")

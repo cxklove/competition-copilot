@@ -55,3 +55,31 @@ need independent source/human review and must respect frozen exact-target,
 coverage, evidence and unspecified-threshold semantics. Unknown thresholds remain
 UNKNOWN diagnosis, not guessed gaps or satisfaction. See the phase documents for
 the frozen P7 scope and P8 input boundary; this Closure implements no P8 capability.
+
+
+## Verified skill route data foundation (2026-10-20)
+
+The human-approved review packet in `data/review/p6-skill-route/README.md`
+authorizes two additive edition-level artifacts:
+
+- `c4-big-data-challenge-2026.json`: machine-learning-modeling, source-backed
+  model construction task in the official 2026 introduction; one new stable
+  Skill definition, independent of programming language/framework.
+- `china-graduate-math-modeling-2026.json`: mathematical-modeling, reusing the
+  exact existing Skill definition; the 2026 invitation explicitly describes
+  building mathematical models, not merely the contest title.
+
+Both retain requirement_version 1.0, REQUIRED as human-reviewed core-task
+interpretation (not P5), PARTIAL coverage, null proficiency and empty threshold
+evidence. Official pages were independently observed before the user's explicit
+approval. No COMPLETE coverage or numeric proficiency is inferred.
+
+Together with the unchanged COMAP artifact, coverage is 3/12 formal edition
+candidates and 3/4 curated demo candidates. GCXL 2027 remains unavailable: track
+names alone establish no edition-wide skill requirement. The curated set does
+not restrict runtime candidate enumeration. These data artifacts define no scores,
+component weights or scoring policy. The separate Domain component
+verified-skill-overlap-v1 consumes prepared snapshots under its documented
+presence-only policy; the original aggregation and ranking rules remain unchanged.
+New requirements
+are also visible to existing P7 exact-target reads without altering P7 semantics.

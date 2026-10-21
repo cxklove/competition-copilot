@@ -9,6 +9,7 @@ from typing import Callable
 
 from competition_copilot.agents.contracts import AgentRequest
 from competition_copilot.agents.graph import GraphInput
+from competition_copilot.application.plans import PlanRegistry
 from competition_copilot.integrations.agentarts.contracts import (
     AgentArtsInvocationEnvelope,
     AgentArtsInvocationResult,
@@ -23,8 +24,12 @@ class LocalSession:
     presentation: Callable[[dict], dict]
 
 
-def failure(code):
-    return {"runtime": {"error": {"code": code, "message": code}}, "presentation": None}
+class ReplanningInputUnavailable(ValueError):
+    """A resolved plan has no supported target-consistent executable proposal."""
+
+
+def failure(code, message=None):
+    return {"runtime": {"error": {"code": code, "message": message or code}}, "presentation": None}
 
 
 class LocalInvocationHost:
@@ -36,8 +41,10 @@ class LocalInvocationHost:
     No durable storage or restart/reload resume guarantee.
     """
 
-    def __init__(self, factory: Callable[[AgentRequest], LocalSession], *, capacity=128, ttl=600):
+    def __init__(self, factory: Callable[[AgentRequest], LocalSession], *, capacity=128, ttl=600,
+                 plan_registry: PlanRegistry | None = None):
         self.factory, self.capacity, self.ttl = factory, capacity, ttl
+        self.plan_registry = plan_registry
         self._pending = {}
         self._lock = threading.Lock()
         self.handler_invocations = 0
@@ -73,6 +80,8 @@ class LocalInvocationHost:
             # continuation, receipt authority, actor or execution context escapes.
             return {"runtime": public,
                     "presentation": session.presentation(raw["response"]) if result.response else None}
+        except ReplanningInputUnavailable:
+            return failure("CORE_VALIDATION_ERROR", "NO_TARGET_CONSISTENT_REPLANNING_INPUT")
         except ValueError:
             return failure("CORE_VALIDATION_ERROR")
         except Exception:

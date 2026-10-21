@@ -582,6 +582,12 @@ input::placeholder {
   width: 100%;
   margin-top: 4px;
 }
+
+.local-context > select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
 .local-context input[type='checkbox'] {
   width: auto;
   margin-right: 7px;

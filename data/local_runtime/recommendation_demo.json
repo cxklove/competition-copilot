@@ -1,0 +1,61 @@
+{
+  "fixture_kind": "LOCAL DEMO FIXTURE",
+  "note": "Synthetic, manually defined applied-mathematics student. Not a real user or an eligibility grant. Fixed independently of candidate scores; only skills are proposed future matching input. Curated candidates are documentation/test data, not a runtime filter.",
+  "profile": {
+    "id": "local-recommendation-demo",
+    "education_level": "undergraduate",
+    "major": "Applied Mathematics",
+    "interests": [
+      "Mathematical modeling",
+      "Computational problem solving"
+    ],
+    "goals": [
+      "Practice explaining models and computational solutions"
+    ],
+    "weekly_available_hours": 10,
+    "skills": [
+      {
+        "skill_id": "mathematical-modeling",
+        "level": "intermediate",
+        "self_assessed": true,
+        "note": "LOCAL DEMO FIXTURE: manually assigned simulated proficiency, not verified real-user evidence."
+      }
+    ]
+  },
+  "student_skill_evidence": [
+    {
+      "student_id": "local-recommendation-demo",
+      "skill_id": "mathematical-modeling",
+      "self_assessed": true,
+      "evidence": {
+        "code": "STUDENT_PROFILE_SKILL_FACT",
+        "message": "LOCAL DEMO FIXTURE; student_id=local-recommendation-demo; skill_id=mathematical-modeling; self_assessed=true; Student profile self-assessed skill fact, level=intermediate. Manually declared simulated data, not externally verified ability.",
+        "source": null,
+        "field": "skills.mathematical-modeling.level",
+        "value": "intermediate"
+      }
+    }
+  ],
+  "curated_candidates": [
+    {
+      "competition_id": "gcxl-engineering-practice-innovation",
+      "edition_id": "gcxl-engineering-practice-innovation-2027",
+      "track_id": null
+    },
+    {
+      "competition_id": "comap-mcm",
+      "edition_id": "comap-mcm-2027",
+      "track_id": null
+    },
+    {
+      "competition_id": "c4-big-data-challenge",
+      "edition_id": "c4-big-data-challenge-2026",
+      "track_id": null
+    },
+    {
+      "competition_id": "china-graduate-math-modeling",
+      "edition_id": "china-graduate-math-modeling-2026",
+      "track_id": null
+    }
+  ]
+}

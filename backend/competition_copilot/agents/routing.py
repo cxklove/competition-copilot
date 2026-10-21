@@ -206,12 +206,23 @@ def _project_trusted_payload(payload: dict) -> dict[str, str]:
     return _merge_trusted_identities(*projections)
 
 
-def _resolve_trusted_context(request: AgentRequest, payload: dict) -> tuple[dict[str, str], ...]:
+def _anchored_recommendations(request, payload, capability):
+    return (capability == CapabilityId.GET_RECOMMENDATIONS
+            and request.context.competition_id is not None
+            and request.context.edition_id is not None
+            and request.context.plan_ref is None
+            and isinstance(payload.get("contexts"), list) and len(payload["contexts"]) > 1)
+
+
+def _resolve_trusted_context(request: AgentRequest, payload: dict, *,
+                             capability=None) -> tuple[dict[str, str], ...]:
     """Caller-only canonical identity scopes; proposal values are never sources.
 
     P6 contexts describe distinct recommendation candidates, so different candidate
     targets remain separate scopes. Every context must describe the same student.
-    Outer identities constrain each scope; no conflict is resolved by precedence.
+    Outer identities constrain each scope. For a P6 multi-candidate batch only,
+    a complete anchor constrains membership instead of excluding alternatives.
+    Plan-bound requests retain the original exact-target checks.
     """
     outer = request.context.model_dump(mode="json")
     plan = request.context.plan_ref
@@ -223,23 +234,44 @@ def _resolve_trusted_context(request: AgentRequest, payload: dict) -> tuple[dict
     contexts = payload.get("contexts", [])
     if not isinstance(contexts, list) or any(not isinstance(item, dict) for item in contexts):
         raise ValueError("Invalid trusted contexts")
+    if _anchored_recommendations(request, payload, capability):
+        # Never let payload-level identities override the caller. Only candidate
+        # scopes may differ; their own projections must remain internally coherent.
+        base = {name: value for name, value in base.items()
+                if name not in ("competition_id", "edition_id", "track_id")}
     scopes = [_merge_trusted_identities(base, _project_trusted_payload(item)) for item in contexts]
     if not scopes:
         scopes = [base]
     # A batch of recommendation candidates belongs to one student, not mixed users.
     _merge_trusted_identities(*({"student_id": scope.get("student_id")} for scope in scopes))
+    if _anchored_recommendations(request, payload, capability):
+        if any("plan_id" in scope for scope in scopes) or not any(
+            all(scope.get(name) == outer.get(name)
+                for name in ("competition_id", "edition_id", "track_id")) for scope in scopes
+        ):
+            raise ValueError("Recommendation anchor missing or plan scope supplied")
     return tuple(sorted(scopes, key=lambda scope: tuple(scope.items())))
 
 
-def context_conflicts(request: AgentRequest, payload: dict, targets: ProposedTargets) -> bool:
+def context_conflicts(request: AgentRequest, payload: dict, targets: ProposedTargets, *,
+                      capability=None) -> bool:
     try:
-        scopes = _resolve_trusted_context(request, payload)
+        scopes = _resolve_trusted_context(request, payload, capability=capability)
     except ValueError:
         return True
     # A proposal target is an assertion about caller context, never a new source.
-    # For multiple candidates it must match every scope, not select/overwrite one.
-    return any(value is not None and any(scope.get(name) != value for scope in scopes)
-               for name, value in targets.model_dump().items())
+    # Without an explicit anchor it must match every scope. With an anchor,
+    # candidate assertions must match that caller anchor, never select an alternative.
+    for name, value in targets.model_dump().items():
+        if value is None:
+            continue
+        if (_anchored_recommendations(request, payload, capability)
+                and name in ("competition_id", "edition_id", "track_id")):
+            if getattr(request.context, name) != value:
+                return True
+        elif any(scope.get(name) != value for scope in scopes):
+            return True
+    return False
 
 
 class RoutingProposalValidator:
@@ -276,7 +308,8 @@ class RoutingProposalValidator:
         payload = arguments.get("payload") if isinstance(arguments, dict) else None
         if payload is not None and not isinstance(payload, dict):
             return reject(RoutingReason.INVALID_ARGUMENTS)
-        if context_conflicts(request, payload or {}, proposal.targets):
+        if context_conflicts(request, payload or {}, proposal.targets,
+                             capability=proposal.candidate_capability):
             return reject(RoutingReason.CONTEXT_CONFLICT)
         if proposal.ambiguity != RoutingAmbiguity.NONE:
             category = (ClarificationReason.AMBIGUOUS_TARGET

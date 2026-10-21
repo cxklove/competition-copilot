@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "skill_requirement_set",
+  "requirement_version": "1.0",
+  "review_note": "HUMAN DECISION: APPROVE, explicitly supplied by the user on 2026-10-20 for the two-item P6 skill-route review packet. Approved machine-learning-modeling identity and REQUIRED core-task interpretation, null proficiency and PARTIAL coverage. Official 2026 source was independently re-observed on 2026-10-20. REQUIRED is a reviewed system interpretation, not an official enum or P5 eligibility restriction. No scoring policy or proficiency threshold is approved. See data/review/p6-skill-route/README.md.",
+  "requirement_set": {
+    "target": {
+      "competition_id": "c4-big-data-challenge",
+      "edition_id": "c4-big-data-challenge-2026",
+      "track_id": null,
+      "scope": "edition"
+    },
+    "coverage": "partial",
+    "coverage_note": "System assessment: one source-supported task capability only, not a complete requirement set. Unspecified proficiency is independent of coverage.",
+    "requirements": [
+      {
+        "skill_id": "machine-learning-modeling",
+        "required_level": null,
+        "requirement_type": "required",
+        "presence_evidence": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "The official 2026 introduction specifies using historical market data to construct machine-learning models for a future-return prediction task. This establishes model-building task capability, not any ordinal proficiency or hard eligibility condition.",
+            "source": {
+              "source_url": "https://nercbds.tsinghua.edu.cn/bdc.html",
+              "source_type": "official",
+              "observed_at": "2026-10-20T15:17:50Z",
+              "verification_status": "verified"
+            },
+            "field": "requirements.machine-learning-modeling.present",
+            "value": true
+          }
+        ],
+        "evidence": []
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "machine-learning-modeling",
+      "name": "Machine Learning Modeling",
+      "description": "Construct and evaluate machine-learning models from data; distinct from mathematical modeling and any particular language or framework.",
+      "aliases": []
+    }
+  ]
+}

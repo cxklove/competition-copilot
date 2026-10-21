@@ -19,6 +19,7 @@ import { interactionFrom } from '../src/workspace/interactions.ts';
 import { renderToStaticMarkup } from 'react-dom/server';
 import plan from '../src/demo/local-plan.json' with { type: 'json' };
 import type { PlanReference } from '../src/runtime/generated/contracts.ts';
+import { collectPlanChoices } from '../src/workspace/plans.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 let baseUrl: string;
@@ -27,7 +28,14 @@ before(async () => {
   backend = spawn(
     path.join(root, 'backend/.venv/Scripts/python.exe'),
     ['scripts/run_local_runtime.py', '--port', '0'],
-    { cwd: root, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] },
+    {
+      cwd: root,
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      // An explicitly cloud-enabled demo shell must not turn regression tests
+      // into billable external-model calls.
+      env: { ...process.env, COMPETITION_COPILOT_LLM_MODE: 'offline' },
+    },
   );
   baseUrl = await new Promise<string>((resolve, reject) => {
     let stdout = '';
@@ -444,4 +452,151 @@ test('Local cancellation forwards AbortSignal without generating REJECT or retry
     (e) => e instanceof RuntimeClientError && e.code === 'ABORTED',
   );
   assert.equal(calls, 1);
+});
+
+test('real generated plan is an explicit session choice; exact ref is sent without automatic approval', async () => {
+  const value = composition();
+  const view = mount(value, 'generated-plan-session');
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  fireEvent.change(view.getByLabelText('竞赛 ID'), { target: { value: 'comap-mcm' } });
+  fireEvent.change(view.getByLabelText('届次 ID'), { target: { value: 'comap-mcm-2027' } });
+  await send(view, 'plan');
+  await settled(view);
+  const response = value.responses[0].response!;
+  const reference = response.plan_refs![0];
+  assert.equal(collectPlanChoices(response, value.deliveries[0].presentation).length, 1);
+  await view.findByRole('option', { name: new RegExp(reference.plan_id) });
+  const select = view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement;
+  assert.equal(select.value, '');
+  assert.equal(select.options.length, 2);
+  assert.ok(select.options[1].textContent?.includes('draft'));
+  assert.ok(select.options[1].textContent?.includes(reference.plan_id));
+  assert.equal(value.calls.length, 1);
+  assert.equal(value.calls[0].request?.context?.plan_ref, undefined);
+
+  // No implicit selection, even on a later request in the same page session.
+  fireEvent.click(view.getByRole('button', { name: '开始新请求' }));
+  await send(view, 'discovery');
+  await settled(view);
+  assert.equal(value.calls[1].request?.context?.plan_ref, undefined);
+  fireEvent.click(view.getByRole('button', { name: '开始新请求' }));
+  const controlled = view.getByRole('checkbox', {
+    name: /使用本地受控修订示例方案/,
+  }) as HTMLInputElement;
+  fireEvent.click(controlled);
+  assert.equal(controlled.checked, true);
+  fireEvent.change(select, { target: { value: select.options[1].value } });
+  assert.equal(controlled.checked, false);
+  await send(view, 'revision');
+  await view.findByRole('alert', {}, { timeout: 10000 });
+  assert.deepEqual(value.calls[2].request?.context?.plan_ref, reference);
+  assert.equal(value.calls.length, 3);
+  const limitation = value.deliveries[2].runtime as { error: { code: string; message: string } };
+  assert.deepEqual(limitation.error, {
+    code: 'CORE_VALIDATION_ERROR',
+    message: 'NO_TARGET_CONSISTENT_REPLANNING_INPUT',
+  });
+  assert.ok(value.calls.every((call) => !call.approval && !call.continuation_ref));
+
+  const presentation = value.deliveries[0].presentation;
+  assert.deepEqual(collectPlanChoices(response, presentation)[0].reference, reference);
+  assert.deepEqual(collectPlanChoices({ ...response, plan_refs: [] }, presentation), []);
+  const wrongIdentity = structuredClone(response);
+  wrongIdentity.plan_refs![0].student_id = 'different-student';
+  assert.deepEqual(collectPlanChoices(wrongIdentity, presentation), []);
+  assert.deepEqual(collectPlanChoices(response, undefined), []);
+  assert.throws(() => collectPlanChoices(response, { request_id: 'wrong', artifacts: [] }));
+
+  view.unmount();
+  const fresh = mount(composition(), 'fresh-session');
+  assert.equal(
+    (fresh.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement).options
+      .length,
+    1,
+  );
+});
+
+test('real generated Huawei plan -> explicit selection -> REJECT then APPROVE -> same-plan PlanDiff', async () => {
+  const value = composition();
+  let sequence = 0;
+  const view = render(
+    <Workspace
+      client={value.client}
+      readArtifacts={value.readArtifacts}
+      nextRequestId={() => `same-plan-${++sequence}`}
+      localPlan={plan as PlanReference}
+      runtimeLabel="LOCAL"
+    />,
+  );
+  for (const [label, input] of [
+    [/学生 ID/, 'local-recommendation-demo'],
+    ['竞赛 ID', 'huawei-ict'],
+    ['届次 ID', 'huawei-ict-2026'],
+    [/赛道 ID/, 'huawei-ict-2026-innovation'],
+  ] as const)
+    fireEvent.change(view.getByLabelText(label), { target: { value: input } });
+  await send(view, 'plan');
+  await settled(view);
+  const reference = value.responses[0].response!.plan_refs![0];
+  assert.equal(reference.student_id, 'local-recommendation-demo');
+  assert.deepEqual(reference.target, {
+    competition_id: 'huawei-ict',
+    edition_id: 'huawei-ict-2026',
+    track_id: 'huawei-ict-2026-innovation',
+  });
+  const option = (await view.findByRole('option', {
+    name: new RegExp(reference.plan_id),
+  })) as HTMLOptionElement;
+  const select = view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement;
+  assert.equal(select.value, '');
+  fireEvent.change(select, { target: { value: option.value } });
+
+  for (const [index, decision] of ['REJECT', 'APPROVE'].entries()) {
+    fireEvent.click(view.getByRole('button', { name: '开始新请求' }));
+    await send(view, '请修订这个计划。');
+    const button = await view.findByRole(
+      'button',
+      { name: new RegExp(decision) },
+      { timeout: 10000 },
+    );
+    const pendingIndex = 1 + index * 2;
+    assert.deepEqual(value.calls[pendingIndex].request?.context?.plan_ref, reference);
+    const pending = value.responses[pendingIndex].response!;
+    assert.equal(pending.outcome, 'WAITING_FOR_APPROVAL');
+    assert.deepEqual(pending.approval_request!.before_plan, reference);
+    assert.ok(pending.approval_request!.summary.includes('target-track-removed-cancel-v1'));
+    assert.equal(view.queryByRole('region', { name: '方案变更' }), null);
+    await act(async () => {
+      fireEvent.click(button);
+      fireEvent.click(button);
+    });
+    await settled(view);
+    assert.equal(value.calls.length, pendingIndex + 2);
+    assert.equal(value.calls[pendingIndex + 1].approval?.decision, decision);
+    assert.equal(value.calls[pendingIndex + 1].approval?.source_request_id, pending.request_id);
+    if (decision === 'REJECT') {
+      assert.equal(view.queryByRole('region', { name: '方案变更' }), null);
+      assert.ok(view.container.textContent?.includes('REJECTED'));
+    } else {
+      assert.ok(view.getByRole('region', { name: '方案变更' }));
+      assert.ok(view.getByText('方案状态：draft → cancelled'));
+      const response = value.responses[pendingIndex + 1].response!;
+      const diff = validateArtifacts(
+        response,
+        value.deliveries[pendingIndex + 1].presentation,
+      ).find((artifact) => artifact.model === 'PlanDiff');
+      if (!diff || diff.model !== 'PlanDiff')
+        throw Error('Expected authoritative same-plan PlanDiff');
+      assert.equal(diff.value.before.id, reference.plan_id);
+      assert.equal(diff.value.before.student_id, reference.student_id);
+      assert.equal(diff.value.before.track_id, reference.target.track_id);
+      assert.equal(diff.value.after.version, reference.version + 1);
+      assert.equal(diff.value.after.status, 'cancelled');
+      assert.ok(!JSON.stringify(diff.value).includes('test-only-p11-5-student'));
+    }
+  }
+  assert.equal(value.calls.length, 5);
+  assert.ok(value.calls.every((call) => !JSON.stringify(call).includes('HUMAN_APPROVED')));
 });

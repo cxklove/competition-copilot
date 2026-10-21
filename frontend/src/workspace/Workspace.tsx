@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useConversation } from './useConversation.ts';
 import type { InvocationClient } from './useConversation.ts';
@@ -7,6 +7,8 @@ import { HitlPanel } from './HitlPanel.tsx';
 import { ResultPanel } from '../results/ResultPanel.tsx';
 import type { ArtifactReader } from '../results/artifacts.ts';
 import type { PlanReference } from '../runtime/generated/contracts.ts';
+import { collectPlanChoices, planChoiceKey } from './plans.ts';
+import type { PlanChoice } from './plans.ts';
 
 const errors = {
   TRANSPORT_ERROR: '连接未完成，请检查后重试。请求不会自动重发。',
@@ -49,12 +51,31 @@ export function Workspace({
   const [studentId, setStudentId] = useState('');
   const [competitionId, setCompetitionId] = useState('');
   const [editionId, setEditionId] = useState('');
+  const [trackId, setTrackId] = useState('');
   const [useLocalPlan, setUseLocalPlan] = useState(false);
+  const [plans, setPlans] = useState<PlanChoice[]>([]);
+  const [selectedPlanKey, setSelectedPlanKey] = useState('');
+  const selectedPlan = plans.find((plan) => planChoiceKey(plan.reference) === selectedPlanKey);
   const pending = state.uiStatus === 'SUBMITTING';
   const response = state.response;
   const needs = response?.outcome === 'NEEDS_CLARIFICATION';
   const waits = response?.outcome === 'WAITING_FOR_APPROVAL';
   const locked = pending || needs || waits || state.continuationUnconfirmed;
+
+  useEffect(() => {
+    if (!response || !readArtifacts) return;
+    try {
+      const received = collectPlanChoices(response, readArtifacts(response));
+      if (!received.length) return;
+      setPlans((previous) => {
+        const choices = new Map(previous.map((plan) => [planChoiceKey(plan.reference), plan]));
+        for (const plan of received) choices.set(planChoiceKey(plan.reference), plan);
+        return [...choices.values()];
+      });
+    } catch {
+      // Invalid hosting artifacts never create selectable references.
+    }
+  }, [response, readArtifacts]);
 
   function send(event: FormEvent) {
     event.preventDefault();
@@ -62,7 +83,12 @@ export function Workspace({
     void submit(input, studentId, {
       ...(competitionId.trim() ? { competition_id: competitionId.trim() } : {}),
       ...(editionId.trim() ? { edition_id: editionId.trim() } : {}),
-      ...(useLocalPlan && localPlan ? { plan_ref: localPlan } : {}),
+      ...(trackId.trim() ? { track_id: trackId.trim() } : {}),
+      ...(selectedPlan
+        ? { plan_ref: selectedPlan.reference }
+        : useLocalPlan && localPlan
+          ? { plan_ref: localPlan }
+          : {}),
     });
     setInput('');
   }
@@ -207,7 +233,7 @@ export function Workspace({
                   <span aria-hidden="true">↑</span>
                 </button>
               </div>
-              {localPlan && (
+              {(localPlan || plans.length > 0) && (
                 <details className="local-context">
                   <summary>本地调用的显式上下文</summary>
                   <label htmlFor="competition-id">竞赛 ID</label>
@@ -225,20 +251,63 @@ export function Workspace({
                     disabled={locked}
                     onChange={(e) => setEditionId(e.target.value)}
                   />
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={useLocalPlan}
-                      disabled={locked}
-                      onChange={(e) => setUseLocalPlan(e.target.checked)}
-                    />
-                    使用本地受控修订示例方案（非真实赛事变化）
-                  </label>
+                  <label htmlFor="track-id">赛道 ID（可选）</label>
+                  <input
+                    id="track-id"
+                    value={trackId}
+                    disabled={locked}
+                    onChange={(event) => setTrackId(event.target.value)}
+                  />
+                  <label htmlFor="selected-plan">当前计划 / 选择计划</label>
+                  <select
+                    id="selected-plan"
+                    value={selectedPlanKey}
+                    disabled={locked}
+                    onChange={(event) => {
+                      setSelectedPlanKey(event.target.value);
+                      setUseLocalPlan(false);
+                    }}
+                  >
+                    <option value="">未选择生成的计划</option>
+                    {plans.map((plan) => (
+                      <option
+                        key={planChoiceKey(plan.reference)}
+                        value={planChoiceKey(plan.reference)}
+                      >
+                        {plan.reference.plan_id} · 版本 {plan.reference.version} · {plan.status} ·{' '}
+                        {plan.reference.target.competition_id} / {plan.reference.target.edition_id}{' '}
+                        / {plan.reference.target.track_id ?? 'edition-level'}
+                      </option>
+                    ))}
+                  </select>
                   <p>
-                    方案引用：{localPlan.plan_id} · 版本 {localPlan.version} · 学生{' '}
-                    {localPlan.student_id}
+                    选择计划不表示批准，也不会生成事件、影响或修订指令。缺少匹配的重规划输入时，修订请求会被拒绝。
+                    计划选择仅保留在当前页面；服务端重启后需重新生成计划。
+                    赛道移除演示使用人工受控观察，不代表官方真的移除了赛道。
                   </p>
-                  <p>选择仅提供公开 PlanRef，不表示批准。修订示例请清空不匹配的学生/赛事字段。</p>
+                  {localPlan && (
+                    <>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={useLocalPlan}
+                          disabled={locked}
+                          onChange={(e) => {
+                            setUseLocalPlan(e.target.checked);
+                            setSelectedPlanKey('');
+                          }}
+                        />
+                        使用本地受控修订示例方案（非真实赛事变化）
+                      </label>
+                      <p>
+                        方案引用：{localPlan.plan_id} · 版本 {localPlan.version} · 学生{' '}
+                        {localPlan.student_id}
+                      </p>
+                      <p>
+                        选择仅提供公开 PlanRef，不表示批准。修订示例请清空不匹配的学生/赛事字段。
+                      </p>
+                    </>
+                  )}
                 </details>
               )}
               <p className="composer-hint" id="composer-hint">

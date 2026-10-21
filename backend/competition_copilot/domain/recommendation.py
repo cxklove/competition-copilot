@@ -23,6 +23,7 @@ from competition_copilot.domain.eligibility import (
     RuleEvaluation,
 )
 from competition_copilot.domain.skill import StudentSkill
+from competition_copilot.domain.skill_gap import SkillRequirementSet
 from competition_copilot.domain.student import StudentProfile
 
 
@@ -134,6 +135,21 @@ class RecommendationCandidate(_RecommendationSnapshot):
         return value
 
 
+class RecommendationSkillRequirements(_RecommendationSnapshot):
+    """Versioned immutable prepared facts; the P7 set already owns target/audit."""
+
+    requirement_version: str = Field(strict=True, min_length=1)
+    requirement_set: SkillRequirementSet
+
+    @field_validator("requirement_version")
+    @classmethod
+    def nonblank_version(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("requirement version must not be blank")
+        return value
+
+
 class RecommendationContext(_RecommendationSnapshot):
     """Prepared Domain snapshot for one candidate; no lookup or scoring."""
 
@@ -143,6 +159,7 @@ class RecommendationContext(_RecommendationSnapshot):
     edition: _EditionSnapshot
     track: _TrackSnapshot | None = None
     eligibility_decision: RecommendationEligibilitySnapshot
+    skill_requirements: RecommendationSkillRequirements | None = None
 
     @model_validator(mode="after")
     def check_target(self) -> "RecommendationContext":
@@ -163,6 +180,12 @@ class RecommendationContext(_RecommendationSnapshot):
             self.eligibility_decision.track_id,
         ):
             raise ValueError("eligibility decision does not match candidate")
+        if self.skill_requirements is not None:
+            target = self.skill_requirements.requirement_set.target
+            if (target.competition_id, target.edition_id, target.track_id) != (
+                candidate.competition_id, candidate.edition_id, candidate.track_id
+            ):
+                raise ValueError("skill requirements do not match candidate")
         return self
 
 

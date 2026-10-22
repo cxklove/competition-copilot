@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Existing lock resolution and frontend HTTP harnesses target Windows / Python 3.12.
+# No provider credentials are supplied; provider tests use deterministic mocks.
+env:
+  COMPETITION_COPILOT_LLM_MODE: offline
+
+jobs:
+  backend:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked backend dependencies
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          python -m venv backend/.venv
+          .\backend\.venv\Scripts\python -m pip install "setuptools>=68"
+          .\backend\.venv\Scripts\python -m pip install -r backend/requirements-agentarts.lock -r backend/requirements-cloud-llm.lock
+          .\backend\.venv\Scripts\python -m pip install --no-deps --no-build-isolation -e ".\backend[dev,agent,agentarts,mcp,cloud-llm]"
+          .\backend\.venv\Scripts\python -m pip check
+      - name: Backend pytest
+        run: .\backend\.venv\Scripts\python -m pytest backend/tests
+      - name: Backend Ruff
+        working-directory: backend
+        run: .\.venv\Scripts\python -m ruff check .
+      - name: Generated contracts and artifacts
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          .\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
+          .\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
+      - name: Diff check
+        run: git diff --check
+
+  frontend:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install backend for real Runtime frontend tests
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          python -m venv backend/.venv
+          .\backend\.venv\Scripts\python -m pip install "setuptools>=68"
+          .\backend\.venv\Scripts\python -m pip install -r backend/requirements-agentarts.lock -r backend/requirements-cloud-llm.lock
+          .\backend\.venv\Scripts\python -m pip install --no-deps --no-build-isolation -e ".\backend[dev,agent,agentarts,mcp,cloud-llm]"
+          .\backend\.venv\Scripts\python -m pip check
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci --ignore-scripts --registry=https://registry.npmjs.org
+      - name: Frontend tests
+        working-directory: frontend
+        run: npm test
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
+      - name: Frontend build
+        working-directory: frontend
+        run: npm run build

@@ -70,8 +70,9 @@ Try these bounded offline intent-model phrases (business results are real):
   preserves UNKNOWN. The local profiles are synthetic server-owned input facts.
 - `skill` / `plan`: student `local-graduate`, competition `comap-mcm`, edition
   `comap-mcm-2027` runs real P7/P8 with formal requirement data and uncertainty.
-- `recommend`: the same explicit target context runs P5 then P6; no suitability
-  signal is configured, so the existing P6 authority preserves missing-score semantics.
+- `recommend`: explicit student/target context runs P5 per formal candidate and P6 once.
+  The wired `verified-skill-overlap-v1` signal uses reviewed requirements and explicit
+  profile skill records; missing signals remain unknown, and scores never promote P5 UNKNOWN.
 - `controlled revision`: clear unrelated student/target fields, explicitly select
   the local controlled PlanRef checkbox. Review the real ApprovalRequest, then
   APPROVE or REJECT. Only P12.5 creates new bound authority; P11 returns the actual

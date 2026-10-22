@@ -4,11 +4,11 @@
 
 Competition Copilot 是面向高校学生的竞赛全生命周期决策与成长平台，目标参加华为 ICT 创新赛。目标能力包括学生画像、赛事检索、资格检查、个性化推荐、技能诊断、备赛规划、赛事变化检测与重规划，以及 Agent 工具、MCP、Web 前端和评测。核心设计是约束感知决策、静态知识与动态状态结合、事件驱动重规划。不得复制或依赖其他平台的源码、前端代码及私有整理数据；Schema、UI 和数据接入流程须独立实现。
 
-仓库目录约定：`backend/` 放服务与领域代码，`frontend/` 放界面，`data/` 放可共享的数据样例，`docs/` 放设计文档，`evals/` 放评测用例，`scripts/` 放可重复运行的脚本。新增模块时同步说明其目录职责。
+仓库目录约定：`backend/` 放服务与领域代码，`frontend/` 放界面，`data/` 放可共享的数据样例，`docs/` 放设计文档，`scripts/` 放可重复运行的脚本，`.github/` 放 CI 与 PR 模板。`evals/` 当前无受版本管理的内容，将在 P15 Evaluation 阶段正式建立/使用；P15 尚未开始。新增模块时同步说明其目录职责。
 
 ## 开发、构建与测试
 
-`backend/` 已提供 `pyproject.toml`、`requirements.lock`、pytest 测试和 Ruff lint；准确的安装、测试、lint 与构建命令见 `backend/README.md`。当前尚无完整应用启动命令。提交前运行 `git status --short` 和 `git diff --check`；首次引入其他模块时，同时提交依赖清单、锁文件及该模块 README 中准确的安装、运行、构建和测试命令。当前没有覆盖率门槛；新功能仍须满足下方测试规则。
+`backend/` 已提供 `pyproject.toml`、锁文件、pytest 测试和 Ruff lint；准确安装与验证命令见根 `README.md` 及 `backend/README.md`。从仓库根运行 `.\backend\.venv\Scripts\python scripts/run_local_runtime.py` 启动 loopback Local Runtime（默认 8765）；Frontend 在另一终端按 `frontend/README.md` 设置 LOCAL 环境并运行 `npm run dev --prefix frontend`（默认 5173）。完整回归所需 optional SDK/provider 依赖通过现有 overlays 安装，CI 测试不使用真实云 API。提交前运行 `git status --short --untracked-files=all` 和 `git diff --check`，显式 stage 任务文件，不使用 `git add .`；force push 须维护者明确允许。首次引入其他模块时，同时提交依赖清单、锁文件及该模块 README 中准确命令。当前没有覆盖率门槛；新功能仍须满足下方测试规则。
 
 ## 代码风格与命名
 

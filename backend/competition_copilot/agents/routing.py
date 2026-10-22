@@ -52,6 +52,26 @@ class IntentRoutingProposal(AgentContract):
     targets: ProposedTargets = Field(default_factory=ProposedTargets)
 
 
+def explicit_intent_proposal(request: AgentRequest) -> IntentRoutingProposal | None:
+    """Translate a user action to an untrusted proposal, not an invocation.
+
+    Unsupported explicit operations stay unsupported; they never fall back to
+    text/model inference. The normal routing validator still admits execution.
+    """
+    if request.intent is None:
+        return None
+    capability = {
+        AgentIntent.GET_COMPETITION_DETAILS: CapabilityId.GET_COMPETITION_DETAILS,
+        AgentIntent.CHECK_ELIGIBILITY: CapabilityId.CHECK_ELIGIBILITY,
+        AgentIntent.GET_RECOMMENDATIONS: CapabilityId.GET_RECOMMENDATIONS,
+        AgentIntent.ANALYZE_SKILL_GAP: CapabilityId.ANALYZE_SKILL_GAP,
+        AgentIntent.BUILD_PLAN: CapabilityId.BUILD_PLAN,
+        AgentIntent.REQUEST_PLAN_REVISION: CapabilityId.REVISE_PLAN,
+    }.get(request.intent)
+    return IntentRoutingProposal(intent=request.intent, candidate_capability=capability,
+                                 ambiguity=RoutingAmbiguity.NONE, missing_context=())
+
+
 class RoutingCapability(AgentContract):
     capability: CapabilityId
     description: StableId
@@ -128,6 +148,7 @@ class RoutingValidationResult(AgentContract):
 INTENT_CAPABILITIES = MappingProxyType({
     AgentIntent.DISCOVER_COMPETITIONS: (CapabilityId.LIST_COMPETITIONS,),
     AgentIntent.GET_COMPETITION_DETAILS: (
+        CapabilityId.GET_COMPETITION_DETAILS,
         CapabilityId.GET_COMPETITION, CapabilityId.LIST_EDITIONS, CapabilityId.GET_EDITION,
         CapabilityId.LIST_TRACKS, CapabilityId.GET_TRACK,
     ),

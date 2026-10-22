@@ -3350,6 +3350,92 @@ ready for subsequent demo polish.
   and run instructions remain in ARCHITECTURE and the backend/frontend READMEs.
   P15 evaluation may start separately; no P15 implementation is claimed here.
 
+## Post-P14 Product Experience Upgrade (PX)
+
+PX 是已验证 Local Demo / Same-plan E2E 基线之上的产品体验升级，独立于
+P15 Evaluation。目标是把 Agent / Developer Workspace 演进为高校竞赛全生命周期
+决策与成长平台；Copilot 成为贯穿业务页面的智能入口，而非整个产品。
+PX0 完成设计与路线同步；PX1 与 PX2 Core 已关闭验证，形成团队共享参考基线。
+没有新增业务能力。
+
+**状态不变量：P12 = CLOSED_FROZEN；P13 = CLOSED_FROZEN；P14 = CLOSED_FROZEN；
+Post-P14 Local Demo / End-to-End Integration = CLOSED_VERIFIED；P15 = NOT_STARTED。**
+P15 的 READY_TO_START 仅为既有 readiness，不表示进入评测实现。
+PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替代阶段评审。
+
+| 工作包 | 状态 | 范围与交付方向 | 验收门槛 |
+|---|---|---|---|
+| PX0 — Design | DOCUMENTED | 产品定位、信息架构、四层体验、统一证据语言及边界 | 设计见 [PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design)；实现状态不得与愿景混淆 |
+| PX1 — Product Shell & Dashboard | CLOSED_VERIFIED | Global App Shell、一级导航、Dashboard、Current Context Panel、独立 Copilot 工作区、基础 Empty / Loading | 默认进入 Dashboard；只聚合已有 session state，缺数据使用 Empty；不新增业务 authority |
+| PX2 Core — Competition Center & Detail | CLOSED_VERIFIED | Competition Center、competition-level browsing、Authoritative Read Projection、Edition/Track query、TimeWindow、Eligibility Policy / Skill Requirement read、Provenance、Canonical Current Context、Copilot handoff | Final Independent Review REVIEW_PASS；完整事件历史仍为 PERSISTENCE_GAP；详情丰富度提升单独延期 |
+| PX2.1 — Read Model Architecture Review | REVIEW_COMPLETE | 最小只读 Application projection、provenance boundary 与公开增量设计 | 审核完成；无新增业务 truth 或平行 API |
+| PX2.2 — Authoritative Read Projection | REVIEW_PASS | 经 Runtime / Facade / Tool / Reader 的正式读取与生成契约 | Final Independent Review REVIEW_PASS；target、不可变性与 authority 边界通过复核 |
+| PX2 Product Detail Enrichment | DEFERRED | 信息密度、信息组织、Edition/Track 选择体验、详情视觉结构及数据覆盖增加后的事实展示 | 非 architecture blocker；不得推断未知事实 |
+| PX3 — My Profile / Skills | PLANNED | 基本资料、教育/专业/年级、技能及自评来源、兴趣、目标、每周可用时间、缺失信息与画像完整度方向 | missing record 不等于 deficit；完整度百分比须先定义可审阅规则；不承诺未提供的编辑/持久化能力 |
+| PX4 — My Competitions & Planning | PLANNED | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | 我的赛事状态是待设计的产品状态，不覆盖资格或 Plan 状态；只显示真实 milestones，不伪造 Task |
+| PX5 — Events / Approval / Version | PLANNED | Competition Updates / Event Feed、Before / After、Impact、Approval Center、PlanDiff、Version History | 复用 Snapshot → Diff → Event → Impact → Decision → policy → approval → execution → actual PlanDiff / lineage；不新增 mutation authority |
+| PX6 — Guided Demo & Reliability | PLANNED | Guided Actions、Scenario Selector、Demo Mode、Quick Journey、Runtime Health、Demo Reset、Notification UX、统一状态与现场可靠性 | 复用已有 Demo Polish 2.1 explicit actions；其余能力仍待实现；不得自动重试、绕过验证或把 UI reset 当作后端状态已重置 |
+
+### PX 实施顺序与准备门槛
+
+- 先从 PX1 建立 shell、导航和真实空状态，再逐步产品化业务页面；不一次性实现所有导航项。
+  产品详细设计由 PRODUCT_SPEC 维护，依赖与 authority 边界见
+  [ARCHITECTURE](ARCHITECTURE.md#post-p14-product-experience-boundary)。
+- PX1 已实现：Dashboard 默认入口、7 项导航、5 个后续页面诚实空态、保留挂载的 Copilot。
+  Dashboard 只读既有显式 context、已选择计划的版本/状态、最近已验证回复和真实待审批。
+  选择版本不声称是服务端最新版本；没有正式读取路径时显示不可用/Empty，不增加假数据。
+  hash 切页不提交请求、不重置会话、不自动选计划、不续接审批；全部后端 authority 保留。
+  验证：前端 targeted 52 / full 247 passed、lint/build PASS；真实 Chrome Local/AgentArts
+  24 项布局检查 PASS（含 1440/1920 Dashboard）；PX1 Backend 无改动。状态 CLOSED_VERIFIED。
+- Demo Polish 1–1.3 的语义结果、证据聚合与 clarification，以及 2.1 的 explicit actions
+  是可复用基线；它们不代表 Dashboard、赛事详情、画像页或整个 PX6 已完成。
+- 后续每个工作包独立确认范围、实现、测试与评审。已有 Runtime / Agent / Facade、
+  P5–P11 deterministic authority、精确 PlanReference、CAS、审批和续接保护持续有效。
+- Task / Action Item、画像完整度规则、我的赛事状态存储、Notification Backend、
+  持久化及新读取 API 如确有缺口，先形成独立设计/审核；不隐含授权在 PX 中实现。
+  新 scorer、数据库、实时爬虫、自动报名、权限系统及 P15/P16 工作均不在本次范围。
+- 延续已验收 demo boundaries：Huawei 变化为 manual controlled demo observation，
+  generated plans 仅存于 in-memory host、重启不持久化，BigModel smoke 不代表生产部署。
+
+### PX2.2 authoritative detail read projection
+
+- 经 PX2.1 审核并获准的最小公开增量：显式 GET_COMPETITION_DETAILS → 只读
+  get_competition_details → Application CompetitionDetailReader → 抽象 Repository /
+  PolicyProvider / RequirementProvider / ProvenanceReader。没有新增 HTTP API 或 MCP Tool。
+- projection 深层不可变，保留 null、覆盖声明、requirement version、技能目录、来源及时间
+  provenance。competition-only 不选届次；track 不自动选择；身份冲突和 provider failure 拒绝。
+- 页面可直接读取详情，不依赖先 Discovery；详情读取零 LLM，不执行 P5/P7 或生成事件。
+  个人结果仅附加 exact student/competition/edition/track 的既有 session result。
+- 完整事件历史仍为 EVENT_HISTORY_PERSISTENCE_GAP，明确显示“暂未提供完整赛事变化历史”；
+  当前会话证据单列，controlled demo 不冒充官方变化；不增加 Event Ledger/Database。
+  submission window 为 DATA_CONTRACT_GAP，当前不实现。Discovery 原路径保持不变。
+- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 保持 PLANNED。
+  PX2 Final Independent Review 已 REVIEW_PASS；PX2 Core 关闭为 CLOSED_VERIFIED。
+- PX2.2 验证：新增 Reader/Runtime 24 passed；扩展 targeted 142 passed；Backend full
+  2774 passed；Frontend results/local targeted 85 passed、full 261 passed；Ruff、schema
+  export checks、frontend lint/build、diff check PASS。
+
+### PX2 release checkpoint — PX2 Authoritative Competition Read Baseline
+
+当前版本适合作为团队共享 GitHub checkpoint 的参考基线：
+**PX2 Authoritative Competition Read Baseline**。PX1 / PX2 Core = CLOSED_VERIFIED；
+PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
+后续 PX2 Detail UX Enrichment 或经单独授权的 PX3 均从该稳定 checkpoint 继续；
+当前不进入 PX3/P15，状态同步不执行 commit、tag 或 push。
+
+**PX2 Product Detail Enrichment = DEFERRED（DEFERRED NON-BLOCKING PRODUCT WORK）**：
+
+- Competition Center 信息密度提升。
+- Competition Detail 更丰富的信息组织。
+- Edition / Track 用户选择体验继续优化。
+- Detail 页面视觉与信息结构精细化。
+- 数据覆盖增加后展示更多 authoritative facts。
+
+上述延期项不是 architecture blocker。页面丰富度不能成为推断未知事实、日期、赛道、
+资格或核验状态的理由；未知事实继续 fail closed / 显示 unavailable。
+完整赛事变化历史仍 unavailable（EVENT_HISTORY_PERSISTENCE_GAP），Current Session Evidence
+不等于完整历史；submission window 仍为 DATA_CONTRACT_GAP，不在 checkpoint 内实现。
+
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 
 - **Status:** NOT_STARTED.

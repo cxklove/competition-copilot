@@ -29,6 +29,10 @@ from competition_copilot.agents.contracts import (
     ReferenceKind,
     ResultReference,
 )
+from competition_copilot.application.competition_detail import (
+    CompetitionDetailProjection,
+    CompetitionDetailQuery,
+)
 from competition_copilot.application.competition_snapshots import (
     CompetitionSnapshotBuilder,
 )
@@ -219,7 +223,9 @@ class CapabilityMetadata(AgentContract):
 
 
 # Static schemas/dispatch set. IDs present in P12.1 but absent here are deferred.
+
 _READ = MappingProxyType({
+    CapabilityId.GET_COMPETITION_DETAILS: (CompetitionDetailQuery, CompetitionDetailProjection),
     CapabilityId.LIST_COMPETITIONS: (ListCompetitionsInput, ListCompetitionsOutput),
     CapabilityId.GET_COMPETITION: (GetCompetitionInput, GetCompetitionOutput),
     CapabilityId.LIST_EDITIONS: (ListCompetitionEditionsInput, ListCompetitionEditionsOutput),
@@ -242,7 +248,7 @@ _SPECS = MappingProxyType({
 })
 
 CapabilityOutput = (
-    ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
+    CompetitionDetailProjection | ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
     | GetCompetitionEditionOutput | ListEditionTracksOutput | GetCompetitionTrackOutput
     | EligibilityDecision | RecommendationRankingResult | SkillGapDecision
     | CompetitionPlan | CompetitionSnapshot | SnapshotDiff | EventBatch | EventImpactAnalysis

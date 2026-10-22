@@ -1,6 +1,10 @@
 import type { PlanDiff, PlanMilestone } from './generated/artifacts.ts';
-import { ReasonList } from './ReasonList.tsx';
-import { SourceMetadata } from './SourceMetadata.tsx';
+import type { ReactNode } from 'react';
+import type { AgentResponse } from '../runtime/generated/contracts.ts';
+import type { SourceMetadata } from './generated/artifacts.ts';
+import { PlanDiffEvidence } from './PlanDiffEvidence.tsx';
+import { isControlledDemo } from './SourceMetadata.tsx';
+import { planStatus } from './SemanticResults.tsx';
 
 function Milestones({ items }: { items: PlanMilestone[] }) {
   return items.length ? (
@@ -8,19 +12,22 @@ function Milestones({ items }: { items: PlanMilestone[] }) {
       {items.map((item) => (
         <li key={item.id}>
           <strong>{item.title}</strong>
-          <p>
-            任务 ID：{item.id} · {item.status ?? '未提供状态'}
-          </p>
-          {item.description && <p>{item.description}</p>}
-          {item.start_at && <p>开始时间：{item.start_at}</p>}
-          {item.due_at && (
+          <details>
+            <summary>任务详情</summary>
             <p>
-              截止时间：<time dateTime={item.due_at}>{item.due_at}</time>
+              任务 ID：{item.id} · {item.status ?? '未提供状态'}
             </p>
-          )}
-          {item.estimated_hours != null && <p>预计工时：{item.estimated_hours}</p>}
-          {!!item.dependency_ids?.length && <p>依赖：{item.dependency_ids.join(', ')}</p>}
-          {item.source_need_id && <p>需求引用：{item.source_need_id}</p>}
+            {item.description && <p>{item.description}</p>}
+            {item.start_at && <p>开始时间：{item.start_at}</p>}
+            {item.due_at && (
+              <p>
+                截止时间：<time dateTime={item.due_at}>{item.due_at}</time>
+              </p>
+            )}
+            {item.estimated_hours != null && <p>预计工时：{item.estimated_hours}</p>}
+            {!!item.dependency_ids?.length && <p>依赖：{item.dependency_ids.join(', ')}</p>}
+            {item.source_need_id && <p>需求引用：{item.source_need_id}</p>}
+          </details>
         </li>
       ))}
     </ul>
@@ -28,30 +35,57 @@ function Milestones({ items }: { items: PlanMilestone[] }) {
     <p>此集合为空。</p>
   );
 }
-export function PlanDiffView({ diff }: { diff: PlanDiff }) {
+export function PlanDiffView({
+  diff,
+  includeDetails = true,
+  response,
+  sources,
+  audit,
+}: {
+  diff: PlanDiff;
+  includeDetails?: boolean;
+  response?: AgentResponse;
+  sources?: readonly SourceMetadata[];
+  audit?: ReactNode;
+}) {
   return (
     <section className="plan-diff" aria-label="方案变更">
       <h4>方案变更 · 后端提供的 PlanDiff</h4>
-      <p>决策：{diff.decision.outcome}</p>
+      <p>
+        决策：
+        {diff.decision.outcome === 'replan'
+          ? '需要调整计划'
+          : diff.decision.outcome === 'keep_current_plan'
+            ? '保持当前计划'
+            : '尚无法确认是否调整'}
+      </p>
+      <p>
+        版本：{diff.before.version} → {diff.after.version}
+      </p>
+      {diff.decision.reason_codes.includes('target_track_removed') && (
+        <p>触发原因：目标赛道发生变化</p>
+      )}
+      {diff.decision.impacts.some((impact) => isControlledDemo(impact.event.source.source_url)) && (
+        <p className="demo-notice">
+          模拟赛事变化 / 演示数据：本次修订来自受控演示事件，不代表 Huawei 官方发生了该变化。
+        </p>
+      )}
       <div className="before-after">
         <div>
           <h5>变更前</h5>
-          <p>
-            {diff.before.id} · 版本 {diff.before.version}
-          </p>
-          <p>状态：{diff.before.status}</p>
+          <p>版本 {diff.before.version}</p>
+          <p>状态：{planStatus(diff.before.status)}</p>
         </div>
         <div>
           <h5>变更后</h5>
-          <p>
-            {diff.after.id} · 版本 {diff.after.version}
-          </p>
-          <p>状态：{diff.after.status}</p>
+          <p>版本 {diff.after.version}</p>
+          <p>状态：{planStatus(diff.after.status)}</p>
         </div>
       </div>
       {diff.status_change && (
         <p>
-          方案状态：{diff.status_change.before_status} → {diff.status_change.after_status}
+          方案状态：{planStatus(diff.status_change.before_status)} →{' '}
+          {planStatus(diff.status_change.after_status)}
         </p>
       )}
       {!diff.changes?.length && !diff.status_change && (
@@ -72,28 +106,9 @@ export function PlanDiffView({ diff }: { diff: PlanDiff }) {
           </div>
         </div>
       ))}
-      <h5>触发与理由</h5>
-      <ReasonList codes={diff.decision.reason_codes} />
-      <ul aria-label="触发事件">
-        {diff.decision.impacts.map((impact) => (
-          <li key={impact.event.id}>
-            <p>事件：{impact.event.id}</p>
-            <p>
-              影响：{impact.outcome} · 范围：{impact.scope.state}
-            </p>
-            <SourceMetadata source={impact.event.source} />
-            <ReasonList codes={impact.reason_codes} />
-            <ul aria-label="重规划证据引用">
-              {impact.evidence.map((item, index) => (
-                <li key={index}>
-                  事件 {item.event_id} · 方案 {item.plan_id} · 字段{' '}
-                  {item.source_change_fields?.join(', ') || '未提供'}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
+      {includeDetails && (
+        <PlanDiffEvidence diffs={[diff]} response={response} sources={sources} audit={audit} />
+      )}
       <p>
         Diff 评估时间：<time dateTime={diff.evaluated_at}>{diff.evaluated_at}</time>
       </p>

@@ -177,6 +177,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "request-1",
           "user_message": "Check competition"
         }
@@ -194,6 +195,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "request-1",
           "user_message": "Check competition"
         }
@@ -211,6 +213,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "request-1",
           "user_message": "Check competition"
         }
@@ -228,6 +231,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": " request-1 ",
           "user_message": "Check competition"
         }
@@ -248,6 +252,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "   ",
           "user_message": "Check competition"
         }
@@ -268,6 +273,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "",
           "user_message": "Check competition"
         }
@@ -288,6 +294,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": true,
           "user_message": "Check competition"
         }
@@ -305,6 +312,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "request-1\u001f",
           "user_message": "Check competition"
         }
@@ -322,6 +330,7 @@
             "track_id": null
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "\u0085request-1\u001f",
           "user_message": "Check competition"
         }
@@ -4184,6 +4193,7 @@
             "edition_id": "edition-1"
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "request-1",
           "user_message": "Check competition"
         }
@@ -4202,6 +4212,7 @@
             }
           },
           "conversation_id": null,
+          "intent": null,
           "request_id": "request-1",
           "user_message": "Check competition"
         }
@@ -4605,6 +4616,7 @@
       "track_id": null
     },
     "conversation_id": null,
+    "intent": null,
     "request_id": "request-1",
     "user_message": "Check competition"
   },

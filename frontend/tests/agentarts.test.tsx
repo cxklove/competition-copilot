@@ -255,7 +255,7 @@ for (const decision of ['REJECT', 'APPROVE'] as const) {
       assert.equal(view.queryByRole('alert'), null);
       expected.push(value.deliveries);
       rendered.push(view.container.querySelector('.grounded-results')!.textContent!);
-      if (decision === 'APPROVE') assert.ok(view.getByText('方案状态：active → cancelled'));
+      if (decision === 'APPROVE') assert.ok(view.getByText('方案状态：执行中 → 已取消'));
       view.unmount();
     }
     assert.deepEqual(expected[0], expected[1]);

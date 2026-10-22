@@ -5,23 +5,16 @@ import type { InvocationClient } from './useConversation.ts';
 import { workflowLabel } from './state.ts';
 import { HitlPanel } from './HitlPanel.tsx';
 import { ResultPanel } from '../results/ResultPanel.tsx';
+import { ErrorPresentation } from '../results/ErrorPresentation.tsx';
 import type { ArtifactReader } from '../results/artifacts.ts';
 import type { PlanReference } from '../runtime/generated/contracts.ts';
 import { collectPlanChoices, planChoiceKey } from './plans.ts';
 import type { PlanChoice } from './plans.ts';
+import { actionHint, guidedActions } from './actions.ts';
+import type { GuidedAction } from './actions.ts';
+import type { WorkspaceSnapshot } from './sessionPresentation.ts';
+import type { CompetitionSelection } from './CompetitionCenter.tsx';
 
-const errors = {
-  TRANSPORT_ERROR: '连接未完成，请检查后重试。请求不会自动重发。',
-  RUNTIME_ERROR: 'Runtime 未能完成调用，请稍后重试。',
-  CONTRACT_ERROR: '无法解析 Runtime 响应，本次内容未作为有效回复展示。',
-  ABORTED: '请求已取消；这不代表业务操作已撤销。',
-};
-const continuationErrors = {
-  TRANSPORT_ERROR: '续接连接未确认完成。',
-  RUNTIME_ERROR: 'Runtime 未返回已确认的续接结果。',
-  CONTRACT_ERROR: '无法解析续接响应，本次内容未作为有效回复展示。',
-  ABORTED: '续接请求已取消等待；这不代表业务操作已撤销。',
-};
 const examples = ['有哪些适合我的竞赛？', '帮我检查参赛资格', '我该如何准备比赛？'];
 const newRequestId = () => crypto.randomUUID();
 
@@ -33,6 +26,10 @@ export function Workspace({
   localPlan,
   runtimeLabel = 'FAKE · 演示环境',
   invocationNote = '演示回复为预设内容，不代表真实业务判断。',
+  embedded = false,
+  onSnapshot,
+  contextSelection,
+  externalBusy = false,
 }: {
   client: InvocationClient;
   nextRequestId?: () => string;
@@ -41,8 +38,12 @@ export function Workspace({
   localPlan?: PlanReference;
   runtimeLabel?: string;
   invocationNote?: string;
+  embedded?: boolean;
+  onSnapshot?: (snapshot: WorkspaceSnapshot) => void;
+  contextSelection?: CompetitionSelection;
+  externalBusy?: boolean;
 }) {
-  const { state, submit, retry, startNew, clarify, decide } = useConversation(
+  const { state, presentationError, submit, retry, startNew, clarify, decide } = useConversation(
     client,
     nextRequestId,
     now,
@@ -60,7 +61,57 @@ export function Workspace({
   const response = state.response;
   const needs = response?.outcome === 'NEEDS_CLARIFICATION';
   const waits = response?.outcome === 'WAITING_FOR_APPROVAL';
-  const locked = pending || needs || waits || state.continuationUnconfirmed;
+  const locked = pending || needs || waits || state.continuationUnconfirmed || externalBusy;
+
+  useEffect(() => {
+    if (!contextSelection) return;
+    if (competitionId.trim() !== contextSelection.competitionId) {
+      setCompetitionId(contextSelection.competitionId);
+      setEditionId('');
+      setTrackId('');
+    }
+    if ('editionId' in contextSelection) {
+      setEditionId(contextSelection.editionId ?? '');
+      setTrackId(contextSelection.trackId ?? '');
+    }
+    if (contextSelection.message) setInput(`请${contextSelection.message}。`);
+  }, [contextSelection]);
+
+  useEffect(() => {
+    onSnapshot?.({
+      context: {
+        ...(studentId.trim() ? { student_id: studentId.trim() } : {}),
+        ...(competitionId.trim() ? { competition_id: competitionId.trim() } : {}),
+        ...(editionId.trim() ? { edition_id: editionId.trim() } : {}),
+        ...(trackId.trim() ? { track_id: trackId.trim() } : {}),
+        ...(selectedPlan
+          ? { plan_ref: selectedPlan.reference }
+          : useLocalPlan && localPlan
+            ? { plan_ref: localPlan }
+            : {}),
+      },
+      selectedPlan: selectedPlan ?? (useLocalPlan && localPlan ? { reference: localPlan } : null),
+      recentResponse: state.entries.findLast((entry) => entry.response)?.response ?? null,
+      pendingApproval: waits ? response.approval_request : null,
+      pending,
+      continuationUnconfirmed: state.continuationUnconfirmed,
+      interactionPending: !!(needs || waits || state.continuationUnconfirmed),
+    });
+  }, [
+    onSnapshot,
+    studentId,
+    competitionId,
+    editionId,
+    trackId,
+    selectedPlan,
+    useLocalPlan,
+    localPlan,
+    state.entries,
+    waits,
+    response,
+    pending,
+    state.continuationUnconfirmed,
+  ]);
 
   useEffect(() => {
     if (!response || !readArtifacts) return;
@@ -77,10 +128,8 @@ export function Workspace({
     }
   }, [response, readArtifacts]);
 
-  function send(event: FormEvent) {
-    event.preventDefault();
-    if (!input.trim() || locked) return;
-    void submit(input, studentId, {
+  function explicitContext() {
+    return {
       ...(competitionId.trim() ? { competition_id: competitionId.trim() } : {}),
       ...(editionId.trim() ? { edition_id: editionId.trim() } : {}),
       ...(trackId.trim() ? { track_id: trackId.trim() } : {}),
@@ -89,30 +138,50 @@ export function Workspace({
         : useLocalPlan && localPlan
           ? { plan_ref: localPlan }
           : {}),
-    });
+    };
+  }
+
+  function send(event: FormEvent) {
+    event.preventDefault();
+    if (!input.trim() || locked) return;
+    void submit(input, studentId, explicitContext());
     setInput('');
   }
 
+  const hasSelectedPlan = !!(selectedPlan || (useLocalPlan && localPlan));
+  const hasTarget = !!(competitionId.trim() && editionId.trim());
+  function sendAction(action: GuidedAction) {
+    if (locked || actionHint(action, hasTarget, hasSelectedPlan)) return;
+    void submit(action.message, studentId, explicitContext(), action.intent);
+  }
+
+  const Content = embedded ? 'section' : 'main';
   return (
-    <div className="app-shell">
-      <header className="product-header">
-        <a className="brand" href="#workspace">
-          <span className="brand-mark" aria-hidden="true">
-            C<span>·</span>C
+    <div className={embedded ? 'copilot-workspace' : 'app-shell'}>
+      {!embedded && (
+        <header className="product-header">
+          <a className="brand" href="#workspace">
+            <span className="brand-mark" aria-hidden="true">
+              C<span>·</span>C
+            </span>
+            <span>
+              Competition Copilot<small>竞赛决策与成长助手</small>
+            </span>
+          </a>
+          <span className="runtime-badge">
+            <span aria-hidden="true" />
+            {runtimeLabel}
           </span>
-          <span>
-            Competition Copilot<small>竞赛决策与成长助手</small>
-          </span>
-        </a>
-        <span className="runtime-badge">
-          <span aria-hidden="true" />
-          {runtimeLabel}
-        </span>
-      </header>
-      <main id="workspace" className="workspace">
+        </header>
+      )}
+      <Content
+        id="workspace"
+        className="workspace"
+        aria-label={embedded ? 'Copilot 工作区' : undefined}
+      >
         <div className="workspace-heading">
-          <p className="eyebrow">COMPETITION WORKSPACE</p>
-          <h1>把竞赛目标，变成下一步。</h1>
+          {!embedded && <p className="eyebrow">COMPETITION WORKSPACE</p>}
+          <h1>{embedded ? 'Copilot' : '把竞赛目标，变成下一步。'}</h1>
           <p>从一个问题开始，梳理你的参赛与备赛方向。</p>
         </div>
         <div className={`workspace-grid${response?.outcome === 'COMPLETED' ? ' has-result' : ''}`}>
@@ -157,7 +226,35 @@ export function Workspace({
                             ? 'Competition Copilot'
                             : '状态'}
                       </div>
-                      <p>{entry.content}</p>
+                      {entry.role === 'AGENT' &&
+                      entry.response?.outcome === 'NEEDS_CLARIFICATION' ? (
+                        <details>
+                          <summary>查看原始回复</summary>
+                          <p>{entry.content}</p>
+                        </details>
+                      ) : entry.role === 'AGENT' &&
+                        readArtifacts &&
+                        entry.response &&
+                        ['GET_RECOMMENDATIONS', 'ANALYZE_SKILL_GAP', 'BUILD_PLAN'].includes(
+                          entry.response.intent,
+                        ) &&
+                        entry.response.outcome === 'COMPLETED' &&
+                        entry.requestId === response?.request_id ? (
+                        <p>
+                          {entry.response.intent === 'GET_RECOMMENDATIONS'
+                            ? '推荐候选已返回，请查看推荐结果。'
+                            : entry.response.intent === 'ANALYZE_SKILL_GAP'
+                              ? '技能分析已返回，请查看技能差距分析。'
+                              : '计划已返回，请查看备赛计划。'}
+                        </p>
+                      ) : entry.role === 'AGENT' && entry.response && readArtifacts ? (
+                        <details>
+                          <summary>查看原始回复</summary>
+                          <p>{entry.content}</p>
+                        </details>
+                      ) : (
+                        <p>{entry.content}</p>
+                      )}
                     </li>
                   ))}
                 </ol>
@@ -177,21 +274,21 @@ export function Workspace({
                 disabled={pending || state.continuationUnconfirmed}
                 clarify={clarify}
                 decide={decide}
+                plans={[...plans.map((plan) => plan.reference), ...(localPlan ? [localPlan] : [])]}
               />
             )}
             {state.error && (
               <div className="error-surface" role="alert">
-                <strong>{state.error}</strong>
-                <p>
-                  {state.continuationUnconfirmed
-                    ? continuationErrors[state.error]
-                    : errors[state.error]}
-                </p>
+                <ErrorPresentation
+                  error={presentationError ?? { code: state.error, message: state.error }}
+                  category={state.error}
+                />
                 {state.continuationUnconfirmed ? (
                   <p>
                     续接请求未确认完成，执行状态可能未知。请重新检查当前状态后再操作；此处不重发续接请求。
                   </p>
-                ) : (
+                ) : presentationError?.message ===
+                  'NO_TARGET_CONSISTENT_REPLANNING_INPUT' ? null : (
                   <button type="button" onClick={() => void retry()} disabled={pending}>
                     重试此请求
                   </button>
@@ -199,6 +296,40 @@ export function Workspace({
               </div>
             )}
             <form className="composer" onSubmit={send}>
+              {contextSelection?.message && (
+                <p className="context-summary">
+                  已从赛事详情选择当前赛事。请补充必要信息，再使用“{contextSelection.message}
+                  ”快捷操作继续；尚未提交。
+                </p>
+              )}
+              {externalBusy && <p role="status">正在获取赛事数据，请等待当前只读请求完成。</p>}
+              <fieldset className="guided-actions" disabled={locked}>
+                <legend>快捷操作</legend>
+                <div className="guided-action-buttons">
+                  {guidedActions.map((action) => {
+                    const hint = actionHint(action, hasTarget, hasSelectedPlan);
+                    return (
+                      <button
+                        key={action.intent}
+                        type="button"
+                        disabled={!!hint}
+                        aria-describedby={
+                          hint
+                            ? action.intent === 'REQUEST_PLAN_REVISION'
+                              ? 'plan-action-hint'
+                              : 'target-action-hint'
+                            : undefined
+                        }
+                        onClick={() => sendAction(action)}
+                      >
+                        {action.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {!hasTarget && <p id="target-action-hint">请先选择比赛和届次。</p>}
+                {!hasSelectedPlan && <p id="plan-action-hint">请先生成或选择一个计划。</p>}
+              </fieldset>
               <label htmlFor="request-text">你的问题</label>
               <textarea
                 id="request-text"
@@ -233,83 +364,79 @@ export function Workspace({
                   <span aria-hidden="true">↑</span>
                 </button>
               </div>
-              {(localPlan || plans.length > 0) && (
-                <details className="local-context">
-                  <summary>本地调用的显式上下文</summary>
-                  <label htmlFor="competition-id">竞赛 ID</label>
-                  <input
-                    id="competition-id"
-                    value={competitionId}
-                    disabled={locked}
-                    required={!!editionId.trim()}
-                    onChange={(e) => setCompetitionId(e.target.value)}
-                  />
-                  <label htmlFor="edition-id">届次 ID</label>
-                  <input
-                    id="edition-id"
-                    value={editionId}
-                    disabled={locked}
-                    onChange={(e) => setEditionId(e.target.value)}
-                  />
-                  <label htmlFor="track-id">赛道 ID（可选）</label>
-                  <input
-                    id="track-id"
-                    value={trackId}
-                    disabled={locked}
-                    onChange={(event) => setTrackId(event.target.value)}
-                  />
-                  <label htmlFor="selected-plan">当前计划 / 选择计划</label>
-                  <select
-                    id="selected-plan"
-                    value={selectedPlanKey}
-                    disabled={locked}
-                    onChange={(event) => {
-                      setSelectedPlanKey(event.target.value);
-                      setUseLocalPlan(false);
-                    }}
-                  >
-                    <option value="">未选择生成的计划</option>
-                    {plans.map((plan) => (
-                      <option
-                        key={planChoiceKey(plan.reference)}
-                        value={planChoiceKey(plan.reference)}
-                      >
-                        {plan.reference.plan_id} · 版本 {plan.reference.version} · {plan.status} ·{' '}
-                        {plan.reference.target.competition_id} / {plan.reference.target.edition_id}{' '}
-                        / {plan.reference.target.track_id ?? 'edition-level'}
-                      </option>
-                    ))}
-                  </select>
-                  <p>
-                    选择计划不表示批准，也不会生成事件、影响或修订指令。缺少匹配的重规划输入时，修订请求会被拒绝。
-                    计划选择仅保留在当前页面；服务端重启后需重新生成计划。
-                    赛道移除演示使用人工受控观察，不代表官方真的移除了赛道。
-                  </p>
-                  {localPlan && (
-                    <>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={useLocalPlan}
-                          disabled={locked}
-                          onChange={(e) => {
-                            setUseLocalPlan(e.target.checked);
-                            setSelectedPlanKey('');
-                          }}
-                        />
-                        使用本地受控修订示例方案（非真实赛事变化）
-                      </label>
-                      <p>
-                        方案引用：{localPlan.plan_id} · 版本 {localPlan.version} · 学生{' '}
-                        {localPlan.student_id}
-                      </p>
-                      <p>
-                        选择仅提供公开 PlanRef，不表示批准。修订示例请清空不匹配的学生/赛事字段。
-                      </p>
-                    </>
-                  )}
-                </details>
-              )}
+              <details className="local-context">
+                <summary>本地调用的显式上下文</summary>
+                <label htmlFor="competition-id">竞赛 ID</label>
+                <input
+                  id="competition-id"
+                  value={competitionId}
+                  disabled={locked}
+                  required={!!editionId.trim()}
+                  onChange={(e) => setCompetitionId(e.target.value)}
+                />
+                <label htmlFor="edition-id">届次 ID</label>
+                <input
+                  id="edition-id"
+                  value={editionId}
+                  disabled={locked}
+                  onChange={(e) => setEditionId(e.target.value)}
+                />
+                <label htmlFor="track-id">赛道 ID（可选）</label>
+                <input
+                  id="track-id"
+                  value={trackId}
+                  disabled={locked}
+                  onChange={(event) => setTrackId(event.target.value)}
+                />
+                <label htmlFor="selected-plan">当前计划 / 选择计划</label>
+                <select
+                  id="selected-plan"
+                  value={selectedPlanKey}
+                  disabled={locked}
+                  onChange={(event) => {
+                    setSelectedPlanKey(event.target.value);
+                    setUseLocalPlan(false);
+                  }}
+                >
+                  <option value="">未选择生成的计划</option>
+                  {plans.map((plan) => (
+                    <option
+                      key={planChoiceKey(plan.reference)}
+                      value={planChoiceKey(plan.reference)}
+                    >
+                      {plan.reference.plan_id} · 版本 {plan.reference.version} · {plan.status} ·{' '}
+                      {plan.reference.target.competition_id} / {plan.reference.target.edition_id} /{' '}
+                      {plan.reference.target.track_id ?? 'edition-level'}
+                    </option>
+                  ))}
+                </select>
+                <p>
+                  选择计划不表示批准，也不会生成事件、影响或修订指令。缺少匹配的重规划输入时，修订请求会被拒绝。
+                  计划选择仅保留在当前页面；服务端重启后需重新生成计划。
+                  赛道移除演示使用人工受控观察，不代表官方真的移除了赛道。
+                </p>
+                {localPlan && (
+                  <>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={useLocalPlan}
+                        disabled={locked}
+                        onChange={(e) => {
+                          setUseLocalPlan(e.target.checked);
+                          setSelectedPlanKey('');
+                        }}
+                      />
+                      使用本地受控修订示例方案（非真实赛事变化）
+                    </label>
+                    <p>
+                      方案引用：{localPlan.plan_id} · 版本 {localPlan.version} · 学生{' '}
+                      {localPlan.student_id}
+                    </p>
+                    <p>选择仅提供公开 PlanRef，不表示批准。修订示例请清空不匹配的学生/赛事字段。</p>
+                  </>
+                )}
+              </details>
               <p className="composer-hint" id="composer-hint">
                 {needs || waits
                   ? '请使用上方对应的补充信息或明确批准/拒绝控件。普通文字不会自动产生批准决定。'
@@ -319,7 +446,7 @@ export function Workspace({
           </section>
           <aside className="workflow-panel" aria-label="工作流与结果">
             <section aria-labelledby="workflow-title">
-              <p className="eyebrow">CURRENT WORKFLOW</p>
+              {!embedded && <p className="eyebrow">CURRENT WORKFLOW</p>}
               <h2 id="workflow-title">工作流状态</h2>
               <p className={`workflow-status ${pending ? 'is-pending' : ''}`} role="status">
                 {workflowLabel(state)}
@@ -335,7 +462,7 @@ export function Workspace({
               {needs ? (
                 <div className="interaction-shell">
                   <h3>需要补充信息</h3>
-                  <p>{response.clarification?.question}</p>
+                  <p>请按表单补充本次操作所需的信息；不能安全填写的参数可在高级输入中查看。</p>
                   <span>
                     {state.continuationUnconfirmed
                       ? '续接结果未确认'
@@ -371,10 +498,12 @@ export function Workspace({
             </p>
           </aside>
         </div>
-      </main>
-      <footer className="page-footer">
-        Competition Copilot<span>明确输入 · 结构化状态 · 可追溯决策</span>
-      </footer>
+      </Content>
+      {!embedded && (
+        <footer className="page-footer">
+          Competition Copilot<span>明确输入 · 结构化状态 · 可追溯决策</span>
+        </footer>
+      )}
     </div>
   );
 }

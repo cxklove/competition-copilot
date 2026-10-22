@@ -10,6 +10,7 @@ from competition_copilot.agents.routing import (
     IntentModelInput,
     IntentRoutingProposal,
     RoutingProposalValidator,
+    explicit_intent_proposal,
     routing_catalog,
 )
 
@@ -29,8 +30,10 @@ class PreparedIntentModel:
             raise ValueError("INTENT_ALREADY_PREPARED")
         self.catalog = routing_catalog(facade)
         try:
-            self.proposal = IntentRoutingProposal.model_validate(
-                self.model.propose(IntentModelInput(request=self.request, catalog=self.catalog)))
+            proposal = explicit_intent_proposal(self.request)
+            if proposal is None:
+                proposal = self.model.propose(IntentModelInput(request=self.request, catalog=self.catalog))
+            self.proposal = IntentRoutingProposal.model_validate(proposal)
             # Model hints cannot establish whether authoritative input exists.
             # Normalize before BOTH preflight and final graph validation; the
             # unchanged validator derives missing fields from prepared arguments.

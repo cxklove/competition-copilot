@@ -2672,3 +2672,64 @@ Restart Local Runtime to load this composition; generated state is not durable.
 cd frontend
 npm run test:local
 ```
+
+### Explicit local demo actions
+
+`AgentRequest.intent` is an optional, additive operation selector using the existing
+AgentIntent enum. Omit it for natural-language model routing. The five guided demo
+operations prepare an untrusted deterministic routing proposal instead of invoking
+the intent model. Both pre-routing argument preparation and graph routing reuse this
+mapping and the existing routing validator, Facade and business services. An intent
+cannot supply arguments, results, an approval decision or execution authority.
+Unsupported explicit operations fail closed rather than falling back to inference.
+Restart the runtime to load the updated request schema and composition.
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/integration/test_explicit_local_actions.py
+.\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
+```
+
+### PX2.2 authoritative competition detail reads
+
+The additive `get_competition_details` READ capability uses the existing invocation
+transport and Facade. Explicit GET_COMPETITION_DETAILS prepares canonical IDs only;
+its detail read and result rendering make no LLM calls. Existing P4 outputs and all
+business decision/approval contracts retain their semantics. No HTTP API or MCP Tool
+was added (the new capability is explicitly excluded from the MCP exposure catalog).
+
+`application/competition_detail.py` owns the immutable query/projection and Reader.
+It depends only on CompetitionRepository, EligibilityPolicyProvider,
+SkillRequirementProvider and repositories/provenance.py's abstract reader.
+JsonSeedCompetitionRepository retains reviewed source/temporal metadata in memory;
+Application does no filesystem IO and never runs Eligibility/SkillGap or event services.
+The outer build_seed_agent accepts an injected requirement_provider for detail reads;
+Local composition supplies the existing JsonSkillRequirementProvider. Other adapters
+can inject the same abstraction; no provider JSON is passed through Runtime input.
+
+Competition-only queries enumerate editions without selecting one. Parent identity,
+exact policy/artifact target, null windows/endpoints, requirement versions, skill catalog,
+coverage and evidence are preserved. Missing sections remain partial reads; provider
+execution failures/corrupt data/identity mismatches are errors, not ordinary UNKNOWN.
+Nested snapshots/collections are immutable and stable-order JSON serializable.
+
+Full event history remains EVENT_HISTORY_PERSISTENCE_GAP. The read returns unavailable
+availability and never generates events or writes an Event Ledger. Current-session
+PlanDiff/events are separate evidence; manual controlled-demo changes are not official
+changes. No submission-window fact contract is added. P12/P13/P14 remain CLOSED_FROZEN;
+P15 is NOT_STARTED; PX3 is PLANNED.
+
+Release checkpoint: **PX2 Authoritative Competition Read Baseline** is suitable
+as the shared GitHub team reference. PX1 / PX2 Core = CLOSED_VERIFIED;
+PX2.1 = REVIEW_COMPLETE; PX2.2 = REVIEW_PASS. P12/P13/P14 remain CLOSED_FROZEN.
+PX2 Product Detail Enrichment is DEFERRED non-blocking product work; future PX2
+UX enrichment or separately authorized PX3 work starts from this baseline.
+Complete history remains unavailable (EVENT_HISTORY_PERSISTENCE_GAP), and current
+session evidence is not complete history. Submission window remains an unimplemented
+DATA_CONTRACT_GAP. Enrichment must preserve unknown facts rather than infer them.
+See the [release checkpoint](../docs/DEVELOPMENT_PLAN.md#px2-release-checkpoint--px2-authoritative-competition-read-baseline).
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/application/test_competition_detail.py backend/tests/integration/test_competition_detail_runtime.py
+.\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
+.\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
+```

@@ -158,6 +158,7 @@ def test_explicit_inventory_and_metadata(facade):
         "check_eligibility", "get_recommendations", "analyze_skill_gap", "build_plan",
         "build_competition_snapshot", "diff_competition_snapshot", "derive_competition_events",
         "analyze_event_impact", "decide_replanning", "revise_plan",
+        "get_competition_details",
     }
     metadata = facade.list_capabilities()
     assert {m.capability.value for m in metadata} == expected

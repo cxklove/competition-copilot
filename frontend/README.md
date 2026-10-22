@@ -1,6 +1,7 @@
-# Frontend workspace and runtime invocation contract
+# Competition Copilot frontend and runtime invocation contract
 
-The single React + TypeScript + Vite workspace presents current-page conversation,
+The React + TypeScript + Vite product shell opens on Dashboard and keeps Copilot
+as an independent page. The retained workspace presents current-page conversation,
 structured workflow states, clarification forms and explicit approval controls.
 The same RuntimeInvocationClient supports offline fake presets or the real local
 Agent invocation path or AgentArts-compatible trusted bridge, selected at the composition root.
@@ -408,3 +409,226 @@ the backend PlanDiff (draft -> cancelled, version +1). This uses a manual contro
 observation, **not a real official Huawei track deletion**. The frontend creates no
 Event/Impact/instruction/authority and computes no diff. Restart Local Runtime
 after upgrading; previously generated references are not durable.
+
+## Demo Polish 1: semantic results and error presentation
+
+The verified artifacts now render as recommendation cards, a skill comparison table
+and a plan timeline. Backend ordering, buckets, scores and decisions are unchanged.
+`verified-skill-overlap-v1=1` means explicit recorded overlap, never “100% suitable”.
+Missing skill facts and unspecified requirement levels remain unknown. Missing
+deadlines stay unset. Competition names are display labels from verified seed data,
+with an identity fallback for unknown names; labels never select or score candidates.
+
+Evidence, sources, original replies and raw audit snapshots remain available through
+keyboard-accessible disclosure controls. Manual controlled-demo sources are labelled
+as simulated changes. No frontend diff, authority or version is computed.
+
+The presentation composition retains validated public runtime error code/message
+without changing RuntimeInvocationClient, transport errors or workflow state.
+`NO_TARGET_CONSISTENT_REPLANNING_INPUT` explains the current plan limitation instead
+of suggesting a later retry. Explicit stale/consumed error identifiers have dedicated
+wording; an opaque `CORE_VALIDATION_ERROR` stays generic because the UI cannot infer
+whether it means stale state, replay or another validation failure. Advanced details
+preserve the supplied public code/message. No error triggers an automatic invocation.
+
+Run `npx tsx --test tests/results.test.tsx tests/local.test.tsx` from `frontend/`
+for presentation and real Local HTTP coverage; `npm test`, `npm run lint` and
+`npm run build` remain the full frontend validation commands. This polish is
+Post-P14 demo work; P15 implementation remains NOT_STARTED.
+
+### Demo Polish 1.1: recommendation presentation cleanup
+
+Recommendation deliveries show one bucket-count summary, the first five candidates
+in existing backend bucket/entry order, and an expandable remainder. Each card has
+one explanation and one source-grouped disclosure. Source cards group by URL and
+show the latest observation plus history count; profile facts are grouped by explicit
+skill ID. No candidate, bucket, rank or score is changed. Missing scores mean
+insufficient scoring information, never zero or a negative skill judgment.
+
+All validated recommendation, Evidence and Source artifacts, references and scoring
+configuration remain in a single advanced audit disclosure. Only their redundant
+visual blocks are removed. The original authoritative reply is folded at the bottom
+of the recommendation result; earlier conversation records remain available.
+
+### Demo Polish 1.2: skill gap and plan presentation
+
+Skill gap summaries translate the supplied decision, requirement coverage and item
+statuses. Known self-assessed ability with an unspecified required level stays
+undetermined; missing profile records never become a skill deficit. Ability and
+requirement provenance are grouped behind disclosures; full artifacts and references
+remain in one advanced audit section, with the original reply separately folded.
+
+Plan timelines use exactly the supplied milestones and their order. Existing
+uncertainty-resolution needs receive readable requirement/skill labels, draft plans
+display as drafts, and missing deadlines remain unset. Follow-up explanatory text
+is explicitly outside the authoritative milestone list. Complete IDs, original
+titles/descriptions, planning needs and dates remain accessible in audit.
+
+Recommendation source cards now consolidate observations of the same URL. The card
+shows metadata from the newest supplied observation and the number of distinct
+historical records. No source/evidence history is removed or written back. P7/P8,
+Runtime, registry and approval behavior are unchanged; this is frontend polish only.
+
+### Demo Polish 1.3: clarification and PlanDiff evidence aggregation
+
+Clarification fields remain backend-requested and use the existing typed continuation
+builder. Known target IDs use normal inputs; requested student profiles allow an
+explicit ID and optional user-supplied education, with no inferred facts. Plan inputs
+select only exact references already returned by the server. No field is treated as
+resolved until a runtime response says so. Original questions/enums remain in audit.
+
+The browser has no trusted SkillGap/capability argument assembler. Arbitrary capability
+arguments/invocations and unavailable plan structures therefore use an explicitly
+opened advanced JSON fallback, never a guessed payload assembled from context IDs.
+JSON textareas are mounted only after opening advanced input. Public client/Core
+validation, continuation identity, stale/replay guards and approval controls remain.
+
+PlanDiff keeps the supplied before/after, version and declared changes. Duplicate
+Source/Evidence attachments are consolidated into one source section and one audit
+snapshot containing all original artifacts and references. The decision chain only
+labels returned Event/Impact/Decision facts. Human approval wording additionally
+requires a completed revision with backend approval-request, approval-response and
+authority audit refs; explanation text or a status change alone is insufficient.
+No Impact, REPLAN, mutation, authorization or diff is computed in presentation code.
+
+### Demo Polish 2.1: explicit guided actions
+
+The composer retains natural-language chat and adds five explicit operations:
+eligibility, recommendations, skill gap, planning and plan revision. Buttons submit
+the existing AgentIntent with the page's explicit context through the same runtime
+client. They never provide capability arguments, results or authorization. Chat
+requests omit intent and continue to use configured intent routing.
+
+This requires the additive optional `AgentRequest.intent` transport field (the old
+public request only exposed text/context; explicit intent was internal graph state).
+Backend preparation and graph routing use the same deterministic proposal mapping
+and existing routing validator; explicit operations make zero intent model calls.
+Old requests remain valid. Generated schemas/types are exported from Python.
+
+Skill gap/planning buttons require an explicitly entered competition and edition;
+revision requires an explicitly selected exact PlanReference. These are UI hints,
+not business validation. Missing facts still use server clarification; planning
+still runs P7 first, and revision still requires event/impact/policy preparation
+and human approval. Buttons are locked during pending/clarification/approval states.
+No default entity, implicit plan selection, retry or business result is synthesized.
+
+## Post-P14 Product Experience Upgrade (PX): design handoff
+
+Product direction: Competition Copilot is a university competition lifecycle
+decision and growth platform. Dashboard becomes the default entry; Copilot remains
+a dedicated workspace and a contextual entry across business pages. The current
+workspace and semantic result components are the reusable implementation baseline;
+PX1 implementation is described below; later business pages remain planned.
+
+- **PX0 / Design: DOCUMENTED. PX1 / PX2 Core: CLOSED_VERIFIED. PX2.1: REVIEW_COMPLETE. PX2.2: REVIEW_PASS. PX3–PX6: PLANNED.**
+  P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED.
+- Planned navigation: 首页、赛事中心、我的赛事、我的能力、备赛计划、赛事动态、Copilot.
+  Approval Center placement remains a later navigation decision. Deliver incrementally.
+- PX1 establishes shell/navigation, Dashboard, Current Context Panel and basic
+  Empty/Loading states. Populate only from validated state and explicit selection;
+  show Empty/unavailable when a safe read path does not exist. No fabricated counts,
+  progress, profile-completeness percentages or inferred server history.
+- Existing explicit actions use the same Agent Runtime and Facade; context selection
+  carries exact authoritative references, not editable technical identities or authority.
+  Evidence stays accessible through Conclusion → Explanation → Evidence → Advanced Audit.
+- Task/Action Item, follow-state storage, completeness policy, notifications and
+  new persistence/API work require separate design/review; none is implied here.
+  Controlled Huawei observations remain demo-only, cloud smoke is not production,
+  and generated plans do not survive an in-memory runtime restart.
+
+Canonical page/interaction design: [PRODUCT_SPEC](../docs/PRODUCT_SPEC.md#post-p14-product-experience-design).
+PX1–PX6 scope, dependencies and acceptance gates:
+[DEVELOPMENT_PLAN](../docs/DEVELOPMENT_PLAN.md#post-p14-product-experience-upgrade-px).
+Authority/data-flow boundaries:
+[ARCHITECTURE](../docs/ARCHITECTURE.md#post-p14-product-experience-boundary).
+
+### PX1 — product shell, Dashboard and current context
+
+Status: CLOSED_VERIFIED. The design handoff above describes the PX0
+baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3–PX6 remain PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
+
+The default `#/home` presents current explicit context, the selected plan's known
+version/status, the most recent validated reply, a pending approval only when the
+live workflow supplies it, and links back to Copilot. Missing information uses
+empty states; there are no invented metrics, default targets, completeness scores
+or auto-selected plans. Context labels reuse existing presentation names; unknown
+names are not guessed from identifiers. Raw identities are folded in technical details.
+
+`#/copilot` retains the existing Workspace as one mounted instance. Minimal hash
+navigation supports browser back/forward and deep links without a router dependency.
+Changing pages hides/shows the workspace; it does not submit, reset conversation,
+clear drafts, choose a plan, reread server state or resume approval. Dashboard reads
+a UI snapshot, not a second workflow or a server current-plan registry. Selected
+versions may be stale; the server still owns validation, CAS and all approval authority.
+
+PX1 delivered five honest coming-soon pages. PX2 now activates 赛事中心;
+我的赛事、我的能力、备赛计划、赛事动态 remain coming-soon pages.
+The existing recommendation, skill-gap, planning, evidence and PlanDiff renderers,
+semantic clarification, explicit actions and approval controls remain in Copilot.
+Session/restart boundaries are unchanged. No Task, Event Feed, Notification Backend,
+Demo Mode or new business capability is implemented by PX1.
+
+Validation: frontend targeted 52 / full 247 tests passed; lint/build passed.
+`npm run test:responsive` passed for Local/AgentArts with 24 captured layouts,
+including Dashboard at 1440 and 1920 widths, with no horizontal overflow.
+Screenshots remain ignored local artifacts in `tmp/p14-7-e2e/`.
+
+### PX2.2 - Authoritative Competition Detail
+
+Status: REVIEW_PASS; PX2 Core is CLOSED_VERIFIED after Final Independent Review.
+P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED and PX3 remains PLANNED.
+
+The center preserves existing Runtime discovery, search and canonical catalog
+records. A direct `#/competitions/<encoded canonical id>` opens a fresh readonly
+query without requiring Discovery. Detail reads use explicit GET_COMPETITION_DETAILS,
+zero intent/explanation LLM calls and the existing Runtime/Agent/Facade path.
+They never read seed files, invoke providers or execute P5/P7 in the frontend.
+
+Generated schemas validate CompetitionDetailProjection before use. Competition-only
+queries return editions without selecting one. Edition/track selectors send exact
+canonical identities and update current context; no default edition/track is guessed.
+Copilot handoff remains a draft, not an automatic analysis or approval.
+
+Seven accessible tabs display authoritative entity snapshots, reviewed policy facts,
+full skill requirement artifacts/version/catalog, registration/competition windows,
+tracks and provenance. Unspecified proficiency remains unspecified; partial coverage
+is retained. Source URL grouping is visual only; complete projection, source metadata,
+evidence and result references remain in folded audit. Null time endpoints are unknown;
+submission windows are not invented. Personal decisions attach only for exact student
+and competition/edition/track matches, without running new eligibility or skill analysis.
+
+Full event history remains EVENT_HISTORY_PERSISTENCE_GAP. The history tab explicitly
+states that complete history is unavailable; exact-target current-session evidence is
+separate and never presented as a complete ledger. Controlled-demo sources remain
+manual demo evidence, not claims of real official changes. No persistence was added.
+
+#### Shared release checkpoint
+
+**PX2 Authoritative Competition Read Baseline** is ready as a shared GitHub team
+reference. PX1 / PX2 Core are CLOSED_VERIFIED; PX2.1 is REVIEW_COMPLETE and PX2.2
+is REVIEW_PASS. Later PX2 Detail UX Enrichment or separately authorized PX3 work
+continues from this stable checkpoint; this status sync does not commit or publish.
+
+**PX2 Product Detail Enrichment: DEFERRED, non-blocking product work.** Scope:
+center information density, richer detail organization, edition/track selection UX,
+visual/information structure polish, and more authoritative facts when data coverage
+increases. Unknown facts must never be inferred to enrich the page. Complete event
+history remains unavailable; current-session evidence is not complete history.
+Submission window remains DATA_CONTRACT_GAP and is not implemented.
+
+Validation commands (from frontend):
+
+```powershell
+npm run test:results
+npm run test:local
+npm test
+npm run lint
+npm run build
+```
+
+Backend schema exports/checks (from repository root):
+
+```powershell
+.\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
+.\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
+```

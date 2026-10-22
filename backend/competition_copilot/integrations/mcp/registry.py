@@ -205,6 +205,9 @@ def build_mcp_tool_registry() -> McpToolRegistry:
                             ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.EXPLAIN_REPLANNING,
                             ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
+        # PX2.2 is a Runtime product read, not an additional MCP Tool.
+        McpExposureDecision(CapabilityId.GET_COMPETITION_DETAILS,
+                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_RECOMMENDATIONS,
                             ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.REVISE_PLAN,

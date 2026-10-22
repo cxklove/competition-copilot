@@ -1,11 +1,11 @@
-import { RuntimeInvocationClient } from './runtime/client.ts';
+import { createPresentedClient } from './results/ErrorPresentation.tsx';
 import { LocalRuntimeTransport } from './runtime/local.ts';
 import type { ArtifactReader } from './results/artifacts.ts';
 
 export function createLocalClient(baseUrl: string) {
   let attachment: unknown;
   const config = { mode: 'LOCAL', baseUrl } as const;
-  const client = new RuntimeInvocationClient(
+  const client = createPresentedClient(
     new LocalRuntimeTransport(config, (value) => {
       attachment = value;
     }),

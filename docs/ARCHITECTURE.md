@@ -3126,3 +3126,72 @@ compatibility path, single-use handles, host lock and stale checks remain intact
 No public AgentRequest/AgentResponse contract, Domain truth, LLM provider or
 scoring rule changes. Frontend adds explicit track input and uses the existing
 plan selection/HITL/PlanDiff components without computing business results.
+
+## Post-P14 Product Experience Boundary
+
+PX 是独立的产品体验路线，不是 P15 Evaluation，也不重开 P12/P13/P14
+CLOSED_FROZEN 基线。PX0 / Design 已 DOCUMENTED，PX1 / PX2 Core 为 CLOSED_VERIFIED；
+PX2.1 REVIEW_COMPLETE、PX2.2 REVIEW_PASS，详情丰富度优化 DEFERRED，PX3–PX6 为 PLANNED。阶段状态与范围由
+[DEVELOPMENT_PLAN](DEVELOPMENT_PLAN.md#post-p14-product-experience-upgrade-px) 维护，
+页面、导航、状态与证据设计由
+[PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design) 维护。
+
+```text
+Dashboard / Competition / Profile / Plans / Updates / Approval / Copilot
+  -> explicit authoritative selection + existing Runtime invocation
+  -> Agent / LangGraph -> CapabilityFacade -> Application / Domain authorities
+  -> validated result / Evidence / PlanReference / actual PlanDiff
+  -> presentation, never browser-owned business truth or execution authority
+```
+
+PX1 Dashboard 已成为默认入口；轻量 hash navigation 不引入 router dependency。
+Copilot 保持单一 Workspace 挂载，切页不重置会话、计划选择或触发 Runtime invocation。
+首页读取现有 context/选择/已验证回复的只读展示 snapshot，不维护第二套 workflow。
+计划状态仅展示所选版本已有记录；没有状态记录不推断 draft，也不宣称是 registry 最新值。
+未完成业务页显示 Coming Soon；独立评审尚未完成。Copilot 仍是独立工作区与智能入口。
+页面 context 显示名称与版本，系统仍传递 exact student/competition/edition/track
+identity 和 PlanReference。现有 optional explicit intent 只选择操作；自然语言路径保留。
+页面不直接调用 Domain/Repository，不自行生成参数事实、结果、分数、影响、指令或审批 actor。
+无安全读取路径的 Dashboard 指标、关注记录、待办/历史等显示 Empty/不可用，
+不能从聊天记录推断完整服务端状态；不因此隐含新增 API、持久化或 capability。
+
+产品展示复用既有业务链；尤其 Event → Impact → ReplanningDecision → instruction
+preparation policy → authority-free proposal → Human Approval → authorized input →
+P11 execution → actual PlanDiff → registry CAS / lineage。Preparation != Authorization；
+精确版本/digest、scope、request/invocation、trusted actor、single-use continuation、
+stale/replay/mismatch 和 host lock 保护持续生效。
+
+所有页面采用 Conclusion → Explanation → Evidence → Advanced Audit；展示可折叠/聚合，
+完整 reason/source/verification/observed_at/result/evidence refs 仍可访问。
+Unknown / Blocked / Error / Waiting For Approval / Stale 保留不同语义，
+missing profile fact 不变成 deficit，PARTIAL 不变成 COMPLETE。
+Task/Action Item、画像完整度规则、我的赛事状态存储和 Notification Backend 都是待设计事项，
+不能由 UI 推进 Domain 状态机或推算业务百分比。
+
+已有 demo boundary 不变：Huawei 赛道移除是 manual controlled observation，
+不代表官方真实变化；BigModel smoke 不是生产部署；Local PlanRegistry in-memory，
+generated plans 在 host 重启后不保留。产品页面必须显式呈现这些限制。
+
+### PX2.2 authoritative readonly product data boundary
+
+Competition Center 通过既有 Runtime discovery 获取 Competition；详情通过显式
+GET_COMPETITION_DETAILS → CapabilityFacade → GetCompetitionDetailsTool →
+Application CompetitionDetailReader 获取 validated CompetitionDetailProjection。
+这是经审核的增量只读 capability，没有新增 HTTP API、MCP Tool、赛事事实或决策规则。
+产品 session 保留按 request/audit identity 绑定的已验证结果与原始 refs，防止新的列表请求
+覆盖 Copilot 旧结果；这个缓存不是 Repository、PlanRegistry 或新的业务 authority。
+详情页只展示同学生、同 competition/edition/track 的既有 P5/P7 结果，绝不运行决策公式。
+来源聚合只影响视图；完整 evidence/source/result refs 与 controlled-demo 标签保留。
+
+Reader 只依赖 CompetitionRepository、EligibilityPolicyProvider、SkillRequirementProvider
+和 CompetitionProvenanceReader。seed adapter 保留既有 competition_source / temporal_provenance；
+Application 不依赖 ingestion 或文件系统。输入按 canonical parent hierarchy 校验，无默认届次/赛道。
+输出深层 immutable、JSON-safe；政策事实不执行 P5，完整 requirement envelope 不执行 P7。
+详情显式路由和成功结果呈现均不调用 LLM，旧 intent / approval / P11 authority 不变。
+MCP 仅将新 capability 明确列为不暴露，原 Tool 集合不变。
+
+Section availability 复用 ObservationState，requested 单独区分未请求；provider None 不等于
+已确认没有规则，空 track 结果只表示仓库记录。读取失败、损坏及 identity mismatch 通过错误路径拒绝，
+不伪装 UNKNOWN。完整事件历史仍是 EVENT_HISTORY_PERSISTENCE_GAP，不建立历史仓库；
+只将 exact-target session event 单列为当前会话证据，受控变化始终标识 demo/manual。
+submission window 不存在正式 contract，继续未提供。P12–P14 冻结，P15 未开始。

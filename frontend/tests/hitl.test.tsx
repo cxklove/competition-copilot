@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom';
 import fixtures from './fixtures/runtime.json' with { type: 'json' };
 import { RuntimeInvocationClient, RuntimeClientError } from '../src/runtime/client.ts';
 import { FakeRuntimeTransport } from '../src/runtime/fake.ts';
-import type { PublicRuntimeResult } from '../src/runtime/generated/contracts.ts';
+import type { PublicRuntimeResult, PlanReference } from '../src/runtime/generated/contracts.ts';
 import {
   interactionFrom,
   clarificationEnvelope,
@@ -61,7 +61,12 @@ test('clarification question and requested field produce exact P12 continuation,
   const { view, fake } = setup([{ body: fixtures.clarification }, { body: fixtures.completed }]);
   await begin(view);
   assert.ok(view.getByRole('heading', { name: '补充所需信息' }));
-  assert.ok(view.getAllByText(fixtures.clarification.response.clarification.question).length);
+  assert.ok(view.getByText('还需要补充一些信息'));
+  assert.ok(
+    view.container
+      .querySelector('.clarification-audit pre')!
+      .textContent?.includes(fixtures.clarification.response.clarification.question),
+  );
   const panel = view.getByRole('region', { name: '补充所需信息' });
   assert.equal(within(panel).getAllByRole('textbox').length, 1);
   fireEvent.change(within(panel).getByRole('textbox', { name: /竞赛 ID/ }), {
@@ -142,7 +147,9 @@ test('typed nested clarification JSON is validated, with no default profile fact
   body.response.clarification.fields = ['STUDENT_PROFILE'];
   const { view, fake } = setup([{ body }, { body: fixtures.completed }]);
   await begin(view);
-  const field = view.getByRole('textbox', { name: /学生画像/ }) as HTMLTextAreaElement;
+  assert.equal(view.container.querySelector('.hitl-panel textarea'), null);
+  fireEvent.click(view.getByText('查看高级输入（学生画像）'));
+  const field = (await view.findByRole('textbox', { name: /完整学生画像/ })) as HTMLTextAreaElement;
   fireEvent.change(field, { target: { value: 'not json' } });
   await act(async () => {
     fireEvent.submit(field.form!);
@@ -154,6 +161,111 @@ test('typed nested clarification JSON is validated, with no default profile fact
     fireEvent.submit(field.form!);
   });
   assert.deepEqual(fake.calls[1].clarification?.values, { student: { id: 'student-explicit' } });
+});
+
+test('capability arguments are an explicit advanced fallback, with no default JSON or inferred payload', async () => {
+  const body = structuredClone(fixtures.clarification);
+  body.response.clarification.fields = ['CAPABILITY_ARGUMENTS'];
+  body.response.clarification.question =
+    'Provide explicit structured context: CAPABILITY_ARGUMENTS';
+  body.response.message = body.response.clarification.question;
+  const stillNeeds = structuredClone(body);
+  stillNeeds.continuation_ref = 'opaque-next';
+  const { view, fake } = setup([{ body }, { body: stillNeeds }]);
+  await begin(view, '分析我的技能差距');
+  const panel = view.getByRole('region', { name: '补充所需信息' });
+  assert.ok(within(panel).getByText('需要补充高级参数'));
+  assert.equal(panel.querySelector('textarea'), null);
+  const main = view.container.cloneNode(true) as HTMLElement;
+  main.querySelectorAll('details').forEach((item) => item.remove());
+  assert.ok(
+    !/CAPABILITY_ARGUMENTS|Provide explicit structured context|能力参数 JSON/.test(
+      main.textContent!,
+    ),
+  );
+  assert.equal(fake.calls.length, 1);
+  await act(async () => {
+    fireEvent.click(within(panel).getByRole('button', { name: '提交补充信息' }));
+  });
+  assert.equal(fake.calls.length, 1);
+  assert.ok(view.getByRole('status').textContent?.includes('需要补充信息'));
+  fireEvent.click(within(panel).getByText('查看高级输入'));
+  const field = await within(panel).findByRole('textbox', { name: '高级参数（JSON）' });
+  fireEvent.change(field, { target: { value: '{"payload":{}}' } });
+  await act(async () => {
+    fireEvent.click(within(panel).getByRole('button', { name: '提交补充信息' }));
+  });
+  assert.equal(fake.calls.length, 2);
+  assert.deepEqual(fake.calls[1].clarification?.values, { arguments_json: '{"payload":{}}' });
+  assert.equal(
+    fake.calls[1].clarification?.clarification_id,
+    body.response.clarification.clarification_id,
+  );
+  assert.equal(fake.calls[1].clarification?.source_request_id, body.response.request_id);
+  assert.equal('request' in fake.calls[1], false);
+  assert.ok(view.getByRole('status').textContent?.includes('需要补充信息'));
+  assert.equal(view.queryByRole('heading', { name: '回复已就绪' }), null);
+});
+
+test('requested student profile uses a semantic form and omits all unentered facts', async () => {
+  const body = structuredClone(fixtures.clarification);
+  body.response.clarification.fields = ['STUDENT_PROFILE'];
+  const { view, fake } = setup([{ body }, { body: fixtures.completed }]);
+  await begin(view);
+  const panel = view.getByRole('region', { name: '补充所需信息' });
+  assert.equal(panel.querySelector('textarea'), null);
+  fireEvent.change(within(panel).getByRole('textbox', { name: '学生画像' }), {
+    target: { value: 'student-semantic' },
+  });
+  await act(async () => {
+    fireEvent.click(within(panel).getByRole('button', { name: '提交补充信息' }));
+  });
+  assert.deepEqual(fake.calls[1].clarification?.values, { student: { id: 'student-semantic' } });
+  assert.equal(fake.calls.length, 2);
+});
+
+test('plan clarification selects only an existing authoritative reference with no digest or version synthesis', async () => {
+  const body = structuredClone(fixtures.clarification);
+  body.response.clarification.fields = ['PLAN'];
+  const fake = new FakeRuntimeTransport('LOCAL', [{ body }, { body: fixtures.completed }]);
+  const client = new RuntimeInvocationClient(fake, config);
+  const ref = fixtures.approval.response.approval_request.before_plan;
+  const view = render(
+    <Workspace
+      client={client}
+      localPlan={ref as PlanReference}
+      nextRequestId={() => 'request-1'}
+      now={now}
+    />,
+  );
+  await begin(view);
+  const panel = view.getByRole('region', { name: '补充所需信息' });
+  assert.equal(panel.querySelector('textarea'), null);
+  const select = within(panel).getByRole('combobox', { name: '选择计划' });
+  assert.equal((select as HTMLSelectElement).value, '');
+  fireEvent.change(select, { target: { value: '0' } });
+  await act(async () => {
+    fireEvent.click(within(panel).getByRole('button', { name: '提交补充信息' }));
+  });
+  assert.deepEqual(fake.calls[1].clarification?.values, { plan_ref: ref });
+});
+
+test('semantic clarification values still fail existing public contract validation before invocation', async () => {
+  const body = structuredClone(fixtures.clarification);
+  body.response.clarification.fields = ['STUDENT_PROFILE'];
+  const { view, fake } = setup([{ body }]);
+  await begin(view);
+  fireEvent.click(view.getByText('查看高级输入（学生画像）'));
+  const input = await view.findByRole('textbox', { name: '完整学生画像（JSON）' });
+  fireEvent.change(input, {
+    target: { value: '{"id":"student","approved_by_ref":"browser-forgery"}' },
+  });
+  await act(async () => {
+    fireEvent.click(view.getByRole('button', { name: '提交补充信息' }));
+  });
+  assert.equal(fake.calls.length, 1);
+  assert.ok(view.getByRole('alert'));
+  assert.ok(view.getByRole('status').textContent?.includes('需要补充信息'));
 });
 
 test('clarification duplicate submit produces one continuation while pending', async () => {
@@ -175,7 +287,9 @@ test('clarification duplicate submit produces one continuation while pending', a
   );
   const view = render(<Workspace client={client} nextRequestId={() => 'request-1'} now={now} />);
   await begin(view);
-  const field = view.getByRole('textbox', { name: /竞赛 ID/ }) as HTMLTextAreaElement;
+  const field = within(view.getByRole('region', { name: '补充所需信息' })).getByRole('textbox', {
+    name: /竞赛 ID/,
+  }) as HTMLInputElement;
   fireEvent.change(field, { target: { value: 'competition-2' } });
   await act(async () => {
     fireEvent.submit(field.form!);

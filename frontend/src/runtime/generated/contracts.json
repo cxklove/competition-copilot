@@ -119,6 +119,17 @@
             "default": null,
             "title": "Conversation Id"
           },
+          "intent": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AgentIntent"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
           "request_id": {
             "minLength": 1,
             "title": "Request Id",
@@ -195,6 +206,7 @@
         "enum": [
           "list_competitions",
           "get_competition",
+          "get_competition_details",
           "list_competition_editions",
           "get_competition_edition",
           "list_edition_tracks",
@@ -855,6 +867,24 @@
         "title": "AgentContext",
         "type": "object"
       },
+      "AgentIntent": {
+        "enum": [
+          "DISCOVER_COMPETITIONS",
+          "GET_COMPETITION_DETAILS",
+          "CHECK_ELIGIBILITY",
+          "GET_RECOMMENDATIONS",
+          "ANALYZE_SKILL_GAP",
+          "BUILD_PLAN",
+          "CHECK_COMPETITION_CHANGES",
+          "EXPLAIN_REPLANNING",
+          "REQUEST_PLAN_REVISION",
+          "APPROVE_PLAN_REVISION",
+          "REJECT_PLAN_REVISION",
+          "UNKNOWN"
+        ],
+        "title": "AgentIntent",
+        "type": "string"
+      },
       "CompetitionTarget": {
         "additionalProperties": false,
         "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
@@ -1008,6 +1038,17 @@
         ],
         "default": null,
         "title": "Conversation Id"
+      },
+      "intent": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AgentIntent"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
       },
       "request_id": {
         "minLength": 1,
@@ -1591,6 +1632,7 @@
         "enum": [
           "list_competitions",
           "get_competition",
+          "get_competition_details",
           "list_competition_editions",
           "get_competition_edition",
           "list_edition_tracks",

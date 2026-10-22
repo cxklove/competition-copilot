@@ -68,6 +68,7 @@ from competition_copilot.agents.routing import (
     RoutingValidationResult,
     RoutingValidationStatus,
     context_conflicts,
+    explicit_intent_proposal,
     routing_catalog,
 )
 from competition_copilot.agents.state import AgentState
@@ -338,11 +339,13 @@ def build_competition_copilot_graph(
 
     def intent(channels):
         state = channels["state"]
-        if state.intent == AgentIntent.UNKNOWN and intent_model is not None:
+        if state.intent == AgentIntent.UNKNOWN and (state.request.intent is not None or intent_model is not None):
             # Explicit known intent always bypasses the model. No parameters,
             # identities, approvals or Domain results may come from the model.
             try:
-                raw = intent_model.propose(IntentModelInput(request=state.request, catalog=catalog))
+                raw = explicit_intent_proposal(state.request)
+                if raw is None:
+                    raw = intent_model.propose(IntentModelInput(request=state.request, catalog=catalog))
             except Exception:
                 return _failure(state, AgentErrorCode.TOOL_UNAVAILABLE, "INTENT_MODEL_FAILED")
             try:
@@ -558,7 +561,9 @@ def build_competition_copilot_graph(
     def explain(channels):
         state, receipt = channels["state"], channels["receipt"]
         context = build_explanation_context(state, receipt)
-        rendering = generate_explanation(context, explanation_model)
+        # Product detail reads return authoritative data without any model call.
+        rendering = generate_explanation(context, None if receipt.capability ==
+            "get_competition_details" else explanation_model)
         state = _replace(state, audit=_merge_audit(state.audit, AuditReferences(results=context.result_refs)))
         response = AgentResponse(
             request_id=state.request.request_id, intent=state.intent,

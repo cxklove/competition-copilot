@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { useMemo, useState } from 'react';
-import { Workspace } from './workspace/Workspace.tsx';
+import { ProductApp } from './workspace/ProductApp.tsx';
 import { createDemoClient, readDemoArtifacts } from './demo/client.ts';
 import type { DemoScenario } from './demo/client.ts';
 import './styles.css';
@@ -22,16 +22,14 @@ function RuntimeApp() {
     [],
   );
   return (
-    <Workspace
+    <ProductApp
       {...composition}
       localPlan={localPlan as PlanReference}
-      runtimeLabel={
-        agentarts ? 'AGENTARTS · Runtime transport' : 'LOCAL · 离线 Agent / 真实业务服务'
-      }
+      runtimeLabel={agentarts ? 'AGENTARTS · Runtime transport' : 'LOCAL · 本地 Runtime'}
       invocationNote={
         agentarts
           ? '通过受信服务端边界调用 Runtime；业务结论以返回的验证结果为准。'
-          : '使用真实本地业务服务与离线意图提案；示例画像/受控事件不代表真实个人或赛事历史。'
+          : '使用真实本地业务服务；意图模式以服务端配置为准。示例画像/受控事件不代表真实个人或赛事历史。'
       }
     />
   );
@@ -83,7 +81,7 @@ function DemoApp() {
           <small>切换场景会清空当前演示会话。</small>
         </details>
       )}
-      <Workspace key={scenario} client={client} readArtifacts={readDemoArtifacts} />
+      <ProductApp key={scenario} client={client} readArtifacts={readDemoArtifacts} />
     </>
   );
 }

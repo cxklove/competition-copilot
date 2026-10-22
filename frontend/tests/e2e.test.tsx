@@ -59,7 +59,11 @@ async function send(view: View, text: string) {
   });
 }
 async function settled(view: View) {
-  await view.findByRole('heading', { name: '回复已就绪' }, timeout);
+  await view.findByRole(
+    'heading',
+    { name: /^(回复已就绪|推荐结果|技能差距分析|备赛计划)$/ },
+    timeout,
+  );
   assert.equal(view.queryByRole('alert'), null);
 }
 function artifacts(value: Composition, index = value.deliveries.length - 1) {
@@ -133,8 +137,10 @@ for (const scenario of scenarioMatrix) {
       assert.equal(value.calls[0].request!.request_id, 'request-1');
       assert.equal(value.deliveries[0].runtime.response!.request_id, 'request-1');
       assert.ok(artifacts(value).some((artifact) => artifact.model === scenario.model));
-      if (scenario.status) assert.ok(view.getAllByText(scenario.status).length);
-      if (scenario.status === 'unknown' || scenario.status === 'undetermined')
+      if (scenario.model === 'SkillGapDecision')
+        assert.ok(view.getByText('当前结论：暂无法完整判断'));
+      else if (scenario.status) assert.ok(view.getAllByText(scenario.status).length);
+      if (scenario.status === 'unknown')
         assert.ok(view.getAllByText(/返回结果保留不确定性/).length);
       for (const entry of view.container.querySelectorAll('[data-request-id]'))
         assert.equal(entry.getAttribute('data-request-id'), 'request-1');
@@ -143,9 +149,9 @@ for (const scenario of scenarioMatrix) {
         if (decision.model !== 'EligibilityDecision') throw Error('P5 result missing');
         const section = view.getByRole('region', { name: `结果 ${decision.ref.ref_id}` });
         assert.deepEqual(
-          [...section.querySelectorAll(':scope > .evidence-list > li strong')].map(
-            (e) => e.textContent,
-          ),
+          [
+            ...section.querySelectorAll(':scope > .evidence-details > .evidence-list > li strong'),
+          ].map((e) => e.textContent),
           decision.value.evidence!.map((e) => e.code),
         );
         const source = decision.value.evidence!.find((e) => e.source)!.source!;
@@ -271,7 +277,7 @@ for (const decision of ['APPROVE', 'REJECT'] as const) {
         assert.ok(view.getByRole('region', { name: '方案变更' }));
         assert.ok(view.getByRole('heading', { name: '变更前' }));
         assert.ok(view.getByRole('heading', { name: '变更后' }));
-        assert.ok(view.getByText('方案状态：active → cancelled'));
+        assert.ok(view.getByText('方案状态：执行中 → 已取消'));
       } else assert.equal(view.queryByRole('region', { name: '方案变更' }), null);
       stages.push(semanticTrace(value, view.container));
       // Explicit adversarial replay is a test call, never a UI retry. It cannot
@@ -571,7 +577,16 @@ test('cross-runtime unknown reasons and untrusted source data remain escaped; ex
       assert.ok(view.getByText(/javascript:attack\(\).*链接未启用/));
       assert.ok(view.getAllByText('ineligible').length);
       assert.equal(view.queryByRole('button', { name: /APPROVE/ }), null);
-      outputs.push(view.container.querySelector('.grounded-results')!.textContent);
+      const structured = view.container
+        .querySelector('.grounded-results')!
+        .cloneNode(true) as HTMLElement;
+      // Original response text is deliberately retained in raw audit. Compare
+      // the structured presentation separately; its facts cannot follow prose.
+      structured.querySelectorAll('pre').forEach((item) => item.remove());
+      assert.ok(
+        view.container.querySelector('.grounded-results pre')!.textContent?.includes(message),
+      );
+      outputs.push(structured.textContent);
       view.unmount();
     }
     assertParity(outputs[0], outputs[1]);

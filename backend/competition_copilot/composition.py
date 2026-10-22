@@ -14,10 +14,12 @@ from competition_copilot.agents.explanation import ExplanationModel
 from competition_copilot.agents.graph import build_competition_copilot_graph
 from competition_copilot.agents.human_contracts import HumanResponseInterpreter
 from competition_copilot.agents.routing import IntentModel
+from competition_copilot.application.competition_detail import CompetitionDetailReader
 from competition_copilot.application.competition_snapshots import (
     CompetitionSnapshotBuilder,
 )
 from competition_copilot.application.eligibility import CompetitionEligibilityEvaluator
+from competition_copilot.application.skill_requirements import SkillRequirementProvider
 from competition_copilot.domain.baseline_plan_builder import (
     BaselineCompetitionPlanBuilder,
 )
@@ -53,6 +55,7 @@ from competition_copilot.tools.competition import (
     ListCompetitionsTool,
     ListEditionTracksTool,
 )
+from competition_copilot.tools.competition_detail import GetCompetitionDetailsTool
 
 
 @dataclass(frozen=True)
@@ -67,6 +70,7 @@ def build_seed_agent(
     intent_model: IntentModel | None = None,
     explanation_model: ExplanationModel | None = None,
     human_interpreter: HumanResponseInterpreter | None = None,
+    requirement_provider: SkillRequirementProvider | None = None,
 ) -> AgentComposition:
     """Assemble the frozen authorities; caller supplies every workflow argument.
 
@@ -77,6 +81,9 @@ def build_seed_agent(
     policies = JsonEligibilityPolicyProvider(policy_directory)
     facade = AgentCapabilityFacade(
         read_tools={
+            **({CapabilityId.GET_COMPETITION_DETAILS: GetCompetitionDetailsTool(
+                CompetitionDetailReader(repository, policies, requirement_provider, repository))}
+               if requirement_provider is not None else {}),
             CapabilityId.LIST_COMPETITIONS: ListCompetitionsTool(repository),
             CapabilityId.GET_COMPETITION: GetCompetitionTool(repository),
             CapabilityId.LIST_EDITIONS: ListCompetitionEditionsTool(repository),

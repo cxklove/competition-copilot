@@ -1,5 +1,8 @@
 """Resolve only server-retained public result JSON pointers; no decisions/diffs."""
 
+from competition_copilot.application.competition_detail import (
+    CompetitionDetailProjection,
+)
 from competition_copilot.domain.decision import Evidence
 from competition_copilot.domain.eligibility import EligibilityDecision
 from competition_copilot.domain.plan import CompetitionPlan
@@ -15,6 +18,7 @@ from competition_copilot.tools.competition import (
 )
 
 PUBLIC_MODELS = {model.__name__: model for model in (
+    CompetitionDetailProjection,
     EligibilityDecision, SkillGapDecision, CompetitionPlan, RecommendationRankingResult,
     ListCompetitionsOutput, GetCompetitionOutput,
 )}

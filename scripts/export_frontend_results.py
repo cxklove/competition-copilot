@@ -16,6 +16,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from competition_copilot.agents.contracts import AgentResponse, PlanReference
+from competition_copilot.application.competition_detail import (
+    CompetitionDetailProjection,
+)
 from competition_copilot.domain.decision import Evidence
 from competition_copilot.domain.eligibility import EligibilityDecision
 from competition_copilot.domain.plan import CompetitionPlan
@@ -31,7 +34,7 @@ from competition_copilot.tools.competition import (
     ListCompetitionsOutput,
 )
 
-MODELS = (EligibilityDecision, RecommendationEvaluation, SkillGapDecision,
+MODELS = (CompetitionDetailProjection, EligibilityDecision, RecommendationEvaluation, SkillGapDecision,
           PlanDiff, Evidence, SourceMetadata, CompetitionPlan, RecommendationRankingResult,
           ListCompetitionsOutput, GetCompetitionOutput)
 MODEL_BY_NAME = {model.__name__: model for model in MODELS}

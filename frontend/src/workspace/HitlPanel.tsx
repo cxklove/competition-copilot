@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { ClarificationPanel } from './ClarificationPanel.tsx';
+import type { PlanReference } from '../runtime/generated/contracts.ts';
 import type {
   AgentResponse,
   ApprovalDecision,
   ClarificationValues,
 } from '../runtime/generated/contracts.ts';
-import schemas from '../runtime/generated/contracts.json' with { type: 'json' };
-import { clarificationFields } from './interactions.ts';
 import type { PublicInteraction } from './interactions.ts';
 import type { InteractionResult } from './useConversation.ts';
 
@@ -15,117 +15,26 @@ export function HitlPanel({
   disabled,
   clarify,
   decide,
+  plans,
 }: {
   response: AgentResponse;
   interaction: PublicInteraction | null;
   disabled: boolean;
+  plans?: readonly PlanReference[];
   clarify: (token: string, values: ClarificationValues) => Promise<InteractionResult>;
   decide: (token: string, decision: ApprovalDecision) => Promise<InteractionResult>;
 }) {
-  const [values, setValues] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const locked = disabled || !interaction;
   if (response.outcome === 'NEEDS_CLARIFICATION' && response.clarification) {
-    const proposal = response.clarification;
-    const unsupported = proposal.fields.some((field) => !clarificationFields[field]);
     return (
-      <section className="hitl-panel" aria-labelledby="clarification-title">
-        <h3 id="clarification-title">补充所需信息</h3>
-        <p>{proposal.question}</p>
-        {interaction?.context && (
-          <p className="context-summary">
-            原请求上下文：
-            {Object.entries(interaction.context)
-              .filter(
-                ([key, value]) => value != null && key !== 'plan_ref' && key !== 'profile_ref',
-              )
-              .map(([key, value]) => `${key}: ${value}`)
-              .join(' · ') || '未提供标识字段'}
-          </p>
-        )}
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (locked || unsupported) return;
-            setError('');
-            try {
-              const answers: Record<string, unknown> = {};
-              for (const field of proposal.fields) {
-                const config = clarificationFields[field]!;
-                const raw = values[field] ?? '';
-                if (!raw.trim()) throw new Error('required');
-                answers[config.key] = config.json ? JSON.parse(raw) : raw;
-              }
-              void clarify(interaction!.token, answers as ClarificationValues).then((result) => {
-                if (!result.accepted) setError(result.error ?? '交互已失效。');
-              });
-            } catch {
-              setError('请完整填写所请求字段；JSON 项须使用合法的结构化对象。');
-            }
-          }}
-        >
-          <fieldset disabled={locked || unsupported}>
-            <legend>本次需要填写的字段</legend>
-            {proposal.fields.map((field) => {
-              const config = clarificationFields[field];
-              const id = `clarify-${proposal.clarification_id}-${field}`;
-              if (!config)
-                return (
-                  <p key={field} className="unsupported-field">
-                    {field} 需要服务端可信上下文，不能在浏览器生成。
-                  </p>
-                );
-              return (
-                <div className="clarification-field" key={field}>
-                  <label htmlFor={id}>
-                    {config.label}
-                    <small>{field}</small>
-                  </label>
-                  {field === 'INTENT' ? (
-                    <select
-                      id={id}
-                      value={values[field] ?? ''}
-                      required
-                      onChange={(e) => setValues({ ...values, [field]: e.target.value })}
-                    >
-                      <option value="" disabled>
-                        请选择意图
-                      </option>
-                      {schemas.AgentArtsInvocationEnvelope.$defs.AgentIntent.enum.map((value) => (
-                        <option key={value} value={value}>
-                          {value}
-                        </option>
-                      ))}
-                    </select>
-                  ) : config.json || field === 'CAPABILITY_ARGUMENTS' ? (
-                    <textarea
-                      id={id}
-                      rows={3}
-                      required
-                      value={values[field] ?? ''}
-                      onChange={(e) => setValues({ ...values, [field]: e.target.value })}
-                    />
-                  ) : (
-                    <input
-                      id={id}
-                      required
-                      value={values[field] ?? ''}
-                      onChange={(e) => setValues({ ...values, [field]: e.target.value })}
-                    />
-                  )}
-                </div>
-              );
-            })}
-            <button className="send-button" type="submit" disabled={locked || unsupported}>
-              提交补充信息
-            </button>
-          </fieldset>
-        </form>
-        {error && <p role="alert">{error}</p>}
-        <p className="hitl-note">
-          只提交本次要求的字段。标识是否匹配、是否存在冲突，仍由 Runtime/Core 验证。
-        </p>
-      </section>
+      <ClarificationPanel
+        proposal={response.clarification}
+        interaction={interaction}
+        disabled={disabled}
+        plans={plans}
+        clarify={clarify}
+      />
     );
   }
   if (response.outcome !== 'WAITING_FOR_APPROVAL' || !response.approval_request) return null;

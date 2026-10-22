@@ -19,6 +19,7 @@ from competition_copilot.repositories.competition import (
     RepositoryEntityNotFoundError,
     RepositoryEntityType,
 )
+from competition_copilot.repositories.provenance import CompetitionProvenance
 
 
 class SeedRepositoryLoadError(ValueError):
@@ -170,6 +171,26 @@ class JsonSeedCompetitionRepository(CompetitionRepository):
     def __init__(self, seed_dir: Path) -> None:
         loaded = _load_seeds(Path(seed_dir))
         self._indexes = _build_indexes(loaded)
+        records = []
+        for _, seed in loaded:
+            identity = {"competition_id": seed.competition.id, "edition_id": seed.edition.id}
+            records.extend(CompetitionProvenance(**identity, section=section,
+                source=seed.competition_source) for section in ("competition", "edition"))
+            records.append(CompetitionProvenance(**identity, section="time_windows",
+                source=seed.competition_source,
+                temporal=tuple(item.model_dump() for item in seed.temporal_provenance)))
+            records.extend(CompetitionProvenance(**identity, track_id=track.id,
+                section="track", source=track.source) for track in seed.tracks)
+        self._provenance = tuple(sorted(records, key=lambda p: (
+            p.competition_id, p.edition_id, p.section, p.track_id or "")))
+
+    def read_provenance(self, competition_id: str,
+                        edition_id: str | None = None) -> tuple[CompetitionProvenance, ...]:
+        self.get_competition(competition_id)
+        if edition_id is not None and self.get_edition(edition_id).competition_id != competition_id:
+            raise ValueError("Provenance edition parent mismatch")
+        return tuple(p for p in self._provenance if p.competition_id == competition_id
+                     and (edition_id is None or p.edition_id == edition_id))
 
     def list_competitions(self) -> list[Competition]:
         indexes = self._indexes

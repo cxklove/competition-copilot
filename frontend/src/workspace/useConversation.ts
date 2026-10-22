@@ -1,9 +1,12 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
+import { errorDetails } from '../results/ErrorPresentation.tsx';
+import type { ErrorDetails } from '../results/ErrorPresentation.tsx';
 import { RuntimeClientError } from '../runtime/client.ts';
 import { validateInput } from '../runtime/validation.ts';
 import type { RuntimeInvocationClient, ResumeEnvelope } from '../runtime/client.ts';
 import type {
   AgentContext,
+  AgentIntent,
   AgentRequest,
   ApprovalDecision,
   ClarificationValues,
@@ -21,6 +24,7 @@ export function useConversation(
   now: () => string = () => new Date().toISOString(),
 ) {
   const [state, dispatch] = useReducer(conversationReducer, initialState);
+  const [presentationError, setPresentationError] = useState<ErrorDetails | null>(null);
   const pending = useRef(false);
   const generation = useRef(0);
   const mounted = useRef(true);
@@ -54,6 +58,7 @@ export function useConversation(
     pending.current = true;
     current.current = null;
     const attempt = ++generation.current;
+    setPresentationError(null);
     if (freshRequest) {
       try {
         freshRequest = validateInput({ request: freshRequest }).request!;
@@ -90,7 +95,8 @@ export function useConversation(
         dispatch({ type: 'RESOLVE', attempt, response: result.response, interaction });
       }
     } catch (error) {
-      if (mounted.current && generation.current === attempt)
+      if (mounted.current && generation.current === attempt) {
+        setPresentationError(errorDetails(error));
         dispatch({
           type: 'ERROR',
           attempt,
@@ -98,13 +104,19 @@ export function useConversation(
           code: error instanceof RuntimeClientError ? error.code : 'TRANSPORT_ERROR',
           continuation: !!continuation,
         });
+      }
     } finally {
       if (generation.current === attempt) pending.current = false;
     }
     return { accepted: true };
   }
 
-  function submit(text: string, studentId: string, explicitContext: AgentContext = {}) {
+  function submit(
+    text: string,
+    studentId: string,
+    explicitContext: AgentContext = {},
+    intent?: AgentIntent,
+  ) {
     if (
       !text.trim() ||
       pending.current ||
@@ -118,6 +130,7 @@ export function useConversation(
       {
         request_id: nextRequestId(),
         user_message: text.trim(),
+        ...(intent ? { intent } : {}),
         context: {
           ...explicitContext,
           ...(studentId.trim() ? { student_id: studentId.trim() } : {}),
@@ -135,6 +148,7 @@ export function useConversation(
     if (pending.current) return;
     current.current = null;
     context.current = undefined;
+    setPresentationError(null);
     generation.current++;
     dispatch({ type: 'NEW_WORKFLOW' });
   }
@@ -189,5 +203,5 @@ export function useConversation(
       'APPROVAL_RESPONSE',
     );
   }
-  return { state, submit, retry, startNew, clarify, decide };
+  return { state, presentationError, submit, retry, startNew, clarify, decide };
 }

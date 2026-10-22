@@ -159,7 +159,7 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
             approval_request_id=nonce + "/approval", interaction_created_at=clock())
         bindings = Bindings(frame, clock=clock, current_plan=lambda reference:
                             PlanReference.from_plan(registry.get_current(reference.plan_id)))
-        if cloud_models is None:
+        if cloud_models is None and request.intent is None:
             model = OfflineIntentModel(request)
         else:
             from competition_copilot.integrations.local_runtime.prepared_intent import (
@@ -167,15 +167,16 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
                 retain_competition_choices,
             )
 
-            model = PreparedIntentModel(cloud_models.intent, request)
+            model = PreparedIntentModel(cloud_models.intent if cloud_models else None, request)
         composition = build_seed_agent(seed_directory=root / "data/seed", policy_directory=root / "data/eligibility",
             inputs=bindings, scoring=RecommendationScoringEngine([WeightedSuitabilityScorer(VerifiedSkillOverlapScorer())]),
             intent_model=model,
             explanation_model=cloud_models.explanation if cloud_models else None,
-            human_interpreter=cloud_models.human_interpreter if cloud_models else None)
-        if cloud_models is not None:
-            # Provider runs once; the already-built P12 graph holds this SAME
-            # prepared model object. No second graph, Agent or routing policy.
+            human_interpreter=cloud_models.human_interpreter if cloud_models else None,
+            requirement_provider=requirements)
+        if cloud_models is not None or request.intent is not None:
+            # Natural-language routing calls the provider once; explicit actions
+            # call it zero times. Both use the same preparation/validation path.
             model.prepare(composition.facade, frame)
             bindings.on_resume = model.observe_resume
             bindings.on_retain = lambda pending: retain_competition_choices(model, composition.facade, pending)
@@ -185,6 +186,11 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         context = request.context
         student = profiles.get(context.student_id)
         payload = {}
+        if capability == "get_competition_details":
+            payload = {key: value for key, value in {
+                "competition_id": context.competition_id, "edition_id": context.edition_id,
+                "track_id": context.track_id,
+            }.items() if value is not None}
         if capability in ("get_competition", "check_eligibility"):
             payload = {key: value for key, value in {
                 "competition_id": context.competition_id,

@@ -7,6 +7,8 @@ import { RuntimeInvocationClient } from '../src/runtime/client.ts';
 import { FakeRuntimeTransport } from '../src/runtime/fake.ts';
 import type { RuntimeMode } from '../src/runtime/transport.ts';
 import type { AgentResponse } from '../src/runtime/generated/contracts.ts';
+import localPlan from '../src/demo/local-plan.json' with { type: 'json' };
+import type { PlanReference } from '../src/runtime/generated/contracts.ts';
 import { conversationReducer, initialState, workflowLabel } from '../src/workspace/state.ts';
 import { createDemoClient } from '../src/demo/client.ts';
 import type { InvocationClient } from '../src/workspace/useConversation.ts';
@@ -33,7 +35,234 @@ Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
 });
 const { render, fireEvent, cleanup, act, within } = await import('@testing-library/react');
 const { Workspace } = await import('../src/workspace/Workspace.tsx');
-afterEach(cleanup);
+const { ProductApp } = await import('../src/workspace/ProductApp.tsx');
+afterEach(() => {
+  cleanup();
+  window.history.replaceState(null, '', '/');
+});
+
+function navigate(view: ReturnType<typeof render>, name: string) {
+  fireEvent.click(
+    within(view.getByRole('navigation', { name: '产品导航' })).getByRole('link', { name }),
+  );
+}
+
+test('catalog transport failure keeps semantic error details and never retries on navigation', async () => {
+  const transport = new FakeRuntimeTransport('LOCAL', [
+    { error: new Error('network unavailable') },
+  ]);
+  const client = new RuntimeInvocationClient(transport, {
+    mode: 'LOCAL',
+    baseUrl: 'http://localhost:0',
+  });
+  const view = render(<ProductApp client={client} />);
+  await act(async () => {
+    navigate(view, '赛事中心');
+  });
+  assert.ok(await view.findByRole('heading', { name: '暂时无法加载赛事信息' }));
+  assert.ok(view.getByText('服务连接失败'));
+  navigate(view, '首页');
+  navigate(view, '赛事中心');
+  assert.equal(transport.calls.length, 1);
+  assert.equal(view.container.querySelectorAll('.competition-card').length, 0);
+});
+
+test('product defaults to Dashboard with honest empty context/plan and no requests or fake metrics', () => {
+  const { client, transport } = clientFor(fixtures.completed);
+  const view = render(<ProductApp client={client} />);
+  assert.ok(view.getByRole('heading', { name: '首页' }));
+  assert.ok(view.getByText('当前没有选中的赛事'));
+  assert.ok(view.getByText('当前没有计划'));
+  assert.equal(view.queryByRole('heading', { name: '待你确认' }), null);
+  assert.equal(view.queryByRole('textbox', { name: '你的问题' }), null);
+  assert.equal(transport.calls.length, 0);
+  assert.ok(!view.getByRole('main').textContent?.match(/72%|50%|关注3个|1条待审批/));
+  assert.equal(
+    (view.getByText('查看技术详情').closest('details') as HTMLDetailsElement).open,
+    false,
+  );
+  assert.equal(view.getAllByRole('main').length, 1);
+});
+
+test('navigation preserves conversation, input draft, pending locks and never invokes on page change', async () => {
+  const { client, transport } = clientFor(fixtures.completed);
+  const view = render(<ProductApp client={client} nextRequestId={() => 'request-1'} />);
+  navigate(view, 'Copilot');
+  await send(view, '保留这次真实提交');
+  const original = view.getByRole('list', { name: '对话记录' }).textContent;
+  fireEvent.change(view.getByRole('textbox', { name: '你的问题' }), {
+    target: { value: '尚未发送的草稿' },
+  });
+  navigate(view, '首页');
+  assert.equal(window.location.hash, '#/home');
+  assert.ok(view.getByRole('heading', { name: '最近结果 / 最近决策' }));
+  navigate(view, '我的赛事');
+  navigate(view, 'Copilot');
+  assert.equal(view.getByRole('list', { name: '对话记录' }).textContent, original);
+  assert.equal(
+    (view.getByRole('textbox', { name: '你的问题' }) as HTMLTextAreaElement).value,
+    '尚未发送的草稿',
+  );
+  assert.equal(transport.calls.length, 1);
+});
+
+test('context presents exact existing input, hides technical identity and never invents a target', () => {
+  const { client, transport } = clientFor(fixtures.completed);
+  const view = render(<ProductApp client={client} />);
+  navigate(view, 'Copilot');
+  fireEvent.change(view.getByLabelText('竞赛 ID'), { target: { value: 'comap-mcm' } });
+  fireEvent.change(view.getByLabelText('届次 ID'), {
+    target: { value: 'opaque-edition-reference' },
+  });
+  fireEvent.change(view.getByLabelText(/学生 ID/), { target: { value: 'explicit-student' } });
+  navigate(view, '首页');
+  const context = view.getByRole('region', { name: '当前上下文' });
+  assert.ok(within(context).getByText('comap-mcm'));
+  assert.ok(within(context).getByText('已指定届次'));
+  const details = context.querySelector('details')!;
+  assert.equal(details.open, false);
+  assert.deepEqual(JSON.parse(details.querySelector('pre')!.textContent!), {
+    student_id: 'explicit-student',
+    competition_id: 'comap-mcm',
+    edition_id: 'opaque-edition-reference',
+  });
+  assert.equal(transport.calls.length, 0);
+});
+
+for (const page of ['我的赛事', '我的能力', '备赛计划', '赛事动态']) {
+  test(`${page} is an honest coming-soon page with active navigation and no invocation`, () => {
+    const { client, transport } = clientFor(fixtures.completed);
+    const view = render(<ProductApp client={client} />);
+    navigate(view, page);
+    assert.ok(view.getByRole('heading', { name: page }));
+    assert.ok(view.getByRole('heading', { name: '即将开放' }));
+    assert.equal(view.queryByRole('textbox', { name: '你的问题' }), null);
+    assert.equal(
+      within(view.getByRole('navigation'))
+        .getByRole('link', { name: page })
+        .getAttribute('aria-current'),
+      'page',
+    );
+    assert.equal(view.container.querySelectorAll('[aria-current="page"]').length, 1);
+    assert.equal(transport.calls.length, 0);
+  });
+}
+
+test('supported deep links and browser hash changes select pages without calls', async () => {
+  window.history.replaceState(null, '', '/#/copilot');
+  const { client, transport } = clientFor(fixtures.completed);
+  const view = render(<ProductApp client={client} />);
+  assert.ok(view.getByRole('heading', { name: 'Copilot' }));
+  fireEvent.click(view.getByRole('link', { name: '跳到主要内容' }));
+  assert.equal(window.location.hash, '#/copilot');
+  assert.equal(document.activeElement, view.getByRole('main'));
+  await act(async () => {
+    window.history.replaceState(null, '', '/#/home');
+    window.dispatchEvent(new window.HashChangeEvent('hashchange'));
+  });
+  assert.ok(view.getByRole('heading', { name: '首页' }));
+  assert.equal(transport.calls.length, 0);
+});
+
+test('actual pending approval remains bound across navigation and Dashboard only links back to controls', async () => {
+  const { client, transport } = clientFor(fixtures.approval);
+  const view = render(<ProductApp client={client} nextRequestId={() => 'request-1'} />);
+  navigate(view, 'Copilot');
+  await send(view, '申请调整');
+  const question = view.getByRole('button', { name: /APPROVE/ });
+  navigate(view, '首页');
+  assert.ok(view.getByRole('heading', { name: '待你确认' }));
+  assert.equal(view.queryByRole('button', { name: /APPROVE/ }), null);
+  fireEvent.click(view.getByRole('button', { name: '返回处理审批' }));
+  assert.equal(view.getByRole('button', { name: /APPROVE/ }), question);
+  assert.equal(
+    (view.getByRole('button', { name: '发送请求' }) as HTMLButtonElement).disabled,
+    true,
+  );
+  assert.equal(transport.calls.length, 1);
+  assert.equal(transport.calls[0].approval, undefined);
+});
+
+for (const [label, intent] of [
+  ['判断参赛资格', 'CHECK_ELIGIBILITY'],
+  ['查看赛事推荐', 'GET_RECOMMENDATIONS'],
+  ['分析技能差距', 'ANALYZE_SKILL_GAP'],
+  ['生成备赛计划', 'BUILD_PLAN'],
+] as const) {
+  test(`guided ${label} sends only explicit operation/context through the existing client`, async () => {
+    const { client, transport } = clientFor(fixtures.completed);
+    const view = mount(client);
+    fireEvent.change(view.getByLabelText('竞赛 ID'), { target: { value: 'comap-mcm' } });
+    fireEvent.change(view.getByLabelText('届次 ID'), { target: { value: 'comap-mcm-2027' } });
+    fireEvent.change(view.getByRole('textbox', { name: /学生 ID/ }), {
+      target: { value: 'local-recommendation-demo' },
+    });
+    fireEvent.change(view.getByRole('textbox', { name: '你的问题' }), {
+      target: { value: '保留我的聊天草稿' },
+    });
+    await act(async () => {
+      fireEvent.click(view.getByRole('button', { name: label }));
+    });
+    assert.equal(transport.calls.length, 1);
+    const request = transport.calls[0].request!;
+    assert.equal(request.intent, intent);
+    assert.deepEqual(request.context, {
+      student_id: 'local-recommendation-demo',
+      competition_id: 'comap-mcm',
+      edition_id: 'comap-mcm-2027',
+    });
+    assert.equal(
+      (view.getByRole('textbox', { name: '你的问题' }) as HTMLTextAreaElement).value,
+      '保留我的聊天草稿',
+    );
+    assert.ok(
+      view.getByRole('list', { name: '对话记录' }).textContent?.includes(request.user_message),
+    );
+    assert.ok(!view.getByRole('list', { name: '对话记录' }).textContent?.includes(intent));
+    assert.ok(!JSON.stringify(transport.calls).includes('HUMAN_APPROVED'));
+    assert.ok(!('payload' in request));
+  });
+}
+
+test('guided prerequisites do not select defaults or submit; explicit controlled selection sends exact ref', async () => {
+  const { client, transport } = clientFor(fixtures.completed);
+  const view = render(
+    <Workspace
+      client={client}
+      localPlan={localPlan as PlanReference}
+      nextRequestId={() => 'request-1'}
+    />,
+  );
+  for (const name of ['分析技能差距', '生成备赛计划', '调整当前计划']) {
+    const button = view.getByRole('button', { name }) as HTMLButtonElement;
+    assert.equal(button.disabled, true);
+    fireEvent.click(button);
+  }
+  assert.equal(transport.calls.length, 0);
+  assert.ok(view.getByText('请先生成或选择一个计划。'));
+  fireEvent.click(view.getByRole('checkbox', { name: /使用本地受控修订示例方案/ }));
+  await act(async () => {
+    fireEvent.click(view.getByRole('button', { name: '调整当前计划' }));
+  });
+  assert.equal(transport.calls[0].request?.intent, 'REQUEST_PLAN_REVISION');
+  assert.deepEqual(transport.calls[0].request?.context?.plan_ref, localPlan);
+  assert.equal(transport.calls.length, 1);
+  assert.equal(transport.calls[0].approval, undefined);
+});
+
+test('guided action with missing student/target still displays server clarification and locks further actions', async () => {
+  const { client, transport } = clientFor(fixtures.clarification);
+  const view = mount(client);
+  await act(async () => {
+    fireEvent.click(view.getByRole('button', { name: '判断参赛资格' }));
+  });
+  assert.equal(transport.calls.length, 1);
+  assert.deepEqual(transport.calls[0].request?.context, {});
+  assert.ok(view.getByRole('heading', { name: '补充所需信息' }));
+  assert.equal(view.container.querySelectorAll('textarea').length, 1);
+  fireEvent.click(view.getByRole('button', { name: '查看赛事推荐' }));
+  assert.equal(transport.calls.length, 1);
+});
 
 function config(mode: RuntimeMode) {
   return mode === 'LOCAL'

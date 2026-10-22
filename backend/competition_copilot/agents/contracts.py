@@ -182,6 +182,8 @@ class AgentContext(AgentContract):
 class AgentRequest(AgentContract):
     request_id: StableId
     user_message: StableId
+    # User-selected operation only; never capability arguments or authorization.
+    intent: AgentIntent | None = None
     conversation_id: StableId | None = None
     context: AgentContext = Field(default_factory=AgentContext)
 
@@ -294,6 +296,7 @@ class CapabilityId(StrEnum):
 
     LIST_COMPETITIONS = "list_competitions"
     GET_COMPETITION = "get_competition"
+    GET_COMPETITION_DETAILS = "get_competition_details"
     LIST_EDITIONS = "list_competition_editions"
     GET_EDITION = "get_competition_edition"
     LIST_TRACKS = "list_edition_tracks"

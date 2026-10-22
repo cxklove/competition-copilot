@@ -218,12 +218,43 @@ try {
     });
     await vite.listen();
     const startCount = posts.length;
+    let capturedDashboard = false;
     async function open() {
+      const beforeNavigation = posts.length;
       await call("Page.navigate", {
         url: `http://127.0.0.1:5173/?smoke=${Date.now()}`,
       });
       await wait(
-        `document.querySelector('.runtime-badge')?.textContent.includes('${mode}') && document.querySelector('.empty-state')`,
+        `document.querySelector('.runtime-badge')?.textContent.includes('${mode}') && document.querySelector('.dashboard')`,
+      );
+      if (!capturedDashboard) {
+        for (const width of [1440, 1920]) {
+          await call("Emulation.setDeviceMetricsOverride", {
+            width,
+            height: 1080,
+            deviceScaleFactor: 1,
+            mobile: false,
+          });
+          await capture(mode, `dashboard-${width}`);
+        }
+        await call("Emulation.setDeviceMetricsOverride", {
+          width: 1440,
+          height: 1100,
+          deviceScaleFactor: 1,
+          mobile: false,
+        });
+        capturedDashboard = true;
+      }
+      await evaluate(
+        `document.querySelector('.primary-navigation a[href="#/copilot"]').click()`,
+      );
+      await wait(
+        `location.hash === '#/copilot' && document.querySelector('.primary-navigation a[aria-current="page"]').textContent.includes('Copilot')`,
+      );
+      assert.equal(
+        posts.length,
+        beforeNavigation,
+        "Product navigation must not invoke backend",
       );
     }
     await call("Emulation.setDeviceMetricsOverride", {
@@ -236,6 +267,45 @@ try {
     await send("赛事列表");
     await wait('document.querySelector(".result-artifact")');
     await capture(mode, "discovery-desktop");
+    const catalogStartCount = posts.length;
+    await evaluate(
+      `document.querySelector('.primary-navigation a[href="#/competitions"]').click()`,
+    );
+    await wait(`document.querySelectorAll('.competition-card').length === 12`);
+    await capture(mode, "competition-center-desktop");
+    await fill('.competition-search input[type="search"]', "华为");
+    await wait(`document.querySelectorAll('.competition-card').length === 1`);
+    await evaluate(
+      `document.querySelector('.competition-card button').click()`,
+    );
+    await wait(
+      `location.hash === '#/competitions/huawei-ict' && document.querySelector('[role="tablist"]')`,
+    );
+    await capture(mode, "competition-detail-desktop");
+    await evaluate(`document.querySelector('[role="tab"]').focus()`);
+    await call("Input.dispatchKeyEvent", {
+      type: "keyDown",
+      key: "ArrowRight",
+      code: "ArrowRight",
+    });
+    await wait(
+      `document.querySelector('[role="tab"][aria-selected="true"]').textContent === '参赛资格'`,
+    );
+    await evaluate(
+      `document.querySelector('.competition-action-bar button').click(); document.querySelector('.primary-navigation a[href="#/home"]').click()`,
+    );
+    await wait(
+      `document.querySelector('.context-overview').textContent.includes('华为ICT大赛')`,
+    );
+    await evaluate(
+      `document.querySelector('.primary-navigation a[href="#/copilot"]').click()`,
+    );
+    assert.equal(
+      posts.length,
+      catalogStartCount,
+      "Cached catalog/detail/context selection must not invoke backend",
+    );
+    await wait(`document.querySelector('.result-artifact')`);
     await call("Emulation.setDeviceMetricsOverride", {
       width: 390,
       height: 900,

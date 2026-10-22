@@ -1,11 +1,11 @@
-import { RuntimeInvocationClient } from './runtime/client.ts';
+import { createPresentedClient } from './results/ErrorPresentation.tsx';
 import { AgentArtsRuntimeTransport } from './runtime/agentarts.ts';
 import type { ArtifactReader } from './results/artifacts.ts';
 
 export function createAgentArtsClient(baseUrl: string, runtimeName: string) {
   let attachment: unknown;
   const config = { mode: 'AGENTARTS', baseUrl, runtimeName } as const;
-  const client = new RuntimeInvocationClient(
+  const client = createPresentedClient(
     new AgentArtsRuntimeTransport(config, (value) => {
       attachment = value;
     }),

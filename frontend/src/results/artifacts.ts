@@ -5,6 +5,7 @@ import type * as Models from './generated/artifacts.ts';
 import type { AgentResponse, ResultReference } from '../runtime/generated/contracts.ts';
 
 type Values = {
+  CompetitionDetailProjection: Models.CompetitionDetailProjection;
   EligibilityDecision: Models.EligibilityDecision;
   RecommendationEvaluation: Models.RecommendationEvaluation;
   SkillGapDecision: Models.SkillGapDecision;
@@ -23,6 +24,7 @@ export type LinkedArtifact = {
 // Fake composition supplies presets; Local hosting supplies validated receipt projections.
 export type ArtifactReader = (response: AgentResponse) => unknown;
 const kinds: Record<keyof Values, string[]> = {
+  CompetitionDetailProjection: ['TOOL_RESULT'],
   EligibilityDecision: ['ELIGIBILITY_RESULT', 'TOOL_RESULT'],
   RecommendationEvaluation: ['RECOMMENDATION_RESULT'],
   SkillGapDecision: ['SKILL_GAP_RESULT', 'TOOL_RESULT'],

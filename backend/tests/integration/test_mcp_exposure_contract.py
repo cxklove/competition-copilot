@@ -80,8 +80,9 @@ def arguments(name):
 def test_explicit_catalog_and_exclusions_cover_real_upstream():
     assert len(REGISTRY.tools) == 8
     approved = {m.capability: m for m in AgentCapabilityFacade().list_capabilities()}
-    assert len(approved) == 16
-    assert len(REGISTRY.exclusions) == 10
+    assert len(approved) == 17
+    assert len(REGISTRY.exclusions) == 11
+    assert CapabilityId.GET_COMPETITION_DETAILS in {x.capability_id for x in REGISTRY.exclusions}
     assert set(x.capability_id for x in REGISTRY.tools) <= approved.keys()
     assert len({x.tool_name for x in REGISTRY.tools}) == len(REGISTRY.tools)
     for tool in REGISTRY.tools:

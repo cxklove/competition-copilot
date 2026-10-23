@@ -576,7 +576,7 @@ Screenshots remain ignored local artifacts in `tmp/p14-7-e2e/`.
 
 ### PX2.2 - Authoritative Competition Detail
 
-Status: REVIEW_PASS; PX2 Core is CLOSED_VERIFIED after Final Independent Review.
+Status: CLOSED_VERIFIED, with Final Independent Review REVIEW_PASS; PX2 Core is CLOSED_VERIFIED.
 P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED and PX3 remains PLANNED.
 
 The center preserves existing Runtime discovery, search and canonical catalog
@@ -588,7 +588,9 @@ They never read seed files, invoke providers or execute P5/P7 in the frontend.
 Generated schemas validate CompetitionDetailProjection before use. Competition-only
 queries return editions without selecting one. Edition/track selectors send exact
 canonical identities and update current context; no default edition/track is guessed.
-Copilot handoff remains a draft, not an automatic analysis or approval.
+Browsing and scope selection do not trigger analysis. Since PX2.3, clicking an
+analysis action opens Copilot and submits the existing explicit intent through
+the shared Workspace submit path; missing context still requires Core clarification.
 
 Seven accessible tabs display authoritative entity snapshots, reviewed policy facts,
 full skill requirement artifacts/version/catalog, registration/competition windows,
@@ -610,12 +612,55 @@ reference. PX1 / PX2 Core are CLOSED_VERIFIED; PX2.1 is REVIEW_COMPLETE and PX2.
 is REVIEW_PASS. Later PX2 Detail UX Enrichment or separately authorized PX3 work
 continues from this stable checkpoint; this status sync does not commit or publish.
 
-**PX2 Product Detail Enrichment: DEFERRED, non-blocking product work.** Scope:
+**At this release checkpoint, PX2 Product Detail Enrichment was DEFERRED.** Scope:
 center information density, richer detail organization, edition/track selection UX,
 visual/information structure polish, and more authoritative facts when data coverage
 increases. Unknown facts must never be inferred to enrich the page. Complete event
 history remains unavailable; current-session evidence is not complete history.
 Submission window remains DATA_CONTRACT_GAP and is not implemented.
+
+### PX2.3 — Detail enrichment / information architecture
+
+Status: **CLOSED_VERIFIED**, following Final Independent Review = REVIEW_PASS.
+PX1 / PX2 Core / PX2.2 remain CLOSED_VERIFIED; PX2.1 is REVIEW_COMPLETE;
+P12/P13/P14 remain CLOSED_FROZEN. PX3 and P15 have not started.
+
+- Center cards group available sections instead of repeating missing-field notices.
+  Counts and availability filters use already validated, cached detail projections;
+  unvisited cards show basic entity information without automatic per-card reads.
+  A cached summary labels its actual target scope and never selects that scope.
+- Detail uses a scope hierarchy, explicit edition/track selectors, grouped overview,
+  partial-policy notice, requirement catalog labels, and a two-stage time line.
+  Null endpoints remain unknown; no submission stage is invented.
+- The evidence center groups URLs visually while retaining section/scope associations,
+  each association's verification and observation, and complete raw projection/ref audit.
+  A competition or edition source never verifies an unreferenced track.
+- Personal eligibility/gap results remain exact student/target session attachments.
+  Suggested actions reuse existing intents; no analysis runs on browsing/selection.
+  Complete event history remains unavailable; current-session evidence is separate.
+
+Projection boundaries: unqueried tracks do not expose exact policy/requirement
+availability (`PX2.3_PROJECTION_GAP`); cards use an exact cached projection or say
+that scope has not been read. Student display names and full selected-plan metadata
+are not in the detail projection; the scope panel shows session selection/version,
+not an invented profile or server-current status. No Backend extension was made.
+
+Validation: 15 new presentation tests; full frontend suite 276 passed; lint/build
+passed. `npm run test:responsive` exercises offline Local/AgentArts-compatible
+Chrome flows, including Huawei competition → edition → track, COMAP requirements,
+unknown times, and 1080/1440 layouts (42 layout checks / 28 explicit requests passed).
+Only the browser harness uses a 5-second test gateway timeout to tolerate rendering
+load; transport fault tests retain their 0.5-second default, with no production
+timeout or retry changes. A no-edition/no-track entity is tested as a
+synthetic UI fixture; no fake competition was inserted into the formal catalog.
+Independent review passed; this closure does not claim production Cloud deployment.
+
+Next: **PX2.4 Temporal Information Enrichment — READY_FOR_DESIGN**, not implemented.
+`PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP`: the current timeline preserves structured
+time, partial endpoints, unknown and unselected scope, but cannot express official
+date text awaiting structured verification. This is non-blocking for PX2.3; a source
+link or year never establishes an announced date. The projection gaps above, full
+event-history persistence gap and submission-window contract gap remain unresolved.
 
 Validation commands (from frontend):
 

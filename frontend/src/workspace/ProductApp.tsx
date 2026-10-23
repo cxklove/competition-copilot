@@ -170,7 +170,7 @@ export function ProductApp(
                 disabled={blocked}
                 onBusy={setCatalogBusy}
                 open={(id) => navigate('competitions', id)}
-                select={(id, message, target) => {
+                select={(id, message, target, action) => {
                   if (
                     blocked ||
                     catalogBusy ||
@@ -181,6 +181,7 @@ export function ProductApp(
                     sequence: (previous?.sequence ?? 0) + 1,
                     competitionId: id,
                     message,
+                    action,
                     ...(target ? { editionId: target.editionId, trackId: target.trackId } : {}),
                   }));
                   if (message) navigate('copilot');

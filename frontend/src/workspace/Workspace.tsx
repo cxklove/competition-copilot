@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useConversation } from './useConversation.ts';
 import type { InvocationClient } from './useConversation.ts';
@@ -63,8 +63,10 @@ export function Workspace({
   const waits = response?.outcome === 'WAITING_FOR_APPROVAL';
   const locked = pending || needs || waits || state.continuationUnconfirmed || externalBusy;
 
+  const handledSelection = useRef<number | undefined>(undefined);
   useEffect(() => {
-    if (!contextSelection) return;
+    if (!contextSelection || handledSelection.current === contextSelection.sequence) return;
+    handledSelection.current = contextSelection.sequence;
     if (competitionId.trim() !== contextSelection.competitionId) {
       setCompetitionId(contextSelection.competitionId);
       setEditionId('');
@@ -75,6 +77,21 @@ export function Workspace({
       setTrackId(contextSelection.trackId ?? '');
     }
     if (contextSelection.message) setInput(`请${contextSelection.message}。`);
+    if (contextSelection.action && !locked) {
+      const scope = explicitContext();
+      scope.competition_id = contextSelection.competitionId;
+      delete scope.edition_id;
+      delete scope.track_id;
+      if (contextSelection.editionId) scope.edition_id = contextSelection.editionId;
+      if (contextSelection.trackId) scope.track_id = contextSelection.trackId;
+      void submit(
+        contextSelection.action.message,
+        studentId,
+        scope,
+        contextSelection.action.intent,
+      );
+      setInput('');
+    }
   }, [contextSelection]);
 
   useEffect(() => {

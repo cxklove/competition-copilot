@@ -1219,3 +1219,215 @@ input::placeholder {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* PX2.3: presentation only; shared scope, availability and evidence language. */
+.competition-detail,
+.competition-detail * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.detail-toolbar,
+.scope-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.detail-toolbar {
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.detail-hero {
+  background: linear-gradient(120deg, #e7f1ed, #f8fbf9);
+  padding: clamp(20px, 3vw, 40px);
+  border: 1px solid #cfdfd7;
+  border-radius: 18px;
+  margin-bottom: 24px;
+}
+.detail-hero h1 {
+  font-size: clamp(25px, 2.6vw, 38px);
+  line-height: 1.4;
+  margin-block: 12px;
+}
+.scope-breadcrumb {
+  font-size: 13px;
+  color: #445e57;
+}
+.detail-description {
+  max-width: 85ch;
+  line-height: 1.8;
+}
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.8fr) minmax(0, 2fr);
+  align-items: start;
+  gap: 20px;
+}
+.current-scope dl,
+.detail-section dl {
+  display: grid;
+  gap: 8px;
+}
+.current-scope dt,
+.detail-section dt {
+  font-size: 12px;
+  color: #5c7069;
+}
+.current-scope dd,
+.detail-section dd {
+  margin: 0 0 8px;
+}
+.overview-grid,
+.edition-options,
+.track-grid,
+.requirement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.detail-section,
+.availability-summary {
+  padding: 20px;
+  background: #f8faf9;
+  border: 1px solid #dce6e0;
+  border-radius: 12px;
+}
+.availability-summary.is-unread,
+.availability-summary.is-compact {
+  padding: 12px;
+  margin-block: 16px;
+  font-size: 13px;
+}
+.availability-grid {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 0;
+}
+.availability-grid > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  border-top: 1px solid #e0e8e3;
+  padding-top: 10px;
+}
+.availability-grid dd {
+  margin: 0;
+}
+.availability-chip {
+  display: inline-block;
+  border: 1px solid #cbdad2;
+  border-radius: 6px;
+  color: #3b5c4c;
+  background: #f0f5f2;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+.availability-chip[data-state='unknown'] {
+  color: #5b6461;
+  border-style: dashed;
+  background: #f8f9f8;
+}
+.coverage-note {
+  border-left: 3px solid #698a7b;
+  padding: 12px 16px;
+  background: #f0f5f2;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 16px;
+}
+.detail-empty {
+  padding: 22px;
+  background: #f6f8f7;
+  border: 1px dashed #c9d7cf;
+  border-radius: 10px;
+  color: #50625a;
+}
+.decision-sections,
+.detail-next {
+  display: grid;
+  gap: 20px;
+}
+.detail-section + .detail-section {
+  margin-top: 20px;
+}
+.overview-grid .detail-section,
+.decision-sections .detail-section {
+  margin-top: 0;
+}
+.detail-section button,
+.detail-next button {
+  margin: 6px 8px 0 0;
+  white-space: normal;
+}
+.detail-next {
+  margin-top: 20px;
+  display: block;
+}
+.competition-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.8;
+}
+.card-scope {
+  color: #476455;
+}
+.competition-timeline {
+  padding: 0;
+  list-style: none;
+}
+.competition-timeline > li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 16px;
+  padding: 0 0 28px;
+}
+.timeline-number {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e4efe9;
+  color: #345345;
+}
+.competition-timeline dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+.competition-timeline dd {
+  margin: 4px 0;
+}
+.competition-evidence select {
+  margin: 8px 12px;
+  padding: 8px;
+  max-width: 100%;
+}
+.evidence-scopes {
+  list-style: none;
+  padding: 0;
+  color: #476455;
+  font-size: 13px;
+}
+.evidence-scopes li {
+  padding: 4px 0;
+}
+.track-grid .is-selected {
+  border: 2px solid #477962;
+}
+.competition-detail details > summary,
+.availability-summary summary {
+  cursor: pointer;
+}
+@media (max-width: 1100px) {
+  .detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .current-scope dl {
+    grid-template-columns: minmax(70px, 0.5fr) minmax(0, 2fr);
+  }
+}

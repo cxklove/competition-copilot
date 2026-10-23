@@ -21,7 +21,7 @@ const results = [];
 try {
   backend = spawn(
     path.join(root, "backend/.venv/Scripts/python.exe"),
-    ["backend/tests/agentarts_gateway_harness.py"],
+    ["backend/tests/agentarts_gateway_harness.py", "--gateway-timeout=5"],
     { cwd: root, windowsHide: true },
   );
   const urls = await new Promise((resolve, reject) => {
@@ -282,7 +282,63 @@ try {
       `location.hash === '#/competitions/huawei-ict' && document.querySelector('[role="tablist"]')`,
     );
     await capture(mode, "competition-detail-desktop");
-    await evaluate(`document.querySelector('[role="tab"]').focus()`);
+    for (const width of [1080, 1440]) {
+      await call("Emulation.setDeviceMetricsOverride", {
+        width,
+        height: 1080,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      await capture(mode, `px23-detail-competition-${width}`);
+    }
+    assert.equal(
+      await evaluate(
+        `document.querySelector('.detail-selection select').value`,
+      ),
+      "",
+      "Competition-only detail must not auto-select an edition",
+    );
+    await evaluate(
+      `{const s=document.querySelector('.detail-selection select');s.value='huawei-ict-2026';s.dispatchEvent(new Event('change',{bubbles:true}));}`,
+    );
+    await wait(
+      `document.querySelectorAll('.detail-selection select').length === 2 && !document.querySelector('.detail-selection select').disabled`,
+    );
+    assert.equal(
+      await evaluate(
+        `document.querySelectorAll('.detail-selection select')[1].value`,
+      ),
+      "",
+      "No default track",
+    );
+    await evaluate(
+      `{const s=document.querySelectorAll('.detail-selection select')[1];s.value='huawei-ict-2026-innovation';s.dispatchEvent(new Event('change',{bubbles:true}));}`,
+    );
+    await wait(
+      `document.querySelectorAll('.detail-selection select')[1]?.value === 'huawei-ict-2026-innovation' && !document.querySelector('.detail-selection select').disabled`,
+    );
+    await evaluate(`document.querySelector('#detail-tab-3').click()`);
+    for (const width of [1080, 1440]) {
+      await call("Emulation.setDeviceMetricsOverride", {
+        width,
+        height: 1080,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      await capture(mode, `px23-timeline-${width}`);
+    }
+    assert.equal(
+      await evaluate(
+        `document.querySelectorAll('.competition-timeline > li').length`,
+      ),
+      2,
+      "No invented submission stage",
+    );
+    await evaluate(`document.querySelector('#detail-tab-5').click()`);
+    await capture(mode, "px23-evidence-scopes");
+    await evaluate(
+      `document.querySelector('#detail-tab-0').click();document.querySelector('[role="tab"]').focus()`,
+    );
     await call("Input.dispatchKeyEvent", {
       type: "keyDown",
       key: "ArrowRight",
@@ -302,10 +358,57 @@ try {
     );
     assert.equal(
       posts.length,
-      catalogStartCount,
-      "Cached catalog/detail/context selection must not invoke backend",
+      catalogStartCount + 3,
+      "Only competition/edition/track explicit reads may invoke backend",
+    );
+    assert.ok(
+      posts
+        .slice(catalogStartCount)
+        .every(
+          (p) =>
+            JSON.parse(p.postData).request.intent === "GET_COMPETITION_DETAILS",
+        ),
     );
     await wait(`document.querySelector('.result-artifact')`);
+    // A second exact target exercises the real reviewed requirement artifact.
+    await evaluate(
+      `document.querySelector('.primary-navigation a[href="#/competitions"]').click()`,
+    );
+    await wait(
+      `document.querySelector('.competition-search input[type="search"]')`,
+    );
+    await evaluate(
+      `{const s=document.querySelector('.competition-search input[type="search"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(s,'COMAP');s.dispatchEvent(new Event('input',{bubbles:true}));}`,
+    );
+    await wait(`document.querySelectorAll('.competition-card').length === 1`);
+    await evaluate(
+      `document.querySelector('.competition-card button').click()`,
+    );
+    await wait(
+      `location.hash.endsWith('/comap-mcm') && document.querySelector('.detail-selection select')`,
+    );
+    await evaluate(
+      `{const s=document.querySelector('.detail-selection select');s.value='comap-mcm-2027';s.dispatchEvent(new Event('change',{bubbles:true}));}`,
+    );
+    await wait(
+      `document.querySelector('.detail-selection select')?.value === 'comap-mcm-2027' && !document.querySelector('.detail-selection select').disabled`,
+    );
+    await evaluate(`document.querySelector('#detail-tab-2').click()`);
+    await wait(
+      `document.querySelector('.requirement-grid')?.textContent.includes('所需能力等级暂未明确')`,
+    );
+    for (const width of [1080, 1440]) {
+      await call("Emulation.setDeviceMetricsOverride", {
+        width,
+        height: 1080,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      await capture(mode, `px23-requirements-${width}`);
+    }
+    await evaluate(
+      `document.querySelector('.primary-navigation a[href="#/copilot"]').click()`,
+    );
     await call("Emulation.setDeviceMetricsOverride", {
       width: 390,
       height: 900,
@@ -360,7 +463,7 @@ try {
     }
     assert.equal(
       posts.length - startCount,
-      9,
+      14,
       "one runtime POST per explicit action",
     );
     const modePosts = posts.slice(startCount);
@@ -376,7 +479,7 @@ try {
       const records = await (
         await fetch(urls.gateway + "/__test__/observations")
       ).json();
-      assert.equal(records.length, 9);
+      assert.equal(records.length, 14);
       assert.ok(
         records.every((entry) => entry.authorized && entry.mcp === null),
       );

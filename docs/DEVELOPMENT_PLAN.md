@@ -3367,11 +3367,12 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 |---|---|---|---|
 | PX0 — Design | DOCUMENTED | 产品定位、信息架构、四层体验、统一证据语言及边界 | 设计见 [PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design)；实现状态不得与愿景混淆 |
 | PX1 — Product Shell & Dashboard | CLOSED_VERIFIED | Global App Shell、一级导航、Dashboard、Current Context Panel、独立 Copilot 工作区、基础 Empty / Loading | 默认进入 Dashboard；只聚合已有 session state，缺数据使用 Empty；不新增业务 authority |
-| PX2 Core — Competition Center & Detail | CLOSED_VERIFIED | Competition Center、competition-level browsing、Authoritative Read Projection、Edition/Track query、TimeWindow、Eligibility Policy / Skill Requirement read、Provenance、Canonical Current Context、Copilot handoff | Final Independent Review REVIEW_PASS；完整事件历史仍为 PERSISTENCE_GAP；详情丰富度提升单独延期 |
+| PX2 Core — Competition Center & Detail | CLOSED_VERIFIED | Competition Center、competition-level browsing、Authoritative Read Projection、Edition/Track query、TimeWindow、Eligibility Policy / Skill Requirement read、Provenance、Canonical Current Context、Copilot handoff | Final Independent Review REVIEW_PASS；完整事件历史仍为 PERSISTENCE_GAP；详情展示升级已在 PX2.3 独立验收 |
 | PX2.1 — Read Model Architecture Review | REVIEW_COMPLETE | 最小只读 Application projection、provenance boundary 与公开增量设计 | 审核完成；无新增业务 truth 或平行 API |
-| PX2.2 — Authoritative Read Projection | REVIEW_PASS | 经 Runtime / Facade / Tool / Reader 的正式读取与生成契约 | Final Independent Review REVIEW_PASS；target、不可变性与 authority 边界通过复核 |
-| PX2 Product Detail Enrichment | DEFERRED | 信息密度、信息组织、Edition/Track 选择体验、详情视觉结构及数据覆盖增加后的事实展示 | 非 architecture blocker；不得推断未知事实 |
-| PX3 — My Profile / Skills | PLANNED | 基本资料、教育/专业/年级、技能及自评来源、兴趣、目标、每周可用时间、缺失信息与画像完整度方向 | missing record 不等于 deficit；完整度百分比须先定义可审阅规则；不承诺未提供的编辑/持久化能力 |
+| PX2.2 — Authoritative Read Projection | CLOSED_VERIFIED | 经 Runtime / Facade / Tool / Reader 的正式读取与生成契约 | Final Independent Review REVIEW_PASS；target、不可变性与 authority 边界通过复核 |
+| PX2 Product Detail Enrichment — PX2.3 | CLOSED_VERIFIED | 信息密度、范围层级、Edition/Track 选择、资料状态、规则/技能/时间线及分范围证据展示 | Final Independent Review REVIEW_PASS；未知事实保持 fail-closed |
+| PX2.4 — Temporal Information Enrichment | READY_FOR_DESIGN | 官方日期原文待结构化核验状态的 projection 设计 | TEMPORAL_INFORMATION_PROJECTION_GAP；仅准备设计，未进入实现 |
+| PX3 — My Profile / Skills | NOT_STARTED（PLANNED） | 基本资料、教育/专业/年级、技能及自评来源、兴趣、目标、每周可用时间、缺失信息与画像完整度方向 | missing record 不等于 deficit；完整度百分比须先定义可审阅规则；不承诺未提供的编辑/持久化能力 |
 | PX4 — My Competitions & Planning | PLANNED | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | 我的赛事状态是待设计的产品状态，不覆盖资格或 Plan 状态；只显示真实 milestones，不伪造 Task |
 | PX5 — Events / Approval / Version | PLANNED | Competition Updates / Event Feed、Before / After、Impact、Approval Center、PlanDiff、Version History | 复用 Snapshot → Diff → Event → Impact → Decision → policy → approval → execution → actual PlanDiff / lineage；不新增 mutation authority |
 | PX6 — Guided Demo & Reliability | PLANNED | Guided Actions、Scenario Selector、Demo Mode、Quick Journey、Runtime Health、Demo Reset、Notification UX、统一状态与现场可靠性 | 复用已有 Demo Polish 2.1 explicit actions；其余能力仍待实现；不得自动重试、绕过验证或把 UI reset 当作后端状态已重置 |
@@ -3423,7 +3424,7 @@ PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
 后续 PX2 Detail UX Enrichment 或经单独授权的 PX3 均从该稳定 checkpoint 继续；
 当前不进入 PX3/P15，状态同步不执行 commit、tag 或 push。
 
-**PX2 Product Detail Enrichment = DEFERRED（DEFERRED NON-BLOCKING PRODUCT WORK）**：
+**该 checkpoint 时 PX2 Product Detail Enrichment = DEFERRED（非阻塞产品工作）；现已恢复为 PX2.3，状态见下节。**
 
 - Competition Center 信息密度提升。
 - Competition Detail 更丰富的信息组织。
@@ -3435,6 +3436,44 @@ PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
 资格或核验状态的理由；未知事实继续 fail closed / 显示 unavailable。
 完整赛事变化历史仍 unavailable（EVENT_HISTORY_PERSISTENCE_GAP），Current Session Evidence
 不等于完整历史；submission window 仍为 DATA_CONTRACT_GAP，不在 checkpoint 内实现。
+
+### PX2.3 — Competition Detail Enrichment & Information Architecture
+
+- **状态：CLOSED_VERIFIED。** Final Independent Review = REVIEW_PASS，完成实现、验证和独立评审；
+  PX1 / PX2 Core 仍 CLOSED_VERIFIED，P12/P13/P14 仍 CLOSED_FROZEN，PX3/P15 未开始。
+- Center 卡片用已有投影的 section availability 汇总资料，未访问卡片不批量预取详情。
+  Information Architecture / Competition Cards 升级并减少重复缺失提示；可用性筛选只过滤已读取资料，
+  不将“尚未读取”当成“确认不存在”。不计算业务完整度百分比。
+- Detail 使用赛事 → 届次 → 赛道层级、明确选择器、当前范围、分组 Overview、PARTIAL 规则说明、
+  技能目录名称、报名/比赛两阶段时间线和分范围 Evidence Center。null 时间保持未知，不造提交阶段。
+  Competition Detail Header、Edition / Track Selector、Tracks Presentation 和 Current Context Integration
+  已完成；不自动选择 Edition / Track，不推断未知日期或创建 submission window。
+- Source URL 仅做展示聚合，每条关联保留自己的范围、核验和观察时间；高级审计保留完整投影与 refs。
+  edition source 不升级为 track 已核验。完整历史 unavailable，与当前会话证据分开；受控演示标签保留。
+- 详情按钮复用 Workspace 的 explicit intent submit 和现有 Runtime；浏览/选范围不触发业务分析。
+  personal results 仍精确匹配 student/competition/edition/track，不运行 P5/P7 或修改审批/计划 authority。
+  Frontend 不重新计算 Eligibility 或 SkillGap；Suggested Actions 仅提交已有 capability intent。
+- **PX2.3_PROJECTION_GAP：** 未查询赛道的 exact policy / requirement 存在性未随 track list 透出，
+  展示使用 exact cached projection 或“尚未读取该范围”，不继承 edition 规则；学生名称、完整计划元数据
+  不在详情投影中，当前范围只展示已有会话引用/版本。未扩 Backend，未新增事实或 persistence。
+- 验证：新增 presentation 15 passed，results/local 85 passed，frontend full 276 passed，lint/build PASS。
+  Chrome 脚本覆盖 offline Local/AgentArts-compatible Huawei 届次/赛道、COMAP requirements、未知时间和
+  1080/1440 布局：两种 transport 共 42 项布局、28 次明确请求 PASS。仅浏览器 test harness
+  使用 5 秒 gateway timeout 以容纳渲染调度，传输 fault tests 默认 0.5 秒和生产配置均不变。
+  无届次/赛道实体用显式 synthetic UI fixture 验证，不向正式库加假数据。
+  Final Independent Review = REVIEW_PASS；本次关闭不表示生产 Cloud 部署，不进入 PX3/P15，不 commit。
+
+### PX2.4 — Temporal Information Enrichment
+
+- **状态：READY_FOR_DESIGN。** 未进入 Implementation，不新增事实 contract、API 或时间数据。
+- **PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP：** 当前 Timeline 可表达已核验的 structured TimeWindow、
+  部分 start/end、unknown，以及未选择范围的 not requested；但无法安全表达“官方网站已明确公布日期文本，
+  尚未完成结构化核验”。未来需先设计 authoritative temporal candidate / evidence 的只读表达。
+- 此 gap 不是 PX2.3 blocker。PX2.3 保持 fail-closed：没有 authoritative structured time 就不推断日期，
+  不依据 official URL、赛事名称或年份声称“官方已公布时间”。
+- 仍未解决：未查询赛道的 exact policy / requirement availability、student display name、完整 plan metadata
+  尚未进入 detail projection；完整 Event History 仍为 EVENT_HISTORY_PERSISTENCE_GAP，当前会话证据不等于
+  完整历史；submission window 仍为 DATA_CONTRACT_GAP。受控演示来源持续标记为模拟赛事变化 / 演示数据。
 
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 

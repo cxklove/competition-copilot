@@ -7,6 +7,7 @@ dependencies only; production host randomness is unchanged. No real credential.
 # ruff: noqa: E402
 # Standalone test subprocess bootstraps the repository package before imports.
 
+import argparse
 import asyncio
 import json
 import sys
@@ -57,7 +58,7 @@ class DeterministicHost:
 
 
 @contextmanager
-def running():
+def running(*, gateway_timeout=0.5):
     local, remote = DeterministicHost(), DeterministicHost()
     records = []
 
@@ -117,7 +118,8 @@ def running():
     gateway.fault = None
     config = GatewayConfig(gateway_url=f"http://127.0.0.1:{gateway.server_port}",
         runtime_name="competition-copilot", authorization=SYNTHETIC_AUTH,
-        endpoint="dev", gateway_user_id="gateway-observer", timeout=0.5, allow_loopback_http=True)
+        endpoint="dev", gateway_user_id="gateway-observer", timeout=gateway_timeout,
+        allow_loopback_http=True)
     client = AgentArtsGatewayClient(config)
     bridge = create_bridge_server(client, port=0)
     local_server = create_server(local, port=0)
@@ -161,7 +163,11 @@ def running():
 
 
 if __name__ == "__main__":
-    with running() as environment:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--gateway-timeout", type=float, default=0.5)
+    args = parser.parse_args()
+    # Browser rendering adds scheduling load; timeout fault tests retain the default.
+    with running(gateway_timeout=args.gateway_timeout) as environment:
         print("COMPAT_URLS=" + json.dumps({k: environment[k] for k in ("local", "bridge", "gateway")}), flush=True)
         # Parent test process owns shutdown. No external network or real credential.
         try:

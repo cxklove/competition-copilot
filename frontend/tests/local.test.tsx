@@ -209,19 +209,18 @@ test('real competition center searches formal records, binds canonical context a
   assert.equal((view.getByLabelText('竞赛 ID') as HTMLInputElement).value, 'huawei-ict');
   assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, '');
   assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
-  assert.ok(
-    (view.getByRole('textbox', { name: '你的问题' }) as HTMLTextAreaElement).value.includes(
-      '分析技能差距',
-    ),
-  );
+  await view.findByRole('heading', { name: '需要补充信息' }, { timeout: 10000 });
+  assert.equal(value.calls[2].request?.intent, 'ANALYZE_SKILL_GAP');
+  assert.equal(value.calls[2].request?.context?.competition_id, 'huawei-ict');
+  assert.equal(value.responses[2].response?.outcome, 'NEEDS_CLARIFICATION');
   assert.equal(
     (view.getByRole('button', { name: '分析技能差距' }) as HTMLButtonElement).disabled,
     true,
   );
-  assert.equal(value.calls.length, 2);
+  assert.equal(value.calls.length, 3);
   assert.deepEqual(value.responses[0], original);
   fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
-  assert.equal(value.calls.length, 2);
+  assert.equal(value.calls.length, 3);
   assert.equal(
     (view.getByRole('searchbox', { name: '搜索赛事名称' }) as HTMLInputElement).value,
     '华为',

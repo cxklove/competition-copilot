@@ -7,6 +7,12 @@ import { ErrorPresentation, errorDetails } from '../results/ErrorPresentation.ts
 import type { ErrorDetails } from '../results/ErrorPresentation.tsx';
 import { CompetitionDetail } from './CompetitionDetail.tsx';
 import type { DetailTarget } from './CompetitionDetail.tsx';
+import {
+  cachedDetail,
+  DataAvailabilitySummary,
+  verificationLabel,
+} from './competitionPresentation.tsx';
+import type { GuidedAction } from './actions.ts';
 
 export type CompetitionSelection = {
   sequence: number;
@@ -14,6 +20,7 @@ export type CompetitionSelection = {
   editionId?: string;
   trackId?: string;
   message?: string;
+  action?: GuidedAction;
 };
 export function CompetitionCenter({
   active,
@@ -34,10 +41,11 @@ export function CompetitionCenter({
   disabled: boolean;
   onBusy: (busy: boolean) => void;
   open: (id: string | null) => void;
-  select: (id: string, message?: string, target?: DetailTarget) => void;
+  select: (id: string, message?: string, target?: DetailTarget, action?: GuidedAction) => void;
 }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [dataFilter, setDataFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ErrorDetails | null>(null);
   const attempted = useRef(false);
@@ -103,7 +111,24 @@ export function CompetitionCenter({
         .join(' ')
         .toLocaleLowerCase()
         .includes(search.trim().toLocaleLowerCase()) &&
-      (filter === 'all' || (filter === 'link' ? !!value.official_url : !value.official_url)),
+      (filter === 'all' || (filter === 'link' ? !!value.official_url : !value.official_url)) &&
+      (() => {
+        if (dataFilter === 'all') return true;
+        const detail = cachedDetail(records, value.id);
+        if (!detail) return false;
+        if (dataFilter === 'editions') return detail.editions.length > 0;
+        if (dataFilter === 'source')
+          return detail.provenance.some(
+            (p) => p.section === 'competition' && p.source.verification_status === 'verified',
+          );
+        if (dataFilter === 'policy') return !!detail.eligibility_policy;
+        if (dataFilter === 'requirements') return !!detail.skill_requirements;
+        return [detail.selected_edition, ...detail.editions].some(
+          (e) =>
+            e &&
+            [e.registration_window, e.competition_window].some((w) => w?.start_at || w?.end_at),
+        );
+      })(),
   );
   if (detailId)
     return (
@@ -135,6 +160,9 @@ export function CompetitionCenter({
           <header className="page-intro">
             <h1>赛事中心</h1>
             <p>发现、比较并了解适合自己的高校竞赛。</p>
+            <p className="panel-note">
+              先了解赛事，再选择届次与赛道，进入你的资格、能力与备赛决策。
+            </p>
           </header>
           <div className="competition-search">
             <label>
@@ -145,6 +173,17 @@ export function CompetitionCenter({
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="搜索已加载的赛事名称或简称"
               />
+            </label>
+            <label>
+              已读取资料
+              <select value={dataFilter} onChange={(e) => setDataFilter(e.target.value)}>
+                <option value="all">全部赛事</option>
+                <option value="editions">有届次记录</option>
+                <option value="time">有时间记录</option>
+                <option value="source">有已核验赛事来源</option>
+                <option value="policy">有精确资格规则</option>
+                <option value="requirements">有精确技能要求</option>
+              </select>
             </label>
             <label>
               官方网站链接
@@ -159,44 +198,65 @@ export function CompetitionCenter({
             </button>
           </div>
           <p className="panel-note">
-            仅筛选已返回的正式赛事记录。届次、年份、赛道与来源核验筛选尚无完整读取数据，不作推断。
+            搜索与筛选仅使用已返回记录；资料筛选使用最近读取范围，不代表整项赛事的完整覆盖。未读取不等于没有资料。
           </p>
           {!visible.length && !loading && (
             <div className="product-empty">
-              <h2>{hasList ? '没有搜索结果' : '暂无已加载赛事'}</h2>
+              <h2>{values.length ? '没有搜索结果' : '暂无已加载赛事'}</h2>
               <p>
-                {hasList
+                {values.length
                   ? '请调整搜索条件；不会根据搜索文字创建赛事。'
                   : '加载赛事后可查看正式记录；没有返回记录不代表赛事库为空。'}
               </p>
             </div>
           )}
           <div className="competition-card-grid">
-            {visible.map((value) => (
-              <article className="dashboard-card competition-card" key={value.id}>
-                <h2>{value.name}</h2>
-                {value.short_name && <p>{value.short_name}</p>}
-                <span className="semantic-chip">正式赛事记录</span>
-                <p>届次信息暂未提供</p>
-                <p>赛道信息暂未提供</p>
-                <p>时间信息暂未确认</p>
-                <p className="panel-note">来源核验状态与观察时间：需读取对应来源记录后确认。</p>
-                <button type="button" onClick={() => open(value.id)}>
-                  查看详情<span className="sr-only">：{value.name}</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={disabled || loading}
-                  onClick={() => select(value.id)}
-                >
-                  设为当前赛事<span className="sr-only">：{value.name}</span>
-                </button>
-                <details>
-                  <summary>高级详情</summary>
-                  <pre>{JSON.stringify(value, null, 2)}</pre>
-                </details>
-              </article>
-            ))}
+            {visible.map((value) => {
+              const detail = cachedDetail(records, value.id);
+              const source = detail?.provenance.find((p) => p.section === 'competition')?.source;
+              return (
+                <article className="dashboard-card competition-card" key={value.id}>
+                  <p className="page-kicker">赛事档案</p>
+                  <h2>{value.name}</h2>
+                  {value.short_name && <p>{value.short_name}</p>}
+                  {value.description && (
+                    <p className="competition-description">{value.description}</p>
+                  )}
+                  <span className="semantic-chip">
+                    正式赛事记录 · {source ? verificationLabel(source) : '详情来源待展开'}
+                  </span>
+                  {detail && (
+                    <p>
+                      {detail.editions.length} 个可读取届次 ·{' '}
+                      {detail.selected_edition
+                        ? `${(detail.tracks ?? []).length} 条当前届次赛道记录`
+                        : '届次由你明确选择'}
+                    </p>
+                  )}
+                  {detail?.selected_edition && (
+                    <p className="card-scope">
+                      最近读取范围：{detail.selected_edition.name}
+                      {detail.selected_track ? ` / ${detail.selected_track.name}` : ' / 不指定赛道'}
+                    </p>
+                  )}
+                  <DataAvailabilitySummary detail={detail} compact />
+                  <button type="button" onClick={() => open(value.id)}>
+                    查看详情<span className="sr-only">：{value.name}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={disabled || loading}
+                    onClick={() => select(value.id)}
+                  >
+                    设为当前赛事<span className="sr-only">：{value.name}</span>
+                  </button>
+                  <details>
+                    <summary>高级详情</summary>
+                    <pre>{JSON.stringify({ competition: value, projection: detail }, null, 2)}</pre>
+                  </details>
+                </article>
+              );
+            })}
           </div>
         </>
       }

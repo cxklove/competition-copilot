@@ -655,12 +655,35 @@ timeout or retry changes. A no-edition/no-track entity is tested as a
 synthetic UI fixture; no fake competition was inserted into the formal catalog.
 Independent review passed; this closure does not claim production Cloud deployment.
 
-Next: **PX2.4 Temporal Information Enrichment — READY_FOR_DESIGN**, not implemented.
-`PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP`: the current timeline preserves structured
-time, partial endpoints, unknown and unselected scope, but cannot express official
-date text awaiting structured verification. This is non-blocking for PX2.3; a source
+**PX2.4 Temporal Information Enrichment — CLOSED_VERIFIED**, FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS.
+PX2 Competition Experience overall is CLOSED_VERIFIED: PX2.1 COMPLETE,
+PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is READY_TO_START (implementation not started);
+P15 remains NOT_STARTED and P12/P13/P14 remain CLOSED_FROZEN.
+`PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP` was the design baseline: the previous timeline
+could not express official date text awaiting structured verification. PX2.4 adds
+that reviewed evidence projection, now verified by independent review. It was non-blocking for PX2.3; a source
 link or year never establishes an announced date. The projection gaps above, full
 event-history persistence gap and submission-window contract gap remain unresolved.
+
+PX2.4 adds reviewed temporal candidates to the same generated detail projection.
+Timeline distinguishes verified full, verified partial, official pending quote,
+unknown within current records, and edition not requested. Candidates preserve
+raw text, precision and source; no dates/timezones are inferred. Complete verified
+windows take priority, with pending evidence folded below; partial windows keep
+unknown endpoints even when a candidate quote is available. Edition evidence stays
+labelled as edition-level on track pages. Evidence source grouping remains visual,
+with Raw/review references and digests available in the existing projection audit.
+This does not feed planning, snapshots, events, impact or replanning. There is no
+runtime extraction, new intent, endpoint, MCP Tool or automatic promotion.
+
+The partial endpoint blocker is fixed: only explicit candidates for missing
+endpoints appear in the main timeline. Same-endpoint candidates for verified
+values and stage-level candidates in partial windows remain in folded audit.
+Classification uses field identity, never quote text. Verified endpoint > Candidate.
+No year, timezone, midnight or month-range bounds are inferred. Targeted tests:
+41 passed; full frontend: 302 passed; lint/build/diff check passed.
+Coverage remains three admitted quotes, not all Raw temporal text; complete event
+history and submission windows remain gaps. Local PlanRegistry remains in-memory.
 
 Validation commands (from frontend):
 

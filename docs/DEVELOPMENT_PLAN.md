@@ -3355,7 +3355,7 @@ ready for subsequent demo polish.
 PX 是已验证 Local Demo / Same-plan E2E 基线之上的产品体验升级，独立于
 P15 Evaluation。目标是把 Agent / Developer Workspace 演进为高校竞赛全生命周期
 决策与成长平台；Copilot 成为贯穿业务页面的智能入口，而非整个产品。
-PX0 完成设计与路线同步；PX1 与 PX2 Core 已关闭验证，形成团队共享参考基线。
+PX0 完成设计与路线同步；PX1 与 PX2 Competition Experience（含 PX2.1–PX2.4）已关闭验证。
 没有新增业务能力。
 
 **状态不变量：P12 = CLOSED_FROZEN；P13 = CLOSED_FROZEN；P14 = CLOSED_FROZEN；
@@ -3367,12 +3367,13 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 |---|---|---|---|
 | PX0 — Design | DOCUMENTED | 产品定位、信息架构、四层体验、统一证据语言及边界 | 设计见 [PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design)；实现状态不得与愿景混淆 |
 | PX1 — Product Shell & Dashboard | CLOSED_VERIFIED | Global App Shell、一级导航、Dashboard、Current Context Panel、独立 Copilot 工作区、基础 Empty / Loading | 默认进入 Dashboard；只聚合已有 session state，缺数据使用 Empty；不新增业务 authority |
+| PX2 — Competition Experience（整体） | CLOSED_VERIFIED | Competition Center、authoritative detail、信息架构丰富化、Temporal Information Enrichment | PX2.1 COMPLETE；PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED；完整历史等已知 gap 保留 |
 | PX2 Core — Competition Center & Detail | CLOSED_VERIFIED | Competition Center、competition-level browsing、Authoritative Read Projection、Edition/Track query、TimeWindow、Eligibility Policy / Skill Requirement read、Provenance、Canonical Current Context、Copilot handoff | Final Independent Review REVIEW_PASS；完整事件历史仍为 PERSISTENCE_GAP；详情展示升级已在 PX2.3 独立验收 |
-| PX2.1 — Read Model Architecture Review | REVIEW_COMPLETE | 最小只读 Application projection、provenance boundary 与公开增量设计 | 审核完成；无新增业务 truth 或平行 API |
+| PX2.1 — Read Model Architecture Review | COMPLETE | 最小只读 Application projection、provenance boundary 与公开增量设计 | REVIEW_COMPLETE；无新增业务 truth 或平行 API |
 | PX2.2 — Authoritative Read Projection | CLOSED_VERIFIED | 经 Runtime / Facade / Tool / Reader 的正式读取与生成契约 | Final Independent Review REVIEW_PASS；target、不可变性与 authority 边界通过复核 |
 | PX2 Product Detail Enrichment — PX2.3 | CLOSED_VERIFIED | 信息密度、范围层级、Edition/Track 选择、资料状态、规则/技能/时间线及分范围证据展示 | Final Independent Review REVIEW_PASS；未知事实保持 fail-closed |
-| PX2.4 — Temporal Information Enrichment | READY_FOR_DESIGN | 官方日期原文待结构化核验状态的 projection 设计 | TEMPORAL_INFORMATION_PROJECTION_GAP；仅准备设计，未进入实现 |
-| PX3 — My Profile / Skills | NOT_STARTED（PLANNED） | 基本资料、教育/专业/年级、技能及自评来源、兴趣、目标、每周可用时间、缺失信息与画像完整度方向 | missing record 不等于 deficit；完整度百分比须先定义可审阅规则；不承诺未提供的编辑/持久化能力 |
+| PX2.4 — Temporal Information Enrichment | CLOSED_VERIFIED | reviewed temporal candidate artifact、只读 provider / projection、五态 Timeline 与证据展示 | FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS；partial endpoint blocker 已解除 |
+| PX3 — My Profile / Skills | READY_TO_START | 基本资料、教育/专业/年级、技能及自评来源、兴趣、目标、每周可用时间、缺失信息与画像完整度方向 | 仅准备就绪，尚未开始实现；missing record 不等于 deficit；完整度规则仍需正式设计 |
 | PX4 — My Competitions & Planning | PLANNED | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | 我的赛事状态是待设计的产品状态，不覆盖资格或 Plan 状态；只显示真实 milestones，不伪造 Task |
 | PX5 — Events / Approval / Version | PLANNED | Competition Updates / Event Feed、Before / After、Impact、Approval Center、PlanDiff、Version History | 复用 Snapshot → Diff → Event → Impact → Decision → policy → approval → execution → actual PlanDiff / lineage；不新增 mutation authority |
 | PX6 — Guided Demo & Reliability | PLANNED | Guided Actions、Scenario Selector、Demo Mode、Quick Journey、Runtime Health、Demo Reset、Notification UX、统一状态与现场可靠性 | 复用已有 Demo Polish 2.1 explicit actions；其余能力仍待实现；不得自动重试、绕过验证或把 UI reset 当作后端状态已重置 |
@@ -3465,15 +3466,41 @@ PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
 
 ### PX2.4 — Temporal Information Enrichment
 
-- **状态：READY_FOR_DESIGN。** 未进入 Implementation，不新增事实 contract、API 或时间数据。
-- **PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP：** 当前 Timeline 可表达已核验的 structured TimeWindow、
-  部分 start/end、unknown，以及未选择范围的 not requested；但无法安全表达“官方网站已明确公布日期文本，
-  尚未完成结构化核验”。未来需先设计 authoritative temporal candidate / evidence 的只读表达。
+- **状态：CLOSED_VERIFIED。** FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS；partial endpoint precedence blocker 已修复并复核通过。
+- **PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP（设计基线）：** 原 Timeline 可表达已核验的 structured TimeWindow、
+  部分 start/end、unknown，以及未选择范围的 not requested，但缺少“官方网站已明确公布日期文本，
+  尚未完成结构化核验”的只读表达。已通过经准入审核的 candidate projection 补充并验收，覆盖限于已准入的少量证据。
 - 此 gap 不是 PX2.3 blocker。PX2.3 保持 fail-closed：没有 authoritative structured time 就不推断日期，
   不依据 official URL、赛事名称或年份声称“官方已公布时间”。
 - 仍未解决：未查询赛道的 exact policy / requirement availability、student display name、完整 plan metadata
   尚未进入 detail projection；完整 Event History 仍为 EVENT_HISTORY_PERSISTENCE_GAP，当前会话证据不等于
   完整历史；submission window 仍为 DATA_CONTRACT_GAP。受控演示来源持续标记为模拟赛事变化 / 演示数据。
+- Application `TemporalCandidateSnapshot` 独立于 Domain TimeWindow：内容绑定的 deterministic ID、原文、
+  精度、来源、Raw digest/locator 和 review reference 全部保留；复用 VerificationStatus，区分来源已核验
+  与时间解释 pending。首批仅准入 Huawei 报名日期、RoboMaster 报名时段、MEICC 比赛月份范围三条届次证据。
+- Infrastructure 在 host 初始化时校验 artifact admission、Raw digest、target、field/quote、source 与正式
+  edition provenance，缓存不可变 snapshot。详情请求只读缓存，不读 Raw、不解析日期、不调用 LLM。
+- GET_COMPETITION_DETAILS 增量暴露 candidates 与 availability，不增加 intent、endpoint 或 MCP Tool。
+  Timeline 五态：Verified Structured 使用正式 TimeWindow，显示“时间已确认”；仅 start/end 已确认时显示
+  “部分确认”；Official Candidate 显示“官方已公布 · 待核验”；Unknown 显示“当前资料中暂未发现可靠时间信息”；
+  Not Requested 显示“请选择届次后查看时间信息”。Track 页面明确标注届次级时间依据。
+- **最终优先级：Verified endpoint > Temporal Candidate。** 主 Timeline 只允许明确对应 missing endpoint 的候选；
+  已确认端点的候选仅进入 Evidence / Audit。Partial 场景中阶段级 registration / competition 候选进入审计，
+  不擅自映射为 start/end；没有 verified endpoint 时才可作阶段级说明。原文和来源仍完整保留。
+- Domain TimeWindow 未修改；candidate 不进入 P8 deadline、P9 Snapshot、CompetitionEvent、Impact、
+  Replanning、PlanDiff 或 Plan。Frontend 不解析日期，不补 year、timezone、midnight 或 month range。
+  测试实际比较候选变化前后的 P8 plan、Snapshot、Diff 和 Event，并保留依赖边界回归。
+- 正式转正仍需明确 Raw structured values / timezone evidence、新 digest、P2 approval / verification 和 seed
+  validation；没有自动 parser、LLM extraction、实时抓取或 Event History persistence。
+- P12/P13/P14 保持 CLOSED_FROZEN；PX1/PX2 Core/PX2.3 保持 CLOSED_VERIFIED；PX3/P15 未开始。
+- 继续保留 demo 边界：Local PlanRegistry 为 in-memory，generated plans 在 server restart 后不持久化。
+  候选仅覆盖逐条准入的三条 evidence，不代表全部 Raw 时间文本；没有 runtime temporal crawler、自动 parser 或 LLM extraction。
+  PX3 = READY_TO_START 仅为后续准备状态，不表示已开始；P15 仍 NOT_STARTED。
+- 初版验证：Backend targeted 39 passed、full 2789 passed；Frontend targeted 109 passed、full 285 passed；
+  Ruff、两项 schema export drift check、frontend lint/build、git diff --check PASS。
+  Backend full 首次受 sandbox pytest 临时目录权限影响，沙箱外相同命令重跑全通过；未修改测试预期规避问题。
+- Blocker fix 验证：Timeline / competition presentation targeted 41 passed，Frontend full 302 passed，
+  lint/build、git diff --check PASS。A–F 场景覆盖报名/比赛两个 section，区分 main 与折叠 audit surface。
 
 ## P15 - Evaluation & Local/AgentArts Semantic Parity
 

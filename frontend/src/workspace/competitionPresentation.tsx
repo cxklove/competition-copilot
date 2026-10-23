@@ -7,6 +7,7 @@ import type {
 } from '../results/generated/artifacts.ts';
 import type { ReadRecord } from './competitionSession.ts';
 import { SourceGroups, groupSources } from '../results/SourceGroups.tsx';
+import { TemporalCandidateCards, visibleTemporalCandidates } from './TemporalTimeline.tsx';
 
 export const detailSections = [
   ['competition', '赛事信息'],
@@ -146,55 +147,7 @@ export function windowSummary(window?: TimeWindow | null) {
   return '时间暂未确认';
 }
 
-export function CompetitionTimeline({ detail }: { detail: CompetitionDetailProjection }) {
-  return (
-    <section>
-      <h2>赛事时间线</h2>
-      <p className="panel-note">以下仅使用当前届次的正式时间记录；观察时间不是截止时间。</p>
-      <ol className="competition-timeline">
-        {(['registration_window', 'competition_window'] as const).map((field, index) => {
-          const window = detail.selected_edition?.[field];
-          return (
-            <li key={field}>
-              <span className="timeline-number" aria-hidden="true">
-                {index + 1}
-              </span>
-              <div>
-                <h3>{field === 'registration_window' ? '报名阶段' : '比赛阶段'}</h3>
-                <span className="availability-chip">{windowSummary(window)}</span>
-                <dl>
-                  <div>
-                    <dt>开始</dt>
-                    <dd>
-                      {window?.start_at ? (
-                        <time dateTime={window.start_at}>{window.start_at}</time>
-                      ) : (
-                        '时间暂未确认'
-                      )}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>结束</dt>
-                    <dd>
-                      {window?.end_at ? (
-                        <time dateTime={window.end_at}>{window.end_at}</time>
-                      ) : (
-                        '时间暂未确认'
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-      <p className="panel-note">
-        <span>提交时间：暂未提供</span>。系统不会自动推断日期。
-      </p>
-    </section>
-  );
-}
+export { TemporalTimeline as CompetitionTimeline } from './TemporalTimeline.tsx';
 
 type Association = { section: string; scope: string; fields: string[]; source: SourceMetadata };
 const evidenceSections = {
@@ -204,6 +157,7 @@ const evidenceSections = {
   eligibility_policy: '资格规则来源',
   skill_requirements: '技能要求来源',
   time_windows: '时间依据',
+  temporal_candidates: '时间原文（待核验）',
 } as const;
 const temporalFields = {
   registration_start: '报名开始',
@@ -259,6 +213,13 @@ export function evidenceAssociations(detail: CompetitionDetailProjection): Assoc
             e.message,
           ],
         });
+  for (const c of visibleTemporalCandidates(detail))
+    rows.push({
+      section: 'temporal_candidates',
+      source: c.source,
+      scope: c.track_id ? `赛道层级 · ${scope}` : `届次层级 · ${editionName(c.edition_id)}`,
+      fields: [c.raw_text, `时间解释待核验 · ${c.precision}`],
+    });
   return rows;
 }
 
@@ -314,6 +275,15 @@ export function CompetitionEvidenceCenter({ detail }: { detail: CompetitionDetai
         <p className="detail-empty">
           暂无来源元数据。当前范围没有来源记录，官网链接不能代替来源核验。
         </p>
+      )}
+      {visibleTemporalCandidates(detail).length > 0 && (
+        <section aria-label="待核验时间依据">
+          <h3>待核验时间依据</h3>
+          <TemporalCandidateCards
+            candidates={visibleTemporalCandidates(detail)}
+            showSource={false}
+          />
+        </section>
       )}
       {detail.skill_requirements && (
         <details>

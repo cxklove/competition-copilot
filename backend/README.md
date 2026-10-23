@@ -2733,3 +2733,25 @@ See the [release checkpoint](../docs/DEVELOPMENT_PLAN.md#px2-release-checkpoint-
 .\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
 .\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
 ```
+## PX2.4 Temporal evidence read projection
+
+Status: CLOSED_VERIFIED; FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS. `application/temporal_evidence.py` defines
+immutable presentation candidates and the abstract TemporalEvidenceProvider;
+`infrastructure/temporal_evidence_json.py` loads the explicit reviewed artifact at
+host initialization, validating Raw digest, quote/locator, target, admission ID,
+and source against reviewed edition provenance. Detail requests read the cache.
+
+`CompetitionDetailReader` adds candidates and section availability to the existing
+GET_COMPETITION_DETAILS projection. Source verification is separate from temporal
+verification; pending candidates never overwrite Edition TimeWindow. Rejected or
+verified-status candidates cannot masquerade as pending or auto-create a window.
+See [candidate data notes](../data/temporal_evidence/README.md).
+
+No parser, LLM extraction, new endpoint or MCP Tool is added. Candidate is excluded
+from P8 deadlines, P9 Snapshot/Event, P10 Impact and P11 Replanning. Formal promotion
+continues to require P2 Raw digest binding, approval, verification and seed validation.
+PX2 Competition Experience is CLOSED_VERIFIED (PX2.1 COMPLETE; PX2.2–PX2.4 CLOSED_VERIFIED).
+P12-P14 remain CLOSED_FROZEN; PX3 is READY_TO_START but implementation has not started;
+P15 remains NOT_STARTED. Candidate coverage is limited to three reviewed quotes.
+Event History persistence and submission-window contracts remain gaps; Local
+PlanRegistry remains in-memory. No temporal crawler/parser/LLM extraction exists.

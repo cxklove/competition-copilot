@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "reviewed_temporal_evidence",
+  "candidates": [
+    {
+      "schema_version": "1.0",
+      "candidate_id": "temporal-candidate-v1:c7f73bced0789c48f19d3df4c6cfb4b33c9440f33b3e54605eee43f430b2cebd",
+      "competition_id": "huawei-ict",
+      "edition_id": "huawei-ict-2026",
+      "track_id": null,
+      "field": "registration_end",
+      "raw_text": "各赛区报名截止: 2026-11-30。",
+      "precision": "DATE",
+      "relation": null,
+      "source": {
+        "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+        "source_type": "official",
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "verification_status": "verified"
+      },
+      "verification_status": "pending",
+      "raw_reference": "data/raw/huawei-ict-2026.json",
+      "raw_digest": "767d603b1ed484c3e45f3dd8a1bb2b8333de4a4c8282dbebf577af367464c5dd",
+      "text_locator": "/raw_payload/registration_text",
+      "review_reference": "px24-huawei-ict-2026-registration_end-admission-v1",
+      "review_note": "Official page explicitly states an all-region date-only deadline. Admitted as edition evidence only; exact clock/timezone and structured window are not verified."
+    },
+    {
+      "schema_version": "1.0",
+      "candidate_id": "temporal-candidate-v1:107e104a09a96bf8d527b851358a5c6e3642fc800a6b39c988300ef6964421e0",
+      "competition_id": "robomaster-rmuc",
+      "edition_id": "robomaster-rmuc-2026",
+      "track_id": null,
+      "field": "registration",
+      "raw_text": "正式报名：\n报名时间：2025年10月29日18:00-2025年11月6日18:00",
+      "precision": "DATETIME",
+      "relation": "RANGE",
+      "source": {
+        "source_url": "https://www.robomaster.com/zh-CN/robo/rm",
+        "source_type": "official",
+        "observed_at": "2026-10-09T16:02:30+08:00",
+        "verification_status": "verified"
+      },
+      "verification_status": "pending",
+      "raw_reference": "data/raw/robomaster-rmuc-2026.json",
+      "raw_digest": "0442437dc5aa1ebc1831449c4e37356a35024d3afe0e536bdfcac85eee9f377a",
+      "text_locator": "/raw_payload/registration_text",
+      "review_reference": "px24-robomaster-rmuc-2026-registration-admission-v1",
+      "review_note": "Official registration clock range is preserved verbatim. P2 review explicitly leaves timezone interpretation unresolved; not a verified TimeWindow."
+    },
+    {
+      "schema_version": "1.0",
+      "candidate_id": "temporal-candidate-v1:ded466de741dc5f75a09cbaa793079282e4af7e2aa85a524e33becc94704ad7d",
+      "competition_id": "meicc",
+      "edition_id": "meicc-2026",
+      "track_id": null,
+      "field": "competition",
+      "raw_text": "2026年3月至11月期间。",
+      "precision": "MONTH",
+      "relation": "RANGE",
+      "source": {
+        "source_url": "https://www.cmes.org/notice/010c5f85554e440e99d702008b58a26f.html",
+        "source_type": "official",
+        "observed_at": "2026-10-09T15:32:55+08:00",
+        "verification_status": "verified"
+      },
+      "verification_status": "pending",
+      "raw_reference": "data/raw/meicc-2026.json",
+      "raw_digest": "01d447ff34c7a25e559c47705c8fbe09c47b9e3a8e1d6e511e7ce4f837c307c4",
+      "text_locator": "/raw_payload/competition_text",
+      "review_reference": "px24-meicc-2026-competition-admission-v1",
+      "review_note": "Official edition month range is preserved. P2 review explicitly prohibits conversion to a competition window; no day or clock boundaries inferred."
+    }
+  ],
+  "admissions": [
+    {
+      "review_reference": "px24-huawei-ict-2026-registration_end-admission-v1",
+      "candidate_id": "temporal-candidate-v1:c7f73bced0789c48f19d3df4c6cfb4b33c9440f33b3e54605eee43f430b2cebd",
+      "decision": "admit"
+    },
+    {
+      "review_reference": "px24-robomaster-rmuc-2026-registration-admission-v1",
+      "candidate_id": "temporal-candidate-v1:107e104a09a96bf8d527b851358a5c6e3642fc800a6b39c988300ef6964421e0",
+      "decision": "admit"
+    },
+    {
+      "review_reference": "px24-meicc-2026-competition-admission-v1",
+      "candidate_id": "temporal-candidate-v1:ded466de741dc5f75a09cbaa793079282e4af7e2aa85a524e33becc94704ad7d",
+      "decision": "admit"
+    }
+  ]
+}

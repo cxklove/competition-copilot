@@ -791,6 +791,135 @@
         "title": "SourceType",
         "type": "string"
       },
+      "TemporalCandidateSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_id": {
+            "default": "",
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "field": {
+            "enum": [
+              "registration",
+              "competition",
+              "registration_start",
+              "registration_end",
+              "competition_start",
+              "competition_end"
+            ],
+            "title": "Field",
+            "type": "string"
+          },
+          "precision": {
+            "enum": [
+              "DATETIME",
+              "DATE",
+              "MONTH",
+              "TEXT_ONLY"
+            ],
+            "title": "Precision",
+            "type": "string"
+          },
+          "raw_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Raw Digest",
+            "type": "string"
+          },
+          "raw_reference": {
+            "pattern": "^data/raw/[^/\\\\]+\\.json$",
+            "title": "Raw Reference",
+            "type": "string"
+          },
+          "raw_text": {
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          },
+          "relation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "RANGE",
+                  "BEFORE"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Relation"
+          },
+          "review_note": {
+            "minLength": 1,
+            "title": "Review Note",
+            "type": "string"
+          },
+          "review_reference": {
+            "minLength": 1,
+            "title": "Review Reference",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0",
+            "default": "1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          "text_locator": {
+            "pattern": "^/raw_payload/[A-Za-z_]+$",
+            "title": "Text Locator",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus",
+            "default": "pending"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id",
+          "field",
+          "raw_text",
+          "precision",
+          "source",
+          "raw_reference",
+          "raw_digest",
+          "text_locator",
+          "review_reference",
+          "review_note"
+        ],
+        "title": "TemporalCandidateSnapshot",
+        "type": "object"
+      },
       "TimeWindow": {
         "additionalProperties": false,
         "description": "A time interval whose endpoints may be unknown.",
@@ -1007,6 +1136,17 @@
           }
         ],
         "default": null
+      },
+      "temporal_candidates": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/TemporalCandidateSnapshot"
+        },
+        "title": "Temporal Candidates",
+        "type": "array"
+      },
+      "temporal_candidates_availability": {
+        "$ref": "#/$defs/DetailSectionAvailability"
       },
       "tracks": {
         "default": [],

@@ -47,11 +47,12 @@ Application 编排用例；Domain 独立决定业务结果；Repository 只提�
 | Core Agent Lifecycle P0–P14 | Stable / Frozen；P12/P13/P14 为 CLOSED_FROZEN |
 | PX1 — Product Shell / Dashboard / Current Context | CLOSED_VERIFIED |
 | PX2 Core — Competition Center / Authoritative Detail | CLOSED_VERIFIED |
-| PX2 Product Detail Enrichment | DEFERRED，非架构阻塞 |
-| PX3 | NOT_STARTED |
+| PX2 Competition Experience（含 PX2.1–PX2.4） | CLOSED_VERIFIED |
+| PX2.1 / PX2.2 / PX2.3 / PX2.4 | COMPLETE / CLOSED_VERIFIED / CLOSED_VERIFIED / CLOSED_VERIFIED |
+| PX3 — My Profile / Skills | READY_TO_START，尚未实施 |
 | P15 Evaluation | NOT_STARTED |
 
-后续详情 UX 丰富度提升或单独授权的 PX3 工作，从上述 checkpoint 继续。
+PX2.4 final independent re-review 已 REVIEW_PASS；后续 PX3 工作等待单独启动。
 详细阶段记录见 [Development Plan](docs/DEVELOPMENT_PLAN.md)。
 
 ## 当前能力

@@ -6,6 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from competition_copilot.application.eligibility import EligibilityPolicyProvider
 from competition_copilot.application.skill_requirements import SkillRequirementProvider
+from competition_copilot.application.temporal_evidence import (
+    TemporalCandidateSnapshot,
+    TemporalEvidenceProvider,
+)
 from competition_copilot.domain.competition import (
     Competition,
     CompetitionEdition,
@@ -101,6 +105,10 @@ class CompetitionDetailProjection(DetailSnapshot):
     skill_requirements: SkillRequirementSetEnvelope | None = None
     provenance: tuple[CompetitionProvenance, ...]
     availability: DetailAvailability
+    temporal_candidates: tuple[TemporalCandidateSnapshot, ...] = ()
+    temporal_candidates_availability: DetailSectionAvailability = Field(default_factory=lambda:
+        DetailSectionAvailability(requested=False, state=ObservationState.UNKNOWN,
+                                  reason="PROVIDER_NOT_CONFIGURED"))
 
     @model_validator(mode="after")
     def exact_identity(self) -> Self:
@@ -133,6 +141,10 @@ class CompetitionDetailProjection(DetailSnapshot):
                 q.edition_id is not None and p.edition_id != q.edition_id
             ):
                 raise ValueError("Provenance target mismatch")
+        for candidate in self.temporal_candidates:
+            if (candidate.competition_id != q.competition_id or candidate.edition_id != q.edition_id
+                or candidate.track_id not in (None, q.track_id)):
+                raise ValueError("Temporal candidate target mismatch")
         return self
 
 
@@ -145,9 +157,11 @@ def _availability(requested: bool, known: bool, reason: str | None = None):
 class CompetitionDetailReader:
     def __init__(self, repository: CompetitionRepository,
                  policies: EligibilityPolicyProvider, requirements: SkillRequirementProvider,
-                 provenance: CompetitionProvenanceReader):
+                 provenance: CompetitionProvenanceReader,
+                 temporal_evidence: TemporalEvidenceProvider | None = None):
         self.repository, self.policies = repository, policies
         self.requirements, self.provenance = requirements, provenance
+        self.temporal_evidence = temporal_evidence
 
     def read(self, query: CompetitionDetailQuery) -> CompetitionDetailProjection:
         q = CompetitionDetailQuery.model_validate(query)
@@ -169,10 +183,15 @@ class CompetitionDetailReader:
             raise ValueError("Duplicate requirement target")
         requirement = matches[0] if matches else None
         provenance = self.provenance.read_provenance(q.competition_id, q.edition_id)
+        candidates = self.temporal_evidence.read_candidates(q.competition_id, q.edition_id,
+            q.track_id) if edition and self.temporal_evidence is not None else ()
         return CompetitionDetailProjection(
             query=q, competition=competition, editions=editions, selected_edition=edition,
             tracks=tracks, selected_track=track, eligibility_policy=policy,
             skill_requirements=requirement, provenance=provenance,
+            temporal_candidates=candidates,
+            temporal_candidates_availability=_availability(bool(edition), bool(candidates),
+                "PROVIDER_NOT_CONFIGURED" if self.temporal_evidence is None else "NO_ADMITTED_CANDIDATE"),
             availability=DetailAvailability(
                 competition=_availability(True, True), editions=_availability(True, True),
                 tracks=_availability(bool(edition), bool(edition)),

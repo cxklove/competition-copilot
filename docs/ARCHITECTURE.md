@@ -3131,7 +3131,7 @@ plan selection/HITL/PlanDiff components without computing business results.
 
 PX 是独立的产品体验路线，不是 P15 Evaluation，也不重开 P12/P13/P14
 CLOSED_FROZEN 基线。PX0 / Design 已 DOCUMENTED，PX1 / PX2 Core 为 CLOSED_VERIFIED；
-PX2.1 REVIEW_COMPLETE、PX2.2 REVIEW_PASS，详情丰富度优化 DEFERRED，PX3–PX6 为 PLANNED。阶段状态与范围由
+PX2 整体 CLOSED_VERIFIED：PX2.1 COMPLETE、PX2.2–PX2.4 CLOSED_VERIFIED；PX3 READY_TO_START（未实施），PX4–PX6 PLANNED。阶段状态与范围由
 [DEVELOPMENT_PLAN](DEVELOPMENT_PLAN.md#post-p14-product-experience-upgrade-px) 维护，
 页面、导航、状态与证据设计由
 [PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design) 维护。
@@ -3195,3 +3195,29 @@ Section availability 复用 ObservationState，requested 单独区分未请求�
 不伪装 UNKNOWN。完整事件历史仍是 EVENT_HISTORY_PERSISTENCE_GAP，不建立历史仓库；
 只将 exact-target session event 单列为当前会话证据，受控变化始终标识 demo/manual。
 submission window 不存在正式 contract，继续未提供。P12–P14 冻结，P15 未开始。
+## PX2.4 — Presentation-only temporal evidence
+
+TemporalCandidate != verified TimeWindow. Application defines a frozen typed
+snapshot and TemporalEvidenceProvider. An Infrastructure adapter validates curated,
+versioned admissions against original Raw bytes and reviewed edition provenance at
+host construction, then serves immutable candidates from memory. Application and
+Tool do not access Raw files. Detail requests perform no extraction or parsing.
+
+The existing Runtime → GET_COMPETITION_DETAILS → Facade → Tool → Reader path exposes
+both unchanged structured windows and candidate evidence, with separate availability.
+No new endpoint, intent or MCP Tool is introduced. Source VERIFIED does not imply
+temporal VERIFIED. Candidates preserve raw text, grain, scope, source/observed_at,
+digest/locator and review reference. Frontend labels pending official quotes,
+retains verified endpoint precedence, and never upgrades edition scope to track scope.
+
+Candidates cannot enter P8 planning input/deadlines, P9 authoritative snapshots or
+CompetitionEvent, P10 Impact, P11 Replanning or plan mutation. Formal promotion uses
+the existing P2 reviewed Raw → approved bundle → verified bundle → validated seed
+chain with new digest binding. No online temporal approval engine is introduced.
+Verified endpoint > Candidate. Partial main presentation only admits candidates
+explicitly bound to missing endpoints. Candidates for already verified endpoints,
+and stage-level candidates in partial windows, remain in folded Evidence/Audit;
+no quote-text heuristic assigns endpoints. No date, year, timezone, midnight or
+month boundaries are inferred. Candidates cannot produce PlanDiff.
+Status CLOSED_VERIFIED; FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS. Frozen P12-P14
+authorities remain unchanged; PX3 readiness does not begin implementation, P15 NOT_STARTED.

@@ -4,6 +4,7 @@ import { JSDOM } from 'jsdom';
 import type {
   CompetitionDetailProjection,
   SourceMetadata,
+  TemporalCandidateSnapshot,
 } from '../src/results/generated/artifacts.ts';
 import type { AgentResponse } from '../src/runtime/generated/contracts.ts';
 import type { ReadRecord } from '../src/workspace/competitionSession.ts';
@@ -19,6 +20,7 @@ import {
 } from '../src/workspace/competitionPresentation.tsx';
 import { detailFacts } from '../src/workspace/competitionData.ts';
 import { guidedActions } from '../src/workspace/actions.ts';
+import { classifyTimelineCandidates } from '../src/workspace/TemporalTimeline.tsx';
 import runtime from './fixtures/runtime.json' with { type: 'json' };
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost/' });
@@ -342,12 +344,13 @@ test('null required level and authoritative catalog stay separate from personal 
 });
 
 for (const [window, label] of [
-  [null, '时间暂未确认'],
-  [{ start_at: '2030-01-01T10:00:00+08:00', end_at: null }, '仅开始时间已确认'],
-  [{ start_at: null, end_at: '2030-01-02T10:00:00+08:00' }, '仅结束时间已确认'],
+  [null, '当前资料中暂未发现可靠时间信息'],
+  [{ start_at: '2030-01-01T10:00:00+08:00', end_at: null }, '部分确认'],
+  [{ start_at: null, end_at: '2030-01-02T10:00:00+08:00' }, '部分确认'],
 ] as const)
   test(`timeline preserves ${label} without submission milestones`, () => {
     const p = projection();
+    p.availability.time_windows.requested = true;
     p.selected_edition!.registration_window = window;
     const rendered = render(<CompetitionTimeline detail={p} />);
     assert.ok(rendered.getAllByText(label).length > 0);
@@ -356,6 +359,231 @@ for (const [window, label] of [
     if (window?.start_at)
       assert.equal(rendered.container.querySelector('time')?.dateTime, window.start_at);
   });
+
+function temporal(p: CompetitionDetailProjection): TemporalCandidateSnapshot {
+  return {
+    schema_version: '1.0',
+    candidate_id: 'synthetic-ui-candidate',
+    competition_id: p.competition.id,
+    edition_id: p.query.edition_id!,
+    field: 'registration_end',
+    raw_text: '明确标记的测试原文：2030年5月',
+    precision: 'MONTH',
+    source,
+    verification_status: 'pending',
+    raw_reference: 'data/raw/synthetic.json',
+    raw_digest: '0'.repeat(64),
+    text_locator: '/raw_payload/registration_text',
+    review_reference: 'synthetic-review',
+    review_note: 'Synthetic UI-only candidate; never a real competition fact.',
+  };
+}
+
+test('official pending text remains an edition quote, not a confirmed date', () => {
+  const p = projection();
+  p.temporal_candidates = [temporal(p)];
+  p.query.track_id = 'synthetic-track';
+  const original = JSON.stringify(p);
+  const rendered = render(<CompetitionTimeline detail={p} />);
+  assert.ok(rendered.getAllByText('官方已公布 · 待核验').length);
+  assert.ok(rendered.getByText(temporal(p).raw_text));
+  assert.ok(rendered.getByText('届次级时间依据（不代表特定赛道日程）'));
+  assert.ok(rendered.getByText(/信息粒度：月份/));
+  assert.ok(rendered.getByRole('link'));
+  assert.equal(rendered.container.querySelectorAll('time[datetime="2030-05-01"]').length, 0);
+  assert.equal(rendered.queryByText('时间已确认'), null);
+  assert.equal(JSON.stringify(p), original);
+});
+
+test('verified full takes priority and pending text remains in evidence disclosure', () => {
+  const p = projection();
+  p.selected_edition!.registration_window = {
+    start_at: '2030-01-01T10:00:00Z',
+    end_at: '2030-01-02T10:00:00Z',
+  };
+  p.temporal_candidates = [temporal(p)];
+  const rendered = render(<CompetitionTimeline detail={p} />);
+  assert.ok(rendered.getByText('时间已确认'));
+  const disclosure = rendered.getByText('存在待核验时间依据').closest('details')!;
+  assert.equal(disclosure.open, false);
+  assert.ok(within(disclosure).getByText(temporal(p).raw_text));
+  assert.ok(rendered.container.querySelector('time[datetime="2030-01-02T10:00:00Z"]'));
+});
+
+test('partial verified window plus end candidate never fills the missing end', () => {
+  const p = projection();
+  p.selected_edition!.registration_window = { start_at: '2030-01-01T10:00:00Z', end_at: null };
+  p.temporal_candidates = [temporal(p)];
+  const rendered = render(<CompetitionTimeline detail={p} />);
+  assert.ok(rendered.getByText('部分确认'));
+  assert.ok(rendered.getAllByText('官方已公布 · 待核验').length);
+  assert.equal(p.selected_edition!.registration_window.end_at, null);
+});
+
+for (const family of ['registration', 'competition'] as const) {
+  for (const [known, field, mainExpected] of [
+    ['start', 'end', true],
+    ['start', 'start', false],
+    ['end', 'start', true],
+    ['end', 'end', false],
+  ] as const) {
+    test(`${family}: verified ${known} protects same endpoint; ${field} candidate main=${mainExpected}`, () => {
+      const p = projection();
+      const verified = '2030-01-01T10:00:00Z';
+      p.selected_edition![`${family}_window`] = {
+        start_at: known === 'start' ? verified : null,
+        end_at: known === 'end' ? verified : null,
+      };
+      const c: TemporalCandidateSnapshot = {
+        ...temporal(p),
+        field: `${family}_${field}`,
+        raw_text: `Synthetic ${family} ${field} quote`,
+      };
+      p.temporal_candidates = [c];
+      const before = JSON.stringify(p);
+      const rendered = render(<CompetitionTimeline detail={p} />);
+      const section = rendered
+        .getByRole('heading', { name: family === 'registration' ? '报名阶段' : '比赛阶段' })
+        .closest('li')!;
+      const main = section.querySelector('.timeline-main') as HTMLElement;
+      assert.equal(!!within(main).queryByText(c.raw_text), mainExpected);
+      const confirmed = within(main).getByText(known === 'start' ? '开始' : '结束').parentElement!;
+      assert.equal(confirmed.querySelector('time')?.dateTime, verified);
+      if (mainExpected) {
+        const missing = within(main).getByText(field === 'start' ? '开始' : '结束').parentElement!;
+        assert.ok(within(missing).getByText(c.raw_text));
+        assert.equal(section.querySelector('details.temporal-audit'), null);
+      } else {
+        const audit = section.querySelector('details.temporal-audit') as HTMLDetailsElement;
+        assert.equal(audit.open, false);
+        assert.ok(within(audit).getByText(c.raw_text));
+        assert.ok(within(audit).getByRole('link'));
+        assert.equal(within(main).queryByText('官方已公布 · 待核验'), null);
+      }
+      assert.equal(JSON.stringify(p), before);
+    });
+  }
+
+  for (const state of ['full', 'empty', 'partial-stage', 'empty-stage'] as const) {
+    test(`${family}: ${state} keeps candidates in their permitted scope`, () => {
+      const p = projection();
+      p.selected_edition![`${family}_window`] = {
+        start_at: state === 'full' || state === 'partial-stage' ? '2030-01-01T10:00:00Z' : null,
+        end_at: state === 'full' ? '2030-01-02T10:00:00Z' : null,
+      };
+      const fields: TemporalCandidateSnapshot['field'][] = state.endsWith('stage')
+        ? [family]
+        : [`${family}_start`, `${family}_end`, family];
+      const candidates = fields.map((field) => ({
+        ...temporal(p),
+        field,
+        candidate_id: `synthetic-${field}`,
+        raw_text: `Synthetic ${field} raw quote: deadline / start`,
+      }));
+      p.temporal_candidates = candidates;
+      const before = JSON.stringify(p);
+      const rendered = render(<CompetitionTimeline detail={p} />);
+      const section = rendered
+        .getByRole('heading', { name: family === 'registration' ? '报名阶段' : '比赛阶段' })
+        .closest('li')!;
+      const main = section.querySelector('.timeline-main') as HTMLElement;
+      if (state === 'full' || state === 'partial-stage') {
+        const audit = section.querySelector('details.temporal-audit') as HTMLDetailsElement;
+        assert.equal(audit.open, false);
+        for (const c of candidates) {
+          assert.equal(within(main).queryByText(c.raw_text), null);
+          assert.ok(within(audit).getByText(c.raw_text));
+        }
+        assert.equal(within(main).queryByText('官方已公布 · 待核验'), null);
+      } else {
+        for (const c of candidates) assert.ok(within(main).getByText(c.raw_text));
+        assert.equal(section.querySelector('details.temporal-audit'), null);
+        if (state === 'empty-stage') {
+          // Source cards contain their own metadata lists; only a direct child
+          // list here would incorrectly assign stage evidence to endpoints.
+          assert.equal(Boolean(main.querySelector(':scope > dl')), false);
+          assert.ok(within(section).getByText('官方已公布相关时间信息 · 待核验'));
+        } else {
+          for (const endpoint of ['start', 'end'] as const) {
+            const row = within(main).getByText(
+              endpoint === 'start' ? '开始' : '结束',
+            ).parentElement!;
+            assert.ok(
+              within(row).getByText(
+                candidates.find((c) => c.field === `${family}_${endpoint}`)!.raw_text,
+              ),
+            );
+          }
+        }
+      }
+      assert.equal(JSON.stringify(p), before);
+    });
+  }
+}
+
+test('classification preserves backend order and uses field identity, never quote wording', () => {
+  const p = projection();
+  const start: TemporalCandidateSnapshot = {
+    ...temporal(p),
+    field: 'registration_start',
+    raw_text: 'deadline',
+  };
+  const end: TemporalCandidateSnapshot = {
+    ...temporal(p),
+    field: 'registration_end',
+    raw_text: 'starts',
+  };
+  const stage: TemporalCandidateSnapshot = {
+    ...temporal(p),
+    field: 'registration',
+    raw_text: 'start / end',
+  };
+  const second = { ...end, candidate_id: 'synthetic-second-end' };
+  const candidates = [end, stage, start, second];
+  const before = JSON.stringify(candidates);
+  const result = classifyTimelineCandidates(
+    { start_at: '2030-01-01T00:00:00Z', end_at: null },
+    candidates,
+    'registration',
+  );
+  assert.deepEqual(result.mainEndCandidates, [end, second]);
+  assert.deepEqual(result.mainStartCandidates, []);
+  assert.deepEqual(result.sectionCandidates, []);
+  assert.deepEqual(result.auditCandidates, [stage, start]);
+  assert.equal(JSON.stringify(candidates), before);
+});
+
+for (const kind of [
+  'no-evidence',
+  'non-official',
+  'rejected',
+  'wrong-target',
+  'verified-candidate',
+]) {
+  test(`no official announcement inferred from ${kind}`, () => {
+    const p = projection();
+    const c = temporal(p);
+    if (kind === 'non-official') c.source = { ...source, source_type: 'manual' };
+    if (kind === 'rejected') c.verification_status = 'rejected';
+    if (kind === 'verified-candidate') c.verification_status = 'verified';
+    if (kind === 'wrong-target') c.edition_id = 'other-edition';
+    p.temporal_candidates = kind === 'no-evidence' ? [] : [c];
+    p.competition.official_url = 'https://example.invalid/official-fixture';
+    const rendered = render(<CompetitionTimeline detail={p} />);
+    assert.equal(rendered.queryByText('官方已公布 · 待核验'), null);
+    assert.ok(rendered.getAllByText('当前资料中暂未发现可靠时间信息').length);
+  });
+}
+
+test('unselected edition is not an unknown requested timeline', () => {
+  const p = projection();
+  p.selected_edition = null;
+  p.query.edition_id = null;
+  p.availability.time_windows.requested = false;
+  const rendered = render(<CompetitionTimeline detail={p} />);
+  assert.ok(rendered.getByText('请选择届次后查看时间信息。'));
+  assert.equal(rendered.queryByText('当前资料中暂未发现可靠时间信息'), null);
+});
 
 test('evidence deduplicates URLs while preserving competition/edition associations and observations', () => {
   const p = projection();

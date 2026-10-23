@@ -40,6 +40,11 @@ def test_explicit_detail_zero_cloud_calls_through_real_facade(context):
     assert parsed.query.model_dump(exclude_none=True) == context
     assert calls == ["get_competition_details"]
     assert chat.calls == []
+    if context.get("edition_id") == "huawei-ict-2026":
+        assert len(parsed.temporal_candidates) == 1
+        assert parsed.temporal_candidates[0].verification_status == "pending"
+        assert parsed.temporal_candidates[0].track_id is None
+        assert parsed.selected_edition.registration_window is None
 
 
 def test_detail_missing_and_conflicting_ids_fail_closed():

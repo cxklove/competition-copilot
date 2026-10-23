@@ -20,6 +20,7 @@ from competition_copilot.application.competition_snapshots import (
 )
 from competition_copilot.application.eligibility import CompetitionEligibilityEvaluator
 from competition_copilot.application.skill_requirements import SkillRequirementProvider
+from competition_copilot.application.temporal_evidence import TemporalEvidenceProvider
 from competition_copilot.domain.baseline_plan_builder import (
     BaselineCompetitionPlanBuilder,
 )
@@ -71,6 +72,7 @@ def build_seed_agent(
     explanation_model: ExplanationModel | None = None,
     human_interpreter: HumanResponseInterpreter | None = None,
     requirement_provider: SkillRequirementProvider | None = None,
+    temporal_evidence: TemporalEvidenceProvider | None = None,
 ) -> AgentComposition:
     """Assemble the frozen authorities; caller supplies every workflow argument.
 
@@ -82,7 +84,8 @@ def build_seed_agent(
     facade = AgentCapabilityFacade(
         read_tools={
             **({CapabilityId.GET_COMPETITION_DETAILS: GetCompetitionDetailsTool(
-                CompetitionDetailReader(repository, policies, requirement_provider, repository))}
+                CompetitionDetailReader(repository, policies, requirement_provider, repository,
+                                        temporal_evidence))}
                if requirement_provider is not None else {}),
             CapabilityId.LIST_COMPETITIONS: ListCompetitionsTool(repository),
             CapabilityId.GET_COMPETITION: GetCompetitionTool(repository),

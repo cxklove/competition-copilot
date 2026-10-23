@@ -144,6 +144,12 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
                          for item in demo.get("student_skill_evidence", []))
     student_evidence = {demo_profile.id: prepare_student_skill_evidence(demo_profile, declarations)}
     repository = JsonSeedCompetitionRepository(root / "data/seed")
+    from competition_copilot.infrastructure.temporal_evidence_json import (
+        JsonTemporalEvidenceProvider,
+    )
+
+    temporal_evidence = JsonTemporalEvidenceProvider(
+        root / "data/temporal_evidence/candidates.json", root, repository)
     requirements = JsonSkillRequirementProvider(root / "data/skill_requirements")
     observation = ControlledPlanObservation.model_validate_json(
         (root / "data/local_runtime/generated_huawei_observation.json").read_bytes())
@@ -173,7 +179,7 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
             intent_model=model,
             explanation_model=cloud_models.explanation if cloud_models else None,
             human_interpreter=cloud_models.human_interpreter if cloud_models else None,
-            requirement_provider=requirements)
+            requirement_provider=requirements, temporal_evidence=temporal_evidence)
         if cloud_models is not None or request.intent is not None:
             # Natural-language routing calls the provider once; explicit actions
             # call it zero times. Both use the same preparation/validation path.

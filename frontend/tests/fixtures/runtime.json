@@ -178,7 +178,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "request-1",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       },
@@ -196,7 +199,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "request-1",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -214,7 +220,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "request-1",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       },
@@ -232,7 +241,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": " request-1 ",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -253,7 +265,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "   ",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -274,7 +289,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -295,7 +313,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": true,
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -313,7 +334,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "request-1\u001f",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       },
@@ -331,7 +355,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "\u0085request-1\u001f",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -4194,7 +4221,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "request-1",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -4213,7 +4243,10 @@
           },
           "conversation_id": null,
           "intent": null,
+          "profile_result_refs": null,
+          "profile_update": null,
           "request_id": "request-1",
+          "skill_command": null,
           "user_message": "Check competition"
         }
       }
@@ -4617,7 +4650,10 @@
     },
     "conversation_id": null,
     "intent": null,
+    "profile_result_refs": null,
+    "profile_update": null,
     "request_id": "request-1",
+    "skill_command": null,
     "user_message": "Check competition"
   },
   "runtime_error": {

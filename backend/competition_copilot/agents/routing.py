@@ -61,6 +61,14 @@ def explicit_intent_proposal(request: AgentRequest) -> IntentRoutingProposal | N
     if request.intent is None:
         return None
     capability = {
+        AgentIntent.GET_PROFILE_ANALYSES: CapabilityId.GET_PROFILE_ANALYSES,
+        AgentIntent.GET_PROFILE: CapabilityId.GET_PROFILE,
+        AgentIntent.GET_SKILL_CATALOG: CapabilityId.GET_SKILL_CATALOG,
+        AgentIntent.ADD_PROFILE_SKILL: CapabilityId.ADD_PROFILE_SKILL,
+        AgentIntent.UPDATE_PROFILE_SKILL: CapabilityId.UPDATE_PROFILE_SKILL,
+        AgentIntent.REMOVE_PROFILE_SKILL: CapabilityId.REMOVE_PROFILE_SKILL,
+
+        AgentIntent.UPDATE_PROFILE: CapabilityId.UPDATE_PROFILE,
         AgentIntent.GET_COMPETITION_DETAILS: CapabilityId.GET_COMPETITION_DETAILS,
         AgentIntent.CHECK_ELIGIBILITY: CapabilityId.CHECK_ELIGIBILITY,
         AgentIntent.GET_RECOMMENDATIONS: CapabilityId.GET_RECOMMENDATIONS,
@@ -146,6 +154,14 @@ class RoutingValidationResult(AgentContract):
 
 # Safety policy, not workflow planning: an intent may admit several capabilities.
 INTENT_CAPABILITIES = MappingProxyType({
+    AgentIntent.GET_PROFILE_ANALYSES: (CapabilityId.GET_PROFILE_ANALYSES,),
+    AgentIntent.GET_PROFILE: (CapabilityId.GET_PROFILE,),
+    AgentIntent.GET_SKILL_CATALOG: (CapabilityId.GET_SKILL_CATALOG,),
+    AgentIntent.ADD_PROFILE_SKILL: (CapabilityId.ADD_PROFILE_SKILL,),
+    AgentIntent.UPDATE_PROFILE_SKILL: (CapabilityId.UPDATE_PROFILE_SKILL,),
+    AgentIntent.REMOVE_PROFILE_SKILL: (CapabilityId.REMOVE_PROFILE_SKILL,),
+
+    AgentIntent.UPDATE_PROFILE: (CapabilityId.UPDATE_PROFILE,),
     AgentIntent.DISCOVER_COMPETITIONS: (CapabilityId.LIST_COMPETITIONS,),
     AgentIntent.GET_COMPETITION_DETAILS: (
         CapabilityId.GET_COMPETITION_DETAILS,
@@ -229,8 +245,6 @@ def _project_trusted_payload(payload: dict) -> dict[str, str]:
 
 def _anchored_recommendations(request, payload, capability):
     return (capability == CapabilityId.GET_RECOMMENDATIONS
-            and request.context.competition_id is not None
-            and request.context.edition_id is not None
             and request.context.plan_ref is None
             and isinstance(payload.get("contexts"), list) and len(payload["contexts"]) > 1)
 
@@ -242,7 +256,7 @@ def _resolve_trusted_context(request: AgentRequest, payload: dict, *,
     P6 contexts describe distinct recommendation candidates, so different candidate
     targets remain separate scopes. Every context must describe the same student.
     Outer identities constrain each scope. For a P6 multi-candidate batch only,
-    a complete anchor constrains membership instead of excluding alternatives.
+    an optional caller target constrains membership instead of excluding alternatives.
     Plan-bound requests retain the original exact-target checks.
     """
     outer = request.context.model_dump(mode="json")
@@ -256,6 +270,7 @@ def _resolve_trusted_context(request: AgentRequest, payload: dict, *,
     if not isinstance(contexts, list) or any(not isinstance(item, dict) for item in contexts):
         raise ValueError("Invalid trusted contexts")
     if _anchored_recommendations(request, payload, capability):
+        # Recommendation ranks a pool even when no current target is selected.
         # Never let payload-level identities override the caller. Only candidate
         # scopes may differ; their own projections must remain internally coherent.
         base = {name: value for name, value in base.items()
@@ -268,7 +283,8 @@ def _resolve_trusted_context(request: AgentRequest, payload: dict, *,
     if _anchored_recommendations(request, payload, capability):
         if any("plan_id" in scope for scope in scopes) or not any(
             all(scope.get(name) == outer.get(name)
-                for name in ("competition_id", "edition_id", "track_id")) for scope in scopes
+                for name in ("competition_id", "edition_id", "track_id")
+                if outer.get(name) is not None) for scope in scopes
         ):
             raise ValueError("Recommendation anchor missing or plan scope supplied")
     return tuple(sorted(scopes, key=lambda scope: tuple(scope.items())))
@@ -323,7 +339,15 @@ class RoutingProposalValidator:
             return reject(RoutingReason.INCOMPATIBLE_CAPABILITY)
         # A model-originated mutation is never executable in P12.4, even with a
         # caller approval response. The existing explicit structured path is separate.
-        if capability.access == CapabilityAccess.MUTATING or capability.requires_explicit_approval:
+        explicit_profile_edit = (
+            capability.capability == CapabilityId.UPDATE_PROFILE
+            and request.intent == AgentIntent.UPDATE_PROFILE
+            and proposal.intent == AgentIntent.UPDATE_PROFILE
+            and request.profile_update is not None)
+        explicit_skill_edit = (
+            request.skill_command is not None and request.intent == proposal.intent
+            and capability.capability.value == request.skill_command.operation + "_profile_skill")
+        if (capability.access == CapabilityAccess.MUTATING or capability.requires_explicit_approval) and not (explicit_profile_edit or explicit_skill_edit):
             return clarify(RoutingReason.APPROVAL_REQUIRED, (ContextField.APPROVAL_CONTEXT,),
                            ClarificationReason.MISSING_APPROVAL_CONTEXT)
         payload = arguments.get("payload") if isinstance(arguments, dict) else None

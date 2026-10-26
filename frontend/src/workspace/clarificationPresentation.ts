@@ -12,6 +12,13 @@ export const clarificationLabels: Partial<Record<ContextField, string>> = {
   CAPABILITY_INVOCATION: '高级调用信息',
 };
 export const intentLabels: Record<AgentIntent, string> = {
+  GET_PROFILE_ANALYSES: '查看分析所用画像版本',
+  GET_SKILL_CATALOG: '查看技能目录',
+  ADD_PROFILE_SKILL: '添加自评技能',
+  UPDATE_PROFILE_SKILL: '编辑技能记录',
+  REMOVE_PROFILE_SKILL: '删除技能记录',
+  GET_PROFILE: '查看个人画像',
+  UPDATE_PROFILE: '保存个人画像',
   DISCOVER_COMPETITIONS: '查找赛事',
   GET_COMPETITION_DETAILS: '查看赛事详情',
   CHECK_ELIGIBILITY: '检查参赛资格',

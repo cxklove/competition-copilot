@@ -245,10 +245,12 @@ export function CompetitionCenter({
                   </button>
                   <button
                     type="button"
-                    disabled={disabled || loading}
+                    aria-label={`${context.competition_id === value.id ? '当前赛事' : '设为当前赛事'}：${value.name}`}
+                    disabled={disabled || loading || context.competition_id === value.id}
                     onClick={() => select(value.id)}
                   >
-                    设为当前赛事<span className="sr-only">：{value.name}</span>
+                    {context.competition_id === value.id ? '当前赛事' : '设为当前赛事'}
+                    <span className="sr-only">：{value.name}</span>
                   </button>
                   <details>
                     <summary>高级详情</summary>

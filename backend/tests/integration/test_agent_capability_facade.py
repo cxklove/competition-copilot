@@ -158,7 +158,8 @@ def test_explicit_inventory_and_metadata(facade):
         "check_eligibility", "get_recommendations", "analyze_skill_gap", "build_plan",
         "build_competition_snapshot", "diff_competition_snapshot", "derive_competition_events",
         "analyze_event_impact", "decide_replanning", "revise_plan",
-        "get_competition_details",
+        "get_competition_details", "get_profile", "update_profile", "get_profile_analyses",
+        "get_skill_catalog", "add_profile_skill", "update_profile_skill", "remove_profile_skill",
     }
     metadata = facade.list_capabilities()
     assert {m.capability.value for m in metadata} == expected
@@ -167,7 +168,11 @@ def test_explicit_inventory_and_metadata(facade):
         assert CapabilityMetadata.model_validate_json(json.dumps(item.model_dump(mode="json"))) == item
         assert json.loads(item.input_schema_json)["properties"]["payload"]
         assert item.requires_explicit_approval == (item.capability == CapabilityId.REVISE_PLAN)
-        assert (item.access == "MUTATING") == item.requires_explicit_approval
+        # Profile self-edit is authorized by its Application actor binding;
+        # plan revision alone retains the separate human approval workflow.
+        assert (item.access == "MUTATING") == (item.capability in (
+            CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL,
+            CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL))
     assert facade.list_capabilities() == metadata
 
 

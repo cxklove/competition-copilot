@@ -84,6 +84,13 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PROFILE_ANALYSES",
+          "GET_PROFILE",
+          "GET_SKILL_CATALOG",
+          "ADD_PROFILE_SKILL",
+          "UPDATE_PROFILE_SKILL",
+          "REMOVE_PROFILE_SKILL",
+          "UPDATE_PROFILE",
           "DISCOVER_COMPETITIONS",
           "GET_COMPETITION_DETAILS",
           "CHECK_ELIGIBILITY",
@@ -130,10 +137,48 @@
             ],
             "default": null
           },
+          "profile_result_refs": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile Result Refs"
+          },
+          "profile_update": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ProfileUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
           "request_id": {
             "minLength": 1,
             "title": "Request Id",
             "type": "string"
+          },
+          "skill_command": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SkillCommand"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           },
           "user_message": {
             "minLength": 1,
@@ -202,8 +247,14 @@
         "type": "object"
       },
       "CapabilityId": {
-        "description": "Existing capabilities, not an executable registry or routing policy.",
         "enum": [
+          "get_profile_analyses",
+          "get_profile",
+          "get_skill_catalog",
+          "add_profile_skill",
+          "update_profile_skill",
+          "remove_profile_skill",
+          "update_profile",
           "list_competitions",
           "get_competition",
           "get_competition_details",
@@ -529,6 +580,138 @@
         "title": "PlanReference",
         "type": "object"
       },
+      "ProfilePatch": {
+        "additionalProperties": false,
+        "properties": {
+          "education_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EducationLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "goals": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grade"
+          },
+          "interests": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "major": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Major"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "School"
+          },
+          "weekly_available_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Available Hours"
+          }
+        },
+        "title": "ProfilePatch",
+        "type": "object"
+      },
+      "ProfileReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "student_id",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "ProfileReference",
+        "type": "object"
+      },
+      "ProfileUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "patch": {
+            "$ref": "#/$defs/ProfilePatch"
+          }
+        },
+        "required": [
+          "expected_profile_ref",
+          "patch"
+        ],
+        "title": "ProfileUpdate",
+        "type": "object"
+      },
       "ReferenceKind": {
         "enum": [
           "PROFILE",
@@ -574,6 +757,51 @@
           "ref_id"
         ],
         "title": "ResultReference",
+        "type": "object"
+      },
+      "SkillCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "level": {
+            "$ref": "#/$defs/SkillLevel",
+            "default": "unknown"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          },
+          "operation": {
+            "enum": [
+              "add",
+              "update",
+              "remove"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "skill_id": {
+            "minLength": 1,
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation",
+          "expected_profile_ref",
+          "skill_id"
+        ],
+        "title": "SkillCommand",
         "type": "object"
       },
       "SkillLevel": {
@@ -869,6 +1097,13 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PROFILE_ANALYSES",
+          "GET_PROFILE",
+          "GET_SKILL_CATALOG",
+          "ADD_PROFILE_SKILL",
+          "UPDATE_PROFILE_SKILL",
+          "REMOVE_PROFILE_SKILL",
+          "UPDATE_PROFILE",
           "DISCOVER_COMPETITIONS",
           "GET_COMPETITION_DETAILS",
           "CHECK_ELIGIBILITY",
@@ -919,6 +1154,14 @@
         ],
         "title": "CompetitionTarget",
         "type": "object"
+      },
+      "EducationLevel": {
+        "enum": [
+          "undergraduate",
+          "graduate"
+        ],
+        "title": "EducationLevel",
+        "type": "string"
       },
       "PlanReference": {
         "additionalProperties": false,
@@ -973,6 +1216,138 @@
         "title": "PlanReference",
         "type": "object"
       },
+      "ProfilePatch": {
+        "additionalProperties": false,
+        "properties": {
+          "education_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EducationLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "goals": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grade"
+          },
+          "interests": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "major": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Major"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "School"
+          },
+          "weekly_available_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Available Hours"
+          }
+        },
+        "title": "ProfilePatch",
+        "type": "object"
+      },
+      "ProfileReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "student_id",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "ProfileReference",
+        "type": "object"
+      },
+      "ProfileUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "patch": {
+            "$ref": "#/$defs/ProfilePatch"
+          }
+        },
+        "required": [
+          "expected_profile_ref",
+          "patch"
+        ],
+        "title": "ProfileUpdate",
+        "type": "object"
+      },
       "ReferenceKind": {
         "enum": [
           "PROFILE",
@@ -1019,6 +1394,61 @@
         ],
         "title": "ResultReference",
         "type": "object"
+      },
+      "SkillCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "level": {
+            "$ref": "#/$defs/SkillLevel",
+            "default": "unknown"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          },
+          "operation": {
+            "enum": [
+              "add",
+              "update",
+              "remove"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "skill_id": {
+            "minLength": 1,
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation",
+          "expected_profile_ref",
+          "skill_id"
+        ],
+        "title": "SkillCommand",
+        "type": "object"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
       }
     },
     "additionalProperties": false,
@@ -1050,10 +1480,48 @@
         ],
         "default": null
       },
+      "profile_result_refs": {
+        "anyOf": [
+          {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Profile Result Refs"
+      },
+      "profile_update": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ProfileUpdate"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
       "request_id": {
         "minLength": 1,
         "title": "Request Id",
         "type": "string"
+      },
+      "skill_command": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/SkillCommand"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
       },
       "user_message": {
         "minLength": 1,
@@ -1104,6 +1572,13 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PROFILE_ANALYSES",
+          "GET_PROFILE",
+          "GET_SKILL_CATALOG",
+          "ADD_PROFILE_SKILL",
+          "UPDATE_PROFILE_SKILL",
+          "REMOVE_PROFILE_SKILL",
+          "UPDATE_PROFILE",
           "DISCOVER_COMPETITIONS",
           "GET_COMPETITION_DETAILS",
           "CHECK_ELIGIBILITY",
@@ -1611,6 +2086,13 @@
     "$defs": {
       "AgentIntent": {
         "enum": [
+          "GET_PROFILE_ANALYSES",
+          "GET_PROFILE",
+          "GET_SKILL_CATALOG",
+          "ADD_PROFILE_SKILL",
+          "UPDATE_PROFILE_SKILL",
+          "REMOVE_PROFILE_SKILL",
+          "UPDATE_PROFILE",
           "DISCOVER_COMPETITIONS",
           "GET_COMPETITION_DETAILS",
           "CHECK_ELIGIBILITY",
@@ -1628,8 +2110,14 @@
         "type": "string"
       },
       "CapabilityId": {
-        "description": "Existing capabilities, not an executable registry or routing policy.",
         "enum": [
+          "get_profile_analyses",
+          "get_profile",
+          "get_skill_catalog",
+          "add_profile_skill",
+          "update_profile_skill",
+          "remove_profile_skill",
+          "update_profile",
           "list_competitions",
           "get_competition",
           "get_competition_details",
@@ -2148,6 +2636,13 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PROFILE_ANALYSES",
+          "GET_PROFILE",
+          "GET_SKILL_CATALOG",
+          "ADD_PROFILE_SKILL",
+          "UPDATE_PROFILE_SKILL",
+          "REMOVE_PROFILE_SKILL",
+          "UPDATE_PROFILE",
           "DISCOVER_COMPETITIONS",
           "GET_COMPETITION_DETAILS",
           "CHECK_ELIGIBILITY",
@@ -2688,6 +3183,9 @@
     },
     "AgentRequest": {
       "conversation_id": "strip",
+      "profile_result_refs": {
+        "items": "strip"
+      },
       "request_id": "strip",
       "user_message": "strip"
     },
@@ -2747,6 +3245,12 @@
       "plan_id": "strip",
       "student_id": "strip"
     },
+    "ProfilePatch": {},
+    "ProfileReference": {
+      "host_scope": "strip",
+      "student_id": "strip"
+    },
+    "ProfileUpdate": {},
     "PublicRuntimeResult": {
       "continuation_ref": "strip"
     },
@@ -2758,6 +3262,9 @@
     },
     "RuntimeError": {
       "message": "strip"
+    },
+    "SkillCommand": {
+      "skill_id": "strip"
     },
     "StudentProfile": {},
     "StudentSkill": {}

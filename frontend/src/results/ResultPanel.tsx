@@ -1,3 +1,4 @@
+import { DerivedResultFreshness } from '../workspace/ProfileFreshness.tsx';
 import { useMemo } from 'react';
 import type { AgentResponse } from '../runtime/generated/contracts.ts';
 import { validateArtifacts } from './artifacts.ts';
@@ -201,7 +202,9 @@ export function ResultPanel({
     return (
       <div className="result-summary grounded-results">
         {ranking ? (
-          <RecommendationResults result={ranking.value} audit={audit} />
+          <DerivedResultFreshness identity={ranking.ref.ref_id}>
+            <RecommendationResults result={ranking.value} audit={audit} />
+          </DerivedResultFreshness>
         ) : (
           evaluation && (
             <>
@@ -228,9 +231,15 @@ export function ResultPanel({
     return (
       <div className="result-summary grounded-results">
         {skillGap ? (
-          <SkillGapResults result={skillGap.value} audit={audit} />
+          <DerivedResultFreshness identity={skillGap.ref.ref_id}>
+            <SkillGapResults result={skillGap.value} audit={audit} />
+          </DerivedResultFreshness>
         ) : (
-          plan && <PlanTimeline plan={plan.value} audit={audit} />
+          plan && (
+            <DerivedResultFreshness identity={plan.ref.ref_id}>
+              <PlanTimeline plan={plan.value} audit={audit} />
+            </DerivedResultFreshness>
+          )
         )}
         <details className="semantic-raw">
           <summary>查看原始回复</summary>

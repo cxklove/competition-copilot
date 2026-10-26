@@ -98,9 +98,530 @@ const { Workspace } = await import('../src/workspace/Workspace.tsx');
 const { ProductApp } = await import('../src/workspace/ProductApp.tsx');
 afterEach(cleanup);
 
+test('competition card selection is canonical, visible and shared across Dashboard, Profile, detail and Copilot', async () => {
+  window.history.replaceState(null, '', '/');
+  const value = composition();
+  const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  const select = await view.findByRole(
+    'button',
+    { name: '设为当前赛事：华为ICT大赛' },
+    { timeout: 10000 },
+  );
+  const before = value.calls.length;
+  fireEvent.click(select);
+  const selected = await view.findByRole('button', { name: '当前赛事：华为ICT大赛' });
+  assert.equal((selected as HTMLButtonElement).disabled, true);
+  assert.equal(value.calls.length, before); // context selection is not a business invocation
+  assert.equal(
+    view.getByRole('status', { name: '当前赛事范围' }).textContent,
+    '当前范围：华为ICT大赛',
+  );
+  fireEvent.click(nav.getByRole('link', { name: '首页' }));
+  assert.ok(within(view.getByRole('region', { name: '当前上下文' })).getByText('华为ICT大赛'));
+  fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+  await view.findByRole('button', { name: '编辑画像' }, { timeout: 10000 });
+  assert.equal(
+    view.getByRole('status', { name: '当前赛事范围' }).textContent,
+    '当前范围：华为ICT大赛',
+  );
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  assert.equal((view.getByLabelText('竞赛 ID') as HTMLInputElement).value, 'huawei-ict');
+  assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, '');
+  assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  assert.ok(view.getByRole('button', { name: '当前赛事：华为ICT大赛' }));
+  fireEvent.click(view.getByRole('button', { name: /查看详情.*华为/ }));
+  await view.findByRole('tab', { name: '赛事概览' }, { timeout: 10000 });
+  assert.equal(
+    (view.getByRole('button', { name: '当前赛事' }) as HTMLButtonElement).disabled,
+    true,
+  );
+  assert.equal((view.getByRole('combobox', { name: '届次' }) as HTMLSelectElement).value, '');
+  assert.equal(view.queryByRole('combobox', { name: '赛道' }), null);
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  fireEvent.click(view.getByRole('button', { name: '查看赛事推荐' }));
+  const { waitFor } = await import('@testing-library/react');
+  await waitFor(
+    () => assert.ok(value.calls.some((call) => call.request?.intent === 'GET_RECOMMENDATIONS')),
+    { timeout: 10000 },
+  );
+  const outbound = value.calls.find(
+    (call) => call.request?.intent === 'GET_RECOMMENDATIONS',
+  )!.request!;
+  assert.equal(outbound.context?.competition_id, 'huawei-ict');
+  assert.equal(outbound.context?.edition_id, undefined);
+  assert.equal(outbound.context?.track_id, undefined);
+  await settled(view);
+  const index = value.calls.findIndex((call) => call.request === outbound);
+  assert.equal(value.responses[index].response?.outcome, 'COMPLETED');
+  assert.ok(
+    validateArtifacts(value.responses[index].response!, value.deliveries[index].presentation).some(
+      (artifact) => artifact.model === 'RecommendationRankingResult',
+    ),
+  );
+  window.history.replaceState(null, '', '/');
+});
+
+test('profile recommendation CTA needs only current student and sends no candidate IDs', async () => {
+  window.history.replaceState(null, '', '/');
+  const value = composition();
+  const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+  await view.findByRole('button', { name: '编辑画像' }, { timeout: 10000 });
+  assert.equal(value.calls.filter((c) => c.request?.intent === 'GET_RECOMMENDATIONS').length, 0);
+  const { waitFor } = await import('@testing-library/react');
+  await waitFor(
+    () =>
+      assert.ok(
+        value.responses.some(
+          (r) => r.response?.intent === 'GET_SKILL_CATALOG' && r.response.outcome === 'COMPLETED',
+        ),
+      ),
+    { timeout: 10000 },
+  );
+  await waitFor(
+    () =>
+      assert.equal(
+        (view.getByRole('button', { name: '根据当前画像推荐赛事' }) as HTMLButtonElement).disabled,
+        false,
+      ),
+    { timeout: 10000 },
+  );
+  fireEvent.click(view.getByRole('button', { name: '根据当前画像推荐赛事' }));
+  assert.equal(window.location.hash, '#/copilot');
+  await view.findByRole('heading', { name: '推荐结果' }, { timeout: 10000 });
+  await view.findAllByText('基于当前画像', {}, { timeout: 10000 });
+  const index = value.calls.findIndex((c) => c.request?.intent === 'GET_RECOMMENDATIONS');
+  const outbound = value.calls[index].request!;
+  assert.deepEqual(outbound.context, { student_id: 'local-recommendation-demo' });
+  assert.ok(!JSON.stringify(outbound).includes('candidate'));
+  assert.equal(value.responses[index].response?.outcome, 'COMPLETED');
+  const artifact = validateArtifacts(
+    value.responses[index].response!,
+    value.deliveries[index].presentation,
+  ).find((a) => a.model === 'RecommendationRankingResult');
+  assert.ok(artifact && artifact.model === 'RecommendationRankingResult');
+  assert.ok(artifact.value.confirmed && artifact.value.uncertain && artifact.value.blocked);
+  assert.equal(
+    artifact.value.confirmed.length +
+      artifact.value.uncertain.length +
+      artifact.value.blocked.length,
+    12,
+  );
+  assert.equal((view.getByLabelText('竞赛 ID') as HTMLInputElement).value, '');
+  assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, '');
+  assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
+  window.history.replaceState(null, '', '/');
+});
+
+test('profile-only recommendation names survive INTERMEDIATE to UNKNOWN, stale retention and explicit rerun', async () => {
+  window.history.replaceState(null, '', '/');
+  const value = composition();
+  const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  const { waitFor } = await import('@testing-library/react');
+  const names = [
+    '中国研究生数学建模竞赛',
+    'COMAP Mathematical Contest in Modeling',
+    '中国大学生计算机设计大赛',
+    '中国高校计算机大赛—大数据挑战赛',
+    '中国国际大学生创新大赛',
+  ];
+  async function skill(level: string) {
+    fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+    await view.findByRole('button', { name: '编辑画像' }, { timeout: 10000 });
+    await waitFor(
+      () =>
+        assert.equal(
+          (view.getByRole('button', { name: '编辑 Mathematical Modeling' }) as HTMLButtonElement)
+            .disabled,
+          false,
+        ),
+      { timeout: 10000 },
+    );
+    fireEvent.click(view.getByRole('button', { name: '编辑 Mathematical Modeling' }));
+    fireEvent.change(view.getByRole('combobox', { name: '技能等级' }), {
+      target: { value: level },
+    });
+    fireEvent.click(view.getByRole('button', { name: '保存技能' }));
+    await view.findByText('技能记录已保存。已有分析和计划不会自动更新。', {}, { timeout: 10000 });
+  }
+  async function assertNames() {
+    await waitFor(
+      () => {
+        const labels = [...view.container.querySelectorAll('.recommendation-card h5')].map(
+          (h) => h.textContent,
+        );
+        for (const name of names)
+          assert.ok(
+            labels.some((label) => label?.endsWith(name)),
+            name,
+          );
+      },
+      { timeout: 15000 },
+    );
+  }
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  try {
+    await skill('intermediate');
+    fireEvent.click(view.getByRole('button', { name: '根据当前画像推荐赛事' }));
+    await view.findByRole('heading', { name: '推荐结果' }, { timeout: 10000 });
+    await view.findAllByText('基于当前画像', {}, { timeout: 10000 });
+    await assertNames();
+    const firstIndex = value.responses.findIndex(
+      (r) => r.response?.intent === 'GET_RECOMMENDATIONS',
+    );
+    const first = validateArtifacts(
+      value.responses[firstIndex].response!,
+      value.deliveries[firstIndex].presentation,
+    ).find((a) => a.model === 'RecommendationRankingResult')!;
+    assert.ok(first.model === 'RecommendationRankingResult');
+    const original = JSON.stringify(first.value);
+    await waitFor(
+      () =>
+        assert.equal(
+          value.responses.filter((r) => r.response?.request_id.startsWith('recommendation-name-'))
+            .length,
+          12,
+        ),
+      { timeout: 15000 },
+    );
+    const readCount = value.calls.filter((c) =>
+      c.request?.request_id.startsWith('recommendation-name-'),
+    ).length;
+    assert.equal(readCount, 12);
+    assert.ok(
+      value.calls
+        .filter((c) => c.request?.request_id.startsWith('recommendation-name-'))
+        .every(
+          (c) =>
+            c.request?.intent === 'GET_COMPETITION_DETAILS' &&
+            !c.request.context?.edition_id &&
+            !c.request.context?.track_id,
+        ),
+    );
+    await skill('unknown');
+    fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+    await view.findAllByText('基于较早画像', {}, { timeout: 10000 });
+    await assertNames();
+    assert.equal(JSON.stringify(first.value), original);
+    fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+    fireEvent.click(view.getByRole('button', { name: '根据当前画像重新推荐' }));
+    await waitFor(
+      () =>
+        assert.equal(
+          value.responses.filter((r) => r.response?.intent === 'GET_RECOMMENDATIONS').length,
+          2,
+        ),
+      { timeout: 10000 },
+    );
+    await view.findAllByText('基于当前画像', {}, { timeout: 10000 });
+    await assertNames();
+    const lastIndex = value.responses.findLastIndex(
+      (r) => r.response?.intent === 'GET_RECOMMENDATIONS',
+    );
+    const last = validateArtifacts(
+      value.responses[lastIndex].response!,
+      value.deliveries[lastIndex].presentation,
+    ).find((a) => a.model === 'RecommendationRankingResult')!;
+    assert.ok(last.model === 'RecommendationRankingResult');
+    for (const [ranking, expected] of [
+      [first.value, 1],
+      [last.value, 0],
+    ] as const) {
+      const item = [
+        ...(ranking.confirmed ?? []),
+        ...(ranking.uncertain ?? []),
+        ...(ranking.blocked ?? []),
+      ]
+        .map((item) => ('evaluation' in item ? item.evaluation : item))
+        .find((item) => item.candidate.competition_id === 'comap-mcm')!;
+      assert.equal(
+        item.score_components?.filter((c) => c.component_id === 'verified-skill-overlap-v1').length,
+        expected,
+      );
+    }
+    assert.equal(
+      value.calls.filter((c) => c.request?.request_id.startsWith('recommendation-name-')).length,
+      readCount,
+    );
+    fireEvent.click(nav.getByRole('link', { name: '首页' }));
+    fireEvent.click(view.getByRole('button', { name: '查看赛事推荐' }));
+    await view.findByRole('heading', { name: '推荐结果' }, { timeout: 10000 });
+    await assertNames();
+  } finally {
+    // The HTTP harness is shared by this file; restore its baseline for later cases.
+    await skill('intermediate');
+    window.history.replaceState(null, '', '/');
+  }
+});
+
+test('selecting a different competition clears the old canonical edition and track', async () => {
+  window.history.replaceState(null, '', '/');
+  const value = composition();
+  const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  for (const [label, text] of [
+    ['竞赛 ID', 'huawei-ict'],
+    ['届次 ID', 'huawei-ict-2026'],
+    [/赛道 ID/, 'huawei-ict-2026-innovation'],
+  ] as const)
+    fireEvent.change(view.getByLabelText(label), { target: { value: text } });
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  const button = await view.findByRole(
+    'button',
+    { name: /设为当前赛事.*COMAP/ },
+    { timeout: 10000 },
+  );
+  fireEvent.click(button);
+  assert.ok(await view.findByRole('button', { name: /当前赛事.*COMAP/ }));
+  assert.ok(view.getByRole('button', { name: '设为当前赛事：华为ICT大赛' }));
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  assert.equal((view.getByLabelText('竞赛 ID') as HTMLInputElement).value, 'comap-mcm');
+  assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, '');
+  assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  fireEvent.click(view.getByRole('button', { name: '设为当前赛事：华为ICT大赛' }));
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  assert.equal((view.getByLabelText('竞赛 ID') as HTMLInputElement).value, 'huawei-ict');
+  assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, '');
+  assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
+  window.history.replaceState(null, '', '/');
+});
+
+test('selection button reflects the same busy guard instead of silently dropping an enabled click', async () => {
+  window.history.replaceState(null, '', '/');
+  const value = composition();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const client = {
+    ...value.client,
+    exchange: async (...args: Parameters<typeof value.client.exchange>) => {
+      const result = await value.client.exchange(...args);
+      if (args[0].request?.intent === 'GET_PROFILE') await gate;
+      return result;
+    },
+  };
+  const view = render(<ProductApp client={client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  await view.findByRole('button', { name: '设为当前赛事：华为ICT大赛' }, { timeout: 10000 });
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+  const { waitFor } = await import('@testing-library/react');
+  await waitFor(() =>
+    assert.ok(value.calls.some((call) => call.request?.intent === 'GET_PROFILE')),
+  );
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  const select = view.getByRole('button', {
+    name: '设为当前赛事：华为ICT大赛',
+  }) as HTMLButtonElement;
+  assert.equal(select.disabled, true);
+  fireEvent.click(select);
+  assert.equal(view.queryByRole('status', { name: '当前赛事范围' }), null);
+  await act(async () => {
+    release();
+  });
+  await waitFor(() => assert.equal(select.disabled, false), { timeout: 10000 });
+  fireEvent.click(select);
+  assert.ok(await view.findByRole('button', { name: '当前赛事：华为ICT大赛' }));
+  window.history.replaceState(null, '', '/');
+});
+
+for (const scenario of [
+  {
+    action: '查看赛事推荐',
+    model: 'RecommendationRankingResult',
+    heading: '推荐结果',
+    rerun: '根据当前画像重新推荐',
+    intent: 'GET_RECOMMENDATIONS',
+  },
+  {
+    action: '分析技能差距',
+    model: 'SkillGapDecision',
+    heading: '技能差距分析',
+    rerun: '重新分析技能差距',
+    intent: 'ANALYZE_SKILL_GAP',
+  },
+  {
+    action: '生成备赛计划',
+    model: 'CompetitionPlan',
+    heading: '备赛计划',
+    rerun: '重新生成计划',
+    intent: 'BUILD_PLAN',
+  },
+] as const)
+  for (const mutation of ['profile', 'skill'] as const)
+    test(`real product ${scenario.model}: ${mutation} save retains stale body, explicit CTA alone reruns`, async () => {
+      window.history.replaceState(null, '', '/');
+      const value = composition();
+      const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+      const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+      fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+      for (const [label, text] of [
+        [/学生 ID/, 'local-recommendation-demo'],
+        ['竞赛 ID', 'comap-mcm'],
+        ['届次 ID', 'comap-mcm-2027'],
+      ] as const)
+        fireEvent.change(view.getByLabelText(label), { target: { value: text } });
+      fireEvent.click(view.getByRole('button', { name: scenario.action }));
+      await view.findByRole('heading', { name: scenario.heading }, { timeout: 10000 });
+      await view.findByText('基于当前画像', {}, { timeout: 10000 });
+      const originalIndex = value.responses.findIndex(
+        (r) => r.response?.intent === scenario.intent,
+      );
+      const originalResponse = value.responses[originalIndex].response!;
+      const originalDelivery = value.deliveries[originalIndex];
+      const original = validateArtifacts(originalResponse, originalDelivery.presentation).find(
+        (a) => a.model === scenario.model,
+      )!;
+      const content = JSON.stringify(original.value);
+      if (scenario.model === 'CompetitionPlan') {
+        const ref = originalResponse.plan_refs![0];
+        const option = view.getByRole('option', { name: new RegExp(ref.plan_id) });
+        fireEvent.change(view.getByRole('combobox', { name: '当前计划 / 选择计划' }), {
+          target: { value: (option as HTMLOptionElement).value },
+        });
+      }
+      // Starting another workflow clears state.response, not the valid prior analysis.
+      fireEvent.click(view.getByRole('button', { name: '开始新请求' }));
+      assert.ok(
+        within(view.getByRole('region', { name: '已保留的分析结果' })).getByRole('heading', {
+          name: scenario.heading,
+        }),
+      );
+      fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+      const edit = await view.findByRole('button', { name: '编辑画像' }, { timeout: 10000 });
+      if (mutation === 'profile') {
+        fireEvent.click(edit);
+        fireEvent.change(view.getByRole('textbox', { name: '学校' }), {
+          target: { value: `School for ${scenario.model}` },
+        });
+        fireEvent.click(view.getByRole('button', { name: '保存画像' }));
+        await view.findByText('画像已保存。已有分析和计划不会自动更新。', {}, { timeout: 10000 });
+      } else {
+        const { waitFor } = await import('@testing-library/react');
+        await waitFor(
+          () =>
+            assert.equal(
+              (
+                view.getByRole('button', {
+                  name: '编辑 Mathematical Modeling',
+                }) as HTMLButtonElement
+              ).disabled,
+              false,
+            ),
+          { timeout: 10000 },
+        );
+        fireEvent.click(view.getByRole('button', { name: '编辑 Mathematical Modeling' }));
+        fireEvent.change(view.getByRole('textbox', { name: '用户备注' }), {
+          target: { value: `User note for ${scenario.model}` },
+        });
+        fireEvent.click(view.getByRole('button', { name: '保存技能' }));
+        await view.findByText(
+          '技能记录已保存。已有分析和计划不会自动更新。',
+          {},
+          { timeout: 10000 },
+        );
+      }
+      await within(view.container.querySelector('#profile-analysis') as HTMLElement).findByText(
+        '\u57fa\u4e8e\u8f83\u65e9\u753b\u50cf',
+        {},
+        { timeout: 10000 },
+      );
+      assert.equal(value.calls.filter((c) => c.request?.intent === scenario.intent).length, 1);
+      assert.equal(JSON.stringify(original.value), content);
+      assert.equal(
+        value.calls.filter((c) => c.request?.intent === 'REQUEST_PLAN_REVISION').length,
+        0,
+      );
+      fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+      const retained = within(view.getByRole('region', { name: '已保留的分析结果' }));
+      assert.ok(retained.getByRole('heading', { name: scenario.heading }));
+      await retained.findByText('基于较早画像', {}, { timeout: 10000 });
+      const audit = [
+        ...view.getByRole('region', { name: '已保留的分析结果' }).querySelectorAll('pre'),
+      ]
+        .map((pre) => {
+          try {
+            return JSON.parse(pre.textContent!);
+          } catch {
+            return null;
+          }
+        })
+        .find((data) =>
+          data?.artifacts?.some((a: { model: string }) => a.model === scenario.model),
+        );
+      assert.equal(
+        JSON.stringify(
+          audit.artifacts.find((a: { model: string }) => a.model === scenario.model).value,
+        ),
+        content,
+      );
+      assert.equal(
+        value.responses.some((r) => r.response?.intent === 'REQUEST_PLAN_REVISION'),
+        false,
+      );
+      fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+      fireEvent.click(view.getByRole('button', { name: scenario.rerun }));
+      await view.findByRole('heading', { name: scenario.heading }, { timeout: 10000 });
+      // The fresh artifact and its query are separate deliveries; wait for both.
+      const { waitFor } = await import('@testing-library/react');
+      await waitFor(
+        () =>
+          assert.equal(value.calls.filter((c) => c.request?.intent === scenario.intent).length, 2),
+        { timeout: 10000 },
+      );
+      if (scenario.model === 'CompetitionPlan') {
+        await waitFor(
+          () =>
+            assert.equal(
+              value.responses.filter((r) => r.response?.intent === scenario.intent).length,
+              2,
+            ),
+          { timeout: 10000 },
+        );
+        const latest = value.responses
+          .filter((r) => r.response?.intent === scenario.intent)
+          .at(-1)!;
+        const ref = latest.response!.plan_refs![0];
+        const option = await view.findByRole('option', { name: new RegExp(ref.plan_id) });
+        fireEvent.change(view.getByRole('combobox', { name: '当前计划 / 选择计划' }), {
+          target: { value: (option as HTMLOptionElement).value },
+        });
+      }
+      await view.findAllByText('\u57fa\u4e8e\u5f53\u524d\u753b\u50cf', {}, { timeout: 10000 });
+      if (scenario.model !== 'CompetitionPlan')
+        assert.ok(view.queryByRole('region', { name: '已保留的分析结果' }) === null);
+      assert.equal(JSON.stringify(original.value), content);
+      window.history.replaceState(null, '', '/');
+    });
+
 test('product navigation preserves a real generated selected plan, version/status and exact outbound ref', async () => {
   window.history.replaceState(null, '', '/');
   const value = composition();
+  const workflowCalls = () =>
+    value.calls.filter((call) => call.request?.intent !== 'GET_PROFILE_ANALYSES');
   let next = 0;
   const view = render(
     <ProductApp
@@ -136,7 +657,7 @@ test('product navigation preserves a real generated selected plan, version/statu
     { name: 'COMAP Mathematical Contest in Modeling' },
     { timeout: 10000 },
   );
-  assert.equal(value.calls.length, 2);
+  assert.equal(workflowCalls().length, 2);
   fireEvent.click(view.getByRole('button', { name: /查看详情.*COMAP/ }));
   await view.findByRole('tab', { name: '赛事概览' }, { timeout: 10000 });
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
@@ -160,13 +681,13 @@ test('product navigation preserves a real generated selected plan, version/statu
     (view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement).value,
     selected,
   );
-  assert.equal(value.calls.length, 3);
+  assert.equal(workflowCalls().length, 3);
   await act(async () => {
     fireEvent.click(view.getByRole('button', { name: '调整当前计划' }));
   });
   await view.findByRole('alert', {}, { timeout: 10000 });
-  assert.deepEqual(value.calls[3].request?.context?.plan_ref, ref);
-  assert.equal(value.calls.length, 4);
+  assert.deepEqual(workflowCalls()[3].request?.context?.plan_ref, ref);
+  assert.equal(workflowCalls().length, 4);
   assert.ok(view.getByText('当前计划暂无可执行的调整依据'));
   window.history.replaceState(null, '', '/');
 });
@@ -346,6 +867,8 @@ test('standalone policy read shows reviewed facts without running a student elig
 test('real P7 result supplies exact requirement snapshot to detail without a new analysis or inferred proficiency', async () => {
   window.history.replaceState(null, '', '/');
   const value = composition();
+  const workflowCalls = () =>
+    value.calls.filter((call) => call.request?.intent !== 'GET_PROFILE_ANALYSES');
   const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
   const nav = within(view.getByRole('navigation', { name: '产品导航' }));
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
@@ -376,10 +899,15 @@ test('real P7 result supplies exact requirement snapshot to detail without a new
   const panel = within(view.getByRole('tabpanel'));
   assert.ok(panel.getByText('所需能力等级暂未明确'));
   assert.ok(panel.getByText('暂无法确认是否存在能力差距'));
-  assert.equal(value.calls.length, 4);
+  assert.equal(workflowCalls().length, 4);
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
   assert.ok(view.getByRole('heading', { name: '技能差距分析' }));
-  assert.equal(value.calls.length, 4);
+  assert.equal(workflowCalls().length, 4);
+  assert.ok(
+    value.calls
+      .filter((call) => call.request?.intent === 'GET_PROFILE_ANALYSES')
+      .every((call) => call.request?.context?.student_id === 'local-recommendation-demo'),
+  );
   window.history.replaceState(null, '', '/');
 });
 

@@ -521,7 +521,7 @@ a dedicated workspace and a contextual entry across business pages. The current
 workspace and semantic result components are the reusable implementation baseline;
 PX1 implementation is described below; later business pages remain planned.
 
-- **PX0 / Design: DOCUMENTED. PX1 / PX2 Core: CLOSED_VERIFIED. PX2.1: REVIEW_COMPLETE. PX2.2: REVIEW_PASS. PX3–PX6: PLANNED.**
+- **PX0 / Design: DOCUMENTED. PX1 / PX2 / PX3: CLOSED_VERIFIED. PX2.1: COMPLETE. PX2.2: CLOSED_VERIFIED. PX4: READY_TO_START. PX5/PX6: PLANNED.**
   P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED.
 - Planned navigation: 首页、赛事中心、我的赛事、我的能力、备赛计划、赛事动态、Copilot.
   Approval Center placement remains a later navigation decision. Deliver incrementally.
@@ -546,7 +546,7 @@ Authority/data-flow boundaries:
 ### PX1 — product shell, Dashboard and current context
 
 Status: CLOSED_VERIFIED. The design handoff above describes the PX0
-baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3–PX6 remain PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
+baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3 is CLOSED_VERIFIED, PX4 READY_TO_START and PX5/PX6 PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
 
 The default `#/home` presents current explicit context, the selected plan's known
 version/status, the most recent validated reply, a pending approval only when the
@@ -577,7 +577,7 @@ Screenshots remain ignored local artifacts in `tmp/p14-7-e2e/`.
 ### PX2.2 - Authoritative Competition Detail
 
 Status: CLOSED_VERIFIED, with Final Independent Review REVIEW_PASS; PX2 Core is CLOSED_VERIFIED.
-P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED and PX3 remains PLANNED.
+P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED; current PX3 closure is recorded below.
 
 The center preserves existing Runtime discovery, search and canonical catalog
 records. A direct `#/competitions/<encoded canonical id>` opens a fresh readonly
@@ -657,7 +657,7 @@ Independent review passed; this closure does not claim production Cloud deployme
 
 **PX2.4 Temporal Information Enrichment — CLOSED_VERIFIED**, FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS.
 PX2 Competition Experience overall is CLOSED_VERIFIED: PX2.1 COMPLETE,
-PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is READY_TO_START (implementation not started);
+PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is CLOSED_VERIFIED; PX4 READY_TO_START (implementation not started);
 P15 remains NOT_STARTED and P12/P13/P14 remain CLOSED_FROZEN.
 `PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP` was the design baseline: the previous timeline
 could not express official date text awaiting structured verification. PX2.4 adds
@@ -701,3 +701,99 @@ Backend schema exports/checks (from repository root):
 .\backend\.venv\Scripts\python scripts/export_frontend_contracts.py --check
 .\backend\.venv\Scripts\python scripts/export_frontend_results.py --check
 ```
+
+## PX3.2 Profile Read / Edit
+
+Status: CLOSED_VERIFIED. Existing #/profile navigation hosts profile
+read/edit through Runtime GET_PROFILE / UPDATE_PROFILE. Current student must be
+explicit; no first-profile fallback or hardcoded demo identity.
+
+Seven base fields support view/edit/cancel/save. Skills were read-only in PX3.2;
+PX3.3 management is described below. Decimal
+and zero weekly hours are supported. Form completion counts N/7 fields; zero
+counts as supplied and skills are outside the denominator. This is not a score.
+Missing skills differ from UNKNOWN; non-self-assessed does not mean certified.
+Unresolved skill names fall back to IDs without a duplicate frontend catalog.
+
+Save uses the returned ProfileReference and backend snapshot. Conflicts preserve
+the draft and require reload; no automatic overwrite or business analysis.
+The page explicitly states that Demo edits live only within the running server
+and disappear after restart. Refresh can reread after selecting the student again.
+IDs/digest/host scope stay in folded technical details. Full stale-result UI is
+CLOSED_VERIFIED in PX3.4; skill mutation is CLOSED_VERIFIED in PX3.3 below.
+
+P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
+
+## PX3.3 Skills Read / Edit — CLOSED_VERIFIED
+
+The existing “我的能力” / `#/profile` page now manages skills through explicit
+GET_SKILL_CATALOG / ADD_PROFILE_SKILL / UPDATE_PROFILE_SKILL / REMOVE_PROFILE_SKILL.
+The catalog selector uses backend names, excludes recorded IDs and disallows free
+ID entry. Historical unresolved names fall back to their original ID.
+
+Add/edit supports UNKNOWN (尚未评定), beginner/intermediate/advanced and optional
+user notes. Skill identity and source flags are read-only. Non-self-assessed never
+means certified. Delete requires confirmation and makes the record missing, not
+UNKNOWN. Empty state is “尚未记录技能”; N/7 base completion still excludes skills.
+
+Each write uses the current ProfileReference and adopts only the returned validated
+snapshot. Conflicts keep the draft; reload is required, with no automatic merge.
+No recommendation, gap analysis or plan change runs on save. Full stale-result UX
+is CLOSED_VERIFIED in PX3.4. Profile/skill changes remain host-memory only and disappear after
+server restart, as visibly explained on the page.
+
+## PX3.4 Derived Result Staleness — CLOSED_VERIFIED
+
+Copilot result panels, Dashboard and My Profile related analyses consume the
+Backend ProfileAnalysesProjection. They display 基于当前画像 / 基于较早画像 /
+画像版本未记录，无法确认. A failed read stays neutral: 无法确认画像版本状态.
+Frontend never compares profile references to decide freshness or uses timestamps.
+Refs remain in folded audit details. Stale is informational, not a failed result.
+
+The session keeps old validated recommendation/gap/plan bodies. Profile/skill saves
+and new results trigger only GET_PROFILE_ANALYSES reads; opening/rendering a page
+does not rerun business analysis. Existing student/competition/edition/track matching
+still applies. Current plan summaries use the exact selected PlanReference; newly
+generated plans still require the existing explicit selection.
+
+相关分析 now supports viewing existing results and explicit recommendation rerun,
+skill-gap rerun and P8 plan generation. Saving does not change an old score, gap or
+plan, and does not invoke P11. No implicit latest student/plan selection. Unknown
+lineage and cross-host scopes remain UNKNOWN. Persistence remains host-memory.
+
+Profile-driven recommendation can start from 我的能力 → 根据当前画像推荐赛事
+with only the current student selected. No competition/edition/track is required;
+Runtime prepares the formal multi-candidate pool. Copilot natural-language and
+explicit recommendation use that same path. Existing exact-target requirements
+for eligibility, skill-gap and planning remain unchanged. A requested explicit
+action waits for a concurrent catalog read instead of being silently discarded.
+
+Copilot also renders the latest successful recommendation, skill-gap analysis and
+plan for the current student/target from the existing validated session cache when
+the active workflow has been cleared or replaced. Profile/skill edits retain those
+bodies and refresh only Backend freshness. Explicit successful reruns replace the
+latest displayed analysis; no history database or persistent result store is added.
+The selected plan remains bound to its canonical PlanReference. Session retention
+still ends on browser refresh.
+
+Recommendation names use the shared authoritative CompetitionCatalog resolver.
+When a recommendation references a competition not yet read in this session,
+the product reads GET_COMPETITION_DETAILS at competition scope to fill its name.
+Initial, stale and rerun presentations reuse that directory; no translation or
+manual ID/name table is used, and unknown names safely fall back to canonical IDs.
+These reads never select an edition/track or change recommendation results.
+
+PX3 final acceptance: PX3.1 COMPLETE; PX3.2/PX3.3/PX3.4 and PX3 overall CLOSED_VERIFIED.
+Browser Smoke PASS; Final Independent Review REVIEW_PASS. Profile/skill read and edit,
+trusted authorization, optimistic concurrency and atomic skill evidence mutation are
+verified. Missing record != UNKNOWN != SkillGap. Explicit rerun/re-analysis/P8
+regeneration uses the current snapshot; saves do not automatically recompute or replan.
+
+Known gaps remain: host-memory persistence (server restart restores fixture baseline),
+no full account/identity system, incomplete required_level coverage
+(SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP), P8's concentration on uncertainty-resolution
+tasks under incomplete constraints (PLANNING_ACTIONABILITY_GAP, PX4 high priority),
+unavailable complete Competition Event History and Submission Window DATA_CONTRACT_GAP.
+PX4 My Competitions + Planning Workspace is READY_TO_START; suggested first stage is
+PX4.1 Planning Readiness & Actionable Preparation. No PX4 implementation here.
+PX1/PX2 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.

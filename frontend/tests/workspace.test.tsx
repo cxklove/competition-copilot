@@ -12,6 +12,7 @@ import type { PlanReference } from '../src/runtime/generated/contracts.ts';
 import { conversationReducer, initialState, workflowLabel } from '../src/workspace/state.ts';
 import { createDemoClient } from '../src/demo/client.ts';
 import type { InvocationClient } from '../src/workspace/useConversation.ts';
+import { guidedActions } from '../src/workspace/actions.ts';
 
 // Install DOM before React DOM's event support detection; keep existing Node runner.
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost/' });
@@ -129,7 +130,7 @@ test('context presents exact existing input, hides technical identity and never 
   assert.equal(transport.calls.length, 0);
 });
 
-for (const page of ['我的赛事', '我的能力', '备赛计划', '赛事动态']) {
+for (const page of ['我的赛事', '备赛计划', '赛事动态']) {
   test(`${page} is an honest coming-soon page with active navigation and no invocation`, () => {
     const { client, transport } = clientFor(fixtures.completed);
     const view = render(<ProductApp client={client} />);
@@ -289,6 +290,41 @@ function deferred() {
   });
   return { promise, release };
 }
+
+test('explicit profile recommendation waits for a catalog read and executes once when unlocked', async () => {
+  const { client, transport } = clientFor(fixtures.completed);
+  const view = mount(client);
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  const selection = { sequence: 1, competitionId: '', action: guidedActions[1] };
+  view.rerender(
+    <Workspace
+      client={client}
+      nextRequestId={() => 'request-1'}
+      contextSelection={selection}
+      externalBusy
+    />,
+  );
+  assert.equal(transport.calls.length, 0);
+  await act(async () => {
+    view.rerender(
+      <Workspace
+        client={client}
+        nextRequestId={() => 'request-1'}
+        contextSelection={selection}
+        externalBusy={false}
+      />,
+    );
+  });
+  assert.equal(transport.calls.length, 1);
+  assert.equal(transport.calls[0].request?.intent, 'GET_RECOMMENDATIONS');
+  assert.deepEqual(transport.calls[0].request?.context, {
+    student_id: 'local-recommendation-demo',
+  });
+  view.rerender(<Workspace client={client} contextSelection={selection} externalBusy={false} />);
+  assert.equal(transport.calls.length, 1);
+});
 
 test('initial accessible shell, examples fill input without invoking', () => {
   const { client, transport } = clientFor(fixtures.completed);

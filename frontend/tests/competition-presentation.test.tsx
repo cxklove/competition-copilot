@@ -143,6 +143,12 @@ function view(detail = projection(), tab = 0) {
   return { ...result, selections };
 }
 
+test('set-current detail header selects competition only, even when a richer detail is being browsed', () => {
+  const page = view();
+  fireEvent.click(page.getByRole('button', { name: '设为当前赛事' }));
+  assert.deepEqual(page.selections, [['synthetic-competition']]);
+});
+
 test('availability uses producer states and coverage without a completeness percentage', () => {
   const p = projection();
   p.availability.eligibility_policy = {

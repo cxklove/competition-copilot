@@ -20,6 +20,7 @@ import { ResultPanel } from '../src/results/ResultPanel.tsx';
 import { HitlPanel } from '../src/workspace/HitlPanel.tsx';
 import { interactionFrom } from '../src/workspace/interactions.ts';
 import plan from '../src/demo/local-plan.json' with { type: 'json' };
+import { validateArtifacts } from '../src/results/artifacts.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const stamp = '2026-01-01T00:00:00Z';
@@ -149,6 +150,80 @@ async function parity(payload: AgentArtsInvocationEnvelope) {
   assert.equal(markup(right, agentarts.readArtifacts), markup(left, local.readArtifacts));
   return { result: right, local, agentarts };
 }
+
+test('Local and AgentArts freshness reads preserve CURRENT/STALE/UNKNOWN without sharing host identity', async () => {
+  const context = {
+    student_id: 'local-recommendation-demo',
+    competition_id: 'comap-mcm',
+    edition_id: 'comap-mcm-2027',
+  };
+  for (const intent of ['GET_RECOMMENDATIONS', 'ANALYZE_SKILL_GAP', 'BUILD_PLAN'] as const) {
+    const traces: string[][] = [];
+    for (const mode of ['LOCAL', 'AGENTARTS'] as const) {
+      const value = composition(mode);
+      const run = async (request: NonNullable<AgentArtsInvocationEnvelope['request']>) => {
+        const result = await value.client.exchange({ request });
+        assert.equal(result.response?.outcome, 'COMPLETED');
+        return validateArtifacts(result.response!, value.readArtifacts());
+      };
+      const generated = await run({
+        request_id: 'fresh-generate',
+        user_message: 'Generate',
+        intent,
+        context,
+      });
+      const identity = generated.find((a) =>
+        ['RecommendationRankingResult', 'SkillGapDecision', 'CompetitionPlan'].includes(a.model),
+      )!.ref.ref_id;
+      const status = async () => {
+        const values = await run({
+          request_id: 'fresh-read',
+          user_message: 'Read profile versions',
+          intent: 'GET_PROFILE_ANALYSES',
+          context,
+          profile_result_refs: [identity, 'legacy-result'],
+        });
+        const projection = values.find((a) => a.model === 'ProfileAnalysesProjection')!;
+        assert.equal(projection.model, 'ProfileAnalysesProjection');
+        if (projection.model !== 'ProfileAnalysesProjection') throw Error('Wrong model');
+        const current = projection.value.analyses[0].profile_freshness;
+        assert.equal(
+          current.input_profile_ref?.host_scope,
+          current.current_profile_ref?.host_scope,
+        );
+        assert.equal(projection.value.analyses[1].profile_freshness.status, 'UNKNOWN');
+        return current.status;
+      };
+      const before = await status();
+      const profiles = await run({
+        request_id: 'fresh-profile',
+        user_message: 'Read profile',
+        intent: 'GET_PROFILE',
+        context,
+      });
+      const profile = profiles.find((a) => a.model === 'StudentProfileProjection')!;
+      if (profile.model !== 'StudentProfileProjection') throw Error('Wrong profile model');
+      await run({
+        request_id: 'fresh-update',
+        user_message: 'Edit profile',
+        intent: 'UPDATE_PROFILE',
+        context,
+        profile_update: {
+          expected_profile_ref: profile.value.profile_ref,
+          patch: { major: `Updated for ${intent}` },
+        },
+      });
+      traces.push([before, await status()]);
+    }
+    assert.deepEqual(traces, [
+      ['CURRENT', 'STALE'],
+      ['CURRENT', 'STALE'],
+    ]);
+  }
+  // Restore fixture baseline for the remaining independent transport scenarios.
+  const response = await fetch(urls.gateway + '/__test__/reset', { method: 'POST', body: '{}' });
+  assert.equal(response.status, 200);
+});
 
 for (const [message, context] of [
   ['discovery', {}],

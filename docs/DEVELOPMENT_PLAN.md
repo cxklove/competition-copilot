@@ -3373,8 +3373,12 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 | PX2.2 — Authoritative Read Projection | CLOSED_VERIFIED | 经 Runtime / Facade / Tool / Reader 的正式读取与生成契约 | Final Independent Review REVIEW_PASS；target、不可变性与 authority 边界通过复核 |
 | PX2 Product Detail Enrichment — PX2.3 | CLOSED_VERIFIED | 信息密度、范围层级、Edition/Track 选择、资料状态、规则/技能/时间线及分范围证据展示 | Final Independent Review REVIEW_PASS；未知事实保持 fail-closed |
 | PX2.4 — Temporal Information Enrichment | CLOSED_VERIFIED | reviewed temporal candidate artifact、只读 provider / projection、五态 Timeline 与证据展示 | FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS；partial endpoint blocker 已解除 |
-| PX3 — My Profile / Skills | READY_TO_START | 基本资料、教育/专业/年级、技能及自评来源、兴趣、目标、每周可用时间、缺失信息与画像完整度方向 | 仅准备就绪，尚未开始实现；missing record 不等于 deficit；完整度规则仍需正式设计 |
-| PX4 — My Competitions & Planning | PLANNED | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | 我的赛事状态是待设计的产品状态，不覆盖资格或 Plan 状态；只显示真实 milestones，不伪造 Task |
+| PX3 — My Profile / Skills | CLOSED_VERIFIED | 个人画像、技能维护与派生结果 freshness 产品化 | PX3.1 COMPLETE；PX3.2/PX3.3/PX3.4 CLOSED_VERIFIED；Browser Smoke PASS；Final Independent Review REVIEW_PASS |
+| PX3.1 — My Profile / Skills Architecture Review | COMPLETE | Profile / Skills 架构与产品边界审查 | 实施方案已完成并通过后续验收 |
+| PX3.2 — Profile Read / Edit | CLOSED_VERIFIED | 七项基础资料、版本化 Repository、Runtime explicit read/edit | host-scoped in-memory；已通过前置验收 |
+| PX3.3 — Skills Read / Edit | CLOSED_VERIFIED | 正式技能目录、增改删、自评证据原子更新、ProfileReference CAS | host-scoped in-memory；已通过前置验收 |
+| PX3.4 — Derived Result Staleness | CLOSED_VERIFIED | 正式引用三态、调用 lineage、相关分析、显式重新分析/规划 | Browser Smoke PASS；Final Independent Review REVIEW_PASS；不改变旧结论，不自动重算或重规划 |
+| PX4 — My Competitions + Planning Workspace | READY_TO_START | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | 建议首阶段 PX4.1 Planning Readiness & Actionable Preparation；本轮未实施；不覆盖资格或 Plan 状态，只显示真实 milestones |
 | PX5 — Events / Approval / Version | PLANNED | Competition Updates / Event Feed、Before / After、Impact、Approval Center、PlanDiff、Version History | 复用 Snapshot → Diff → Event → Impact → Decision → policy → approval → execution → actual PlanDiff / lineage；不新增 mutation authority |
 | PX6 — Guided Demo & Reliability | PLANNED | Guided Actions、Scenario Selector、Demo Mode、Quick Journey、Runtime Health、Demo Reset、Notification UX、统一状态与现场可靠性 | 复用已有 Demo Polish 2.1 explicit actions；其余能力仍待实现；不得自动重试、绕过验证或把 UI reset 当作后端状态已重置 |
 
@@ -3411,7 +3415,7 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 - 完整事件历史仍为 EVENT_HISTORY_PERSISTENCE_GAP，明确显示“暂未提供完整赛事变化历史”；
   当前会话证据单列，controlled demo 不冒充官方变化；不增加 Event Ledger/Database。
   submission window 为 DATA_CONTRACT_GAP，当前不实现。Discovery 原路径保持不变。
-- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 保持 PLANNED。
+- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 当前 CLOSED_VERIFIED，PX4 READY_TO_START。
   PX2 Final Independent Review 已 REVIEW_PASS；PX2 Core 关闭为 CLOSED_VERIFIED。
 - PX2.2 验证：新增 Reader/Runtime 24 passed；扩展 targeted 142 passed；Backend full
   2774 passed；Frontend results/local targeted 85 passed、full 261 passed；Ruff、schema
@@ -3492,10 +3496,10 @@ PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
   测试实际比较候选变化前后的 P8 plan、Snapshot、Diff 和 Event，并保留依赖边界回归。
 - 正式转正仍需明确 Raw structured values / timezone evidence、新 digest、P2 approval / verification 和 seed
   validation；没有自动 parser、LLM extraction、实时抓取或 Event History persistence。
-- P12/P13/P14 保持 CLOSED_FROZEN；PX1/PX2 Core/PX2.3 保持 CLOSED_VERIFIED；PX3/P15 未开始。
+- P12/P13/P14 保持 CLOSED_FROZEN；PX1/PX2 Core/PX2.3 保持 CLOSED_VERIFIED；当前 PX3 CLOSED_VERIFIED，P15 未开始。
 - 继续保留 demo 边界：Local PlanRegistry 为 in-memory，generated plans 在 server restart 后不持久化。
   候选仅覆盖逐条准入的三条 evidence，不代表全部 Raw 时间文本；没有 runtime temporal crawler、自动 parser 或 LLM extraction。
-  PX3 = READY_TO_START 仅为后续准备状态，不表示已开始；P15 仍 NOT_STARTED。
+  当时 PX3 = READY_TO_START 仅为准备状态；当前 PX3 已 CLOSED_VERIFIED，PX4 READY_TO_START；P15 仍 NOT_STARTED。
 - 初版验证：Backend targeted 39 passed、full 2789 passed；Frontend targeted 109 passed、full 285 passed；
   Ruff、两项 schema export drift check、frontend lint/build、git diff --check PASS。
   Backend full 首次受 sandbox pytest 临时目录权限影响，沙箱外相同命令重跑全通过；未修改测试预期规避问题。
@@ -3713,3 +3717,132 @@ P11.5 is IMPLEMENTED / REVIEW PASS / COMMITTED (5394316).
 This compatibility defect is resolved by committed P11.1.2 (bf792fc).
 P11 Final Review retry PASS; P11 is CLOSED / FROZEN. P12 is CLOSED_FROZEN; Final Review is REVIEW_PASS; Closure is CLOSED_FROZEN.
 The original follow-up made no git commit; Closure is a documentation-only update.
+
+## PX3.1 / PX3.2 - Profile Read / Edit
+
+Current state: PX3 CLOSED_VERIFIED; PX3.1 COMPLETE;
+PX3.2 CLOSED_VERIFIED. Pre-acceptance confirmed by the PX3.3 implementation instruction.
+Historical PX2 closure notes retain their stage-time PX3 readiness statements;
+this section and the roadmap table define the current PX3 state.
+
+Completed implementation: formal Profile Repository abstraction and host-memory
+adapter; immutable projection/reference with version, canonical content digest
+and host instance scope; trusted operator scope; optimistic concurrency; explicit
+GET_PROFILE / UPDATE_PROFILE via existing Runtime/Graph/Facade; seven editable
+base fields and read-only skills; current-student empty state; N/7 form completion;
+semantic validation/conflict UX and visible Demo persistence boundary.
+
+Omitted patch fields stay unchanged, null clears optional values, [] clears tags.
+Domain education enum, finite decimal hours 0-168 and ordered dedup are preserved.
+Skills cannot be patched. Source state is unified for old capability preparation.
+New Recommendation/SkillGap/Planning inputs retain their prepared ProfileReference
+in host audit mappings; stale UI is completed in PX3.4 below, with no destructive migration.
+
+Known limits: profiles and bindings are host-memory only; restart restores seeds.
+Skill catalog exposure and skills mutation are implemented in PX3.3 below.
+Full derived-result staleness presentation is CLOSED_VERIFIED in PX3.4. No automatic analysis,
+plan mutation, approval bypass or LLM profile write authority.
+
+PX3.3/PX3.4 are CLOSED_VERIFIED. PX1/PX2 remain CLOSED_VERIFIED;
+P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED.
+
+PX3.2 implementation validation: backend targeted 105 passed; full backend 2839
+passed (sandbox temporary-directory denial resolved by running the same command
+outside sandbox); frontend targeted 85 passed, full 313 passed; Ruff, schema export
+and generated drift checks, frontend lint/build and git diff --check passed.
+PX3.2/PX3.3 acceptance is complete; PX3.4 Final Independent Review is REVIEW_PASS.
+
+## PX3.3 — Skills Read / Edit
+
+Status: CLOSED_VERIFIED. PX3.1 COMPLETE; PX3.2 CLOSED_VERIFIED per
+pre-acceptance. PX3 and PX3.4 are CLOSED_VERIFIED. PX1/PX2 CLOSED_VERIFIED;
+P12/P13/P14 CLOSED_FROZEN; P15 NOT_STARTED.
+
+Implemented scope: authoritative catalog projection with conflict detection;
+explicit catalog read and authorized add/update/remove; catalog-only additions;
+historical unresolved skill preservation; semantic errors; optimistic concurrency;
+atomic profile + existing P7 declaration evidence storage; one ProfileReference
+version; invocation-start profile/evidence snapshot; skill management UI with catalog
+selector, level/note editing, delete confirmation and source/UNKNOWN semantics.
+
+Missing record != UNKNOWN != formal SkillGap. Skills remain outside base N/7 form
+completion. Notes/non-self-assessed flags never imply verified credentials. Skill
+saves do not call Recommendation, SkillGap, Planning or Replanning, mutate plans or
+produce PlanDiff. No new MCP Tool, certificate system or LLM extraction.
+
+Known limits: profile/skill/evidence persistence remains host-scoped in-memory;
+restart restores fixture baseline. Catalog coverage follows reviewed requirement
+artifacts. Full derived-result staleness UX is CLOSED_VERIFIED in PX3.4. Independent Review and
+browser smoke were accepted as the PX3.4 prerequisite.
+
+PX3.3 implementation validation: backend targeted 131 passed; full backend 2869
+passed; frontend targeted 97 passed; full frontend 325 passed. Ruff, schema exports
+and generated drift checks, frontend lint/build and git diff --check passed.
+The frontend deletion wait assertion retains the same absence check using a boolean
+to avoid Node constructing a huge DOM-object diagnostic while React commits.
+Status remains CLOSED_VERIFIED; no commit/push was made.
+
+## PX3.4 — Derived Result Staleness Integration
+
+Status: CLOSED_VERIFIED. Browser Smoke PASS; Final Independent Review REVIEW_PASS.
+PX3.1 COMPLETE; PX3.2/PX3.3/PX3.4 and PX3 overall CLOSED_VERIFIED. P12/P13/P14 remain
+CLOSED_FROZEN; P15 remains NOT_STARTED. This status sync creates no commit or push.
+
+Implemented: unified immutable ProfileFreshness resolver; formal full-reference
+comparison; host-scope UNKNOWN policy; read-only GET_PROFILE_ANALYSES; existing host
+audit mapping exposure with exact student/target/selected-plan scope; generated
+contracts; Copilot/Dashboard/My Profile related-analysis presentation; folded audit;
+explicit P6 rerun, P7 rerun and P8 regeneration. Invocation-time/race binding remains
+based on the original profile snapshot, never a completion-time read.
+
+STALE != INVALID != WRONG. Old result content is retained. Profile/skill saves only
+refresh read metadata; no automatic recommendation, gap analysis, plan mutation,
+CompetitionEvent, Impact, P11 REPLAN or PlanDiff. Frontend does not compare refs,
+timestamps, fields or result ages to infer staleness. No LLM or new MCP Tool.
+
+Known gaps: host-memory persistence and no durable result history; legacy/unbound
+or cross-host lineage is UNKNOWN. New plan selection follows the existing explicit
+PlanRegistry/PlanReference flow. PX3.4_ELIGIBILITY_FRESHNESS_GAP remains: P5 uses
+StudentProfile, but no formal P5 profile lineage is added in this scope.
+
+Validation: backend targeted 102 passed; full backend 2897 passed. Frontend targeted
+130 passed, plus the dedicated real Local/AgentArts freshness parity test; full
+frontend 336 passed. Ruff, frontend lint/build, schema exports and generated drift
+checks, and git diff --check passed. Existing build chunk-size advisory remains.
+These counts record the original implementation validation. Subsequent blocker-fix
+validation: backend full 2906 passed; final frontend full 347 passed; Ruff,
+frontend lint/build and diff check passed. Final Independent Review also verified
+19 in-memory cases, including races, legacy references and exact identity matching.
+Browser Smoke PASS and Final Independent Review REVIEW_PASS close PX3.4.
+
+### PX3 final closure and retained boundaries
+
+Completed: Profile read/edit; immutable ProfileReference; optimistic concurrency;
+trusted self-edit authorization; host-scoped in-memory profile repository; skills
+catalog read and skill add/update/remove; atomic profile + skill evidence mutation;
+missing != UNKNOWN != SkillGap; CURRENT / STALE / UNKNOWN freshness for Recommendation,
+SkillGap and Plan; explicit rerun/re-analysis/P8 regeneration. No automatic
+recomputation or P11 replanning. Old ranking, score, reason/evidence, SkillGap truth
+and Plan ID/version/status remain intact after profile/skill edits. Recommendation
+uses the backend multi-candidate pool and shared authoritative display names.
+
+Known gaps remain unresolved:
+
+- Profile/skill/evidence persistence is host-scoped in-memory; server restart restores
+  the fixture baseline. Local PlanRegistry is also in-memory; no durable result history.
+- Full account / identity system is not implemented; the trusted Demo operator binding
+  is not a production account system.
+- SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP: required_level coverage remains incomplete;
+  null is not interpreted as no requirement or proof of satisfaction.
+- PLANNING_ACTIONABILITY_GAP: under incomplete constraints, P8 may over-concentrate on
+  uncertainty-resolution tasks (confirming requirements, with deadlines unset).
+  This is a PX4 high-priority product issue, not a PX3.4 blocker; P8 truth is unchanged.
+- Full Competition Event History remains unavailable: EVENT_HISTORY_PERSISTENCE_GAP.
+  Current Session Evidence does not constitute complete history.
+- Submission Window remains DATA_CONTRACT_GAP; no submission window is invented.
+- PX3.4_ELIGIBILITY_FRESHNESS_GAP remains outside the completed freshness scope.
+
+Next: PX4 My Competitions + Planning Workspace is READY_TO_START. Suggested first
+stage: PX4.1 Planning Readiness & Actionable Preparation. No PX4 implementation is
+started by this sync. PX1/PX2 remain CLOSED_VERIFIED; P12/P13/P14 CLOSED_FROZEN;
+P15 NOT_STARTED. No commit or push.

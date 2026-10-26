@@ -3798,6 +3798,583 @@
     "title": "PlanDiff",
     "type": "object"
   },
+  "ProfileAnalysesProjection": {
+    "$defs": {
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "DerivedProfileBinding": {
+        "additionalProperties": false,
+        "properties": {
+          "competition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Competition Id"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Edition Id"
+          },
+          "input_profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "kind": {
+            "enum": [
+              "RecommendationRankingResult",
+              "SkillGapDecision",
+              "CompetitionPlan"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Plan Id"
+          },
+          "plan_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "plan_version": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Plan Version"
+          },
+          "result_ref_id": {
+            "minLength": 1,
+            "title": "Result Ref Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "result_ref_id",
+          "input_profile_ref",
+          "kind"
+        ],
+        "title": "DerivedProfileBinding",
+        "type": "object"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "ProfileAnalysis": {
+        "additionalProperties": false,
+        "properties": {
+          "binding": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DerivedProfileBinding"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profile_freshness": {
+            "$ref": "#/$defs/ProfileFreshness"
+          },
+          "result_ref_id": {
+            "minLength": 1,
+            "title": "Result Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result_ref_id",
+          "binding",
+          "profile_freshness"
+        ],
+        "title": "ProfileAnalysis",
+        "type": "object"
+      },
+      "ProfileFreshness": {
+        "additionalProperties": false,
+        "properties": {
+          "current_profile_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ProfileReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "input_profile_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ProfileReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "enum": [
+              "EXACT_REFERENCE_MATCH",
+              "PROFILE_REFERENCE_CHANGED",
+              "RESULT_PROFILE_REFERENCE_UNKNOWN",
+              "CURRENT_PROFILE_NOT_FOUND",
+              "HOST_SCOPE_INCOMPARABLE",
+              "RESULT_PROFILE_IDENTITY_MISMATCH"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "CURRENT",
+              "STALE",
+              "UNKNOWN"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "input_profile_ref",
+          "current_profile_ref",
+          "reason"
+        ],
+        "title": "ProfileFreshness",
+        "type": "object"
+      },
+      "ProfileReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "student_id",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "ProfileReference",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "analyses": {
+        "items": {
+          "$ref": "#/$defs/ProfileAnalysis"
+        },
+        "title": "Analyses",
+        "type": "array"
+      },
+      "student_id": {
+        "minLength": 1,
+        "title": "Student Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "student_id",
+      "analyses"
+    ],
+    "title": "ProfileAnalysesProjection",
+    "type": "object"
+  },
+  "ProfileMutationResult": {
+    "$defs": {
+      "EducationLevel": {
+        "enum": [
+          "undergraduate",
+          "graduate"
+        ],
+        "title": "EducationLevel",
+        "type": "string"
+      },
+      "ProfileReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "student_id",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "ProfileReference",
+        "type": "object"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
+      },
+      "StudentProfileProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "education_level": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EducationLevel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "goals": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grade"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "interests": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "major": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Major"
+          },
+          "persistence_boundary": {
+            "const": "HOST_MEMORY",
+            "default": "HOST_MEMORY",
+            "title": "Persistence Boundary",
+            "type": "string"
+          },
+          "profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "School"
+          },
+          "skills": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/StudentSkillSnapshot"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "updated_by": {
+            "minLength": 1,
+            "title": "Updated By",
+            "type": "string"
+          },
+          "weekly_available_hours": {
+            "anyOf": [
+              {
+                "maximum": 168,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Available Hours"
+          }
+        },
+        "required": [
+          "id",
+          "profile_ref",
+          "student_id",
+          "updated_at",
+          "updated_by"
+        ],
+        "title": "StudentProfileProjection",
+        "type": "object"
+      },
+      "StudentSkillSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "$ref": "#/$defs/SkillLevel",
+            "default": "unknown"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          },
+          "self_assessed": {
+            "default": true,
+            "title": "Self Assessed",
+            "type": "boolean"
+          },
+          "skill_id": {
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id"
+        ],
+        "title": "StudentSkillSnapshot",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "changed_fields": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Changed Fields",
+        "type": "array"
+      },
+      "profile": {
+        "$ref": "#/$defs/StudentProfileProjection"
+      },
+      "request_id": {
+        "minLength": 1,
+        "title": "Request Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "profile",
+      "changed_fields",
+      "request_id"
+    ],
+    "title": "ProfileMutationResult",
+    "type": "object"
+  },
   "RecommendationEvaluation": {
     "$defs": {
       "EligibilityReasonCode": {
@@ -4650,6 +5227,65 @@
     "title": "RecommendationRankingResult",
     "type": "object"
   },
+  "SkillCatalogProjection": {
+    "$defs": {
+      "CatalogSkill": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "skill_id": {
+            "minLength": 1,
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id",
+          "name"
+        ],
+        "title": "CatalogSkill",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "skills": {
+        "items": {
+          "$ref": "#/$defs/CatalogSkill"
+        },
+        "title": "Skills",
+        "type": "array"
+      }
+    },
+    "required": [
+      "skills"
+    ],
+    "title": "SkillCatalogProjection",
+    "type": "object"
+  },
   "SkillGapDecision": {
     "$defs": {
       "SkillGapItem": {
@@ -5098,6 +5734,221 @@
       "verification_status"
     ],
     "title": "SourceMetadata",
+    "type": "object"
+  },
+  "StudentProfileProjection": {
+    "$defs": {
+      "EducationLevel": {
+        "enum": [
+          "undergraduate",
+          "graduate"
+        ],
+        "title": "EducationLevel",
+        "type": "string"
+      },
+      "ProfileReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "student_id",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "ProfileReference",
+        "type": "object"
+      },
+      "SkillLevel": {
+        "enum": [
+          "unknown",
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "SkillLevel",
+        "type": "string"
+      },
+      "StudentSkillSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "$ref": "#/$defs/SkillLevel",
+            "default": "unknown"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          },
+          "self_assessed": {
+            "default": true,
+            "title": "Self Assessed",
+            "type": "boolean"
+          },
+          "skill_id": {
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_id"
+        ],
+        "title": "StudentSkillSnapshot",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "education_level": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/EducationLevel"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "goals": {
+        "default": [],
+        "items": {
+          "type": "string"
+        },
+        "title": "Goals",
+        "type": "array"
+      },
+      "grade": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Grade"
+      },
+      "id": {
+        "title": "Id",
+        "type": "string"
+      },
+      "interests": {
+        "default": [],
+        "items": {
+          "type": "string"
+        },
+        "title": "Interests",
+        "type": "array"
+      },
+      "major": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Major"
+      },
+      "persistence_boundary": {
+        "const": "HOST_MEMORY",
+        "default": "HOST_MEMORY",
+        "title": "Persistence Boundary",
+        "type": "string"
+      },
+      "profile_ref": {
+        "$ref": "#/$defs/ProfileReference"
+      },
+      "school": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "School"
+      },
+      "skills": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/StudentSkillSnapshot"
+        },
+        "title": "Skills",
+        "type": "array"
+      },
+      "student_id": {
+        "minLength": 1,
+        "title": "Student Id",
+        "type": "string"
+      },
+      "updated_at": {
+        "format": "date-time",
+        "title": "Updated At",
+        "type": "string"
+      },
+      "updated_by": {
+        "minLength": 1,
+        "title": "Updated By",
+        "type": "string"
+      },
+      "weekly_available_hours": {
+        "anyOf": [
+          {
+            "maximum": 168,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Weekly Available Hours"
+      }
+    },
+    "required": [
+      "id",
+      "profile_ref",
+      "student_id",
+      "updated_at",
+      "updated_by"
+    ],
+    "title": "StudentProfileProjection",
     "type": "object"
   }
 }

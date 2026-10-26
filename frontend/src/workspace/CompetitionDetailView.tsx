@@ -4,6 +4,7 @@ import type { CompetitionDetailProjection } from '../results/generated/artifacts
 import { ErrorPresentation } from '../results/ErrorPresentation.tsx';
 import type { ErrorDetails } from '../results/ErrorPresentation.tsx';
 import { SkillGapResults } from '../results/SemanticResults.tsx';
+import { ProfileFreshnessBadge } from './ProfileFreshness.tsx';
 import { isControlledDemo } from '../results/SourceMetadata.tsx';
 import { SourceGroups } from '../results/SourceGroups.tsx';
 import type { ReadRecord } from './competitionSession.ts';
@@ -133,10 +134,10 @@ export function CompetitionDetailView({
             <div className="competition-action-bar">
               <button
                 type="button"
-                disabled={locked}
-                onClick={() => select(detail.competition.id, undefined, target)}
+                disabled={locked || context.competition_id === detail.competition.id}
+                onClick={() => select(detail.competition.id)}
               >
-                设为当前赛事
+                {context.competition_id === detail.competition.id ? '当前赛事' : '设为当前赛事'}
               </button>
               {actions.map((a) => (
                 <button
@@ -493,7 +494,10 @@ export function CompetitionDetailView({
                 <section className="detail-section">
                   <h2>我的技能差距</h2>
                   {facts.skillGap ? (
-                    <SkillGapResults result={facts.skillGap} />
+                    <>
+                      {facts.skillGapRef && <ProfileFreshnessBadge identity={facts.skillGapRef} />}
+                      <SkillGapResults result={facts.skillGap} />
+                    </>
                   ) : (
                     <p>尚未进行个人技能差距分析。</p>
                   )}

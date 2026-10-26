@@ -19,6 +19,15 @@ from competition_copilot.application.competition_snapshots import (
     CompetitionSnapshotBuilder,
 )
 from competition_copilot.application.eligibility import CompetitionEligibilityEvaluator
+from competition_copilot.application.profile_freshness import ProfileAnalysesReader
+from competition_copilot.application.profile_skills import (
+    SkillCatalogReader,
+    StudentSkillEditor,
+)
+from competition_copilot.application.profiles import (
+    StudentProfileEditor,
+    StudentProfileReader,
+)
 from competition_copilot.application.skill_requirements import SkillRequirementProvider
 from competition_copilot.application.temporal_evidence import TemporalEvidenceProvider
 from competition_copilot.domain.baseline_plan_builder import (
@@ -73,6 +82,11 @@ def build_seed_agent(
     human_interpreter: HumanResponseInterpreter | None = None,
     requirement_provider: SkillRequirementProvider | None = None,
     temporal_evidence: TemporalEvidenceProvider | None = None,
+    skill_catalog: SkillCatalogReader | None = None,
+    skill_editor: StudentSkillEditor | None = None,
+    profile_analyses: ProfileAnalysesReader | None = None,
+    profile_reader: StudentProfileReader | None = None,
+    profile_editor: StudentProfileEditor | None = None,
 ) -> AgentComposition:
     """Assemble the frozen authorities; caller supplies every workflow argument.
 
@@ -101,7 +115,7 @@ def build_seed_agent(
         snapshot_builder=CompetitionSnapshotBuilder(repository), snapshot_diff=SnapshotDiffEngine(),
         event_engine=CompetitionEventEngine(), event_aggregator=CompetitionEventAggregator(),
         impact=CompetitionEventImpactAnalyzer(), replanning=ReplanningDecisionService(),
-        revision=PlanRevisionService(),
+        revision=PlanRevisionService(), profile_analyses=profile_analyses, skill_catalog=skill_catalog, skill_editor=skill_editor, profile_reader=profile_reader, profile_editor=profile_editor,
     )
     graph = build_competition_copilot_graph(facade, intent_model=intent_model,
         explanation_model=explanation_model, human_interpreter=human_interpreter)

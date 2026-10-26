@@ -39,6 +39,7 @@ class ExposureReason(StrEnum):
     APPROVED = "APPROVED"
     TRUSTED_ARTIFACT_BOUNDARY_REQUIRED = "TRUSTED_ARTIFACT_BOUNDARY_REQUIRED"
     MUTATING_REQUIRES_HUMAN_FLOW = "MUTATING_REQUIRES_HUMAN_FLOW"
+    SELF_AUTHORIZED_MUTATION_NOT_EXPOSED = "SELF_AUTHORIZED_MUTATION_NOT_EXPOSED"
     UPSTREAM_CAPABILITY_NOT_EXPOSED = "UPSTREAM_CAPABILITY_NOT_EXPOSED"
 
 
@@ -83,7 +84,8 @@ class McpExposureDecision:
     @property
     def mutation_policy(self) -> MutationPolicy:
         return (MutationPolicy.MUTATING_NOT_EXPOSED
-                if self.reason == ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW
+                if self.reason in (ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW,
+                                   ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED)
                 else MutationPolicy.NON_MUTATING)
 
 
@@ -121,6 +123,8 @@ class McpToolRegistry:
             meta = approved.get(item.capability_id)
             expected_reason = (
                 ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED if meta is None else
+                ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED
+                if item.capability_id in (CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL) else
                 ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW
                 if meta.access == CapabilityAccess.MUTATING else
                 ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED
@@ -189,27 +193,22 @@ def build_mcp_tool_registry() -> McpToolRegistry:
             "Evaluate supplied student facts under existing P5 rules; does not override status or infer missing facts.",
             CapabilityAccess.DECISION, CheckEligibilityInput, "P5 CompetitionEligibilityEvaluator"),
     ), exclusions=(
-        McpExposureDecision(CapabilityId.ANALYZE_EVENT_IMPACT,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.ANALYZE_SKILL_GAP,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.BUILD_PLAN,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.CHECK_COMPETITION_CHANGES,
-                            ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
-        McpExposureDecision(CapabilityId.DECIDE_REPLANNING,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.DERIVE_COMPETITION_EVENTS,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.DIFF_COMPETITION_SNAPSHOT,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.EXPLAIN_REPLANNING,
-                            ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
-        # PX2.2 is a Runtime product read, not an additional MCP Tool.
-        McpExposureDecision(CapabilityId.GET_COMPETITION_DETAILS,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.GET_RECOMMENDATIONS,
-                            ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
-        McpExposureDecision(CapabilityId.REVISE_PLAN,
-                            ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW),
+        McpExposureDecision(CapabilityId.ADD_PROFILE_SKILL, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
+        McpExposureDecision(CapabilityId.ANALYZE_EVENT_IMPACT, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.ANALYZE_SKILL_GAP, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.BUILD_PLAN, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.CHECK_COMPETITION_CHANGES, ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
+        McpExposureDecision(CapabilityId.DECIDE_REPLANNING, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.DERIVE_COMPETITION_EVENTS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.DIFF_COMPETITION_SNAPSHOT, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.EXPLAIN_REPLANNING, ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
+        McpExposureDecision(CapabilityId.GET_COMPETITION_DETAILS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_PROFILE, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_PROFILE_ANALYSES, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_RECOMMENDATIONS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_SKILL_CATALOG, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.REMOVE_PROFILE_SKILL, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
+        McpExposureDecision(CapabilityId.REVISE_PLAN, ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW),
+        McpExposureDecision(CapabilityId.UPDATE_PROFILE, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
+        McpExposureDecision(CapabilityId.UPDATE_PROFILE_SKILL, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
     ))

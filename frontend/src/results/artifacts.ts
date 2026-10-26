@@ -5,6 +5,10 @@ import type * as Models from './generated/artifacts.ts';
 import type { AgentResponse, ResultReference } from '../runtime/generated/contracts.ts';
 
 type Values = {
+  ProfileAnalysesProjection: Models.ProfileAnalysesProjection;
+  SkillCatalogProjection: Models.SkillCatalogProjection;
+  StudentProfileProjection: Models.StudentProfileProjection;
+  ProfileMutationResult: Models.ProfileMutationResult;
   CompetitionDetailProjection: Models.CompetitionDetailProjection;
   EligibilityDecision: Models.EligibilityDecision;
   RecommendationEvaluation: Models.RecommendationEvaluation;
@@ -18,12 +22,20 @@ type Values = {
   RecommendationRankingResult: Models.RecommendationRankingResult;
 };
 export type LinkedArtifact = {
-  [K in keyof Values]: { ref: ResultReference; model: K; value: Values[K] };
+  [K in keyof Values]: {
+    ref: ResultReference;
+    model: K;
+    value: Values[K];
+  };
 }[keyof Values];
 // Optional readonly hosting projection, NOT an extension of P12 AgentResponse.
 // Fake composition supplies presets; Local hosting supplies validated receipt projections.
 export type ArtifactReader = (response: AgentResponse) => unknown;
 const kinds: Record<keyof Values, string[]> = {
+  ProfileAnalysesProjection: ['TOOL_RESULT'],
+  SkillCatalogProjection: ['TOOL_RESULT'],
+  StudentProfileProjection: ['TOOL_RESULT'],
+  ProfileMutationResult: ['TOOL_RESULT'],
   CompetitionDetailProjection: ['TOOL_RESULT'],
   EligibilityDecision: ['ELIGIBILITY_RESULT', 'TOOL_RESULT'],
   RecommendationEvaluation: ['RECOMMENDATION_RESULT'],

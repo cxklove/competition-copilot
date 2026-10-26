@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { planStatus } from '../results/SemanticResults.tsx';
 import { useCompetitionName } from '../results/competitionNames.tsx';
 import { intentLabels } from './clarificationPresentation.ts';
@@ -57,10 +58,12 @@ export function CurrentContext({
 }
 
 export function Dashboard({
+  analyses,
   session,
   openCopilot,
   openCompetition,
 }: {
+  analyses?: ReactNode;
   session: WorkspaceSnapshot | null;
   openCopilot: () => void;
   openCompetition?: () => void;
@@ -82,6 +85,7 @@ export function Dashboard({
       {session?.pending && (
         <p role="status">正在处理 Copilot 中的请求，可返回查看进展。切换页面不会重新提交。</p>
       )}
+      {analyses && <section className="dashboard-card">{analyses}</section>}
       <div className="dashboard-grid">
         <CurrentContext session={session} openCompetition={openCompetition} />
         <section className="dashboard-card" aria-labelledby="current-plan-title">

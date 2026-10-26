@@ -7,6 +7,7 @@ arguments are caller-owned context; only the unchanged P12 graph authorizes use.
 import json
 import secrets
 from datetime import datetime, timezone
+from types import MappingProxyType
 
 from competition_copilot.agents.contracts import ResultReference
 from competition_copilot.agents.graph import GraphInput
@@ -22,6 +23,19 @@ from competition_copilot.application.controlled_plan_observation import (
     ControlledPlanRevisionPreparer,
 )
 from competition_copilot.application.plans import PlanRegistry
+from competition_copilot.application.profile_freshness import (
+    DerivedProfileBinding,
+    ProfileAnalysesReader,
+)
+from competition_copilot.application.profile_skills import (
+    SkillCatalogReader,
+    StudentSkillEditor,
+)
+from competition_copilot.application.profiles import (
+    ProfileActorBinding,
+    StudentProfileEditor,
+    StudentProfileReader,
+)
 from competition_copilot.application.recommendation import (
     RecommendationContextAssembler,
 )
@@ -42,6 +56,9 @@ from competition_copilot.domain.student import StudentProfile
 from competition_copilot.domain.verified_skill_overlap import VerifiedSkillOverlapScorer
 from competition_copilot.infrastructure.repositories.json_seed import (
     JsonSeedCompetitionRepository,
+)
+from competition_copilot.infrastructure.repositories.student_memory import (
+    InMemoryStudentProfileRepository,
 )
 from competition_copilot.infrastructure.skill_requirement_json import (
     JsonSkillRequirementProvider,
@@ -123,7 +140,7 @@ class Bindings:
 
 
 def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_models=None,
-                      plan_registry: PlanRegistry | None = None):
+                      plan_registry: PlanRegistry | None = None, permitted_profile_ids=None):
     controlled = json.loads((root / "data/local_runtime/controlled_revision.json").read_text(encoding="utf-8"))
     source = ReplanningInput.model_validate(controlled["proposal"])
     registry = plan_registry if plan_registry is not None else InMemoryPlanRegistry()
@@ -142,7 +159,14 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
     profiles[demo_profile.id] = demo_profile
     declarations = tuple(StudentSkillEvidenceDeclaration.model_validate(item)
                          for item in demo.get("student_skill_evidence", []))
-    student_evidence = {demo_profile.id: prepare_student_skill_evidence(demo_profile, declarations)}
+    profile_repository = InMemoryStudentProfileRepository(profiles.values(), created_at=clock(),
+        evidence={demo_profile.id: prepare_student_skill_evidence(demo_profile, declarations)})
+    actor = ProfileActorBinding(actor_id="local-development-operator",
+        permitted_student_ids=tuple(profiles) if permitted_profile_ids is None else tuple(permitted_profile_ids))
+    profile_reader = StudentProfileReader(profile_repository, actor)
+    profile_editor = StudentProfileEditor(profile_repository, actor, clock=clock)
+    del profiles  # Fixture bootstrap is not a second authoritative store.
+
     repository = JsonSeedCompetitionRepository(root / "data/seed")
     from competition_copilot.infrastructure.temporal_evidence_json import (
         JsonTemporalEvidenceProvider,
@@ -151,9 +175,14 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
     temporal_evidence = JsonTemporalEvidenceProvider(
         root / "data/temporal_evidence/candidates.json", root, repository)
     requirements = JsonSkillRequirementProvider(root / "data/skill_requirements")
+    skill_catalog = SkillCatalogReader(requirements)
+    skill_editor = StudentSkillEditor(profile_repository, actor, clock=clock, catalog=skill_catalog)
     observation = ControlledPlanObservation.model_validate_json(
         (root / "data/local_runtime/generated_huawei_observation.json").read_bytes())
     revision_preparer = ControlledPlanRevisionPreparer(repository, observation)
+
+    profile_inputs = {}
+    profile_analyses = ProfileAnalysesReader(profile_repository, actor, MappingProxyType(profile_inputs))
 
     def factory(request):
         nonce = secrets.token_urlsafe(16)
@@ -177,9 +206,11 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         composition = build_seed_agent(seed_directory=root / "data/seed", policy_directory=root / "data/eligibility",
             inputs=bindings, scoring=RecommendationScoringEngine([WeightedSuitabilityScorer(VerifiedSkillOverlapScorer())]),
             intent_model=model,
-            explanation_model=cloud_models.explanation if cloud_models else None,
+            explanation_model=cloud_models.explanation if cloud_models and request.intent not in ("GET_PROFILE_ANALYSES", "GET_PROFILE", "UPDATE_PROFILE", "GET_SKILL_CATALOG", "ADD_PROFILE_SKILL", "UPDATE_PROFILE_SKILL", "REMOVE_PROFILE_SKILL") else None,
             human_interpreter=cloud_models.human_interpreter if cloud_models else None,
-            requirement_provider=requirements, temporal_evidence=temporal_evidence)
+            requirement_provider=requirements, temporal_evidence=temporal_evidence,
+            profile_reader=profile_reader, profile_editor=profile_editor,
+            skill_catalog=skill_catalog, skill_editor=skill_editor, profile_analyses=profile_analyses)
         if cloud_models is not None or request.intent is not None:
             # Natural-language routing calls the provider once; explicit actions
             # call it zero times. Both use the same preparation/validation path.
@@ -190,8 +221,23 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         else:
             capability = model.proposal.candidate_capability
         context = request.context
-        student = profiles.get(context.student_id)
+        profile_record = profile_repository.get_record(context.student_id)
+        profile_snapshot = profile_record.profile if profile_record else None
+        student = profile_snapshot.domain_profile() if profile_snapshot else None
         payload = {}
+        if capability == "get_profile_analyses":
+            payload = {"student_id": context.student_id, "result_ref_ids": request.profile_result_refs or (),
+                       "competition_id": context.competition_id, "edition_id": context.edition_id,
+                       "track_id": context.track_id,
+                       "plan_ref": context.plan_ref.model_dump(mode="json") if context.plan_ref else None}
+        if capability in ("get_profile", "update_profile"):
+            payload = {"student_id": context.student_id} if context.student_id else {}
+            if capability == "update_profile" and request.profile_update is not None:
+                payload.update(update=request.profile_update.model_dump(mode="json"), request_id=request.request_id)
+        if capability in ("add_profile_skill", "update_profile_skill", "remove_profile_skill"):
+            payload = {"student_id": context.student_id} if context.student_id else {}
+            if request.skill_command is not None:
+                payload.update(command=request.skill_command.model_dump(mode="json"), request_id=request.request_id)
         if capability == "get_competition_details":
             payload = {key: value for key, value in {
                 "competition_id": context.competition_id, "edition_id": context.edition_id,
@@ -217,7 +263,7 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         if capability in ("analyze_skill_gap", "build_plan") and student and context.competition_id and context.edition_id:
             skill = prepare_skill_gap_context(repository, requirements, student,
                 context.competition_id, context.edition_id, context.track_id,
-                student_evidence.get(student.id, ()))
+                profile_record.evidence if profile_record else ())
             payload = {"context": skill.model_dump(mode="json")}
         if capability == "revise_plan":
             if context.plan_ref:
@@ -225,7 +271,8 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
                 if PlanReference.from_plan(registry.get_current(selected.id)) != context.plan_ref:
                     raise ValueError("Stale selected Plan")
                 if selected != source.before:
-                    owner = profiles.get(selected.student_id)
+                    owner_snapshot = profile_repository.get(selected.student_id)
+                    owner = owner_snapshot.domain_profile() if owner_snapshot else None
                     if owner is None:
                         raise ReplanningInputUnavailable()
                     prepared = revision_preparer.prepare(selected, owner, observed_at=frame.interaction_created_at)
@@ -242,14 +289,15 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         frame = GraphInput(**{**frame.model_dump(), "arguments_json": json.dumps({
             "artifact_ref": args.model_dump(mode="json"), "payload": payload})})
         bindings.frame = frame
-        if capability == "get_recommendations" and student and context.competition_id and context.edition_id:
+        if capability == "get_recommendations" and student:
             from competition_copilot.integrations.local_runtime.recommendation import (
                 FacadeEligibilityEvaluator,
             )
             contexts = RecommendationContextAssembler(repository, FacadeEligibilityEvaluator(
                 composition.facade, request_id=request.request_id, namespace=nonce), requirements).assemble(
-                    student, anchor=RecommendationCandidate(competition_id=context.competition_id,
-                        edition_id=context.edition_id, track_id=context.track_id))
+                    student, anchor=(RecommendationCandidate(competition_id=context.competition_id,
+                        edition_id=context.edition_id, track_id=context.track_id)
+                        if context.competition_id and context.edition_id else None))
             payload = {"contexts": [candidate.model_dump(mode="json") for candidate in contexts]}
             bindings.frame = GraphInput(**{**frame.model_dump(), "arguments_json": json.dumps({
                 "artifact_ref": args.model_dump(mode="json"), "payload": payload})})
@@ -273,6 +321,21 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         def record(*values, **kwargs):
             receipt = execute(*values, **kwargs)
             receipts.append(receipt)
+            if (receipt.status == "SUCCESS" and profile_snapshot
+                    and isinstance(values[1], dict)
+                    and values[1].get("payload") == payload
+                    and receipt.capability in (
+                "get_recommendations", "analyze_skill_gap", "build_plan")):
+                target = receipt.data.target if receipt.capability == "analyze_skill_gap" else receipt.data
+                profile_inputs[receipt.result_ref.ref_id] = DerivedProfileBinding(
+                    kind=type(receipt.data).__name__,
+                    competition_id=target.competition_id if receipt.capability != "get_recommendations" else None,
+                    edition_id=target.edition_id if receipt.capability != "get_recommendations" else None,
+                    track_id=target.track_id if receipt.capability != "get_recommendations" else None,
+                    plan_ref=PlanReference.from_plan(receipt.data) if receipt.capability == "build_plan" else None,
+                    result_ref_id=receipt.result_ref.ref_id, input_profile_ref=profile_snapshot.profile_ref,
+                    plan_id=receipt.data.id if receipt.capability == "build_plan" else None,
+                    plan_version=receipt.data.version if receipt.capability == "build_plan" else None)
             if receipt.status == "SUCCESS" and receipt.capability == "revise_plan":
                 registry.replace_current(PlanReference.from_plan(receipt.data.plan_diff.before),
                     receipt.data.after, plan_diff=receipt.data.plan_diff)
@@ -284,4 +347,7 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         return LocalSession(AgentArtsRuntimeAdapter(composition.agent, bindings), bindings.retain,
                             lambda response: presentation(response, receipts))
 
-    return LocalInvocationHost(factory, plan_registry=registry)
+    host = LocalInvocationHost(factory, plan_registry=registry)
+    host.profile_repository = profile_repository
+    host.profile_input_bindings = MappingProxyType(profile_inputs)
+    return host

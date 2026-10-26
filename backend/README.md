@@ -2469,7 +2469,11 @@ invocation/argument/result references per candidate, then invokes P6 once with
 all contexts. The AgentArts-compatible demo uses the same host composition.
 P5 UNKNOWN is retained; a failed prerequisite aborts assembly, without partial
 ranking or an invented UNKNOWN. A blocked anchor does not stop alternatives.
-The P6 identity guard admits a complete anchor as batch membership only for
+Profile-driven recommendation needs only the current student repository snapshot;
+competition/edition/track selection is optional. All formal edition candidates
+are enumerated by the existing backend assembler, not supplied by Frontend.
+An explicitly selected complete target remains an optional additional anchor.
+The P6 identity guard admits an optional caller target as batch membership only for
 multi-candidate get_recommendations; student identity, internal target coherence,
 and all plan/approval paths retain their guards. No public schema changes.
 
@@ -2716,7 +2720,7 @@ Full event history remains EVENT_HISTORY_PERSISTENCE_GAP. The read returns unava
 availability and never generates events or writes an Event Ledger. Current-session
 PlanDiff/events are separate evidence; manual controlled-demo changes are not official
 changes. No submission-window fact contract is added. P12/P13/P14 remain CLOSED_FROZEN;
-P15 is NOT_STARTED; PX3 is PLANNED.
+P15 is NOT_STARTED; current PX3 closure is recorded below.
 
 Release checkpoint: **PX2 Authoritative Competition Read Baseline** is suitable
 as the shared GitHub team reference. PX1 / PX2 Core = CLOSED_VERIFIED;
@@ -2751,7 +2755,98 @@ No parser, LLM extraction, new endpoint or MCP Tool is added. Candidate is exclu
 from P8 deadlines, P9 Snapshot/Event, P10 Impact and P11 Replanning. Formal promotion
 continues to require P2 Raw digest binding, approval, verification and seed validation.
 PX2 Competition Experience is CLOSED_VERIFIED (PX2.1 COMPLETE; PX2.2–PX2.4 CLOSED_VERIFIED).
-P12-P14 remain CLOSED_FROZEN; PX3 is READY_TO_START but implementation has not started;
+P12-P14 remain CLOSED_FROZEN; PX3 has started (see current PX3.2 status below);
 P15 remains NOT_STARTED. Candidate coverage is limited to three reviewed quotes.
 Event History persistence and submission-window contracts remain gaps; Local
 PlanRegistry remains in-memory. No temporal crawler/parser/LLM extraction exists.
+
+## PX3.2 Profile Read / Edit
+
+Status: CLOSED_VERIFIED; PX3.1 COMPLETE. PX3 CLOSED_VERIFIED;
+P12-P14 CLOSED_FROZEN; P15 NOT_STARTED. PX3.3/PX3.4 are CLOSED_VERIFIED below.
+
+`repositories/student.py` defines deeply immutable profile snapshots, ProfileReference
+and StudentProfileRepository. `infrastructure/repositories/student_memory.py`
+bootstraps fixture profiles once per host. Every Local Runtime student lookup now
+reads the same repository, including Eligibility, Recommendation and SkillGap.
+References bind student ID, version, canonical content SHA-256 and repository
+instance scope. updated_at is audit metadata, never the concurrency token.
+
+`application/profiles.py` provides reader/editor use cases through explicit
+GET_PROFILE / UPDATE_PROFILE via existing Runtime, Graph and CapabilityFacade.
+GET is READ; UPDATE is MUTATING with server-bound operator/student scope and CAS,
+not P11 approval. Model-originated profile updates cannot execute. No LLM needed.
+No new HTTP endpoint or MCP tool. Seven base fields are writable; skills/ID/version/
+owner are forbidden. Omitted fields stay; null clears optional fields; empty lists
+clear preferences. Existing Domain validation applies, including finite hours 0-168.
+
+Persistence is HOST_MEMORY: rereads retain edits; server restart restores fixture
+seeds with a new scope. Refresh requires explicit student selection again. This
+is not a production account system or persistent database. Mutation returns the
+validated new snapshot, reference, changed fields and request correlation.
+
+New Recommendation/SkillGap/Planning calls capture the profile at preparation.
+Host profile_input_bindings retains immutable references by result artifact ID,
+plus plan ID/version for plans. Old payloads and legacy results remain valid.
+Full stale UI is deferred. Saves never run analysis, modify plans or produce PlanDiff.
+
+## PX3.3 Skills Read / Edit — CLOSED_VERIFIED
+
+`application/profile_skills.py` aggregates the authoritative requirement-artifact
+catalog (stable ID order, identical definitions deduplicated, conflicts rejected).
+GET_SKILL_CATALOG is READ; ADD_PROFILE_SKILL / UPDATE_PROFILE_SKILL /
+REMOVE_PROFILE_SKILL are explicit MUTATING capabilities through the existing
+Runtime/Facade. No model call, new endpoint or MCP tool is involved.
+
+New skill IDs must be in the catalog. Historical unresolved records remain legal.
+Add defaults to self-assessed; update accepts level/note only; remove deletes the
+record rather than setting UNKNOWN. Notes and non-self-assessed flags are not
+certification. Missing, UNKNOWN and formal SkillGap remain distinct.
+
+Profile and existing P7 declaration evidence are stored in one immutable record.
+Application validates matching evidence before a locked copy-on-write CAS commit;
+known-level changes replace the corresponding fact, UNKNOWN/removal remove it.
+Validation failure leaves both old states and ProfileReference intact. Base profile
+edits preserve evidence. Every changed profile gets one version increment; unchanged
+content is a no-op. Business preparation reads one profile/evidence snapshot and
+retains its input_profile_ref. Skill saves never run P6/P7/P8/P11 or change plans.
+
+Persistence remains host-scoped in-memory; restart restores fixture bootstrap.
+PX3.4 is CLOSED_VERIFIED below; P12-P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED.
+
+## PX3.4 Derived Result Staleness — CLOSED_VERIFIED
+
+`application/profile_freshness.py` provides immutable ProfileFreshness and a pure
+reference resolver. Exact student/version/digest/host equality means CURRENT;
+different references within the same student/host mean STALE. Missing references,
+missing current profile or incomparable host scopes mean UNKNOWN. Cross-student
+results are excluded, never displayed as stale. Timestamps and result age are not used.
+
+GET_PROFILE_ANALYSES is an explicit READ via the existing Runtime/Facade, excluded
+from MCP. It reads existing host input_profile_bindings and the current profile;
+no Domain result contract, score, gap, plan status/version or PlanReference changes.
+Bindings retain the preparation-time ProfileReference and canonical result target,
+plus exact PlanReference for plans. Changed caller-prepared inputs without matching
+repository lineage are not retroactively assigned the latest profile reference.
+
+Freshness is mark-on-read metadata, not invalidation. It never deletes old results,
+runs P6/P7/P8/P11, generates events, revises plans or creates PlanDiff. Explicit rerun
+buttons use the existing P6/P7/P8 paths. Input bindings remain host-memory only;
+legacy/previous-host results remain legal and UNKNOWN. No history database or LLM.
+PX3.4_ELIGIBILITY_FRESHNESS_GAP: P5 depends on StudentProfile but is intentionally
+outside this freshness scope; its existing output/authority are unchanged.
+
+PX3 final status: PX3.1 COMPLETE; PX3.2/PX3.3/PX3.4 and PX3 overall CLOSED_VERIFIED.
+Browser Smoke PASS; Final Independent Review REVIEW_PASS. Profile read/edit,
+ProfileReference CAS, trusted self-edit, catalog/skills management and atomic evidence
+mutation are verified; Recommendation/SkillGap/Plan freshness never automatically
+reruns decisions or P11. PX1/PX2 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
+
+Retained gaps: host-scoped in-memory profile/skill/evidence storage restores fixture
+baseline on server restart; full account/identity system is not implemented.
+SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP retains incomplete required_level coverage.
+PLANNING_ACTIONABILITY_GAP (PX4 high priority) records P8 over-concentration on
+uncertainty-resolution tasks when constraints are incomplete; P8 truth is unchanged.
+Complete Event History remains unavailable; Submission Window is DATA_CONTRACT_GAP.
+PX4 My Competitions + Planning Workspace is READY_TO_START, with suggested PX4.1
+Planning Readiness & Actionable Preparation; no implementation starts in this sync.

@@ -3,6 +3,9 @@
 from competition_copilot.application.competition_detail import (
     CompetitionDetailProjection,
 )
+from competition_copilot.application.profile_freshness import ProfileAnalysesProjection
+from competition_copilot.application.profile_skills import SkillCatalogProjection
+from competition_copilot.application.profiles import ProfileMutationResult
 from competition_copilot.domain.decision import Evidence
 from competition_copilot.domain.eligibility import EligibilityDecision
 from competition_copilot.domain.plan import CompetitionPlan
@@ -12,13 +15,16 @@ from competition_copilot.domain.recommendation_ranking import (
 from competition_copilot.domain.replanning import PlanDiff
 from competition_copilot.domain.skill_gap import SkillGapDecision
 from competition_copilot.domain.source_metadata import SourceMetadata
+from competition_copilot.repositories.student import (
+    StudentProfileProjection,
+)
 from competition_copilot.tools.competition import (
     GetCompetitionOutput,
     ListCompetitionsOutput,
 )
 
 PUBLIC_MODELS = {model.__name__: model for model in (
-    CompetitionDetailProjection,
+    ProfileAnalysesProjection, SkillCatalogProjection, CompetitionDetailProjection, StudentProfileProjection, ProfileMutationResult,
     EligibilityDecision, SkillGapDecision, CompetitionPlan, RecommendationRankingResult,
     ListCompetitionsOutput, GetCompetitionOutput,
 )}

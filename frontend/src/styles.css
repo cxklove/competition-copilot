@@ -1431,3 +1431,82 @@ input::placeholder {
     grid-template-columns: minmax(70px, 0.5fr) minmax(0, 2fr);
   }
 }
+
+.profile-page {
+  max-width: 70rem;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+.profile-page nav {
+  margin-block: 1rem;
+}
+.profile-section {
+  margin-block: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border, #d4dde4);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+}
+.profile-section dl {
+  display: grid;
+  gap: 0.4rem;
+}
+.profile-section dd {
+  margin: 0 0 0.7rem;
+}
+.profile-section fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.profile-section label {
+  display: grid;
+  gap: 0.4rem;
+}
+.profile-section input,
+.profile-section select,
+.profile-section textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.6rem;
+}
+.profile-section pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.profile-section article {
+  border-top: 1px solid #d4dde4;
+  padding-block: 0.5rem;
+}
+.profile-persistence {
+  padding: 0.75rem;
+  background: #fff4da;
+  border-left: 3px solid #92702c;
+}
+.profile-freshness {
+  border-left: 3px solid #758594;
+  background: #f0f4f6;
+  padding: 0.75rem;
+  margin-block: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.freshness-stale {
+  border-color: #96732b;
+  background: #fff4da;
+}
+.freshness-current {
+  border-color: #377663;
+}
+.profile-freshness pre {
+  white-space: pre-wrap;
+}
+.profile-analyses {
+  display: grid;
+  gap: 1rem;
+}
+@media (max-width: 800px) {
+  .profile-section fieldset {
+    grid-template-columns: 1fr;
+  }
+}

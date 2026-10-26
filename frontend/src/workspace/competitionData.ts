@@ -125,6 +125,7 @@ export function detailFacts(
   return {
     eligibility: eligibility?.model === 'EligibilityDecision' ? eligibility.value : undefined,
     skillGap: skillGap?.model === 'SkillGapDecision' ? skillGap.value : undefined,
+    skillGapRef: skillGap?.model === 'SkillGapDecision' ? skillGap.ref.ref_id : undefined,
     requirements,
     sources,
     events: [...new Map(events.map((event) => [event.id, event])).values()],

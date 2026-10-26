@@ -14,6 +14,8 @@ import { actionHint, guidedActions } from './actions.ts';
 import type { GuidedAction } from './actions.ts';
 import type { WorkspaceSnapshot } from './sessionPresentation.ts';
 import type { CompetitionSelection } from './CompetitionCenter.tsx';
+import type { ReadRecord } from './competitionSession.ts';
+import { RetainedDerivedResults } from './RetainedDerivedResults.tsx';
 
 const examples = ['有哪些适合我的竞赛？', '帮我检查参赛资格', '我该如何准备比赛？'];
 const newRequestId = () => crypto.randomUUID();
@@ -30,6 +32,7 @@ export function Workspace({
   onSnapshot,
   contextSelection,
   externalBusy = false,
+  resultRecords = [],
 }: {
   client: InvocationClient;
   nextRequestId?: () => string;
@@ -42,6 +45,7 @@ export function Workspace({
   onSnapshot?: (snapshot: WorkspaceSnapshot) => void;
   contextSelection?: CompetitionSelection;
   externalBusy?: boolean;
+  resultRecords?: readonly ReadRecord[];
 }) {
   const { state, presentationError, submit, retry, startNew, clarify, decide } = useConversation(
     client,
@@ -66,6 +70,9 @@ export function Workspace({
   const handledSelection = useRef<number | undefined>(undefined);
   useEffect(() => {
     if (!contextSelection || handledSelection.current === contextSelection.sequence) return;
+    // A catalog read can start as the user leaves Profile. Retain the explicit
+    // action until it can execute instead of consuming and silently dropping it.
+    if (contextSelection.action && locked) return;
     handledSelection.current = contextSelection.sequence;
     if (competitionId.trim() !== contextSelection.competitionId) {
       setCompetitionId(contextSelection.competitionId);
@@ -79,7 +86,8 @@ export function Workspace({
     if (contextSelection.message) setInput(`请${contextSelection.message}。`);
     if (contextSelection.action && !locked) {
       const scope = explicitContext();
-      scope.competition_id = contextSelection.competitionId;
+      if (contextSelection.competitionId) scope.competition_id = contextSelection.competitionId;
+      else delete scope.competition_id;
       delete scope.edition_id;
       delete scope.track_id;
       if (contextSelection.editionId) scope.edition_id = contextSelection.editionId;
@@ -92,7 +100,7 @@ export function Workspace({
       );
       setInput('');
     }
-  }, [contextSelection]);
+  }, [contextSelection, locked]);
 
   useEffect(() => {
     onSnapshot?.({
@@ -319,7 +327,7 @@ export function Workspace({
                   ”快捷操作继续；尚未提交。
                 </p>
               )}
-              {externalBusy && <p role="status">正在获取赛事数据，请等待当前只读请求完成。</p>}
+              {externalBusy && <p role="status">正在处理页面请求，请等待当前操作完成。</p>}
               <fieldset className="guided-actions" disabled={locked}>
                 <legend>快捷操作</legend>
                 <div className="guided-action-buttons">
@@ -506,6 +514,15 @@ export function Workspace({
                 <p className="panel-note">发送问题后，在这里查看当前请求的状态与结果摘要。</p>
               )}
             </section>
+            <RetainedDerivedResults
+              records={resultRecords}
+              context={{
+                ...explicitContext(),
+                ...(studentId.trim() ? { student_id: studentId.trim() } : {}),
+              }}
+              activeResponse={response}
+              readArtifacts={readArtifacts}
+            />
             <p className="session-note">
               仅保留当前页面会话
               <br />

@@ -18,6 +18,8 @@ from pydantic import (
     model_validator,
 )
 
+from competition_copilot.application.profile_skills import SkillCommand
+from competition_copilot.application.profiles import ProfileUpdate
 from competition_copilot.domain.digital_twin import StableId
 from competition_copilot.domain.replanning import PlanReference
 from competition_copilot.tools.contracts import ToolResult
@@ -56,6 +58,13 @@ class AgentContract(BaseModel):
 
 
 class AgentIntent(StrEnum):
+    GET_PROFILE_ANALYSES = "GET_PROFILE_ANALYSES"
+    GET_PROFILE = "GET_PROFILE"
+    GET_SKILL_CATALOG = "GET_SKILL_CATALOG"
+    ADD_PROFILE_SKILL = "ADD_PROFILE_SKILL"
+    UPDATE_PROFILE_SKILL = "UPDATE_PROFILE_SKILL"
+    REMOVE_PROFILE_SKILL = "REMOVE_PROFILE_SKILL"
+    UPDATE_PROFILE = "UPDATE_PROFILE"
     DISCOVER_COMPETITIONS = "DISCOVER_COMPETITIONS"
     GET_COMPETITION_DETAILS = "GET_COMPETITION_DETAILS"
     CHECK_ELIGIBILITY = "CHECK_ELIGIBILITY"
@@ -184,8 +193,24 @@ class AgentRequest(AgentContract):
     user_message: StableId
     # User-selected operation only; never capability arguments or authorization.
     intent: AgentIntent | None = None
+    profile_update: ProfileUpdate | None = None
+    skill_command: SkillCommand | None = None
+    profile_result_refs: tuple[StableId, ...] | None = None
     conversation_id: StableId | None = None
     context: AgentContext = Field(default_factory=AgentContext)
+
+    @model_validator(mode="after")
+    def profile_command(self):
+        if self.profile_result_refs is not None and self.intent != AgentIntent.GET_PROFILE_ANALYSES:
+            raise ValueError("Profile result query requires explicit GET_PROFILE_ANALYSES")
+        if self.skill_command is not None:
+            expected = {"add": AgentIntent.ADD_PROFILE_SKILL, "update": AgentIntent.UPDATE_PROFILE_SKILL,
+                        "remove": AgentIntent.REMOVE_PROFILE_SKILL}[self.skill_command.operation]
+            if self.intent != expected:
+                raise ValueError("Skill command requires matching explicit intent")
+        if self.profile_update is not None and self.intent != AgentIntent.UPDATE_PROFILE:
+            raise ValueError("Profile update requires explicit UPDATE_PROFILE")
+        return self
 
 
 class ContextField(StrEnum):
@@ -292,6 +317,13 @@ class ApprovalResponse(AgentContract):
 
 
 class CapabilityId(StrEnum):
+    GET_PROFILE_ANALYSES = "get_profile_analyses"
+    GET_PROFILE = "get_profile"
+    GET_SKILL_CATALOG = "get_skill_catalog"
+    ADD_PROFILE_SKILL = "add_profile_skill"
+    UPDATE_PROFILE_SKILL = "update_profile_skill"
+    REMOVE_PROFILE_SKILL = "remove_profile_skill"
+    UPDATE_PROFILE = "update_profile"
     """Existing capabilities, not an executable registry or routing policy."""
 
     LIST_COMPETITIONS = "list_competitions"

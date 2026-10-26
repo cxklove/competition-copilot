@@ -40,6 +40,25 @@ from competition_copilot.application.eligibility import (
     CompetitionEligibilityEvaluator,
     EligibilityTargetError,
 )
+from competition_copilot.application.profile_freshness import (
+    ProfileAnalysesProjection,
+    ProfileAnalysesQuery,
+    ProfileAnalysesReader,
+)
+from competition_copilot.application.profile_skills import (
+    SkillCatalogProjection,
+    SkillCatalogQuery,
+    SkillCatalogReader,
+    SkillMutationInput,
+    StudentSkillEditor,
+)
+from competition_copilot.application.profiles import (
+    GetProfileQuery,
+    ProfileMutationResult,
+    StudentProfileEditor,
+    StudentProfileReader,
+    UpdateProfileInput,
+)
 from competition_copilot.domain.baseline_plan_builder import (
     BaselineCompetitionPlanBuilder,
 )
@@ -83,6 +102,10 @@ from competition_copilot.domain.skill_gap_engine import SkillGapEngine
 from competition_copilot.domain.snapshot_diff_engine import SnapshotDiffEngine
 from competition_copilot.domain.student import StudentProfile
 from competition_copilot.domain.temporal import TimeWindow
+from competition_copilot.repositories.student import (
+    ProfileError,
+    StudentProfileProjection,
+)
 from competition_copilot.tools.competition import (
     GetCompetitionEditionInput,
     GetCompetitionEditionOutput,
@@ -201,6 +224,17 @@ class CapabilityStatus(StrEnum):
 
 class CapabilityErrorCode(StrEnum):
     INVALID_INPUT = "INVALID_INPUT"
+    PROFILE_NOT_FOUND = "PROFILE_NOT_FOUND"
+    PROFILE_VERSION_CONFLICT = "PROFILE_VERSION_CONFLICT"
+    PROFILE_EDIT_FORBIDDEN = "PROFILE_EDIT_FORBIDDEN"
+    INVALID_PROFILE_FIELD = "INVALID_PROFILE_FIELD"
+    SKILL_ALREADY_EXISTS = "SKILL_ALREADY_EXISTS"
+    SKILL_NOT_FOUND = "SKILL_NOT_FOUND"
+    SKILL_NOT_IN_CATALOG = "SKILL_NOT_IN_CATALOG"
+    INVALID_SKILL_LEVEL = "INVALID_SKILL_LEVEL"
+    SKILL_EVIDENCE_INCONSISTENT = "SKILL_EVIDENCE_INCONSISTENT"
+    SKILL_CATALOG_CONFLICT = "SKILL_CATALOG_CONFLICT"
+
     UNSUPPORTED_CAPABILITY = "UNSUPPORTED_CAPABILITY"
     NOT_FOUND = "NOT_FOUND"
     DEPENDENCY_UNAVAILABLE = "DEPENDENCY_UNAVAILABLE"
@@ -235,6 +269,14 @@ _READ = MappingProxyType({
 })
 _SPECS = MappingProxyType({
     **_READ,
+    CapabilityId.GET_PROFILE_ANALYSES: (ProfileAnalysesQuery, ProfileAnalysesProjection),
+    CapabilityId.GET_PROFILE: (GetProfileQuery, StudentProfileProjection),
+    CapabilityId.GET_SKILL_CATALOG: (SkillCatalogQuery, SkillCatalogProjection),
+    CapabilityId.ADD_PROFILE_SKILL: (SkillMutationInput, ProfileMutationResult),
+    CapabilityId.UPDATE_PROFILE_SKILL: (SkillMutationInput, ProfileMutationResult),
+    CapabilityId.REMOVE_PROFILE_SKILL: (SkillMutationInput, ProfileMutationResult),
+
+    CapabilityId.UPDATE_PROFILE: (UpdateProfileInput, ProfileMutationResult),
     CapabilityId.CHECK_ELIGIBILITY: (CheckEligibilityInput, EligibilityDecision),
     CapabilityId.GET_RECOMMENDATIONS: (RecommendCompetitionsInput, RecommendationRankingResult),
     CapabilityId.ANALYZE_SKILL_GAP: (AnalyzeSkillGapInput, SkillGapDecision),
@@ -248,7 +290,7 @@ _SPECS = MappingProxyType({
 })
 
 CapabilityOutput = (
-    CompetitionDetailProjection | ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
+    ProfileAnalysesProjection | SkillCatalogProjection | StudentProfileProjection | ProfileMutationResult | CompetitionDetailProjection | ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
     | GetCompetitionEditionOutput | ListEditionTracksOutput | GetCompetitionTrackOutput
     | EligibilityDecision | RecommendationRankingResult | SkillGapDecision
     | CompetitionPlan | CompetitionSnapshot | SnapshotDiff | EventBatch | EventImpactAnalysis
@@ -345,7 +387,15 @@ class AgentCapabilityFacade:
         impact: CompetitionEventImpactAnalyzer | None = None,
         replanning: ReplanningDecisionService | None = None,
         revision: PlanRevisionService | None = None,
+        skill_catalog: SkillCatalogReader | None = None,
+        skill_editor: StudentSkillEditor | None = None,
+        profile_analyses: ProfileAnalysesReader | None = None,
+        profile_reader: StudentProfileReader | None = None,
+        profile_editor: StudentProfileEditor | None = None,
     ):
+        self._profile_analyses = profile_analyses
+        self._skill_catalog, self._skill_editor = skill_catalog, skill_editor
+        self._profile_reader, self._profile_editor = profile_reader, profile_editor
         tools = dict(read_tools or {})
         for capability, tool in tools.items():
             if capability not in _READ or (
@@ -368,8 +418,8 @@ class AgentCapabilityFacade:
             input_schema_json=json.dumps(
                 CapabilityArguments[models[0]].model_json_schema(), sort_keys=True),
             output_type=models[1].__name__,
-            access=(CapabilityAccess.READ if capability in _READ or capability == CapabilityId.BUILD_COMPETITION_SNAPSHOT else
-                    CapabilityAccess.MUTATING if capability == CapabilityId.REVISE_PLAN
+            access=(CapabilityAccess.READ if capability in _READ or capability in (CapabilityId.BUILD_COMPETITION_SNAPSHOT, CapabilityId.GET_PROFILE, CapabilityId.GET_PROFILE_ANALYSES, CapabilityId.GET_SKILL_CATALOG) else
+                    CapabilityAccess.MUTATING if capability in (CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL)
                     else CapabilityAccess.DECISION),
             requires_explicit_approval=capability == CapabilityId.REVISE_PLAN,
         ) for capability, models in sorted(_SPECS.items(), key=lambda pair: pair[0].value))
@@ -430,6 +480,8 @@ class AgentCapabilityFacade:
                 capability=capability, status=CapabilityStatus.SUCCESS,
                 result_ref=result_ref, data=data, audit=_audit(data, result_ref),
             )
+        except ProfileError as exc:
+            return error(CapabilityErrorCode(exc.code))
         except _InvocationRejected as exc:
             return error(exc.code)
         except EligibilityTargetError as exc:
@@ -440,6 +492,23 @@ class AgentCapabilityFacade:
             return error(CapabilityErrorCode.EXECUTION_REJECTED)
 
     def _delegate(self, capability, value):
+        if capability == CapabilityId.GET_PROFILE_ANALYSES:
+            self._require(self._profile_analyses)
+            return self._profile_analyses.read(value)
+        if capability == CapabilityId.GET_SKILL_CATALOG:
+            self._require(self._skill_catalog)
+            return self._skill_catalog.read(value)
+        if capability in (CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL):
+            self._require(self._skill_editor)
+            if capability.value != value.command.operation + "_profile_skill":
+                raise _InvocationRejected(CapabilityErrorCode.INVALID_INPUT)
+            return self._skill_editor.mutate(value)
+        if capability == CapabilityId.GET_PROFILE:
+            self._require(self._profile_reader)
+            return self._profile_reader.read(value)
+        if capability == CapabilityId.UPDATE_PROFILE:
+            self._require(self._profile_editor)
+            return self._profile_editor.edit(value)
         if capability in _READ:
             tool = self._read_tools.get(capability)
             self._require(tool)

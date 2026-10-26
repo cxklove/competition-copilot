@@ -7,6 +7,8 @@ import time
 from dataclasses import dataclass
 from typing import Callable
 
+from pydantic import ValidationError
+
 from competition_copilot.agents.contracts import AgentRequest
 from competition_copilot.agents.graph import GraphInput
 from competition_copilot.application.plans import PlanRegistry
@@ -52,6 +54,17 @@ class LocalInvocationHost:
     async def invoke(self, payload):
         try:
             envelope = AgentArtsInvocationEnvelope.model_validate(payload)
+        except ValidationError as exc:
+            # Preserve safe field diagnostics without leaking Pydantic input or traceback.
+            fields = {str(part) for error in exc.errors() for part in error["loc"]}
+            message = None
+            if "skill_command" in fields:
+                message = "INVALID_SKILL_LEVEL" if "level" in fields else "INVALID_PROFILE_FIELD"
+            if "profile_update" in fields:
+                message = ("INVALID_WEEKLY_HOURS" if "weekly_available_hours" in fields else
+                           "INVALID_EDUCATION_LEVEL" if "education_level" in fields else
+                           "INVALID_PROFILE_FIELD")
+            return failure("INVALID_RUNTIME_PAYLOAD", message)
         except Exception:
             return failure("INVALID_RUNTIME_PAYLOAD")
         await asyncio.to_thread(self._lock.acquire)

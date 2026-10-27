@@ -1,3 +1,5 @@
 # P2 Raw fixtures are byte-bound by Human Review Manifest SHA256.
 # Do not apply line-ending conversion.
-data/raw/*.json -text
+# Reviewed fixtures may contain CRLF; keep normal whitespace checks while
+# accepting the carriage returns that are part of their reviewed bytes.
+data/raw/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

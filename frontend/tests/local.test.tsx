@@ -21,6 +21,7 @@ import plan from '../src/demo/local-plan.json' with { type: 'json' };
 import type { PlanReference } from '../src/runtime/generated/contracts.ts';
 import { collectPlanChoices } from '../src/workspace/plans.ts';
 import { createPresentedClient } from '../src/results/ErrorPresentation.tsx';
+import { stopLocalRuntime, waitForLocalRuntime } from './runtimeStartup.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 let baseUrl: string;
@@ -38,40 +39,10 @@ before(async () => {
       env: { ...process.env, COMPETITION_COPILOT_LLM_MODE: 'offline' },
     },
   );
-  baseUrl = await new Promise<string>((resolve, reject) => {
-    let stdout = '';
-    let stderr = '';
-    const timer = setTimeout(() => {
-      backend.kill();
-      reject(new Error('Local Runtime startup timed out'));
-    }, 20000);
-    backend.stderr!.on('data', (chunk) => {
-      stderr += chunk;
-    });
-    backend.stdout!.on('data', (chunk) => {
-      stdout += chunk;
-      const match = stdout.match(/LOCAL_RUNTIME_URL=(http:\/\/127\.0\.0\.1:\d+)/);
-      if (match) {
-        clearTimeout(timer);
-        resolve(match[1]);
-      }
-    });
-    backend.once('error', (error) => {
-      clearTimeout(timer);
-      reject(error);
-    });
-    backend.once('exit', (code) => {
-      clearTimeout(timer);
-      reject(new Error(`Local Runtime exited ${code}: ${stderr}`));
-    });
-  });
+  baseUrl = await waitForLocalRuntime(backend);
 });
 after(async () => {
-  if (backend && backend.exitCode === null) {
-    const ended = once(backend, 'exit');
-    backend.kill();
-    await ended;
-  }
+  if (backend) await stopLocalRuntime(backend);
 });
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost/' });

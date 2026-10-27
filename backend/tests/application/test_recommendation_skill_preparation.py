@@ -10,8 +10,9 @@ from competition_copilot.domain.skill_requirement_artifact import (
     SkillRequirementSetEnvelope,
 )
 from competition_copilot.domain.student import StudentProfile
-from tests.application.test_recommendation_assembler import Policies, Repository
 from tests.domain.test_skill_requirement_artifact import artifact_data
+
+from .recommendation_test_support import Policies, Repository
 
 
 def artifact():

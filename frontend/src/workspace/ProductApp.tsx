@@ -17,6 +17,7 @@ import type { ReadRecord } from './competitionSession.ts';
 import { competitionsFrom } from './competitionData.ts';
 import { CompetitionCatalog } from '../results/competitionNames.tsx';
 import { useRecommendationNames } from './useRecommendationNames.ts';
+import { PlanningWorkspace } from './PlanningWorkspace.tsx';
 
 const pages = [
   { id: 'home', label: '首页' },
@@ -53,7 +54,7 @@ function pageFromHash(): { page: Page; detailId: string | null } {
 export function ProductApp(
   props: Omit<
     ComponentProps<typeof Workspace>,
-    'embedded' | 'onSnapshot' | 'contextSelection' | 'externalBusy'
+    'embedded' | 'onSnapshot' | 'contextSelection' | 'externalBusy' | 'renderPlanningWorkspace'
   >,
 ) {
   const [route, setRoute] = useState(pageFromHash);
@@ -74,6 +75,19 @@ export function ProductApp(
   const blocked = !!(session?.pending || session?.interactionPending);
   const main = useRef<HTMLElement>(null);
   const currentContext = session?.context ?? {};
+  const profileToken = JSON.stringify(
+    records
+      .flatMap((r) =>
+        r.artifacts.flatMap((a) =>
+          a.model === 'ProfileMutationResult'
+            ? [a.value.profile.profile_ref]
+            : a.model === 'StudentProfileProjection'
+              ? [a.value.profile_ref]
+              : [],
+        ),
+      )
+      .findLast((r) => r.student_id === currentContext.student_id),
+  );
   const freshness = useProfileFreshness(
     records,
     currentContext,
@@ -200,7 +214,8 @@ export function ProductApp(
               {page !== 'home' &&
                 page !== 'copilot' &&
                 page !== 'competitions' &&
-                page !== 'profile' && (
+                page !== 'profile' &&
+                page !== 'plans' && (
                   <section className="coming-soon" aria-labelledby="coming-soon-title">
                     <p className="page-kicker">产品体验 · 后续开放</p>
                     <h1 id="coming-soon-title">{title}</h1>
@@ -214,6 +229,18 @@ export function ProductApp(
                     </div>
                   </section>
                 )}
+              <PlanningWorkspace
+                active={page === 'plans'}
+                context={currentContext}
+                client={scoped.client}
+                readArtifacts={scoped.readArtifacts}
+                disabled={blocked || catalogBusy}
+                profileToken={profileToken}
+                act={rerun}
+                center={() => navigate('competitions')}
+                detail={() => navigate('competitions', currentContext.competition_id ?? null)}
+                profile={() => navigate('profile')}
+              />
               <div hidden={page !== 'profile'}>
                 <ProfilePage
                   analyses={relatedAnalyses}
@@ -267,6 +294,20 @@ export function ProductApp(
                   contextSelection={selection}
                   externalBusy={catalogBusy}
                   resultRecords={records}
+                  renderPlanningWorkspace={(context) => (
+                    <PlanningWorkspace
+                      active={page === 'copilot'}
+                      context={context}
+                      client={scoped.client}
+                      readArtifacts={scoped.readArtifacts}
+                      disabled={blocked || catalogBusy}
+                      profileToken={profileToken}
+                      act={rerun}
+                      center={() => navigate('competitions')}
+                      detail={() => navigate('competitions', context.competition_id ?? null)}
+                      profile={() => navigate('profile')}
+                    />
+                  )}
                 />
               </div>
             </main>

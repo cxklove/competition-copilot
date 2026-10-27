@@ -3131,7 +3131,7 @@ plan selection/HITL/PlanDiff components without computing business results.
 
 PX 是独立的产品体验路线，不是 P15 Evaluation，也不重开 P12/P13/P14
 CLOSED_FROZEN 基线。PX0 / Design 已 DOCUMENTED，PX1 / PX2 Core 为 CLOSED_VERIFIED；
-PX2 整体 CLOSED_VERIFIED：PX2.1 COMPLETE、PX2.2–PX2.4 CLOSED_VERIFIED；PX3 CLOSED_VERIFIED，PX4 READY_TO_START（未实施），PX5–PX6 PLANNED。阶段状态与范围由
+PX2 整体 CLOSED_VERIFIED：PX2.1 COMPLETE、PX2.2–PX2.4 CLOSED_VERIFIED；PX3 CLOSED_VERIFIED，PX4 IN_PROGRESS（PX4.1 CLOSED_VERIFIED；PX4.2 READY_TO_START），PX5–PX6 PLANNED。阶段状态与范围由
 [DEVELOPMENT_PLAN](DEVELOPMENT_PLAN.md#post-p14-product-experience-upgrade-px) 维护，
 页面、导航、状态与证据设计由
 [PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design) 维护。
@@ -3312,5 +3312,45 @@ under incomplete constraints, a PX4 high-priority product concern, not a PX3 blo
 Complete Competition Event History remains unavailable; Submission Window remains
 DATA_CONTRACT_GAP. No business truth or missing date/requirement is invented.
 
-PX4 My Competitions + Planning Workspace is READY_TO_START. Suggested first stage:
-PX4.1 Planning Readiness & Actionable Preparation. This sync starts no implementation.
+At the PX3 sync, PX4 was READY_TO_START. Current status: PX4 IN_PROGRESS;
+PX4.1 CLOSED_VERIFIED; PX4.2 My Competitions Workspace READY_TO_START only.
+
+## PX4.1 Planning Readiness & Actionable Preparation — CLOSED_VERIFIED
+
+Browser Smoke PASS; Final Independent Review REVIEW_PASS. PX4 IN_PROGRESS;
+PX4.2 READY_TO_START only; PX1-PX3 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
+No PX4.2 work. Runtime explicit GET_PLANNING_WORKSPACE -> Facade READ ->
+PlanningWorkspaceReader -> abstract ProfileRepository / PlanRegistry /
+PlanInputLineageReader, existing CompetitionDetailReader and SkillCatalogReader ->
+immutable JSON-safe projection. Explicit MCP exclusion; no parallel business API.
+
+Verified constraint, non-authoritative advisory and pending confirmation are separate.
+Target identity is context, not an official requirement. Edition time provenance
+keeps edition scope on track pages. Exact requirements are not inherited. Provider
+failure, corrupt data and invalid target/PlanReference fail closed, not pending.
+
+PreparationAdvisoryPolicy emits at most six stable template-based tasks, using formal
+skill IDs/catalog names and one captured ProfileReference. No competition-name/slug
+inference, goals interpretation, level comparison, LLM or scheduling. Advisory DTOs
+have no due_at, status, progress, estimated_hours or persisted checkbox. Their IDs
+bind template/policy/target/profile/source basis, excluding runtime time/order.
+
+PlanRegistry.resolve uses the complete supplied PlanReference. Exact lineage reuses
+the input binding map: no match is UNKNOWN; conflicting matches fail closed. Historical
+profiles are not reconstructed from current data. Stale Plan and current-profile
+advice have separate bindings; original Plan JSON retains all needs/dependencies.
+
+Candidates/advice never enter CompetitionPlan, planning_horizon or due_at. No Plan
+version/digest/status/updated_at change, Approval, Snapshot, CompetitionEvent, Impact,
+P11 REPLAN or PlanDiff occurs. Only explicit P7/P8 CTAs execute those authorities.
+P8 truth is unchanged. PLANNING_ACTIONABILITY_GAP is mitigated by read-side advice;
+skill-level coverage, host-memory persistence, account/identity, Event History and
+Submission Window gaps remain. No task management or progress persistence is added.
+
+Product surfacing: completed BUILD_PLAN -> validated CompetitionPlan plus returned
+exact PlanReference -> session selection -> GET_PLANNING_WORKSPACE READ -> Copilot
+right-side PlanningWorkspaceView. The separate plans route uses the same reader
+component and session reference. No registry latest lookup or digest/version
+reconstruction occurs. Original stages use the existing Plan renderer only inside
+folded audit; suggestions remain outside Plan milestones. Legacy standalone result
+rendering remains available. The automatic follow-up is a read, never P7/P8/P11.

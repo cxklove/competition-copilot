@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useConversation } from './useConversation.ts';
 import type { InvocationClient } from './useConversation.ts';
 import { workflowLabel } from './state.ts';
@@ -7,7 +7,7 @@ import { HitlPanel } from './HitlPanel.tsx';
 import { ResultPanel } from '../results/ResultPanel.tsx';
 import { ErrorPresentation } from '../results/ErrorPresentation.tsx';
 import type { ArtifactReader } from '../results/artifacts.ts';
-import type { PlanReference } from '../runtime/generated/contracts.ts';
+import type { AgentContext, PlanReference } from '../runtime/generated/contracts.ts';
 import { collectPlanChoices, planChoiceKey } from './plans.ts';
 import type { PlanChoice } from './plans.ts';
 import { actionHint, guidedActions } from './actions.ts';
@@ -33,6 +33,7 @@ export function Workspace({
   contextSelection,
   externalBusy = false,
   resultRecords = [],
+  renderPlanningWorkspace,
 }: {
   client: InvocationClient;
   nextRequestId?: () => string;
@@ -46,6 +47,7 @@ export function Workspace({
   contextSelection?: CompetitionSelection;
   externalBusy?: boolean;
   resultRecords?: readonly ReadRecord[];
+  renderPlanningWorkspace?: (context: AgentContext) => ReactNode;
 }) {
   const { state, presentationError, submit, retry, startNew, clarify, decide } = useConversation(
     client,
@@ -66,6 +68,30 @@ export function Workspace({
   const needs = response?.outcome === 'NEEDS_CLARIFICATION';
   const waits = response?.outcome === 'WAITING_FOR_APPROVAL';
   const locked = pending || needs || waits || state.continuationUnconfirmed || externalBusy;
+  const receivedPlans = useMemo(() => {
+    if (!response || !readArtifacts) return [];
+    try {
+      return collectPlanChoices(response, readArtifacts(response));
+    } catch {
+      return []; // Invalid artifacts never create references or Workspace reads.
+    }
+  }, [response, readArtifacts]);
+  const generated =
+    response?.outcome === 'COMPLETED' &&
+    response.intent === 'BUILD_PLAN' &&
+    receivedPlans.length === 1
+      ? receivedPlans[0]
+      : undefined;
+  const generatedInScope =
+    generated &&
+    generated.reference.student_id === studentId.trim() &&
+    (!competitionId.trim() || generated.reference.target.competition_id === competitionId.trim()) &&
+    (!editionId.trim() || generated.reference.target.edition_id === editionId.trim()) &&
+    (!trackId.trim() || generated.reference.target.track_id === trackId.trim())
+      ? generated
+      : undefined;
+  const autoSelectGenerated = !!renderPlanningWorkspace;
+  const adoptedResponse = useRef<typeof response>(null);
 
   const handledSelection = useRef<number | undefined>(undefined);
   useEffect(() => {
@@ -139,19 +165,25 @@ export function Workspace({
   ]);
 
   useEffect(() => {
-    if (!response || !readArtifacts) return;
-    try {
-      const received = collectPlanChoices(response, readArtifacts(response));
-      if (!received.length) return;
-      setPlans((previous) => {
-        const choices = new Map(previous.map((plan) => [planChoiceKey(plan.reference), plan]));
-        for (const plan of received) choices.set(planChoiceKey(plan.reference), plan);
-        return [...choices.values()];
-      });
-    } catch {
-      // Invalid hosting artifacts never create selectable references.
-    }
-  }, [response, readArtifacts]);
+    if (!receivedPlans.length) return;
+    setPlans((previous) => {
+      const choices = new Map(previous.map((plan) => [planChoiceKey(plan.reference), plan]));
+      for (const plan of receivedPlans) choices.set(planChoiceKey(plan.reference), plan);
+      return [...choices.values()];
+    });
+  }, [receivedPlans]);
+  useEffect(() => {
+    if (!autoSelectGenerated || !generatedInScope || adoptedResponse.current === response) return;
+    adoptedResponse.current = response;
+    const ref = generatedInScope.reference;
+    setSelectedPlanKey(planChoiceKey(ref));
+    setUseLocalPlan(false);
+    // These targets come from the exact result of the user's explicit generation,
+    // including accepted clarification, never from latest/first repository choice.
+    setCompetitionId(ref.target.competition_id);
+    setEditionId(ref.target.edition_id);
+    setTrackId(ref.target.track_id ?? '');
+  }, [autoSelectGenerated, generatedInScope, response]);
 
   function explicitContext() {
     return {
@@ -508,6 +540,12 @@ export function Workspace({
                         : '尚未发送批准或拒绝决定'}
                   </span>
                 </div>
+              ) : renderPlanningWorkspace && generatedInScope ? (
+                renderPlanningWorkspace({
+                  student_id: generatedInScope.reference.student_id,
+                  ...generatedInScope.reference.target,
+                  plan_ref: generatedInScope.reference,
+                })
               ) : response ? (
                 <ResultPanel response={response} readArtifacts={readArtifacts} />
               ) : (

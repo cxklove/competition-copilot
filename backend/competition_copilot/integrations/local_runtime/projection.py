@@ -3,6 +3,9 @@
 from competition_copilot.application.competition_detail import (
     CompetitionDetailProjection,
 )
+from competition_copilot.application.planning_workspace import (
+    PlanningWorkspaceProjection,
+)
 from competition_copilot.application.profile_freshness import ProfileAnalysesProjection
 from competition_copilot.application.profile_skills import SkillCatalogProjection
 from competition_copilot.application.profiles import ProfileMutationResult
@@ -24,7 +27,7 @@ from competition_copilot.tools.competition import (
 )
 
 PUBLIC_MODELS = {model.__name__: model for model in (
-    ProfileAnalysesProjection, SkillCatalogProjection, CompetitionDetailProjection, StudentProfileProjection, ProfileMutationResult,
+    PlanningWorkspaceProjection, ProfileAnalysesProjection, SkillCatalogProjection, CompetitionDetailProjection, StudentProfileProjection, ProfileMutationResult,
     EligibilityDecision, SkillGapDecision, CompetitionPlan, RecommendationRankingResult,
     ListCompetitionsOutput, GetCompetitionOutput,
 )}

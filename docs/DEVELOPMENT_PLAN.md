@@ -3378,7 +3378,9 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 | PX3.2 — Profile Read / Edit | CLOSED_VERIFIED | 七项基础资料、版本化 Repository、Runtime explicit read/edit | host-scoped in-memory；已通过前置验收 |
 | PX3.3 — Skills Read / Edit | CLOSED_VERIFIED | 正式技能目录、增改删、自评证据原子更新、ProfileReference CAS | host-scoped in-memory；已通过前置验收 |
 | PX3.4 — Derived Result Staleness | CLOSED_VERIFIED | 正式引用三态、调用 lineage、相关分析、显式重新分析/规划 | Browser Smoke PASS；Final Independent Review REVIEW_PASS；不改变旧结论，不自动重算或重规划 |
-| PX4 — My Competitions + Planning Workspace | READY_TO_START | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | 建议首阶段 PX4.1 Planning Readiness & Actionable Preparation；本轮未实施；不覆盖资格或 Plan 状态，只显示真实 milestones |
+| PX4 — My Competitions + Planning Workspace | IN_PROGRESS | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | PX4.1 CLOSED_VERIFIED；PX4.2 READY_TO_START；不覆盖资格或 Plan 状态 |
+| PX4.1 — Planning Readiness & Actionable Preparation | CLOSED_VERIFIED | 正式只读 Workspace、已确认约束、准备建议、待确认、时间参考及 Plan freshness | Browser Smoke PASS；Final Independent Review REVIEW_PASS；P8 truth、P11 authority 不变 |
+| PX4.2 — My Competitions Workspace | READY_TO_START | 后续我的赛事 Workspace | 本轮仅同步 readiness；未进入实现 |
 | PX5 — Events / Approval / Version | PLANNED | Competition Updates / Event Feed、Before / After、Impact、Approval Center、PlanDiff、Version History | 复用 Snapshot → Diff → Event → Impact → Decision → policy → approval → execution → actual PlanDiff / lineage；不新增 mutation authority |
 | PX6 — Guided Demo & Reliability | PLANNED | Guided Actions、Scenario Selector、Demo Mode、Quick Journey、Runtime Health、Demo Reset、Notification UX、统一状态与现场可靠性 | 复用已有 Demo Polish 2.1 explicit actions；其余能力仍待实现；不得自动重试、绕过验证或把 UI reset 当作后端状态已重置 |
 
@@ -3415,7 +3417,7 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 - 完整事件历史仍为 EVENT_HISTORY_PERSISTENCE_GAP，明确显示“暂未提供完整赛事变化历史”；
   当前会话证据单列，controlled demo 不冒充官方变化；不增加 Event Ledger/Database。
   submission window 为 DATA_CONTRACT_GAP，当前不实现。Discovery 原路径保持不变。
-- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 当前 CLOSED_VERIFIED，PX4 READY_TO_START。
+- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 当前 CLOSED_VERIFIED，PX4 IN_PROGRESS，PX4.1 CLOSED_VERIFIED，PX4.2 READY_TO_START。
   PX2 Final Independent Review 已 REVIEW_PASS；PX2 Core 关闭为 CLOSED_VERIFIED。
 - PX2.2 验证：新增 Reader/Runtime 24 passed；扩展 targeted 142 passed；Backend full
   2774 passed；Frontend results/local targeted 85 passed、full 261 passed；Ruff、schema
@@ -3499,7 +3501,7 @@ PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
 - P12/P13/P14 保持 CLOSED_FROZEN；PX1/PX2 Core/PX2.3 保持 CLOSED_VERIFIED；当前 PX3 CLOSED_VERIFIED，P15 未开始。
 - 继续保留 demo 边界：Local PlanRegistry 为 in-memory，generated plans 在 server restart 后不持久化。
   候选仅覆盖逐条准入的三条 evidence，不代表全部 Raw 时间文本；没有 runtime temporal crawler、自动 parser 或 LLM extraction。
-  当时 PX3 = READY_TO_START 仅为准备状态；当前 PX3 已 CLOSED_VERIFIED，PX4 READY_TO_START；P15 仍 NOT_STARTED。
+  当时 PX3 = READY_TO_START 仅为准备状态；当前 PX3 已 CLOSED_VERIFIED，PX4 IN_PROGRESS，PX4.1 CLOSED_VERIFIED，PX4.2 READY_TO_START；P15 仍 NOT_STARTED。
 - 初版验证：Backend targeted 39 passed、full 2789 passed；Frontend targeted 109 passed、full 285 passed；
   Ruff、两项 schema export drift check、frontend lint/build、git diff --check PASS。
   Backend full 首次受 sandbox pytest 临时目录权限影响，沙箱外相同命令重跑全通过；未修改测试预期规避问题。
@@ -3842,7 +3844,156 @@ Known gaps remain unresolved:
 - Submission Window remains DATA_CONTRACT_GAP; no submission window is invented.
 - PX3.4_ELIGIBILITY_FRESHNESS_GAP remains outside the completed freshness scope.
 
-Next: PX4 My Competitions + Planning Workspace is READY_TO_START. Suggested first
+Historical PX3 sync outcome: PX4 My Competitions + Planning Workspace was READY_TO_START. Suggested first
 stage: PX4.1 Planning Readiness & Actionable Preparation. No PX4 implementation is
 started by this sync. PX1/PX2 remain CLOSED_VERIFIED; P12/P13/P14 CLOSED_FROZEN;
 P15 NOT_STARTED. No commit or push.
+
+## PX4.1 — Planning Readiness & Actionable Preparation
+
+Status: CLOSED_VERIFIED (Browser Smoke PASS; Final Independent Review REVIEW_PASS).
+PX4 IN_PROGRESS; PX4.2 READY_TO_START only; PX1/PX2/PX3 CLOSED_VERIFIED;
+P12/P13/P14 CLOSED_FROZEN; P15 NOT_STARTED. No PX4.2 implementation, commit or push.
+
+Implemented PlanningWorkspaceProjection / Reader, ConfirmedConstraint,
+PendingConfirmation, TimeReference, AdvisoryPreparationTask and deterministic
+PreparationAdvisoryPolicy (preparation-advisory-v1). Runtime/Facade exposes the READ
+GET_PLANNING_WORKSPACE with generated contracts and MCP exclusion. Frontend 备赛计划
+now has seven sections, exact scope/Plan selection, honest empty/error states,
+transparent counts, folded original Plan/audit and explicit P7/P8/navigation CTAs.
+
+Constraints retain verified sources and exact scope. Skill identity can be known
+while required_level remains pending. Official temporal candidates remain quotes,
+not deadlines. P7 uncertainty needs are separate from advice; original Plan milestones
+and needs remain intact. Provider errors/identity mismatches are not missing-data items.
+
+Advisory uses formal exact requirement skill IDs/catalog names, one captured profile
+snapshot/ref, bounded templates and stable content IDs/order. No name heuristic,
+goals inference, invented gap/level, LLM or hour allocation. Missing != UNKNOWN !=
+deficit; None/0/decimal hours are display context. Stale Plan and current-profile
+advice are separate. Missing lineage is UNKNOWN; ambiguous exact lineage fails closed.
+
+PLANNING_ACTIONABILITY_GAP is mitigated through read-side preparation suggestions.
+CompetitionPlan / PlanReference, PlanningInputDeriver, BaselineCompetitionPlanBuilder,
+P7/P8 truth, P11 and PlanDiff authority are unchanged. Reads do not alter Plan version,
+digest/status/updated_at/milestones/due_at, generate events, trigger approval/replanning
+or execute P7/P8. Only explicit CTAs invoke existing P7/P8 paths.
+
+Known gaps retained: required_level coverage; host-memory profile/PlanRegistry and
+lineage persistence; no full account/identity system; full Competition Event History
+unavailable; Submission Window DATA_CONTRACT_GAP. No task management/progress,
+calendar, notifications, team features or autonomous planning.
+
+Historical implementation validation: Backend targeted 98 passed; full backend 2947 passed. Frontend
+Workspace targeted 10 passed plus 2 real HTTP navigation/Plan integration tests;
+full frontend 357 passed. Ruff, schema export/generated contract drift checks,
+frontend lint/build and git diff --check passed. Domain files are unchanged.
+AgentArts timeout failures during the initial regression were addressed by caching
+only static capability input-schema JSON, with schema-equivalence coverage; no
+timeout/retry, gateway semantics or business authority was changed. Final backend
+and frontend full regressions passed. Browser Smoke and independent review remain
+pending at that checkpoint; status was IMPLEMENTED_AWAITING_REVIEW.
+
+### PX4.1 Browser Smoke blocker — profile hydration / target clarification
+
+The existing Local Runtime factory already looked up the repository profile before
+argument assembly. However, incomplete exact targets left the Planning payload
+empty; generic schema missing-field composition mislabeled missing `student_id`
+as STUDENT_PROFILE alongside CAPABILITY_ARGUMENTS. Complete targets prepared P7/P8
+inputs and therefore did not show that spurious profile form.
+
+Fixed with trusted pending-argument preparation: retain the resolved profile ref,
+ask only unresolved canonical target fields, then prepare full typed inputs after
+Core validates the clarification. Retained continuation uses its captured profile
+snapshot/ref; new requests capture current repository state. Missing repository
+profiles show profile navigation rather than accepting ad hoc profile construction.
+No P7/P8/CompetitionPlan/P11/MCP truth or authority changes, no inferred target.
+At this blocker-fix checkpoint PX4.1 was IMPLEMENTED_AWAITING_REVIEW; Browser Smoke required resumption.
+
+Blocker-fix validation: new preparation scenarios 14 passed; broader targeted
+backend regression 187 passed; final full backend 2961 passed. Frontend
+clarification targeted 24 passed; full frontend 359 passed. Ruff, frontend lint,
+build, both generated contract drift checks and git diff --check passed. Repository
+lookup now precedes even the routing admission preflight. No commit or push.
+
+### PX4.1 Browser Smoke blocker — Workspace surfacing
+
+Backend DTOs/Reader/advisory policy/lineage/READ action were present. Copilot still
+rendered CompetitionPlan through ResultPanel -> PlanTimeline, while the new
+Workspace was active only on the separate plans route and generated references
+were collected without being selected. The frontend integration was incomplete.
+
+Product BUILD_PLAN success now validates and selects the returned exact reference,
+then immediately reads GET_PLANNING_WORKSPACE into the Copilot result panel. No
+latest lookup, reference reconstruction, business rerun or navigation is needed.
+Original stages remain in folded Plan audit, using the existing renderer and
+generated schema validation. Standalone legacy rendering remains supported.
+
+Validation: Backend targeted 38 passed; no Backend production changes, so full
+backend was not rerun for this fix. Frontend Workspace targeted 13 passed plus
+2 real HTTP generation/navigation tests; full frontend 362 passed. Ruff, lint,
+build, both schema drift checks and git diff --check passed. Real headless Chrome
+COMAP acceptance passed: six required regions, three advisory tasks, exact returned
+reference used, original stages 1/2 preserved, no P8 on Workspace-only read and no
+P11 call. Evidence: tmp/px41-workspace-browser (local ignored artifacts).
+At this surfacing-fix checkpoint PX4.1 was IMPLEMENTED_AWAITING_REVIEW; no PX4.2/P15, commit or push.
+
+### PX4.1 Final Status Sync — CLOSED_VERIFIED
+
+Browser Smoke = PASS. Final Independent Review = REVIEW_PASS. These accepted
+results close PX4.1; earlier implementation/blocker notes above retain historical
+checkpoint states and do not reopen this phase.
+
+| Stage | Current status |
+|---|---|
+| PX1 Product Shell | CLOSED_VERIFIED |
+| PX2 Competition Experience | CLOSED_VERIFIED |
+| PX3 My Profile / Skills | CLOSED_VERIFIED |
+| PX4 My Competitions + Planning Workspace | IN_PROGRESS |
+| PX4.1 Planning Readiness & Actionable Preparation | CLOSED_VERIFIED |
+| PX4.2 My Competitions Workspace | READY_TO_START |
+| P12 | CLOSED_FROZEN |
+| P13 | CLOSED_FROZEN |
+| P14 | CLOSED_FROZEN |
+| P15 Evaluation | NOT_STARTED |
+
+Completed and verified:
+
+- PlanningWorkspaceProjection and read-only PlanningWorkspaceReader.
+- Exact PlanReference reads, formal Plan lineage and ProfileReference freshness.
+- Confirmed Constraints, Pending Confirmations and Time References with provenance/scope.
+- Versioned deterministic Preparation Advisory, separate from official requirements.
+- Stale Plan / current Advisory separation; original Plan remains auditable.
+- No Plan Workspace, explicit Runtime Workspace READ and product UI integration.
+- Repository profile hydration before target clarification; only genuinely missing
+  target fields are requested when the profile has already been resolved.
+
+Authority boundaries retained:
+
+- CompetitionPlan truth, P8 builder truth and P11 authority are unchanged.
+- TemporalCandidate cannot become an authoritative deadline.
+- Advisory does not become a milestone or generate PlanDiff / CompetitionEvent.
+- Page rendering can read Workspace; it cannot automatically invoke P8.
+- Explicit generation/regeneration uses existing P7/P8; no automatic P11 or approval.
+
+PLANNING_ACTIONABILITY_GAP = MITIGATED / PRODUCTIZED through the read-side advisory
+layer. This does not mean all planning data gaps have been resolved.
+
+Known gaps remain open:
+
+- SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP: required_level coverage remains incomplete.
+- PROFILE_PERSISTENCE_GAP: host-scoped in-memory; restart restores fixture baseline.
+- MY_COMPETITIONS_RELATIONSHIP_GAP: no formal persistent My Competitions relationship.
+- TASK_PROGRESS_PERSISTENCE_GAP: no advisory checkbox/progress persistence.
+- FULL_EVENT_HISTORY_GAP / EVENT_HISTORY_PERSISTENCE_GAP: full competition history unavailable.
+- Existing gaps also remain: in-memory PlanRegistry/lineage and no durable result
+  history, full account/identity system, Submission Window DATA_CONTRACT_GAP,
+  PX3.4_ELIGIBILITY_FRESHNESS_GAP and previously documented unclosed projection/data gaps.
+
+Final review verification: Backend targeted 155 passed; Frontend targeted 15 passed;
+Runtime/result schema drift checks and diff check passed. Prior full regressions
+and Browser Smoke evidence remain recorded above; no new regression run is claimed
+by this status-only sync. Ready for full regression.
+
+PX4.2 is READY_TO_START only. No PX4.2 implementation, P15 work, production business
+logic changes, reopening P12-P14, commit or push is included in this sync.

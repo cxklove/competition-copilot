@@ -5,6 +5,7 @@ import type * as Models from './generated/artifacts.ts';
 import type { AgentResponse, ResultReference } from '../runtime/generated/contracts.ts';
 
 type Values = {
+  PlanningWorkspaceProjection: Models.PlanningWorkspaceProjection;
   ProfileAnalysesProjection: Models.ProfileAnalysesProjection;
   SkillCatalogProjection: Models.SkillCatalogProjection;
   StudentProfileProjection: Models.StudentProfileProjection;
@@ -32,6 +33,7 @@ export type LinkedArtifact = {
 // Fake composition supplies presets; Local hosting supplies validated receipt projections.
 export type ArtifactReader = (response: AgentResponse) => unknown;
 const kinds: Record<keyof Values, string[]> = {
+  PlanningWorkspaceProjection: ['TOOL_RESULT'],
   ProfileAnalysesProjection: ['TOOL_RESULT'],
   SkillCatalogProjection: ['TOOL_RESULT'],
   StudentProfileProjection: ['TOOL_RESULT'],
@@ -59,6 +61,16 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 function exact(value: Record<string, unknown>, keys: string[]) {
   return Object.keys(value).length === keys.length && keys.every((key) => key in value);
+}
+// Read-side original Plan JSON uses the same generated model validator as results.
+// This validates presentation data only; it cannot create a PlanReference or digest.
+export function parseOriginalPlan(text: string): Models.CompetitionPlan | null {
+  try {
+    const value: unknown = JSON.parse(text);
+    return validators.CompetitionPlan!(value) ? (value as Models.CompetitionPlan) : null;
+  } catch {
+    return null;
+  }
 }
 export function validateArtifacts(response: AgentResponse, raw?: unknown): LinkedArtifact[] {
   if (raw === undefined || response.outcome !== 'COMPLETED') return [];

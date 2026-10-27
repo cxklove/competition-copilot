@@ -75,6 +75,15 @@ export function ClarificationPanel({
       </details>
     );
   }
+  if (proposal.reason === 'MISSING_STUDENT_PROFILE') {
+    return (
+      <section className="hitl-panel" aria-label="画像不可用">
+        <h3>请先确认个人画像</h3>
+        <p>当前学生画像不可用。请确认已选择当前学生，并在“我的能力”中查看画像后重新发起操作。</p>
+        <a href="#/profile">前往我的能力</a>
+      </section>
+    );
+  }
   return (
     <section className="hitl-panel" aria-labelledby="clarification-title">
       <h3 id="clarification-title">补充所需信息</h3>

@@ -58,6 +58,7 @@ class AgentContract(BaseModel):
 
 
 class AgentIntent(StrEnum):
+    GET_PLANNING_WORKSPACE = "GET_PLANNING_WORKSPACE"
     GET_PROFILE_ANALYSES = "GET_PROFILE_ANALYSES"
     GET_PROFILE = "GET_PROFILE"
     GET_SKILL_CATALOG = "GET_SKILL_CATALOG"
@@ -317,6 +318,7 @@ class ApprovalResponse(AgentContract):
 
 
 class CapabilityId(StrEnum):
+    GET_PLANNING_WORKSPACE = "get_planning_workspace"
     GET_PROFILE_ANALYSES = "get_profile_analyses"
     GET_PROFILE = "get_profile"
     GET_SKILL_CATALOG = "get_skill_catalog"

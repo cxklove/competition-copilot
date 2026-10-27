@@ -24,6 +24,7 @@ from competition_copilot.agents.contracts import (
 )
 from competition_copilot.domain.digital_twin import StableId
 from competition_copilot.domain.replanning import PlanReference
+from competition_copilot.repositories.student import ProfileReference
 
 
 class RoutingAmbiguity(StrEnum):
@@ -52,6 +53,15 @@ class IntentRoutingProposal(AgentContract):
     targets: ProposedTargets = Field(default_factory=ProposedTargets)
 
 
+class PendingArgumentPreparation(AgentContract):
+    """Trusted caller's unresolved inputs, never a model proposal or execution grant."""
+
+    capability: CapabilityId
+    fields: tuple[ContextField, ...] = Field(min_length=1)
+    profile_ref: ProfileReference | None = None
+    reason: ClarificationReason = ClarificationReason.MISSING_REQUIRED_CONTEXT
+
+
 def explicit_intent_proposal(request: AgentRequest) -> IntentRoutingProposal | None:
     """Translate a user action to an untrusted proposal, not an invocation.
 
@@ -61,6 +71,7 @@ def explicit_intent_proposal(request: AgentRequest) -> IntentRoutingProposal | N
     if request.intent is None:
         return None
     capability = {
+        AgentIntent.GET_PLANNING_WORKSPACE: CapabilityId.GET_PLANNING_WORKSPACE,
         AgentIntent.GET_PROFILE_ANALYSES: CapabilityId.GET_PROFILE_ANALYSES,
         AgentIntent.GET_PROFILE: CapabilityId.GET_PROFILE,
         AgentIntent.GET_SKILL_CATALOG: CapabilityId.GET_SKILL_CATALOG,
@@ -154,6 +165,7 @@ class RoutingValidationResult(AgentContract):
 
 # Safety policy, not workflow planning: an intent may admit several capabilities.
 INTENT_CAPABILITIES = MappingProxyType({
+    AgentIntent.GET_PLANNING_WORKSPACE: (CapabilityId.GET_PLANNING_WORKSPACE,),
     AgentIntent.GET_PROFILE_ANALYSES: (CapabilityId.GET_PROFILE_ANALYSES,),
     AgentIntent.GET_PROFILE: (CapabilityId.GET_PROFILE,),
     AgentIntent.GET_SKILL_CATALOG: (CapabilityId.GET_SKILL_CATALOG,),
@@ -318,7 +330,8 @@ class RoutingProposalValidator:
 
     def validate(self, proposal: IntentRoutingProposal, request: AgentRequest, *,
                  invocation_id: StableId | None, arguments_ref: ResultReference | None,
-                 arguments: dict | None) -> RoutingValidationResult:
+                 arguments: dict | None,
+                 pending_preparation: PendingArgumentPreparation | None = None) -> RoutingValidationResult:
         proposal = IntentRoutingProposal.model_validate(proposal)
 
         def reject(reason):
@@ -361,6 +374,15 @@ class RoutingProposalValidator:
                         if proposal.ambiguity in (RoutingAmbiguity.TARGET, RoutingAmbiguity.CONFLICT)
                         else ClarificationReason.AMBIGUOUS_INTENT)
             return clarify(RoutingReason.AMBIGUITY, (ContextField.INTENT,), category)
+        if pending_preparation is not None:
+            # This can only request clarification. All safety/catalog/context
+            # guards above and full typed validation after preparation remain.
+            if (pending_preparation.capability != capability.capability or
+                    (pending_preparation.profile_ref is not None and
+                     pending_preparation.profile_ref.student_id != request.context.student_id)):
+                return reject(RoutingReason.CONTEXT_CONFLICT)
+            return clarify(RoutingReason.MISSING_CONTEXT, pending_preparation.fields,
+                           pending_preparation.reason)
         missing = list(proposal.missing_context)
         if payload is None or arguments_ref is None or invocation_id is None:
             missing.append(ContextField.CAPABILITY_ARGUMENTS)

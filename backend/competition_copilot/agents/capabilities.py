@@ -7,6 +7,7 @@ dependencies. No concrete Repository, provider, SDK, IO or global service locato
 import json
 from collections.abc import Mapping
 from enum import StrEnum
+from functools import lru_cache
 from types import MappingProxyType
 from typing import Generic, Self, TypeVar
 
@@ -39,6 +40,11 @@ from competition_copilot.application.competition_snapshots import (
 from competition_copilot.application.eligibility import (
     CompetitionEligibilityEvaluator,
     EligibilityTargetError,
+)
+from competition_copilot.application.planning_workspace import (
+    PlanningWorkspaceProjection,
+    PlanningWorkspaceQuery,
+    PlanningWorkspaceReader,
 )
 from competition_copilot.application.profile_freshness import (
     ProfileAnalysesProjection,
@@ -147,6 +153,12 @@ class CapabilityArguments(AgentContract, Generic[InputT]):
         return self
 
 
+@lru_cache(maxsize=None)
+def _input_schema_json(model: type[BaseModel]) -> str:
+    """Approved model schemas are static; retain only their immutable JSON text."""
+    return json.dumps(CapabilityArguments[model].model_json_schema(), sort_keys=True)
+
+
 class CheckEligibilityInput(AgentContract):
     student: StudentProfile
     competition_id: StableId
@@ -224,6 +236,8 @@ class CapabilityStatus(StrEnum):
 
 class CapabilityErrorCode(StrEnum):
     INVALID_INPUT = "INVALID_INPUT"
+    PLAN_REFERENCE_UNAVAILABLE = "PLAN_REFERENCE_UNAVAILABLE"
+    PLANNING_IDENTITY_MISMATCH = "PLANNING_IDENTITY_MISMATCH"
     PROFILE_NOT_FOUND = "PROFILE_NOT_FOUND"
     PROFILE_VERSION_CONFLICT = "PROFILE_VERSION_CONFLICT"
     PROFILE_EDIT_FORBIDDEN = "PROFILE_EDIT_FORBIDDEN"
@@ -269,6 +283,7 @@ _READ = MappingProxyType({
 })
 _SPECS = MappingProxyType({
     **_READ,
+    CapabilityId.GET_PLANNING_WORKSPACE: (PlanningWorkspaceQuery, PlanningWorkspaceProjection),
     CapabilityId.GET_PROFILE_ANALYSES: (ProfileAnalysesQuery, ProfileAnalysesProjection),
     CapabilityId.GET_PROFILE: (GetProfileQuery, StudentProfileProjection),
     CapabilityId.GET_SKILL_CATALOG: (SkillCatalogQuery, SkillCatalogProjection),
@@ -290,7 +305,7 @@ _SPECS = MappingProxyType({
 })
 
 CapabilityOutput = (
-    ProfileAnalysesProjection | SkillCatalogProjection | StudentProfileProjection | ProfileMutationResult | CompetitionDetailProjection | ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
+    PlanningWorkspaceProjection | ProfileAnalysesProjection | SkillCatalogProjection | StudentProfileProjection | ProfileMutationResult | CompetitionDetailProjection | ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
     | GetCompetitionEditionOutput | ListEditionTracksOutput | GetCompetitionTrackOutput
     | EligibilityDecision | RecommendationRankingResult | SkillGapDecision
     | CompetitionPlan | CompetitionSnapshot | SnapshotDiff | EventBatch | EventImpactAnalysis
@@ -390,9 +405,11 @@ class AgentCapabilityFacade:
         skill_catalog: SkillCatalogReader | None = None,
         skill_editor: StudentSkillEditor | None = None,
         profile_analyses: ProfileAnalysesReader | None = None,
+        planning_workspace: PlanningWorkspaceReader | None = None,
         profile_reader: StudentProfileReader | None = None,
         profile_editor: StudentProfileEditor | None = None,
     ):
+        self._planning_workspace = planning_workspace
         self._profile_analyses = profile_analyses
         self._skill_catalog, self._skill_editor = skill_catalog, skill_editor
         self._profile_reader, self._profile_editor = profile_reader, profile_editor
@@ -415,10 +432,9 @@ class AgentCapabilityFacade:
         return tuple(CapabilityMetadata(
             capability=capability,
             description=f"Delegate {capability.value} to the existing deterministic authority.",
-            input_schema_json=json.dumps(
-                CapabilityArguments[models[0]].model_json_schema(), sort_keys=True),
+            input_schema_json=_input_schema_json(models[0]),
             output_type=models[1].__name__,
-            access=(CapabilityAccess.READ if capability in _READ or capability in (CapabilityId.BUILD_COMPETITION_SNAPSHOT, CapabilityId.GET_PROFILE, CapabilityId.GET_PROFILE_ANALYSES, CapabilityId.GET_SKILL_CATALOG) else
+            access=(CapabilityAccess.READ if capability in _READ or capability in (CapabilityId.GET_PLANNING_WORKSPACE, CapabilityId.BUILD_COMPETITION_SNAPSHOT, CapabilityId.GET_PROFILE, CapabilityId.GET_PROFILE_ANALYSES, CapabilityId.GET_SKILL_CATALOG) else
                     CapabilityAccess.MUTATING if capability in (CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL)
                     else CapabilityAccess.DECISION),
             requires_explicit_approval=capability == CapabilityId.REVISE_PLAN,
@@ -492,6 +508,9 @@ class AgentCapabilityFacade:
             return error(CapabilityErrorCode.EXECUTION_REJECTED)
 
     def _delegate(self, capability, value):
+        if capability == CapabilityId.GET_PLANNING_WORKSPACE:
+            self._require(self._planning_workspace)
+            return self._planning_workspace.read(value)
         if capability == CapabilityId.GET_PROFILE_ANALYSES:
             self._require(self._profile_analyses)
             return self._profile_analyses.read(value)

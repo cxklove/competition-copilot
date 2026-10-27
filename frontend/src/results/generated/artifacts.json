@@ -3798,6 +3798,1127 @@
     "title": "PlanDiff",
     "type": "object"
   },
+  "PlanningWorkspaceProjection": {
+    "$defs": {
+      "AdvisoryPreparationTask": {
+        "additionalProperties": false,
+        "properties": {
+          "advisory": {
+            "const": true,
+            "default": true,
+            "title": "Advisory",
+            "type": "boolean"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "policy_version": {
+            "const": "preparation-advisory-v1",
+            "default": "preparation-advisory-v1",
+            "title": "Policy Version",
+            "type": "string"
+          },
+          "profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "related_skill_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Related Skill Ids",
+            "type": "array"
+          },
+          "source_basis": {
+            "$ref": "#/$defs/PreparationBasis"
+          },
+          "suggested_sequence": {
+            "minimum": 1,
+            "title": "Suggested Sequence",
+            "type": "integer"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionDetailQuery"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "template_id": {
+            "title": "Template Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "template_id",
+          "title",
+          "description",
+          "related_skill_ids",
+          "target",
+          "profile_ref",
+          "source_basis",
+          "suggested_sequence"
+        ],
+        "title": "AdvisoryPreparationTask",
+        "type": "object"
+      },
+      "CompetitionDetailQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Edition Id"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id"
+        ],
+        "title": "CompetitionDetailQuery",
+        "type": "object"
+      },
+      "CompetitionTarget": {
+        "additionalProperties": false,
+        "description": "Generic machine identity, not a planning or requirement target.\n\nRepository existence and parent relationships are validated by P9.2, since\nthis contract contains IDs rather than Competition/Edition/Track objects.",
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "CompetitionTarget",
+        "type": "object"
+      },
+      "ConfirmedConstraint": {
+        "additionalProperties": false,
+        "properties": {
+          "constraint_id": {
+            "title": "Constraint Id",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/WorkspaceEvidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "competition",
+              "edition",
+              "track"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          "type": {
+            "enum": [
+              "skill_identity",
+              "skill_level",
+              "eligibility",
+              "time"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "verification": {
+            "const": "verified",
+            "default": "verified",
+            "title": "Verification",
+            "type": "string"
+          }
+        },
+        "required": [
+          "constraint_id",
+          "type",
+          "field",
+          "label",
+          "value",
+          "scope",
+          "source"
+        ],
+        "title": "ConfirmedConstraint",
+        "type": "object"
+      },
+      "DetailAvailability": {
+        "additionalProperties": false,
+        "properties": {
+          "competition": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "editions": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "eligibility_policy": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "event_history": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "provenance": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "skill_requirements": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "time_windows": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          },
+          "tracks": {
+            "$ref": "#/$defs/DetailSectionAvailability"
+          }
+        },
+        "required": [
+          "competition",
+          "editions",
+          "tracks",
+          "time_windows",
+          "eligibility_policy",
+          "skill_requirements",
+          "provenance",
+          "event_history"
+        ],
+        "title": "DetailAvailability",
+        "type": "object"
+      },
+      "DetailSectionAvailability": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          },
+          "requested": {
+            "title": "Requested",
+            "type": "boolean"
+          },
+          "state": {
+            "$ref": "#/$defs/ObservationState"
+          }
+        },
+        "required": [
+          "requested",
+          "state"
+        ],
+        "title": "DetailSectionAvailability",
+        "type": "object"
+      },
+      "ObservationState": {
+        "enum": [
+          "known_value",
+          "known_absent",
+          "unknown"
+        ],
+        "title": "ObservationState",
+        "type": "string"
+      },
+      "PendingConfirmation": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmation_id": {
+            "title": "Confirmation Id",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "scope": {
+            "enum": [
+              "competition",
+              "edition",
+              "track"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "source_basis": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/WorkspaceEvidence"
+            },
+            "title": "Source Basis",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "requirement",
+              "profile",
+              "time",
+              "plan_need",
+              "policy"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirmation_id",
+          "type",
+          "title",
+          "description",
+          "scope",
+          "reason_codes"
+        ],
+        "title": "PendingConfirmation",
+        "type": "object"
+      },
+      "PlanReference": {
+        "additionalProperties": false,
+        "description": "Exact immutable P8 context reference, without student profile contents.",
+        "properties": {
+          "content_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "milestone_ids": {
+            "default": [],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Milestone Ids",
+            "type": "array"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/CompetitionTarget"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "student_id",
+          "target",
+          "version",
+          "updated_at",
+          "content_digest"
+        ],
+        "title": "PlanReference",
+        "type": "object"
+      },
+      "PreparationBasis": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "items": {
+              "$ref": "#/$defs/WorkspaceEvidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "profile_ref": {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          "profile_skill_state": {
+            "enum": [
+              "recorded",
+              "missing",
+              "unknown"
+            ],
+            "title": "Profile Skill State",
+            "type": "string"
+          },
+          "requirement_target": {
+            "$ref": "#/$defs/CompetitionDetailQuery"
+          },
+          "requirement_version": {
+            "title": "Requirement Version",
+            "type": "string"
+          },
+          "skill_id": {
+            "title": "Skill Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile_ref",
+          "skill_id",
+          "profile_skill_state",
+          "requirement_version",
+          "requirement_target",
+          "evidence"
+        ],
+        "title": "PreparationBasis",
+        "type": "object"
+      },
+      "ProfileFreshness": {
+        "additionalProperties": false,
+        "properties": {
+          "current_profile_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ProfileReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "input_profile_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ProfileReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "enum": [
+              "EXACT_REFERENCE_MATCH",
+              "PROFILE_REFERENCE_CHANGED",
+              "RESULT_PROFILE_REFERENCE_UNKNOWN",
+              "CURRENT_PROFILE_NOT_FOUND",
+              "HOST_SCOPE_INCOMPARABLE",
+              "RESULT_PROFILE_IDENTITY_MISMATCH"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "CURRENT",
+              "STALE",
+              "UNKNOWN"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "input_profile_ref",
+          "current_profile_ref",
+          "reason"
+        ],
+        "title": "ProfileFreshness",
+        "type": "object"
+      },
+      "ProfileReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "student_id",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "ProfileReference",
+        "type": "object"
+      },
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Immutable provenance and verification state for a competition fact.",
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_type": {
+            "$ref": "#/$defs/SourceType"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "source_url",
+          "source_type",
+          "observed_at",
+          "verification_status"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "official",
+          "university",
+          "organizer",
+          "manual",
+          "other"
+        ],
+        "title": "SourceType",
+        "type": "string"
+      },
+      "TemporalCandidateSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_id": {
+            "default": "",
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "field": {
+            "enum": [
+              "registration",
+              "competition",
+              "registration_start",
+              "registration_end",
+              "competition_start",
+              "competition_end"
+            ],
+            "title": "Field",
+            "type": "string"
+          },
+          "precision": {
+            "enum": [
+              "DATETIME",
+              "DATE",
+              "MONTH",
+              "TEXT_ONLY"
+            ],
+            "title": "Precision",
+            "type": "string"
+          },
+          "raw_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Raw Digest",
+            "type": "string"
+          },
+          "raw_reference": {
+            "pattern": "^data/raw/[^/\\\\]+\\.json$",
+            "title": "Raw Reference",
+            "type": "string"
+          },
+          "raw_text": {
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          },
+          "relation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "RANGE",
+                  "BEFORE"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Relation"
+          },
+          "review_note": {
+            "minLength": 1,
+            "title": "Review Note",
+            "type": "string"
+          },
+          "review_reference": {
+            "minLength": 1,
+            "title": "Review Reference",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0",
+            "default": "1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          "text_locator": {
+            "pattern": "^/raw_payload/[A-Za-z_]+$",
+            "title": "Text Locator",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          },
+          "verification_status": {
+            "$ref": "#/$defs/VerificationStatus",
+            "default": "pending"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id",
+          "field",
+          "raw_text",
+          "precision",
+          "source",
+          "raw_reference",
+          "raw_digest",
+          "text_locator",
+          "review_reference",
+          "review_note"
+        ],
+        "title": "TemporalCandidateSnapshot",
+        "type": "object"
+      },
+      "TimeReference": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TemporalCandidateSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "field": {
+            "enum": [
+              "registration",
+              "competition",
+              "registration_start",
+              "registration_end",
+              "competition_start",
+              "competition_end"
+            ],
+            "title": "Field",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "VERIFIED",
+              "OFFICIAL_CANDIDATE"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "precision": {
+            "enum": [
+              "minute",
+              "second",
+              "DATETIME",
+              "DATE",
+              "MONTH",
+              "TEXT_ONLY"
+            ],
+            "title": "Precision",
+            "type": "string"
+          },
+          "raw_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Raw Text"
+          },
+          "scope": {
+            "enum": [
+              "edition",
+              "track"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          },
+          "verification": {
+            "$ref": "#/$defs/VerificationStatus"
+          }
+        },
+        "required": [
+          "kind",
+          "field",
+          "scope",
+          "source",
+          "observed_at",
+          "precision",
+          "verification"
+        ],
+        "title": "TimeReference",
+        "type": "object"
+      },
+      "VerificationStatus": {
+        "enum": [
+          "pending",
+          "verified",
+          "rejected"
+        ],
+        "title": "VerificationStatus",
+        "type": "string"
+      },
+      "WorkspaceAvailability": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "$ref": "#/$defs/DetailAvailability"
+          },
+          "plan": {
+            "enum": [
+              "AVAILABLE",
+              "NOT_SELECTED"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
+          "profile": {
+            "const": "AVAILABLE",
+            "default": "AVAILABLE",
+            "title": "Profile",
+            "type": "string"
+          },
+          "suggestions": {
+            "enum": [
+              "AVAILABLE",
+              "NO_EXACT_REQUIREMENT"
+            ],
+            "title": "Suggestions",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail",
+          "plan",
+          "suggestions"
+        ],
+        "title": "WorkspaceAvailability",
+        "type": "object"
+      },
+      "WorkspaceEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SourceMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "value_json": {
+            "title": "Value Json",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "field",
+          "value_json",
+          "source"
+        ],
+        "title": "WorkspaceEvidence",
+        "type": "object"
+      },
+      "WorkspacePlanSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan_id",
+          "version",
+          "status"
+        ],
+        "title": "WorkspacePlanSummary",
+        "type": "object"
+      },
+      "WorkspaceProfileContext": {
+        "additionalProperties": false,
+        "properties": {
+          "goals": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "interests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "persistence_boundary": {
+            "const": "HOST_MEMORY",
+            "default": "HOST_MEMORY",
+            "title": "Persistence Boundary",
+            "type": "string"
+          },
+          "weekly_available_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Available Hours"
+          }
+        },
+        "required": [
+          "weekly_available_hours",
+          "goals",
+          "interests"
+        ],
+        "title": "WorkspaceProfileContext",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "competition_name": {
+        "title": "Competition Name",
+        "type": "string"
+      },
+      "confirmed_constraints": {
+        "items": {
+          "$ref": "#/$defs/ConfirmedConstraint"
+        },
+        "title": "Confirmed Constraints",
+        "type": "array"
+      },
+      "current_profile_ref": {
+        "$ref": "#/$defs/ProfileReference"
+      },
+      "edition_name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Edition Name"
+      },
+      "pending_confirmations": {
+        "items": {
+          "$ref": "#/$defs/PendingConfirmation"
+        },
+        "title": "Pending Confirmations",
+        "type": "array"
+      },
+      "plan_freshness": {
+        "$ref": "#/$defs/ProfileFreshness"
+      },
+      "plan_input_profile_ref": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ProfileReference"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "plan_original_json": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Plan Original Json"
+      },
+      "plan_ref": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/PlanReference"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "plan_summary": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/WorkspacePlanSummary"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "preparation_suggestions": {
+        "items": {
+          "$ref": "#/$defs/AdvisoryPreparationTask"
+        },
+        "title": "Preparation Suggestions",
+        "type": "array"
+      },
+      "profile_context": {
+        "$ref": "#/$defs/WorkspaceProfileContext"
+      },
+      "schema_version": {
+        "const": "1.0",
+        "default": "1.0",
+        "title": "Schema Version",
+        "type": "string"
+      },
+      "section_availability": {
+        "$ref": "#/$defs/WorkspaceAvailability"
+      },
+      "student_id": {
+        "title": "Student Id",
+        "type": "string"
+      },
+      "target": {
+        "$ref": "#/$defs/CompetitionDetailQuery"
+      },
+      "time_references": {
+        "items": {
+          "$ref": "#/$defs/TimeReference"
+        },
+        "title": "Time References",
+        "type": "array"
+      },
+      "track_name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Track Name"
+      }
+    },
+    "required": [
+      "student_id",
+      "target",
+      "competition_name",
+      "edition_name",
+      "track_name",
+      "plan_summary",
+      "plan_ref",
+      "plan_input_profile_ref",
+      "plan_freshness",
+      "current_profile_ref",
+      "profile_context",
+      "confirmed_constraints",
+      "preparation_suggestions",
+      "pending_confirmations",
+      "time_references",
+      "section_availability",
+      "plan_original_json"
+    ],
+    "title": "PlanningWorkspaceProjection",
+    "type": "object"
+  },
   "ProfileAnalysesProjection": {
     "$defs": {
       "CompetitionTarget": {

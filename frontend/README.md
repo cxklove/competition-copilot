@@ -521,7 +521,7 @@ a dedicated workspace and a contextual entry across business pages. The current
 workspace and semantic result components are the reusable implementation baseline;
 PX1 implementation is described below; later business pages remain planned.
 
-- **PX0 / Design: DOCUMENTED. PX1 / PX2 / PX3: CLOSED_VERIFIED. PX2.1: COMPLETE. PX2.2: CLOSED_VERIFIED. PX4: READY_TO_START. PX5/PX6: PLANNED.**
+- **PX0 / Design: DOCUMENTED. PX1 / PX2 / PX3: CLOSED_VERIFIED. PX2.1: COMPLETE. PX2.2: CLOSED_VERIFIED. PX4: IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START. PX5/PX6: PLANNED.**
   P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED.
 - Planned navigation: 首页、赛事中心、我的赛事、我的能力、备赛计划、赛事动态、Copilot.
   Approval Center placement remains a later navigation decision. Deliver incrementally.
@@ -546,7 +546,7 @@ Authority/data-flow boundaries:
 ### PX1 — product shell, Dashboard and current context
 
 Status: CLOSED_VERIFIED. The design handoff above describes the PX0
-baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3 is CLOSED_VERIFIED, PX4 READY_TO_START and PX5/PX6 PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
+baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3 is CLOSED_VERIFIED, PX4 IN_PROGRESS (PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START) and PX5/PX6 PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
 
 The default `#/home` presents current explicit context, the selected plan's known
 version/status, the most recent validated reply, a pending approval only when the
@@ -657,7 +657,7 @@ Independent review passed; this closure does not claim production Cloud deployme
 
 **PX2.4 Temporal Information Enrichment — CLOSED_VERIFIED**, FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS.
 PX2 Competition Experience overall is CLOSED_VERIFIED: PX2.1 COMPLETE,
-PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is CLOSED_VERIFIED; PX4 READY_TO_START (implementation not started);
+PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is CLOSED_VERIFIED; PX4 IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START (implementation not started);
 P15 remains NOT_STARTED and P12/P13/P14 remain CLOSED_FROZEN.
 `PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP` was the design baseline: the previous timeline
 could not express official date text awaiting structured verification. PX2.4 adds
@@ -753,8 +753,9 @@ Refs remain in folded audit details. Stale is informational, not a failed result
 The session keeps old validated recommendation/gap/plan bodies. Profile/skill saves
 and new results trigger only GET_PROFILE_ANALYSES reads; opening/rendering a page
 does not rerun business analysis. Existing student/competition/edition/track matching
-still applies. Current plan summaries use the exact selected PlanReference; newly
-generated plans still require the existing explicit selection.
+still applies. Current plan summaries use the exact selected PlanReference. In the
+product shell, explicit successful plan generation selects its returned exact
+reference and immediately reads Planning Workspace; other plan choices stay manual.
 
 相关分析 now supports viewing existing results and explicit recommendation rerun,
 skill-gap rerun and P8 plan generation. Saving does not change an old score, gap or
@@ -794,6 +795,46 @@ no full account/identity system, incomplete required_level coverage
 (SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP), P8's concentration on uncertainty-resolution
 tasks under incomplete constraints (PLANNING_ACTIONABILITY_GAP, PX4 high priority),
 unavailable complete Competition Event History and Submission Window DATA_CONTRACT_GAP.
-PX4 My Competitions + Planning Workspace is READY_TO_START; suggested first stage is
-PX4.1 Planning Readiness & Actionable Preparation. No PX4 implementation here.
+At the PX3 sync, PX4 was READY_TO_START. Current status: PX4 IN_PROGRESS;
+PX4.1 CLOSED_VERIFIED; PX4.2 My Competitions Workspace READY_TO_START only.
 PX1/PX2 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
+
+## PX4.1 Planning Workspace — CLOSED_VERIFIED
+
+Existing 备赛计划 navigation opens the read Workspace: 备赛概览 / 已确认约束 /
+推荐准备任务 / 待确认事项 / 时间参考 / 计划原文与审计 / 显式操作.
+Opening/refreshing calls only GET_PLANNING_WORKSPACE. No target selects no default;
+edition/track remain explicit choices. Plan references come from a manual choice
+or the validated result of explicit generation, never a latest-plan lookup. Counts come from
+projection entries, with no readiness score. Full original milestones/dependencies/
+needs and references remain in folded audit, with technical IDs hidden by default.
+
+Stale Plan and current-profile suggestions are explicitly separate. Advice is not
+old Plan text. Verified endpoints take precedence over pending candidates; quotes,
+precision, scope and sources remain available, including overlapping audit evidence.
+Weekly hours preserve None/0/decimals; no goals inference or time allocation.
+
+Generate/regenerate and skill-gap re-analysis use existing explicit P8/P7 actions.
+Viewing, refreshing or saving a profile never executes them automatically.
+Detail/profile CTAs preserve canonical context. PLANNING_ACTIONABILITY_GAP is
+mitigated without changing P8 truth or P11 authority. Browser Smoke PASS;
+Final Independent Review REVIEW_PASS. PX4 IN_PROGRESS; PX4.1 CLOSED_VERIFIED;
+PX4.2 READY_TO_START only; no PX4.2/P15 implementation.
+
+Targeted frontend verification (from frontend):
+
+```powershell
+node --import tsx --test tests/planning-workspace.test.tsx tests/local.test.tsx
+```
+
+Planning clarification renders backend-resolved missing fields only. An existing
+repository profile plus a missing Edition shows the Edition input without a second
+profile form. MISSING_STUDENT_PROFILE directs users to 我的能力; no temporary
+profile JSON or education selector is offered for that unavailable-profile state.
+The UI does not infer profile availability from student_id.
+
+BUILD_PLAN completion now surfaces this same Workspace in Copilot's right result
+panel through GET_PLANNING_WORKSPACE, using the full returned exact PlanReference.
+The left chat stays concise. No refresh, route change or second plan-selection
+click is required. The original Plan renderer remains folded under 计划原文 / 审计;
+advisory tasks are independent and never inserted into the original milestones.

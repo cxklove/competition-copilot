@@ -203,6 +203,7 @@ def build_mcp_tool_registry() -> McpToolRegistry:
         McpExposureDecision(CapabilityId.DIFF_COMPETITION_SNAPSHOT, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.EXPLAIN_REPLANNING, ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.GET_COMPETITION_DETAILS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_PLANNING_WORKSPACE, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_PROFILE, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_PROFILE_ANALYSES, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_RECOMMENDATIONS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),

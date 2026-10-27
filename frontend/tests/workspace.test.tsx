@@ -130,7 +130,7 @@ test('context presents exact existing input, hides technical identity and never 
   assert.equal(transport.calls.length, 0);
 });
 
-for (const page of ['我的赛事', '备赛计划', '赛事动态']) {
+for (const page of ['我的赛事', '赛事动态']) {
   test(`${page} is an honest coming-soon page with active navigation and no invocation`, () => {
     const { client, transport } = clientFor(fixtures.completed);
     const view = render(<ProductApp client={client} />);

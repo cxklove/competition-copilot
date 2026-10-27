@@ -1,0 +1,1115 @@
+{
+  "without_plan": {
+    "schema_version": "1.0",
+    "student_id": "student",
+    "target": {
+      "competition_id": "comap-mcm",
+      "edition_id": "comap-mcm-2027",
+      "track_id": null
+    },
+    "competition_name": "COMAP Mathematical Contest in Modeling",
+    "edition_name": "2027 Mathematical Contest in Modeling",
+    "track_name": null,
+    "plan_summary": null,
+    "plan_ref": null,
+    "plan_input_profile_ref": null,
+    "plan_freshness": {
+      "status": "UNKNOWN",
+      "input_profile_ref": null,
+      "current_profile_ref": {
+        "student_id": "student",
+        "version": 1,
+        "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+        "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+      },
+      "reason": "RESULT_PROFILE_REFERENCE_UNKNOWN"
+    },
+    "current_profile_ref": {
+      "student_id": "student",
+      "version": 1,
+      "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+      "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+    },
+    "profile_context": {
+      "weekly_available_hours": 10.0,
+      "goals": [
+        "My free-text goal"
+      ],
+      "interests": [
+        "My interest"
+      ],
+      "persistence_boundary": "HOST_MEMORY"
+    },
+    "confirmed_constraints": [
+      {
+        "constraint_id": "constraint:30a10b1dc28df72c6679cec3a2e6287691774b33cbf4d2660c2b3b968f628efa",
+        "type": "skill_identity",
+        "field": "mathematical-modeling",
+        "label": "已核验相关技能",
+        "value": "Mathematical Modeling",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-12T03:08:52Z",
+          "verification_status": "verified"
+        },
+        "evidence": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+            "field": "requirements.mathematical-modeling.present",
+            "value_json": "true",
+            "source": {
+              "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+              "source_type": "official",
+              "observed_at": "2026-10-12T03:08:52Z",
+              "verification_status": "verified"
+            }
+          }
+        ],
+        "verification": "verified"
+      },
+      {
+        "constraint_id": "constraint:4f5e8e9db8d6b7f1b5efba08633c6478974f862bf63a82e0b8b9058dbd1d474d",
+        "type": "time",
+        "field": "competition_end",
+        "label": "比赛结束",
+        "value": "2027-02-01T20:00:00-05:00",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence": [],
+        "verification": "verified"
+      },
+      {
+        "constraint_id": "constraint:942cc4af5779bb450a5a89d531ef18152d2dd3c5073017a75e93d71736cbea7d",
+        "type": "time",
+        "field": "competition_start",
+        "label": "比赛开始",
+        "value": "2027-01-28T17:00:00-05:00",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence": [],
+        "verification": "verified"
+      },
+      {
+        "constraint_id": "constraint:f1ecdbe59639658da6787a3e6d9c873cfd96a151ed8cd64034c23478df92f854",
+        "type": "time",
+        "field": "registration_end",
+        "label": "报名结束",
+        "value": "2027-01-28T15:00:00-05:00",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence": [],
+        "verification": "verified"
+      }
+    ],
+    "preparation_suggestions": [
+      {
+        "task_id": "advisory:f6b5a190869362e1e20381232efcb590aaf7c99299a3bba4bb72b8d859888dba",
+        "template_id": "model-case",
+        "policy_version": "preparation-advisory-v1",
+        "title": "建议完成一次完整数学建模案例训练",
+        "description": "自主练习完整建模流程；不表示存在技能差距或赛事规定了训练任务。",
+        "advisory": true,
+        "related_skill_ids": [
+          "mathematical-modeling"
+        ],
+        "target": {
+          "competition_id": "comap-mcm",
+          "edition_id": "comap-mcm-2027",
+          "track_id": null
+        },
+        "profile_ref": {
+          "student_id": "student",
+          "version": 1,
+          "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+          "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+        },
+        "source_basis": {
+          "profile_ref": {
+            "student_id": "student",
+            "version": 1,
+            "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+            "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+          },
+          "skill_id": "mathematical-modeling",
+          "profile_skill_state": "recorded",
+          "requirement_version": "1.0",
+          "requirement_target": {
+            "competition_id": "comap-mcm",
+            "edition_id": "comap-mcm-2027",
+            "track_id": null
+          },
+          "evidence": [
+            {
+              "code": "REVIEWED_REQUIREMENT_PRESENCE",
+              "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+              "field": "requirements.mathematical-modeling.present",
+              "value_json": "true",
+              "source": {
+                "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+                "source_type": "official",
+                "observed_at": "2026-10-12T03:08:52Z",
+                "verification_status": "verified"
+              }
+            }
+          ]
+        },
+        "suggested_sequence": 1
+      },
+      {
+        "task_id": "advisory:ca73f532c9a678b1434765c229565adce491b338ad801c870799938717fed158",
+        "template_id": "model-review",
+        "policy_version": "preparation-advisory-v1",
+        "title": "建议复盘模型选择与结果评价",
+        "description": "记录模型选择、假设、验证与复盘过程。",
+        "advisory": true,
+        "related_skill_ids": [
+          "mathematical-modeling"
+        ],
+        "target": {
+          "competition_id": "comap-mcm",
+          "edition_id": "comap-mcm-2027",
+          "track_id": null
+        },
+        "profile_ref": {
+          "student_id": "student",
+          "version": 1,
+          "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+          "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+        },
+        "source_basis": {
+          "profile_ref": {
+            "student_id": "student",
+            "version": 1,
+            "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+            "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+          },
+          "skill_id": "mathematical-modeling",
+          "profile_skill_state": "recorded",
+          "requirement_version": "1.0",
+          "requirement_target": {
+            "competition_id": "comap-mcm",
+            "edition_id": "comap-mcm-2027",
+            "track_id": null
+          },
+          "evidence": [
+            {
+              "code": "REVIEWED_REQUIREMENT_PRESENCE",
+              "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+              "field": "requirements.mathematical-modeling.present",
+              "value_json": "true",
+              "source": {
+                "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+                "source_type": "official",
+                "observed_at": "2026-10-12T03:08:52Z",
+                "verification_status": "verified"
+              }
+            }
+          ]
+        },
+        "suggested_sequence": 2
+      },
+      {
+        "task_id": "advisory:146c43cb3aa071c188b66cc0c06788c42c3522ac23488c6f4f647ebff404d551",
+        "template_id": "model-tools",
+        "policy_version": "preparation-advisory-v1",
+        "title": "建议整理建模工具和个人模板",
+        "description": "整理可复用的个人工具与练习记录；不是官方材料要求。",
+        "advisory": true,
+        "related_skill_ids": [
+          "mathematical-modeling"
+        ],
+        "target": {
+          "competition_id": "comap-mcm",
+          "edition_id": "comap-mcm-2027",
+          "track_id": null
+        },
+        "profile_ref": {
+          "student_id": "student",
+          "version": 1,
+          "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+          "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+        },
+        "source_basis": {
+          "profile_ref": {
+            "student_id": "student",
+            "version": 1,
+            "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+            "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+          },
+          "skill_id": "mathematical-modeling",
+          "profile_skill_state": "recorded",
+          "requirement_version": "1.0",
+          "requirement_target": {
+            "competition_id": "comap-mcm",
+            "edition_id": "comap-mcm-2027",
+            "track_id": null
+          },
+          "evidence": [
+            {
+              "code": "REVIEWED_REQUIREMENT_PRESENCE",
+              "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+              "field": "requirements.mathematical-modeling.present",
+              "value_json": "true",
+              "source": {
+                "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+                "source_type": "official",
+                "observed_at": "2026-10-12T03:08:52Z",
+                "verification_status": "verified"
+              }
+            }
+          ]
+        },
+        "suggested_sequence": 3
+      }
+    ],
+    "pending_confirmations": [
+      {
+        "confirmation_id": "confirmation:05c5b09f6828b0a5ee7ecae03fe96494dacd413a9bdced919d24e8f0b26928ae",
+        "type": "policy",
+        "title": "暂无当前范围的已审核资格规则",
+        "description": "暂无当前范围的已审核资格规则",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "NO_EXACT_POLICY"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:4bd4ac1cb40d8ea616232dbfaff4b57ad70c06c2e37a89d623ca0a6ff5b4e614",
+        "type": "requirement",
+        "title": "Mathematical Modeling 所需能力等级尚未明确",
+        "description": "Mathematical Modeling 所需能力等级尚未明确",
+        "scope": "edition",
+        "source_basis": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+            "field": "requirements.mathematical-modeling.present",
+            "value_json": "true",
+            "source": {
+              "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+              "source_type": "official",
+              "observed_at": "2026-10-12T03:08:52Z",
+              "verification_status": "verified"
+            }
+          }
+        ],
+        "reason_codes": [
+          "REQUIREMENT_PROFICIENCY_UNSPECIFIED"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:60e66f59880817dc8dd6aaeef9afe5fb8aa3a381052fe0cf9817cacfae0a150a",
+        "type": "requirement",
+        "title": "当前技能要求覆盖仍不完整",
+        "description": "当前技能要求覆盖仍不完整",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "PARTIAL_REQUIREMENT_COVERAGE"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:d2b030c702974dd6ff02843d735c803621dd04b284a6c2e37b7e6ca03180c3f4",
+        "type": "time",
+        "title": "正式报名开始时间尚未确认",
+        "description": "正式报名开始时间尚未确认",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "VERIFIED_TIME_UNAVAILABLE"
+        ]
+      }
+    ],
+    "time_references": [
+      {
+        "kind": "VERIFIED",
+        "field": "competition_end",
+        "scope": "edition",
+        "value": "2027-02-01T20:00:00-05:00",
+        "raw_text": null,
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-09T17:42:51+08:00",
+        "precision": "minute",
+        "verification": "verified",
+        "candidate": null
+      },
+      {
+        "kind": "VERIFIED",
+        "field": "competition_start",
+        "scope": "edition",
+        "value": "2027-01-28T17:00:00-05:00",
+        "raw_text": null,
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-09T17:42:51+08:00",
+        "precision": "minute",
+        "verification": "verified",
+        "candidate": null
+      },
+      {
+        "kind": "VERIFIED",
+        "field": "registration_end",
+        "scope": "edition",
+        "value": "2027-01-28T15:00:00-05:00",
+        "raw_text": null,
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-09T17:42:51+08:00",
+        "precision": "minute",
+        "verification": "verified",
+        "candidate": null
+      }
+    ],
+    "section_availability": {
+      "detail": {
+        "competition": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "editions": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "tracks": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "time_windows": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "eligibility_policy": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "NO_EXACT_POLICY"
+        },
+        "skill_requirements": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "provenance": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "event_history": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "EVENT_HISTORY_PERSISTENCE_GAP"
+        }
+      },
+      "plan": "NOT_SELECTED",
+      "profile": "AVAILABLE",
+      "suggestions": "AVAILABLE"
+    },
+    "plan_original_json": null
+  },
+  "stale_plan": {
+    "schema_version": "1.0",
+    "student_id": "student",
+    "target": {
+      "competition_id": "comap-mcm",
+      "edition_id": "comap-mcm-2027",
+      "track_id": null
+    },
+    "competition_name": "COMAP Mathematical Contest in Modeling",
+    "edition_name": "2027 Mathematical Contest in Modeling",
+    "track_name": null,
+    "plan_summary": {
+      "plan_id": "read-only-plan",
+      "version": 1,
+      "status": "draft"
+    },
+    "plan_ref": {
+      "plan_id": "read-only-plan",
+      "student_id": "student",
+      "target": {
+        "competition_id": "comap-mcm",
+        "edition_id": "comap-mcm-2027",
+        "track_id": null
+      },
+      "version": 1,
+      "updated_at": "2026-10-20T00:00:00Z",
+      "milestone_ids": [
+        "manual"
+      ],
+      "content_digest": "d895b2f099c07275192751637b8a48ebae0391018987b4efcbdda93a656de657"
+    },
+    "plan_input_profile_ref": {
+      "student_id": "student",
+      "version": 1,
+      "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+      "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+    },
+    "plan_freshness": {
+      "status": "STALE",
+      "input_profile_ref": {
+        "student_id": "student",
+        "version": 1,
+        "content_digest": "778d2696da141d3f8530c7c1d41ed80d4f56c61c689975c587bbb61809dbbf23",
+        "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+      },
+      "current_profile_ref": {
+        "student_id": "student",
+        "version": 2,
+        "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+        "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+      },
+      "reason": "PROFILE_REFERENCE_CHANGED"
+    },
+    "current_profile_ref": {
+      "student_id": "student",
+      "version": 2,
+      "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+      "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+    },
+    "profile_context": {
+      "weekly_available_hours": 10.0,
+      "goals": [
+        "My free-text goal"
+      ],
+      "interests": [
+        "My interest"
+      ],
+      "persistence_boundary": "HOST_MEMORY"
+    },
+    "confirmed_constraints": [
+      {
+        "constraint_id": "constraint:30a10b1dc28df72c6679cec3a2e6287691774b33cbf4d2660c2b3b968f628efa",
+        "type": "skill_identity",
+        "field": "mathematical-modeling",
+        "label": "已核验相关技能",
+        "value": "Mathematical Modeling",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-12T03:08:52Z",
+          "verification_status": "verified"
+        },
+        "evidence": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+            "field": "requirements.mathematical-modeling.present",
+            "value_json": "true",
+            "source": {
+              "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+              "source_type": "official",
+              "observed_at": "2026-10-12T03:08:52Z",
+              "verification_status": "verified"
+            }
+          }
+        ],
+        "verification": "verified"
+      },
+      {
+        "constraint_id": "constraint:4f5e8e9db8d6b7f1b5efba08633c6478974f862bf63a82e0b8b9058dbd1d474d",
+        "type": "time",
+        "field": "competition_end",
+        "label": "比赛结束",
+        "value": "2027-02-01T20:00:00-05:00",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence": [],
+        "verification": "verified"
+      },
+      {
+        "constraint_id": "constraint:942cc4af5779bb450a5a89d531ef18152d2dd3c5073017a75e93d71736cbea7d",
+        "type": "time",
+        "field": "competition_start",
+        "label": "比赛开始",
+        "value": "2027-01-28T17:00:00-05:00",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence": [],
+        "verification": "verified"
+      },
+      {
+        "constraint_id": "constraint:f1ecdbe59639658da6787a3e6d9c873cfd96a151ed8cd64034c23478df92f854",
+        "type": "time",
+        "field": "registration_end",
+        "label": "报名结束",
+        "value": "2027-01-28T15:00:00-05:00",
+        "scope": "edition",
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "evidence": [],
+        "verification": "verified"
+      }
+    ],
+    "preparation_suggestions": [
+      {
+        "task_id": "advisory:01d75a48628156c32448067dbaf11e4f4547f70d462496852908e340a8f8bdd3",
+        "template_id": "model-case",
+        "policy_version": "preparation-advisory-v1",
+        "title": "建议完成一次完整数学建模案例训练",
+        "description": "自主练习完整建模流程；不表示存在技能差距或赛事规定了训练任务。",
+        "advisory": true,
+        "related_skill_ids": [
+          "mathematical-modeling"
+        ],
+        "target": {
+          "competition_id": "comap-mcm",
+          "edition_id": "comap-mcm-2027",
+          "track_id": null
+        },
+        "profile_ref": {
+          "student_id": "student",
+          "version": 2,
+          "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+          "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+        },
+        "source_basis": {
+          "profile_ref": {
+            "student_id": "student",
+            "version": 2,
+            "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+            "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+          },
+          "skill_id": "mathematical-modeling",
+          "profile_skill_state": "recorded",
+          "requirement_version": "1.0",
+          "requirement_target": {
+            "competition_id": "comap-mcm",
+            "edition_id": "comap-mcm-2027",
+            "track_id": null
+          },
+          "evidence": [
+            {
+              "code": "REVIEWED_REQUIREMENT_PRESENCE",
+              "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+              "field": "requirements.mathematical-modeling.present",
+              "value_json": "true",
+              "source": {
+                "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+                "source_type": "official",
+                "observed_at": "2026-10-12T03:08:52Z",
+                "verification_status": "verified"
+              }
+            }
+          ]
+        },
+        "suggested_sequence": 1
+      },
+      {
+        "task_id": "advisory:1e133bca48079637c1c4c2c4459db131db5753755f11c475af8c3d4a02e7a879",
+        "template_id": "model-review",
+        "policy_version": "preparation-advisory-v1",
+        "title": "建议复盘模型选择与结果评价",
+        "description": "记录模型选择、假设、验证与复盘过程。",
+        "advisory": true,
+        "related_skill_ids": [
+          "mathematical-modeling"
+        ],
+        "target": {
+          "competition_id": "comap-mcm",
+          "edition_id": "comap-mcm-2027",
+          "track_id": null
+        },
+        "profile_ref": {
+          "student_id": "student",
+          "version": 2,
+          "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+          "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+        },
+        "source_basis": {
+          "profile_ref": {
+            "student_id": "student",
+            "version": 2,
+            "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+            "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+          },
+          "skill_id": "mathematical-modeling",
+          "profile_skill_state": "recorded",
+          "requirement_version": "1.0",
+          "requirement_target": {
+            "competition_id": "comap-mcm",
+            "edition_id": "comap-mcm-2027",
+            "track_id": null
+          },
+          "evidence": [
+            {
+              "code": "REVIEWED_REQUIREMENT_PRESENCE",
+              "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+              "field": "requirements.mathematical-modeling.present",
+              "value_json": "true",
+              "source": {
+                "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+                "source_type": "official",
+                "observed_at": "2026-10-12T03:08:52Z",
+                "verification_status": "verified"
+              }
+            }
+          ]
+        },
+        "suggested_sequence": 2
+      },
+      {
+        "task_id": "advisory:2fbf10a660a03f465431d3a6311f17dec2b287a271719f80f815c32b43047366",
+        "template_id": "model-tools",
+        "policy_version": "preparation-advisory-v1",
+        "title": "建议整理建模工具和个人模板",
+        "description": "整理可复用的个人工具与练习记录；不是官方材料要求。",
+        "advisory": true,
+        "related_skill_ids": [
+          "mathematical-modeling"
+        ],
+        "target": {
+          "competition_id": "comap-mcm",
+          "edition_id": "comap-mcm-2027",
+          "track_id": null
+        },
+        "profile_ref": {
+          "student_id": "student",
+          "version": 2,
+          "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+          "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+        },
+        "source_basis": {
+          "profile_ref": {
+            "student_id": "student",
+            "version": 2,
+            "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+            "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+          },
+          "skill_id": "mathematical-modeling",
+          "profile_skill_state": "recorded",
+          "requirement_version": "1.0",
+          "requirement_target": {
+            "competition_id": "comap-mcm",
+            "edition_id": "comap-mcm-2027",
+            "track_id": null
+          },
+          "evidence": [
+            {
+              "code": "REVIEWED_REQUIREMENT_PRESENCE",
+              "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+              "field": "requirements.mathematical-modeling.present",
+              "value_json": "true",
+              "source": {
+                "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+                "source_type": "official",
+                "observed_at": "2026-10-12T03:08:52Z",
+                "verification_status": "verified"
+              }
+            }
+          ]
+        },
+        "suggested_sequence": 3
+      }
+    ],
+    "pending_confirmations": [
+      {
+        "confirmation_id": "confirmation:05c5b09f6828b0a5ee7ecae03fe96494dacd413a9bdced919d24e8f0b26928ae",
+        "type": "policy",
+        "title": "暂无当前范围的已审核资格规则",
+        "description": "暂无当前范围的已审核资格规则",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "NO_EXACT_POLICY"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:4bd4ac1cb40d8ea616232dbfaff4b57ad70c06c2e37a89d623ca0a6ff5b4e614",
+        "type": "requirement",
+        "title": "Mathematical Modeling 所需能力等级尚未明确",
+        "description": "Mathematical Modeling 所需能力等级尚未明确",
+        "scope": "edition",
+        "source_basis": [
+          {
+            "code": "REVIEWED_REQUIREMENT_PRESENCE",
+            "message": "COMAP's 2027 rules describe teams applying mathematics to model real-world problems, and judges considering modeling approaches and mathematical methods. This supports mathematical-modeling membership in the reviewed requirement set, without an ordinal proficiency threshold or an official REQUIRED enum.",
+            "field": "requirements.mathematical-modeling.present",
+            "value_json": "true",
+            "source": {
+              "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+              "source_type": "official",
+              "observed_at": "2026-10-12T03:08:52Z",
+              "verification_status": "verified"
+            }
+          }
+        ],
+        "reason_codes": [
+          "REQUIREMENT_PROFICIENCY_UNSPECIFIED"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:60e66f59880817dc8dd6aaeef9afe5fb8aa3a381052fe0cf9817cacfae0a150a",
+        "type": "requirement",
+        "title": "当前技能要求覆盖仍不完整",
+        "description": "当前技能要求覆盖仍不完整",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "PARTIAL_REQUIREMENT_COVERAGE"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:d2b030c702974dd6ff02843d735c803621dd04b284a6c2e37b7e6ca03180c3f4",
+        "type": "time",
+        "title": "正式报名开始时间尚未确认",
+        "description": "正式报名开始时间尚未确认",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "VERIFIED_TIME_UNAVAILABLE"
+        ]
+      }
+    ],
+    "time_references": [
+      {
+        "kind": "VERIFIED",
+        "field": "competition_end",
+        "scope": "edition",
+        "value": "2027-02-01T20:00:00-05:00",
+        "raw_text": null,
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-09T17:42:51+08:00",
+        "precision": "minute",
+        "verification": "verified",
+        "candidate": null
+      },
+      {
+        "kind": "VERIFIED",
+        "field": "competition_start",
+        "scope": "edition",
+        "value": "2027-01-28T17:00:00-05:00",
+        "raw_text": null,
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-09T17:42:51+08:00",
+        "precision": "minute",
+        "verification": "verified",
+        "candidate": null
+      },
+      {
+        "kind": "VERIFIED",
+        "field": "registration_end",
+        "scope": "edition",
+        "value": "2027-01-28T15:00:00-05:00",
+        "raw_text": null,
+        "source": {
+          "source_url": "https://contest.comap.com/undergraduate/contests/mcm/instructions.php",
+          "source_type": "official",
+          "observed_at": "2026-10-09T17:42:51+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-09T17:42:51+08:00",
+        "precision": "minute",
+        "verification": "verified",
+        "candidate": null
+      }
+    ],
+    "section_availability": {
+      "detail": {
+        "competition": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "editions": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "tracks": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "time_windows": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "eligibility_policy": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "NO_EXACT_POLICY"
+        },
+        "skill_requirements": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "provenance": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "event_history": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "EVENT_HISTORY_PERSISTENCE_GAP"
+        }
+      },
+      "plan": "AVAILABLE",
+      "profile": "AVAILABLE",
+      "suggestions": "AVAILABLE"
+    },
+    "plan_original_json": "{\"id\":\"read-only-plan\",\"student_id\":\"student\",\"competition_id\":\"comap-mcm\",\"edition_id\":\"comap-mcm-2027\",\"track_id\":null,\"planning_horizon\":null,\"skill_gap_audit\":null,\"planning_needs\":[],\"status\":\"draft\",\"version\":1,\"milestones\":[{\"id\":\"manual\",\"title\":\"Original\",\"description\":null,\"start_at\":null,\"due_at\":null,\"estimated_hours\":null,\"dependency_ids\":[],\"status\":\"pending\",\"source_need_id\":null}],\"created_at\":\"2026-10-20T00:00:00Z\",\"updated_at\":\"2026-10-20T00:00:00Z\"}"
+  },
+  "candidate": {
+    "schema_version": "1.0",
+    "student_id": "student",
+    "target": {
+      "competition_id": "huawei-ict",
+      "edition_id": "huawei-ict-2026",
+      "track_id": "huawei-ict-2026-innovation"
+    },
+    "competition_name": "华为ICT大赛",
+    "edition_name": "第十一届华为ICT大赛",
+    "track_name": "创新赛",
+    "plan_summary": null,
+    "plan_ref": null,
+    "plan_input_profile_ref": null,
+    "plan_freshness": {
+      "status": "UNKNOWN",
+      "input_profile_ref": null,
+      "current_profile_ref": {
+        "student_id": "student",
+        "version": 2,
+        "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+        "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+      },
+      "reason": "RESULT_PROFILE_REFERENCE_UNKNOWN"
+    },
+    "current_profile_ref": {
+      "student_id": "student",
+      "version": 2,
+      "content_digest": "89b146d6d90c77bdc4c04b8045bf02a2cb8ceb2079ef96cc94d1e9bb63506d7a",
+      "host_scope": "e826a75f09f33bee60fb8dcd88fbdf1e86a99355ea27cace"
+    },
+    "profile_context": {
+      "weekly_available_hours": 10.0,
+      "goals": [
+        "My free-text goal"
+      ],
+      "interests": [
+        "My interest"
+      ],
+      "persistence_boundary": "HOST_MEMORY"
+    },
+    "confirmed_constraints": [],
+    "preparation_suggestions": [],
+    "pending_confirmations": [
+      {
+        "confirmation_id": "confirmation:7c434a48bfd59d3ee2c65836329c3dd613cefc68ef0ad3ff9df0c092d60b397f",
+        "type": "policy",
+        "title": "暂无当前范围的已审核资格规则",
+        "description": "暂无当前范围的已审核资格规则",
+        "scope": "track",
+        "source_basis": [],
+        "reason_codes": [
+          "NO_EXACT_POLICY"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:17fe8754113b42a9997c2ce0befd08f3a1247f72b882a7fe703519f2de792eb5",
+        "type": "requirement",
+        "title": "暂无当前范围的已审核技能要求",
+        "description": "暂无当前范围的已审核技能要求",
+        "scope": "track",
+        "source_basis": [],
+        "reason_codes": [
+          "NO_EXACT_REQUIREMENT"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:3bf4515bdc19f36c93e2095d2ddb9ae03bf7cb250ad5e1d5b3e9baec8f069b22",
+        "type": "time",
+        "title": "正式比赛结束时间尚未确认",
+        "description": "正式比赛结束时间尚未确认",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "VERIFIED_TIME_UNAVAILABLE"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:79041313e5227ff19fed165e56a48fe62666878373c6476a762bb71462181474",
+        "type": "time",
+        "title": "正式报名结束时间尚未确认",
+        "description": "正式报名结束时间尚未确认",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "VERIFIED_TIME_UNAVAILABLE"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:a3df9b9db8fe93a87d36d1be494b89966d775b72247364c133c132052a434f99",
+        "type": "time",
+        "title": "正式报名开始时间尚未确认",
+        "description": "正式报名开始时间尚未确认",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "VERIFIED_TIME_UNAVAILABLE"
+        ]
+      },
+      {
+        "confirmation_id": "confirmation:d33c8bf888d15ae401aa609eae1e5907f8e3be18e9d0301abe417ef7f6c77cb0",
+        "type": "time",
+        "title": "正式比赛开始时间尚未确认",
+        "description": "正式比赛开始时间尚未确认",
+        "scope": "edition",
+        "source_basis": [],
+        "reason_codes": [
+          "VERIFIED_TIME_UNAVAILABLE"
+        ]
+      }
+    ],
+    "time_references": [
+      {
+        "kind": "OFFICIAL_CANDIDATE",
+        "field": "registration_end",
+        "scope": "edition",
+        "value": null,
+        "raw_text": "各赛区报名截止: 2026-11-30。",
+        "source": {
+          "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+          "source_type": "official",
+          "observed_at": "2026-10-08T21:34:48+08:00",
+          "verification_status": "verified"
+        },
+        "observed_at": "2026-10-08T21:34:48+08:00",
+        "precision": "DATE",
+        "verification": "pending",
+        "candidate": {
+          "schema_version": "1.0",
+          "candidate_id": "temporal-candidate-v1:c7f73bced0789c48f19d3df4c6cfb4b33c9440f33b3e54605eee43f430b2cebd",
+          "competition_id": "huawei-ict",
+          "edition_id": "huawei-ict-2026",
+          "track_id": null,
+          "field": "registration_end",
+          "raw_text": "各赛区报名截止: 2026-11-30。",
+          "precision": "DATE",
+          "relation": null,
+          "source": {
+            "source_url": "https://e.huawei.com/cn/talent/ict-academy/#/ict-contest?compId=85132018",
+            "source_type": "official",
+            "observed_at": "2026-10-08T21:34:48+08:00",
+            "verification_status": "verified"
+          },
+          "verification_status": "pending",
+          "raw_reference": "data/raw/huawei-ict-2026.json",
+          "raw_digest": "767d603b1ed484c3e45f3dd8a1bb2b8333de4a4c8282dbebf577af367464c5dd",
+          "text_locator": "/raw_payload/registration_text",
+          "review_reference": "px24-huawei-ict-2026-registration_end-admission-v1",
+          "review_note": "Official page explicitly states an all-region date-only deadline. Admitted as edition evidence only; exact clock/timezone and structured window are not verified."
+        }
+      }
+    ],
+    "section_availability": {
+      "detail": {
+        "competition": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "editions": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "tracks": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "time_windows": {
+          "requested": true,
+          "state": "unknown",
+          "reason": null
+        },
+        "eligibility_policy": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "NO_EXACT_POLICY"
+        },
+        "skill_requirements": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "NO_EXACT_ARTIFACT"
+        },
+        "provenance": {
+          "requested": true,
+          "state": "known_value",
+          "reason": null
+        },
+        "event_history": {
+          "requested": true,
+          "state": "unknown",
+          "reason": "EVENT_HISTORY_PERSISTENCE_GAP"
+        }
+      },
+      "plan": "NOT_SELECTED",
+      "profile": "AVAILABLE",
+      "suggestions": "NO_EXACT_REQUIREMENT"
+    },
+    "plan_original_json": null
+  }
+}

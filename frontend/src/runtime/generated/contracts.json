@@ -84,6 +84,7 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
           "GET_SKILL_CATALOG",
@@ -248,6 +249,7 @@
       },
       "CapabilityId": {
         "enum": [
+          "get_planning_workspace",
           "get_profile_analyses",
           "get_profile",
           "get_skill_catalog",
@@ -1097,6 +1099,7 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
           "GET_SKILL_CATALOG",
@@ -1572,6 +1575,7 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
           "GET_SKILL_CATALOG",
@@ -2086,6 +2090,7 @@
     "$defs": {
       "AgentIntent": {
         "enum": [
+          "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
           "GET_SKILL_CATALOG",
@@ -2111,6 +2116,7 @@
       },
       "CapabilityId": {
         "enum": [
+          "get_planning_workspace",
           "get_profile_analyses",
           "get_profile",
           "get_skill_catalog",
@@ -2636,6 +2642,7 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
           "GET_SKILL_CATALOG",

@@ -158,7 +158,7 @@ def test_explicit_inventory_and_metadata(facade):
         "check_eligibility", "get_recommendations", "analyze_skill_gap", "build_plan",
         "build_competition_snapshot", "diff_competition_snapshot", "derive_competition_events",
         "analyze_event_impact", "decide_replanning", "revise_plan",
-        "get_competition_details", "get_profile", "update_profile", "get_profile_analyses",
+        "get_planning_workspace", "get_competition_details", "get_profile", "update_profile", "get_profile_analyses",
         "get_skill_catalog", "add_profile_skill", "update_profile_skill", "remove_profile_skill",
     }
     metadata = facade.list_capabilities()
@@ -174,6 +174,17 @@ def test_explicit_inventory_and_metadata(facade):
             CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL,
             CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL))
     assert facade.list_capabilities() == metadata
+
+
+def test_cached_catalog_schemas_equal_fresh_public_contracts_and_are_detached():
+    facade = AgentCapabilityFacade()
+    before = facade.list_capabilities()
+    for item in before:
+        model = capabilities._SPECS[item.capability][0]
+        assert item.input_schema_json == json.dumps(CapabilityArguments[model].model_json_schema(), sort_keys=True)
+        detached = json.loads(item.input_schema_json)
+        detached.clear()
+    assert AgentCapabilityFacade().list_capabilities() == before
 
 
 @pytest.mark.parametrize("capability,payload", [

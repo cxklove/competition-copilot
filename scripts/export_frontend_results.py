@@ -19,6 +19,9 @@ from competition_copilot.agents.contracts import AgentResponse, PlanReference
 from competition_copilot.application.competition_detail import (
     CompetitionDetailProjection,
 )
+from competition_copilot.application.planning_workspace import (
+    PlanningWorkspaceProjection,
+)
 from competition_copilot.application.profile_freshness import ProfileAnalysesProjection
 from competition_copilot.application.profile_skills import SkillCatalogProjection
 from competition_copilot.application.profiles import ProfileMutationResult
@@ -40,7 +43,7 @@ from competition_copilot.tools.competition import (
     ListCompetitionsOutput,
 )
 
-MODELS = (ProfileAnalysesProjection, SkillCatalogProjection, StudentProfileProjection, ProfileMutationResult, CompetitionDetailProjection, EligibilityDecision, RecommendationEvaluation, SkillGapDecision,
+MODELS = (PlanningWorkspaceProjection, ProfileAnalysesProjection, SkillCatalogProjection, StudentProfileProjection, ProfileMutationResult, CompetitionDetailProjection, EligibilityDecision, RecommendationEvaluation, SkillGapDecision,
           PlanDiff, Evidence, SourceMetadata, CompetitionPlan, RecommendationRankingResult,
           ListCompetitionsOutput, GetCompetitionOutput)
 MODEL_BY_NAME = {model.__name__: model for model in MODELS}

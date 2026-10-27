@@ -16,11 +16,19 @@ from competition_copilot.agents.human_contracts import (
     HumanMessage,
     HumanResume,
 )
-from competition_copilot.agents.routing import IntentRoutingProposal
+from competition_copilot.agents.routing import (
+    IntentRoutingProposal,
+    PendingArgumentPreparation,
+)
 from competition_copilot.agents.state import AgentState
+from competition_copilot.application.competition_detail import CompetitionDetailReader
 from competition_copilot.application.controlled_plan_observation import (
     ControlledPlanObservation,
     ControlledPlanRevisionPreparer,
+)
+from competition_copilot.application.planning_workspace import (
+    MappedPlanInputLineageReader,
+    PlanningWorkspaceReader,
 )
 from competition_copilot.application.plans import PlanRegistry
 from competition_copilot.application.profile_freshness import (
@@ -54,6 +62,9 @@ from competition_copilot.domain.replanning import PlanReference
 from competition_copilot.domain.replanning_input import ReplanningInput
 from competition_copilot.domain.student import StudentProfile
 from competition_copilot.domain.verified_skill_overlap import VerifiedSkillOverlapScorer
+from competition_copilot.infrastructure.eligibility_policy_json import (
+    JsonEligibilityPolicyProvider,
+)
 from competition_copilot.infrastructure.repositories.json_seed import (
     JsonSeedCompetitionRepository,
 )
@@ -106,6 +117,10 @@ class Bindings:
         self.handle, self.pending = None, None
         self.on_retain = None
         self.on_resume = None
+        self.on_resolved = None
+
+    def prepare_resolved(self, frame):
+        return self.on_resolved(frame) if self.on_resolved else frame
 
     def prepare_request(self, request):
         if request != self.frame.state.request:
@@ -182,9 +197,19 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
     revision_preparer = ControlledPlanRevisionPreparer(repository, observation)
 
     profile_inputs = {}
+    planning_workspace = PlanningWorkspaceReader(profile_repository, registry,
+        MappedPlanInputLineageReader(MappingProxyType(profile_inputs)),
+        CompetitionDetailReader(repository, JsonEligibilityPolicyProvider(root / "data/eligibility"),
+            requirements, repository, temporal_evidence), skill_catalog, actor)
     profile_analyses = ProfileAnalysesReader(profile_repository, actor, MappingProxyType(profile_inputs))
 
     def factory(request):
+        # Capture repository profile state before even the routing admission
+        # preflight computes missing fields; target completeness is independent.
+        context = request.context
+        profile_record = profile_repository.get_record(context.student_id)
+        profile_snapshot = profile_record.profile if profile_record else None
+        student = profile_snapshot.domain_profile() if profile_snapshot else None
         nonce = secrets.token_urlsafe(16)
         args = ResultReference(kind="CAPABILITY_ARGUMENTS", ref_id=nonce + "/arguments")
         frame = GraphInput(state=AgentState(request=request), clarification_id=nonce + "/question",
@@ -206,11 +231,12 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         composition = build_seed_agent(seed_directory=root / "data/seed", policy_directory=root / "data/eligibility",
             inputs=bindings, scoring=RecommendationScoringEngine([WeightedSuitabilityScorer(VerifiedSkillOverlapScorer())]),
             intent_model=model,
-            explanation_model=cloud_models.explanation if cloud_models and request.intent not in ("GET_PROFILE_ANALYSES", "GET_PROFILE", "UPDATE_PROFILE", "GET_SKILL_CATALOG", "ADD_PROFILE_SKILL", "UPDATE_PROFILE_SKILL", "REMOVE_PROFILE_SKILL") else None,
+            explanation_model=cloud_models.explanation if cloud_models and request.intent not in ("GET_PLANNING_WORKSPACE", "GET_PROFILE_ANALYSES", "GET_PROFILE", "UPDATE_PROFILE", "GET_SKILL_CATALOG", "ADD_PROFILE_SKILL", "UPDATE_PROFILE_SKILL", "REMOVE_PROFILE_SKILL") else None,
             human_interpreter=cloud_models.human_interpreter if cloud_models else None,
             requirement_provider=requirements, temporal_evidence=temporal_evidence,
             profile_reader=profile_reader, profile_editor=profile_editor,
-            skill_catalog=skill_catalog, skill_editor=skill_editor, profile_analyses=profile_analyses)
+            planning_workspace=planning_workspace, skill_catalog=skill_catalog, skill_editor=skill_editor, profile_analyses=profile_analyses,
+            resume_preparer=bindings.prepare_resolved)
         if cloud_models is not None or request.intent is not None:
             # Natural-language routing calls the provider once; explicit actions
             # call it zero times. Both use the same preparation/validation path.
@@ -220,11 +246,52 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
             capability = model.preparation_capability
         else:
             capability = model.proposal.candidate_capability
-        context = request.context
-        profile_record = profile_repository.get_record(context.student_id)
-        profile_snapshot = profile_record.profile if profile_record else None
-        student = profile_snapshot.domain_profile() if profile_snapshot else None
+        def prepare_exact_target(selected_frame):
+            """Resolve independent profile and target inputs before schema-level missing checks.
+
+            A retained clarification uses this same captured profile/evidence/ref;
+            a new request captures a new repository snapshot. No inferred target.
+            """
+            selected = selected_frame.state.request.context
+            missing = []
+            if student is None:
+                missing.append("STUDENT_PROFILE")
+            if selected.competition_id is None:
+                missing.append("COMPETITION")
+            elif selected.edition_id is None:
+                missing.append("EDITION")
+            if missing:
+                return {}, PendingArgumentPreparation(capability=capability, fields=tuple(missing),
+                    profile_ref=profile_snapshot.profile_ref if profile_snapshot else None,
+                    reason="MISSING_STUDENT_PROFILE" if student is None else "MISSING_REQUIRED_CONTEXT")
+            skill = prepare_skill_gap_context(repository, requirements, student,
+                selected.competition_id, selected.edition_id, selected.track_id,
+                profile_record.evidence)
+            prepared_payload = {"context": skill.model_dump(mode="json")}
+            if capability == "build_plan":
+                # Same real P7 prerequisite; no synthetic decision or Domain change.
+                from competition_copilot.agents.contracts import (
+                    CapabilityInvocationRequest,
+                )
+
+                invocation = CapabilityInvocationRequest(invocation_id=nonce + "/skill-prerequisite",
+                    source_request_id=request.request_id, intent="ANALYZE_SKILL_GAP",
+                    capability="analyze_skill_gap", arguments_ref=args)
+                prerequisite = composition.facade.execute(invocation,
+                    {"artifact_ref": args.model_dump(mode="json"), "payload": prepared_payload},
+                    result_ref=ResultReference(kind="TOOL_RESULT", ref_id=nonce + "/skill-result"))
+                if prerequisite.status != "SUCCESS":
+                    raise ValueError("P7 prerequisite unavailable")
+                prepared_payload = {"source_decision": prerequisite.data.model_dump(mode="json"),
+                    "student_id": student.id, "created_at": clock().isoformat()}
+            return prepared_payload, None
+
         payload = {}
+        if capability == "get_planning_workspace":
+            payload = {k: v for k, v in {"student_id": context.student_id,
+                "competition_id": context.competition_id, "edition_id": context.edition_id,
+                "track_id": context.track_id,
+                "plan_ref": context.plan_ref.model_dump(mode="json") if context.plan_ref else None}.items() if v is not None}
         if capability == "get_profile_analyses":
             payload = {"student_id": context.student_id, "result_ref_ids": request.profile_result_refs or (),
                        "competition_id": context.competition_id, "edition_id": context.edition_id,
@@ -260,11 +327,18 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         ):
             if capability == selected and getattr(context, name) is not None:
                 payload = {name: getattr(context, name)}
-        if capability in ("analyze_skill_gap", "build_plan") and student and context.competition_id and context.edition_id:
-            skill = prepare_skill_gap_context(repository, requirements, student,
-                context.competition_id, context.edition_id, context.track_id,
-                profile_record.evidence if profile_record else ())
-            payload = {"context": skill.model_dump(mode="json")}
+        if capability in ("analyze_skill_gap", "build_plan"):
+            payload, pending = prepare_exact_target(frame)
+            frame = GraphInput(**{**frame.model_dump(), "pending_preparation": pending})
+
+            def resume_target(resolved):
+                nonlocal payload
+                payload, pending = prepare_exact_target(resolved)
+                return GraphInput(**{**resolved.model_dump(), "pending_preparation": pending,
+                    "arguments_json": json.dumps({"artifact_ref": args.model_dump(mode="json"),
+                                                   "payload": payload})})
+
+            bindings.on_resolved = resume_target
         if capability == "revise_plan":
             if context.plan_ref:
                 selected = registry.resolve(context.plan_ref)
@@ -299,20 +373,6 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
                         edition_id=context.edition_id, track_id=context.track_id)
                         if context.competition_id and context.edition_id else None))
             payload = {"contexts": [candidate.model_dump(mode="json") for candidate in contexts]}
-            bindings.frame = GraphInput(**{**frame.model_dump(), "arguments_json": json.dumps({
-                "artifact_ref": args.model_dump(mode="json"), "payload": payload})})
-        if capability == "build_plan" and "context" in payload:
-            # Real P7 prerequisite through the same Facade, not browser-computed truth.
-            from competition_copilot.agents.contracts import CapabilityInvocationRequest
-            invocation = CapabilityInvocationRequest(invocation_id=nonce + "/skill-prerequisite",
-                source_request_id=request.request_id, intent="ANALYZE_SKILL_GAP", capability="analyze_skill_gap", arguments_ref=args)
-            prerequisite = composition.facade.execute(invocation,
-                {"artifact_ref": args.model_dump(mode="json"), "payload": payload},
-                result_ref=ResultReference(kind="TOOL_RESULT", ref_id=nonce + "/skill-result"))
-            if prerequisite.status != "SUCCESS":
-                raise ValueError("P7 prerequisite unavailable")
-            payload = {"source_decision": prerequisite.data.model_dump(mode="json"),
-                       "student_id": student.id, "created_at": clock().isoformat()}
             bindings.frame = GraphInput(**{**frame.model_dump(), "arguments_json": json.dumps({
                 "artifact_ref": args.model_dump(mode="json"), "payload": payload})})
         receipts = []

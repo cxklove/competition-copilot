@@ -617,11 +617,104 @@ for (const scenario of [
       window.history.replaceState(null, '', '/');
     });
 
+test('real Planning Workspace automatically surfaces exact generated Plan, preserves original stages and separates stale/current advice', async () => {
+  window.history.replaceState(null, '', '/');
+  const value = composition();
+  const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  const { waitFor } = await import('@testing-library/react');
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  for (const [label, text] of [
+    [/学生 ID/, 'local-recommendation-demo'],
+    ['竞赛 ID', 'comap-mcm'],
+    ['届次 ID', 'comap-mcm-2027'],
+  ] as const)
+    fireEvent.change(view.getByLabelText(label), { target: { value: text } });
+  fireEvent.click(nav.getByRole('link', { name: '备赛计划' }));
+  await view.findByText('尚未生成或选择正式备赛计划', {}, { timeout: 10000 });
+  assert.ok(view.getByRole('region', { name: '推荐准备任务' }));
+  assert.equal(value.calls.filter((c) => c.request?.intent === 'BUILD_PLAN').length, 0);
+  fireEvent.click(view.getByRole('button', { name: '生成备赛计划' }));
+  await view.findByRole('heading', { name: '备赛计划' }, { timeout: 10000 });
+  await waitFor(
+    () =>
+      assert.equal(value.responses.filter((r) => r.response?.intent === 'BUILD_PLAN').length, 1),
+    { timeout: 10000 },
+  );
+  const planResponse = value.responses.find((r) => r.response?.intent === 'BUILD_PLAN')!.response!;
+  const ref = planResponse.plan_refs![0];
+  await within(
+    await view.findByRole('region', { name: '备赛概览' }, { timeout: 10000 }),
+  ).findByText('基于当前画像', {}, { timeout: 10000 });
+  assert.equal(window.location.hash, '#/copilot');
+  const selected = view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement;
+  assert.deepEqual(JSON.parse(selected.value), ref);
+  for (const name of ['已确认约束', '推荐准备任务', '待确认事项', '时间参考', '计划原文与审计'])
+    assert.ok(view.getByRole('region', { name }));
+  const suggestions = within(view.getByRole('region', { name: '推荐准备任务' }));
+  assert.equal(suggestions.getAllByText('建议').length, 3);
+  assert.ok(suggestions.getByRole('heading', { name: '建议完成一次完整数学建模案例训练' }));
+  assert.ok(suggestions.getAllByText(/赛事已核验涉及 Mathematical Modeling/).length);
+  assert.ok(
+    within(view.getByRole('region', { name: '待确认事项' })).getByText(/所需能力等级尚未明确/),
+  );
+  const originalSection = view.getByRole('region', { name: '计划原文与审计' });
+  const originalDetails = originalSection.querySelector('details')!;
+  assert.equal(originalDetails.open, false);
+  fireEvent.click(within(originalSection).getByText('查看完整正式计划与依赖'));
+  assert.ok(within(originalSection).getByText(/阶段 1/));
+  assert.ok(within(originalSection).getByText(/阶段 2/));
+  const planDeliveryIndex = value.responses.findIndex((r) => r.response === planResponse);
+  const body = validateArtifacts(
+    planResponse,
+    value.deliveries[planDeliveryIndex].presentation,
+  ).find((a) => a.model === 'CompetitionPlan');
+  assert.ok(body?.model === 'CompetitionPlan');
+  assert.deepEqual(JSON.parse(originalSection.querySelector('pre')!.textContent!), body.value);
+  assert.ok(body.value.milestones?.every((m) => !m.title.includes('建议')));
+  const first = value.calls.findLast(
+    (c) => c.request?.intent === 'GET_PLANNING_WORKSPACE',
+  )!.request!;
+  assert.deepEqual(first.context?.plan_ref, ref);
+  fireEvent.click(nav.getByRole('link', { name: '我的能力' }));
+  fireEvent.click(await view.findByRole('button', { name: '编辑画像' }, { timeout: 10000 }));
+  fireEvent.change(view.getByRole('textbox', { name: '学校' }), {
+    target: { value: 'Workspace smoke school' },
+  });
+  fireEvent.click(view.getByRole('button', { name: '保存画像' }));
+  await view.findByText('画像已保存。已有分析和计划不会自动更新。', {}, { timeout: 10000 });
+  fireEvent.click(nav.getByRole('link', { name: '备赛计划' }));
+  await within(
+    await view.findByRole('region', { name: '备赛概览' }, { timeout: 10000 }),
+  ).findByText('基于较早画像', {}, { timeout: 10000 });
+  assert.ok(within(view.getByRole('region', { name: '推荐准备任务' })).getByText(/独立于正式计划/));
+  const lastIndex = value.responses.findLastIndex(
+    (r) => r.response?.intent === 'GET_PLANNING_WORKSPACE',
+  );
+  const projection = validateArtifacts(
+    value.responses[lastIndex].response!,
+    value.deliveries[lastIndex].presentation,
+  ).find((a) => a.model === 'PlanningWorkspaceProjection')!;
+  assert.ok(projection.model === 'PlanningWorkspaceProjection');
+  assert.deepEqual(projection.value.plan_ref, ref);
+  assert.ok(
+    projection.value.preparation_suggestions.every(
+      (t) => JSON.stringify(t.profile_ref) === JSON.stringify(projection.value.current_profile_ref),
+    ),
+  );
+  assert.equal(value.calls.filter((c) => c.request?.intent === 'BUILD_PLAN').length, 1);
+  assert.equal(value.calls.filter((c) => c.request?.intent === 'REQUEST_PLAN_REVISION').length, 0);
+  window.history.replaceState(null, '', '/');
+});
+
 test('product navigation preserves a real generated selected plan, version/status and exact outbound ref', async () => {
   window.history.replaceState(null, '', '/');
   const value = composition();
   const workflowCalls = () =>
-    value.calls.filter((call) => call.request?.intent !== 'GET_PROFILE_ANALYSES');
+    value.calls.filter(
+      (call) =>
+        !['GET_PROFILE_ANALYSES', 'GET_PLANNING_WORKSPACE'].includes(call.request?.intent ?? ''),
+    );
   let next = 0;
   const view = render(
     <ProductApp
@@ -645,9 +738,9 @@ test('product navigation preserves a real generated selected plan, version/statu
   const ref = value.responses[0].response!.plan_refs![0];
   const option = await view.findByRole('option', { name: new RegExp(ref.plan_id) });
   const select = view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement;
-  assert.equal(select.value, '');
+  assert.deepEqual(JSON.parse(select.value), ref);
   fireEvent.click(nav.getByRole('link', { name: '首页' }));
-  assert.ok(view.getByText('当前没有计划'));
+  assert.ok(within(view.getByRole('region', { name: '当前计划' })).getByText('计划版本：v1'));
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
   fireEvent.change(select, { target: { value: (option as HTMLOptionElement).value } });
   const selected = select.value;
@@ -675,7 +768,8 @@ test('product navigation preserves a real generated selected plan, version/statu
     false,
   );
   fireEvent.click(nav.getByRole('link', { name: '备赛计划' }));
-  assert.ok(view.getByRole('heading', { name: '即将开放' }));
+  await view.findByRole('region', { name: '备赛概览' }, { timeout: 10000 });
+  assert.ok(value.calls.some((call) => call.request?.intent === 'GET_PLANNING_WORKSPACE'));
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
   assert.equal(
     (view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement).value,

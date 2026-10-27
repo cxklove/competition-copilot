@@ -19,6 +19,9 @@ from competition_copilot.application.competition_snapshots import (
     CompetitionSnapshotBuilder,
 )
 from competition_copilot.application.eligibility import CompetitionEligibilityEvaluator
+from competition_copilot.application.planning_workspace import (
+    PlanningWorkspaceReader,
+)
 from competition_copilot.application.profile_freshness import ProfileAnalysesReader
 from competition_copilot.application.profile_skills import (
     SkillCatalogReader,
@@ -85,8 +88,10 @@ def build_seed_agent(
     skill_catalog: SkillCatalogReader | None = None,
     skill_editor: StudentSkillEditor | None = None,
     profile_analyses: ProfileAnalysesReader | None = None,
+    planning_workspace: PlanningWorkspaceReader | None = None,
     profile_reader: StudentProfileReader | None = None,
     profile_editor: StudentProfileEditor | None = None,
+    resume_preparer=None,
 ) -> AgentComposition:
     """Assemble the frozen authorities; caller supplies every workflow argument.
 
@@ -115,8 +120,9 @@ def build_seed_agent(
         snapshot_builder=CompetitionSnapshotBuilder(repository), snapshot_diff=SnapshotDiffEngine(),
         event_engine=CompetitionEventEngine(), event_aggregator=CompetitionEventAggregator(),
         impact=CompetitionEventImpactAnalyzer(), replanning=ReplanningDecisionService(),
-        revision=PlanRevisionService(), profile_analyses=profile_analyses, skill_catalog=skill_catalog, skill_editor=skill_editor, profile_reader=profile_reader, profile_editor=profile_editor,
+        revision=PlanRevisionService(), planning_workspace=planning_workspace, profile_analyses=profile_analyses, skill_catalog=skill_catalog, skill_editor=skill_editor, profile_reader=profile_reader, profile_editor=profile_editor,
     )
     graph = build_competition_copilot_graph(facade, intent_model=intent_model,
-        explanation_model=explanation_model, human_interpreter=human_interpreter)
+        explanation_model=explanation_model, human_interpreter=human_interpreter,
+        resume_preparer=resume_preparer)
     return AgentComposition(CompetitionCopilotAgent(graph, inputs), facade)

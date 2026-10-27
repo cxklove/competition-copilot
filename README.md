@@ -51,7 +51,9 @@ Application 编排用例；Domain 独立决定业务结果；Repository 只提�
 | PX2.1 / PX2.2 / PX2.3 / PX2.4 | COMPLETE / CLOSED_VERIFIED / CLOSED_VERIFIED / CLOSED_VERIFIED |
 | PX3 — My Profile / Skills | CLOSED_VERIFIED |
 | PX3.1 / PX3.2 / PX3.3 / PX3.4 | COMPLETE / CLOSED_VERIFIED / CLOSED_VERIFIED / CLOSED_VERIFIED |
-| PX4 — My Competitions + Planning Workspace | READY_TO_START，尚未实施 |
+| PX4 — My Competitions + Planning Workspace | IN_PROGRESS |
+| PX4.1 — Planning Readiness & Actionable Preparation | CLOSED_VERIFIED |
+| PX4.2 — My Competitions Workspace | READY_TO_START |
 | P15 Evaluation | NOT_STARTED |
 
 PX3.4 Browser Smoke 已 PASS、Final Independent Review 已 REVIEW_PASS，PX3 整体验收关闭。
@@ -60,7 +62,11 @@ PX3.4 Browser Smoke 已 PASS、Final Independent Review 已 REVIEW_PASS，PX3 �
 missing != UNKNOWN != SkillGap；仅显式操作重新分析/生成，不自动重算或触发 P11。
 画像仍为 host-scoped in-memory，重启恢复 fixture；完整账号系统、技能要求等级覆盖、
 计划可执行性、完整赛事历史和 submission window 等限制继续保留。
-下一阶段建议 PX4.1 Planning Readiness & Actionable Preparation，本轮未开始实现。
+PX4.1 Browser Smoke PASS、Final Independent Review REVIEW_PASS，现为 CLOSED_VERIFIED。
+已完成只读 Planning Workspace、exact PlanReference / lineage freshness、正式约束、待确认、
+时间参考和 deterministic advisory，以及产品接线和 target clarification 前的画像 hydration。
+PLANNING_ACTIONABILITY_GAP 已通过 read-side advisory 缓解，未解决全部数据覆盖或持久化 gap。
+P8 truth 和 P11 authority 保持不变；PX4.2 仅 READY_TO_START，尚未实现。
 详细阶段记录见 [Development Plan](docs/DEVELOPMENT_PLAN.md)。
 
 ## 当前能力

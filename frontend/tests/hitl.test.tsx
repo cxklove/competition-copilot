@@ -34,7 +34,52 @@ Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
 });
 const { render, fireEvent, cleanup, act, within } = await import('@testing-library/react');
 const { Workspace } = await import('../src/workspace/Workspace.tsx');
+const { ClarificationPanel } = await import('../src/workspace/ClarificationPanel.tsx');
 afterEach(cleanup);
+
+test('resolved repository profile leaves only the requested Edition input', () => {
+  const view = render(
+    <ClarificationPanel
+      proposal={{
+        clarification_id: 'edition-only',
+        source_request_id: 'r',
+        reason: 'MISSING_REQUIRED_CONTEXT',
+        fields: ['EDITION'],
+        question: 'Provide explicit structured context: EDITION',
+      }}
+      interaction={null}
+      disabled={false}
+      clarify={async () => ({ accepted: true })}
+    />,
+  );
+  assert.equal(view.getAllByRole('textbox').length, 1);
+  assert.ok(view.getByRole('textbox', { name: /届次/ }));
+  assert.equal(view.queryByText(/学历/), null);
+  assert.equal(view.queryByText(/完整学生画像/), null);
+  assert.equal(view.queryByText('需要补充高级参数'), null);
+});
+
+test('backend profile unavailable reason offers profile navigation without an ad hoc profile form', () => {
+  const view = render(
+    <ClarificationPanel
+      proposal={{
+        clarification_id: 'profile-unavailable',
+        source_request_id: 'r',
+        reason: 'MISSING_STUDENT_PROFILE',
+        fields: ['STUDENT_PROFILE'],
+        question: 'Provide explicit structured context: STUDENT_PROFILE',
+      }}
+      interaction={null}
+      disabled={false}
+      clarify={async () => ({ accepted: true })}
+    />,
+  );
+  assert.ok(view.getByRole('heading', { name: '请先确认个人画像' }));
+  assert.equal(view.getByRole('link', { name: '前往我的能力' }).getAttribute('href'), '#/profile');
+  assert.equal(view.queryAllByRole('textbox').length, 0);
+  assert.equal(view.queryAllByRole('combobox').length, 0);
+  assert.equal(view.queryByRole('button', { name: '提交补充信息' }), null);
+});
 const now = () => '2026-10-20T00:00:00Z';
 const config = { mode: 'LOCAL', baseUrl: 'http://localhost:0' } as const;
 function setup(steps: ConstructorParameters<typeof FakeRuntimeTransport>[1]) {

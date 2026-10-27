@@ -5,7 +5,7 @@ Facade receipts wait in a private channel until a coherent terminal snapshot exi
 """
 
 import json
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
@@ -63,6 +63,7 @@ from competition_copilot.agents.routing import (
     IntentModel,
     IntentModelInput,
     IntentRoutingProposal,
+    PendingArgumentPreparation,
     ProposedTargets,
     RoutingProposalValidator,
     RoutingValidationResult,
@@ -100,6 +101,7 @@ class GraphInput(AgentContract):
     interaction_created_at: AwareDatetime | None = None
     revision_proposal: ReplanningInput | PlanRevisionProposal | None = None
     prepared_revision: PlanRevisionProposal | None = None
+    pending_preparation: PendingArgumentPreparation | None = None
 
 
 class _PreparedRevisionPayload(AgentContract):
@@ -223,6 +225,7 @@ def build_competition_copilot_graph(
     facade: AgentCapabilityFacade, *, intent_model: IntentModel | None = None,
     human_interpreter: HumanResponseInterpreter | None = None,
     explanation_model: ExplanationModel | None = None,
+    resume_preparer: Callable[[GraphInput], GraphInput] | None = None,
 ) -> CompetitionCopilotGraph:
     """Build/compile on explicit call, without checkpointer, store or external IO."""
     metadata = {m.capability: m for m in facade.list_capabilities()}
@@ -267,6 +270,11 @@ def build_competition_copilot_graph(
             state = _replace(state, audit=_merge_audit(state.audit, AuditReferences(results=(reference,))))
             frame = GraphInput(**{**frame.model_dump(), "state": state,
                                   "arguments_json": json.dumps(args, sort_keys=True)})
+            if state.clarification is None and frame.pending_preparation and resume_preparer:
+                prepared = GraphInput.model_validate(resume_preparer(frame))
+                if prepared.state != state:
+                    raise ValueError("Argument preparation cannot replace resolved state")
+                frame = prepared
         except Exception:
             return _failure(channels["state"], AgentErrorCode.INVALID_WORKFLOW_TRANSITION,
                             "Clarification response rejected")
@@ -356,7 +364,8 @@ def build_competition_copilot_graph(
             try:
                 validation = validator.validate(proposal, state.request,
                     invocation_id=frame.routing_invocation_id,
-                    arguments_ref=frame.routing_arguments_ref, arguments=_arguments(frame))
+                    arguments_ref=frame.routing_arguments_ref, arguments=_arguments(frame),
+                    pending_preparation=frame.pending_preparation)
             except (ValueError, TypeError):
                 return _failure(state, AgentErrorCode.SERIALIZATION_ERROR, "Invalid routing arguments")
             trace = {"proposal": proposal, "routing_validation": validation}

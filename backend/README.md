@@ -2590,8 +2590,10 @@ conflicting content/version under an existing ID rejects. Historical IDs remain
 resolvable and point to their lineage's current head for stale checks.
 
 The frontend offers generated plans only when validated CompetitionPlan artifacts
-match server-supplied `plan_refs`. Select a plan explicitly in the context area;
-no plan is selected automatically. The browser retains only references and display
+match server-supplied `plan_refs`. Plans can be selected in the context area; the
+PX4.1 product shell also selects the exact returned reference after an explicit
+successful generation and reads its Workspace. No latest/first Plan is inferred.
+The browser retains only references and display
 metadata, never recalculates digest/version and never supplies plan bodies for
 registration. Selection does not approve or create a revision proposal.
 
@@ -2848,5 +2850,56 @@ SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP retains incomplete required_level coverage
 PLANNING_ACTIONABILITY_GAP (PX4 high priority) records P8 over-concentration on
 uncertainty-resolution tasks when constraints are incomplete; P8 truth is unchanged.
 Complete Event History remains unavailable; Submission Window is DATA_CONTRACT_GAP.
-PX4 My Competitions + Planning Workspace is READY_TO_START, with suggested PX4.1
-Planning Readiness & Actionable Preparation; no implementation starts in this sync.
+At the PX3 status sync, PX4 was READY_TO_START. Current status: PX4 IN_PROGRESS,
+PX4.1 CLOSED_VERIFIED, PX4.2 My Competitions Workspace READY_TO_START only.
+
+## PX4.1 Planning Readiness & Actionable Preparation — CLOSED_VERIFIED
+
+Existing Runtime explicit GET_PLANNING_WORKSPACE -> Facade READ -> Application
+PlanningWorkspaceReader -> ProfileRepository / exact PlanRegistry / read-only
+Plan lineage / CompetitionDetailReader / SkillCatalogReader. No new HTTP endpoint
+or MCP tool; Local and AgentArts reuse the same authorities.
+
+Immutable read DTOs separate confirmed constraints, pending confirmations,
+current-profile advisory preparation, time references and full original Plan audit.
+Exact PlanReference resolution never selects a latest/first Plan. Missing lineage
+is UNKNOWN; conflicting exact lineage fails closed. One profile snapshot is captured
+at read start; stale Plan and current-profile advisory bindings remain separate.
+
+PreparationAdvisoryPolicy preparation-advisory-v1 uses bounded deterministic
+templates and formal skill IDs/catalog names. required_level=null permits advice
+without inventing a threshold or gap. Missing != UNKNOWN != deficit. Goals,
+interests and hours are display context; no LLM, name inference or hour allocation.
+Task IDs bind template/policy/target/ProfileReference/source basis; order is stable.
+
+Capability catalog input schemas are memoized as immutable JSON text. This avoids
+rebuilding unchanged Pydantic schemas on every invocation; public schema equality
+is regression-tested. No profile, result, authorization decision, timeout or retry
+policy is cached or changed by this optimization.
+
+Verified time retains provenance/scope; official candidates remain quoted references,
+never deadlines, planning_horizon, P8 inputs, Snapshot or Event. CompetitionPlan,
+PlanReference, P8 truth, P11 and PlanDiff authority are unchanged. Reads cannot change
+Plan version/digest/status/timestamps/milestones. Only explicit CTAs invoke P7/P8.
+PLANNING_ACTIONABILITY_GAP is mitigated through this read-side layer; data coverage,
+host-memory persistence, account, Event History and Submission Window gaps remain.
+Browser Smoke PASS; Final Independent Review REVIEW_PASS. PX4 IN_PROGRESS;
+PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START only; no PX4.2/P15 implementation.
+P12-P14 CLOSED_FROZEN; PX1-PX3 CLOSED_VERIFIED; P15 NOT_STARTED.
+
+PX4.1 target clarification: repository profile lookup is independent of target
+completeness. Trusted pending-preparation metadata records the captured profile
+reference and only unresolved target fields. It can request clarification, never
+authorize execution or bypass typed arguments, identity checks or approval.
+After Core accepts a structured target reply, caller preparation builds the same
+P7/P8 inputs using the retained profile/evidence snapshot. A new request reads the
+current repository snapshot. Unavailable repository profiles use the existing
+MISSING_STUDENT_PROFILE reason and direct users to My Profile; generic browser
+profile JSON cannot create authoritative profile state. Edition-level planning
+continues to permit no track; no edition or track is selected automatically.
+
+Targeted verification from the repository root:
+
+```powershell
+.\backend\.venv\Scripts\python -m pytest backend/tests/application/test_planning_workspace.py backend/tests/integration/test_planning_workspace_runtime.py backend/tests/integration/test_mcp_exposure_contract.py
+```

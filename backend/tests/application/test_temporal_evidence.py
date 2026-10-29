@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -66,6 +67,13 @@ def test_load_stable_identity_frozen_json_and_no_request_filesystem(monkeypatch)
         first.model_copy(update={"raw_text": "changed"})
     monkeypatch.setattr(Path, "read_bytes", Mock(side_effect=AssertionError("runtime IO")))
     assert p.read_candidates("huawei-ict", "huawei-ict-2026") == (first,)
+
+
+def test_artifact_raw_digests_match_fixture_bytes():
+    artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    for candidate in artifact["candidates"]:
+        raw_path = ROOT / candidate["raw_reference"]
+        assert sha256(raw_path.read_bytes()).hexdigest() == candidate["raw_digest"]
 
 
 @pytest.mark.parametrize("field,value", [

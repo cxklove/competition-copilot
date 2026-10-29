@@ -30,7 +30,7 @@
     },
     {
       "raw_fixture_path": "data/raw/fwwb-2026.json",
-      "raw_sha256": "d8fd1f5c17e871e5914c3a8ffe6c65267df838ac2e5f8002530d1be1bae51b62",
+      "raw_sha256": "d72059eb238e7b690ad6bddd6ab24d0920ff50916e787cfae1b86d320c3bb571",
       "competition_id": "fwwb",
       "edition_id": "fwwb-2026",
       "candidate_id": "fwwb-2026-candidate",
@@ -56,7 +56,7 @@
     },
     {
       "raw_fixture_path": "data/raw/robomaster-rmuc-2026.json",
-      "raw_sha256": "0442437dc5aa1ebc1831449c4e37356a35024d3afe0e536bdfcac85eee9f377a",
+      "raw_sha256": "af9a9ec4ec5f7bcfbb56d8633b553d9f12d69e2a2665639158958c2d1fe2ab9e",
       "competition_id": "robomaster-rmuc",
       "edition_id": "robomaster-rmuc-2026",
       "candidate_id": "robomaster-rmuc-2026-candidate",

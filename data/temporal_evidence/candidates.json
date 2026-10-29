@@ -27,7 +27,7 @@
     },
     {
       "schema_version": "1.0",
-      "candidate_id": "temporal-candidate-v1:107e104a09a96bf8d527b851358a5c6e3642fc800a6b39c988300ef6964421e0",
+      "candidate_id": "temporal-candidate-v1:aab17d2c22da70dba933c75664b1bd3af4a28b380a8fd23c95ec1bd0bdbb2a68",
       "competition_id": "robomaster-rmuc",
       "edition_id": "robomaster-rmuc-2026",
       "track_id": null,
@@ -43,7 +43,7 @@
       },
       "verification_status": "pending",
       "raw_reference": "data/raw/robomaster-rmuc-2026.json",
-      "raw_digest": "0442437dc5aa1ebc1831449c4e37356a35024d3afe0e536bdfcac85eee9f377a",
+      "raw_digest": "af9a9ec4ec5f7bcfbb56d8633b553d9f12d69e2a2665639158958c2d1fe2ab9e",
       "text_locator": "/raw_payload/registration_text",
       "review_reference": "px24-robomaster-rmuc-2026-registration-admission-v1",
       "review_note": "Official registration clock range is preserved verbatim. P2 review explicitly leaves timezone interpretation unresolved; not a verified TimeWindow."
@@ -80,7 +80,7 @@
     },
     {
       "review_reference": "px24-robomaster-rmuc-2026-registration-admission-v1",
-      "candidate_id": "temporal-candidate-v1:107e104a09a96bf8d527b851358a5c6e3642fc800a6b39c988300ef6964421e0",
+      "candidate_id": "temporal-candidate-v1:aab17d2c22da70dba933c75664b1bd3af4a28b380a8fd23c95ec1bd0bdbb2a68",
       "decision": "admit"
     },
     {

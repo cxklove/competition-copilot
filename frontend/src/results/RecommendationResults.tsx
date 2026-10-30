@@ -1,3 +1,4 @@
+import { AddMyCompetitionButton } from '../workspace/MyCompetitions.tsx';
 import type { ReactNode } from 'react';
 import type {
   Evidence,
@@ -56,6 +57,7 @@ export function CandidateCard({
         {rank != null ? `#${rank} ` : ''}
         {competitionLabel(result.candidate.competition_id)}
       </h5>
+      <AddMyCompetitionButton target={result.candidate} />
       <p>资格状态：{status}</p>
       <p>技能匹配：{matched ? '已发现明确技能匹配' : '暂无足够信息评分'}</p>
       <p>

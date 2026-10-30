@@ -29,6 +29,7 @@ from competition_copilot.agents.contracts import (
     ApprovalRequest,
     AuditReferences,
     CapabilityInvocationRequest,
+    ClarificationChoice,
     ClarificationReason,
     ClarificationRequest,
     ContextField,
@@ -481,6 +482,9 @@ def build_competition_copilot_graph(
             reason=channels["clarification_reason"], fields=channels["missing_fields"],
             question="Provide explicit structured context: " + ", ".join(
                 field.value for field in channels["missing_fields"]),
+            options=tuple(ClarificationChoice(**option.model_dump())
+                          for option in frame.clarification_options
+                          if option.field in channels["missing_fields"]),
         )
         state = _replace(state, status=WorkflowStatus.NEEDS_CLARIFICATION,
                          approval_request=None, approval_response=None, clarification=question)
@@ -570,9 +574,12 @@ def build_competition_copilot_graph(
     def explain(channels):
         state, receipt = channels["state"], channels["receipt"]
         context = build_explanation_context(state, receipt)
-        # Product detail reads return authoritative data without any model call.
-        rendering = generate_explanation(context, None if receipt.capability ==
-            "get_competition_details" else explanation_model)
+        # These product projections/self-actions need no model explanation,
+        # including when natural-language routing selected the read capability.
+        rendering = generate_explanation(context, None if receipt.capability in (
+            "get_competition_details", "get_my_competitions", "get_my_competition",
+            "add_my_competition", "update_my_competition", "remove_my_competition",
+            "select_my_competition_plan") else explanation_model)
         state = _replace(state, audit=_merge_audit(state.audit, AuditReferences(results=context.result_refs)))
         response = AgentResponse(
             request_id=state.request.request_id, intent=state.intent,

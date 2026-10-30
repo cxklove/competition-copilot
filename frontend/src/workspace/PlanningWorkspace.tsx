@@ -1,3 +1,4 @@
+import { AddMyCompetitionButton } from './MyCompetitions.tsx';
 import { useEffect, useRef, useState } from 'react';
 import type { AgentContext } from '../runtime/generated/contracts.ts';
 import type { PlanningWorkspaceProjection } from '../results/generated/artifacts.ts';
@@ -55,6 +56,7 @@ export function PlanningWorkspaceView({
           {value.edition_name ? ` / ${value.edition_name}` : ''}
           {value.track_name ? ` / ${value.track_name}` : ''}
         </p>
+        <AddMyCompetitionButton target={value.target} />
         {value.plan_summary ? (
           <>
             <p>

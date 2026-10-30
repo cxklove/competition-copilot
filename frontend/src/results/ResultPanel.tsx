@@ -51,6 +51,16 @@ export function BusinessStatus({ status }: { status: string }) {
 }
 function ArtifactView({ artifact }: { artifact: LinkedArtifact }) {
   switch (artifact.model) {
+    case 'MyCompetitionProjection':
+    case 'MyCompetitionsProjection':
+    case 'MyCompetitionMutationResult':
+    case 'MyPlanSelectionResult':
+      return (
+        <details>
+          <summary>我的赛事读取 / 操作详情</summary>
+          <pre>{JSON.stringify(artifact.value, null, 2)}</pre>
+        </details>
+      );
     case 'CompetitionDetailProjection':
       return (
         <>

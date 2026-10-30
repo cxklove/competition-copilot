@@ -166,8 +166,30 @@ export function ClarificationPanel({
               return <div key={field}>{advancedInput(field, clarificationLabels[field]!)}</div>;
             return (
               <div className="clarification-field" key={field}>
-                <label htmlFor={id}>{clarificationLabels[field]}</label>
-                {field === 'INTENT' ? (
+                <label htmlFor={id}>
+                  {field === 'EDITION' && proposal.options?.some((option) => option.field === field)
+                    ? '届次'
+                    : clarificationLabels[field]}
+                </label>
+                {proposal.options?.some((option) => option.field === field) ? (
+                  <select
+                    id={id}
+                    required
+                    value={values[field] ?? ''}
+                    onChange={(e) => update(field, e.target.value)}
+                  >
+                    <option value="" disabled>
+                      {field === 'EDITION' ? '请选择届次' : '请选择'}
+                    </option>
+                    {proposal.options
+                      .filter((option) => option.field === field)
+                      .map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                  </select>
+                ) : field === 'INTENT' ? (
                   <select
                     id={id}
                     required

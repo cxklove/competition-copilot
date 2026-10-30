@@ -53,7 +53,8 @@ Application 编排用例；Domain 独立决定业务结果；Repository 只提�
 | PX3.1 / PX3.2 / PX3.3 / PX3.4 | COMPLETE / CLOSED_VERIFIED / CLOSED_VERIFIED / CLOSED_VERIFIED |
 | PX4 — My Competitions + Planning Workspace | IN_PROGRESS |
 | PX4.1 — Planning Readiness & Actionable Preparation | CLOSED_VERIFIED |
-| PX4.2 — My Competitions Workspace | READY_TO_START |
+| PX4.2 — My Competitions Workspace | CLOSED_VERIFIED_LOCAL |
+| PX4.3 | NOT_STARTED |
 | P15 Evaluation | NOT_STARTED |
 
 PX3.4 Browser Smoke 已 PASS、Final Independent Review 已 REVIEW_PASS，PX3 整体验收关闭。
@@ -66,7 +67,12 @@ PX4.1 Browser Smoke PASS、Final Independent Review REVIEW_PASS，现为 CLOSED_
 已完成只读 Planning Workspace、exact PlanReference / lineage freshness、正式约束、待确认、
 时间参考和 deterministic advisory，以及产品接线和 target clarification 前的画像 hydration。
 PLANNING_ACTIONABILITY_GAP 已通过 read-side advisory 缓解，未解决全部数据覆盖或持久化 gap。
-P8 truth 和 P11 authority 保持不变；PX4.2 仅 READY_TO_START，尚未实现。
+P8 truth 和 P11 authority 保持不变。PX4.2 已完成显式 exact-target 赛事关系、
+结果选择与只读摘要、我的赛事产品页面及本地验收，状态为 CLOSED_VERIFIED_LOCAL。
+本地 Frontend Full 383 passed / 0 failed / 0 skipped；PX4.2 backend targeted
+61 passed、frontend targeted 82 passed；lint、build、diff check PASS。
+该状态不代表 GitHub Actions 全绿：CI_PIPELINE_STABILITY_GAP 继续 OPEN。
+PX4 保持 IN_PROGRESS；PX4.3、P15 均 NOT_STARTED。
 详细阶段记录见 [Development Plan](docs/DEVELOPMENT_PLAN.md)。
 
 ## 当前能力

@@ -1,3 +1,4 @@
+import { AddMyCompetitionButton } from './MyCompetitions.tsx';
 import type { Dispatch, SetStateAction } from 'react';
 import type { AgentContext } from '../runtime/generated/contracts.ts';
 import type { CompetitionDetailProjection } from '../results/generated/artifacts.ts';
@@ -132,6 +133,13 @@ export function CompetitionDetailView({
               }
             />
             <div className="competition-action-bar">
+              <AddMyCompetitionButton
+                target={{
+                  competition_id: detail.competition.id,
+                  edition_id: detail.selected_edition?.id,
+                  track_id: detail.selected_track?.id,
+                }}
+              />
               <button
                 type="button"
                 disabled={locked || context.competition_id === detail.competition.id}

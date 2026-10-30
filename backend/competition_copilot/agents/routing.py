@@ -71,6 +71,13 @@ def explicit_intent_proposal(request: AgentRequest) -> IntentRoutingProposal | N
     if request.intent is None:
         return None
     capability = {
+        AgentIntent.GET_MY_COMPETITIONS: CapabilityId.GET_MY_COMPETITIONS,
+        AgentIntent.GET_MY_COMPETITION: CapabilityId.GET_MY_COMPETITION,
+        AgentIntent.ADD_MY_COMPETITION: CapabilityId.ADD_MY_COMPETITION,
+        AgentIntent.UPDATE_MY_COMPETITION: CapabilityId.UPDATE_MY_COMPETITION,
+        AgentIntent.REMOVE_MY_COMPETITION: CapabilityId.REMOVE_MY_COMPETITION,
+        AgentIntent.SELECT_MY_COMPETITION_PLAN: CapabilityId.SELECT_MY_COMPETITION_PLAN,
+
         AgentIntent.GET_PLANNING_WORKSPACE: CapabilityId.GET_PLANNING_WORKSPACE,
         AgentIntent.GET_PROFILE_ANALYSES: CapabilityId.GET_PROFILE_ANALYSES,
         AgentIntent.GET_PROFILE: CapabilityId.GET_PROFILE,
@@ -165,6 +172,13 @@ class RoutingValidationResult(AgentContract):
 
 # Safety policy, not workflow planning: an intent may admit several capabilities.
 INTENT_CAPABILITIES = MappingProxyType({
+    AgentIntent.GET_MY_COMPETITIONS: (CapabilityId.GET_MY_COMPETITIONS,),
+    AgentIntent.GET_MY_COMPETITION: (CapabilityId.GET_MY_COMPETITION,),
+    AgentIntent.ADD_MY_COMPETITION: (CapabilityId.ADD_MY_COMPETITION,),
+    AgentIntent.UPDATE_MY_COMPETITION: (CapabilityId.UPDATE_MY_COMPETITION,),
+    AgentIntent.REMOVE_MY_COMPETITION: (CapabilityId.REMOVE_MY_COMPETITION,),
+    AgentIntent.SELECT_MY_COMPETITION_PLAN: (CapabilityId.SELECT_MY_COMPETITION_PLAN,),
+
     AgentIntent.GET_PLANNING_WORKSPACE: (CapabilityId.GET_PLANNING_WORKSPACE,),
     AgentIntent.GET_PROFILE_ANALYSES: (CapabilityId.GET_PROFILE_ANALYSES,),
     AgentIntent.GET_PROFILE: (CapabilityId.GET_PROFILE,),
@@ -257,7 +271,6 @@ def _project_trusted_payload(payload: dict) -> dict[str, str]:
 
 def _anchored_recommendations(request, payload, capability):
     return (capability == CapabilityId.GET_RECOMMENDATIONS
-            and request.context.plan_ref is None
             and isinstance(payload.get("contexts"), list) and len(payload["contexts"]) > 1)
 
 
@@ -269,10 +282,13 @@ def _resolve_trusted_context(request: AgentRequest, payload: dict, *,
     targets remain separate scopes. Every context must describe the same student.
     Outer identities constrain each scope. For a P6 multi-candidate batch only,
     an optional caller target constrains membership instead of excluding alternatives.
-    Plan-bound requests retain the original exact-target checks.
+    Recommendation does not consume the selected Plan reference. The original
+    request retains it for audit/session use. Target-bound and Plan-bound
+    capabilities retain the original exact-target checks.
     """
     outer = request.context.model_dump(mode="json")
-    plan = request.context.plan_ref
+    plan = (None if capability == CapabilityId.GET_RECOMMENDATIONS
+            else request.context.plan_ref)
     plan_ids = {} if plan is None else {
         "plan_id": plan.plan_id, "student_id": plan.student_id,
         **plan.target.model_dump(mode="json"),
@@ -360,7 +376,11 @@ class RoutingProposalValidator:
         explicit_skill_edit = (
             request.skill_command is not None and request.intent == proposal.intent
             and capability.capability.value == request.skill_command.operation + "_profile_skill")
-        if (capability.access == CapabilityAccess.MUTATING or capability.requires_explicit_approval) and not (explicit_profile_edit or explicit_skill_edit):
+        explicit_relationship_edit = (request.intent == proposal.intent and
+            ((request.my_competition_command is not None and capability.capability.value ==
+              request.my_competition_command.operation + "_my_competition") or
+             (request.intent == AgentIntent.SELECT_MY_COMPETITION_PLAN and request.context.plan_ref is not None)))
+        if (capability.access == CapabilityAccess.MUTATING or capability.requires_explicit_approval) and not (explicit_profile_edit or explicit_skill_edit or explicit_relationship_edit):
             return clarify(RoutingReason.APPROVAL_REQUIRED, (ContextField.APPROVAL_CONTEXT,),
                            ClarificationReason.MISSING_APPROVAL_CONTEXT)
         payload = arguments.get("payload") if isinstance(arguments, dict) else None

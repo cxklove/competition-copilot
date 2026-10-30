@@ -84,6 +84,12 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_MY_COMPETITIONS",
+          "GET_MY_COMPETITION",
+          "ADD_MY_COMPETITION",
+          "UPDATE_MY_COMPETITION",
+          "REMOVE_MY_COMPETITION",
+          "SELECT_MY_COMPETITION_PLAN",
           "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
@@ -131,6 +137,17 @@
             "anyOf": [
               {
                 "$ref": "#/$defs/AgentIntent"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "my_competition_command": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/MyCompetitionCommand"
               },
               {
                 "type": "null"
@@ -249,6 +266,12 @@
       },
       "CapabilityId": {
         "enum": [
+          "get_my_competitions",
+          "get_my_competition",
+          "add_my_competition",
+          "update_my_competition",
+          "remove_my_competition",
+          "select_my_competition_plan",
           "get_planning_workspace",
           "get_profile_analyses",
           "get_profile",
@@ -529,6 +552,89 @@
         "title": "HumanMessage",
         "type": "object"
       },
+      "MyCompetitionCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_reference": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/RelationshipReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "operation": {
+            "enum": [
+              "add",
+              "update",
+              "remove"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "state": {
+            "default": "SAVED",
+            "enum": [
+              "SAVED",
+              "PREPARING"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/MyCompetitionTarget"
+          }
+        },
+        "required": [
+          "student_id",
+          "operation",
+          "target"
+        ],
+        "title": "MyCompetitionCommand",
+        "type": "object"
+      },
+      "MyCompetitionTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "MyCompetitionTarget",
+        "type": "object"
+      },
       "PlanReference": {
         "additionalProperties": false,
         "description": "Exact immutable P8 context reference, without student profile contents.",
@@ -740,6 +846,49 @@
         ],
         "title": "ReferenceKind",
         "type": "string"
+      },
+      "RelationshipReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "relationship_id": {
+            "minLength": 1,
+            "title": "Relationship Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/MyCompetitionTarget"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "relationship_id",
+          "student_id",
+          "target",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "RelationshipReference",
+        "type": "object"
       },
       "ResultReference": {
         "additionalProperties": false,
@@ -1099,6 +1248,12 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_MY_COMPETITIONS",
+          "GET_MY_COMPETITION",
+          "ADD_MY_COMPETITION",
+          "UPDATE_MY_COMPETITION",
+          "REMOVE_MY_COMPETITION",
+          "SELECT_MY_COMPETITION_PLAN",
           "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
@@ -1165,6 +1320,89 @@
         ],
         "title": "EducationLevel",
         "type": "string"
+      },
+      "MyCompetitionCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_reference": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/RelationshipReference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "operation": {
+            "enum": [
+              "add",
+              "update",
+              "remove"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "state": {
+            "default": "SAVED",
+            "enum": [
+              "SAVED",
+              "PREPARING"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/MyCompetitionTarget"
+          }
+        },
+        "required": [
+          "student_id",
+          "operation",
+          "target"
+        ],
+        "title": "MyCompetitionCommand",
+        "type": "object"
+      },
+      "MyCompetitionTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "competition_id": {
+            "minLength": 1,
+            "title": "Competition Id",
+            "type": "string"
+          },
+          "edition_id": {
+            "minLength": 1,
+            "title": "Edition Id",
+            "type": "string"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Track Id"
+          }
+        },
+        "required": [
+          "competition_id",
+          "edition_id"
+        ],
+        "title": "MyCompetitionTarget",
+        "type": "object"
       },
       "PlanReference": {
         "additionalProperties": false,
@@ -1378,6 +1616,49 @@
         "title": "ReferenceKind",
         "type": "string"
       },
+      "RelationshipReference": {
+        "additionalProperties": false,
+        "properties": {
+          "content_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "host_scope": {
+            "minLength": 1,
+            "title": "Host Scope",
+            "type": "string"
+          },
+          "relationship_id": {
+            "minLength": 1,
+            "title": "Relationship Id",
+            "type": "string"
+          },
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/$defs/MyCompetitionTarget"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "relationship_id",
+          "student_id",
+          "target",
+          "version",
+          "content_digest",
+          "host_scope"
+        ],
+        "title": "RelationshipReference",
+        "type": "object"
+      },
       "ResultReference": {
         "additionalProperties": false,
         "description": "Reference to an existing artifact, not a duplicated Domain result.\n\nref_id may be a producer's canonical fingerprint when it has no native ID.\nThis contract validates shape, not artifact existence or factual truth.",
@@ -1483,6 +1764,17 @@
         ],
         "default": null
       },
+      "my_competition_command": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/MyCompetitionCommand"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
       "profile_result_refs": {
         "anyOf": [
           {
@@ -1575,6 +1867,12 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_MY_COMPETITIONS",
+          "GET_MY_COMPETITION",
+          "ADD_MY_COMPETITION",
+          "UPDATE_MY_COMPETITION",
+          "REMOVE_MY_COMPETITION",
+          "SELECT_MY_COMPETITION_PLAN",
           "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
@@ -1725,6 +2023,35 @@
         "title": "AuditReferences",
         "type": "object"
       },
+      "ClarificationChoice": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "$ref": "#/$defs/ContextField"
+          },
+          "label": {
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "source_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "value": {
+            "minLength": 1,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "value",
+          "label",
+          "source_ref"
+        ],
+        "title": "ClarificationChoice",
+        "type": "object"
+      },
       "ClarificationReason": {
         "enum": [
           "MISSING_REQUIRED_CONTEXT",
@@ -1750,6 +2077,14 @@
             },
             "minItems": 1,
             "title": "Fields",
+            "type": "array"
+          },
+          "options": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ClarificationChoice"
+            },
+            "title": "Options",
             "type": "array"
           },
           "question": {
@@ -2090,6 +2425,12 @@
     "$defs": {
       "AgentIntent": {
         "enum": [
+          "GET_MY_COMPETITIONS",
+          "GET_MY_COMPETITION",
+          "ADD_MY_COMPETITION",
+          "UPDATE_MY_COMPETITION",
+          "REMOVE_MY_COMPETITION",
+          "SELECT_MY_COMPETITION_PLAN",
           "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
@@ -2116,6 +2457,12 @@
       },
       "CapabilityId": {
         "enum": [
+          "get_my_competitions",
+          "get_my_competition",
+          "add_my_competition",
+          "update_my_competition",
+          "remove_my_competition",
+          "select_my_competition_plan",
           "get_planning_workspace",
           "get_profile_analyses",
           "get_profile",
@@ -2642,6 +2989,12 @@
       },
       "AgentIntent": {
         "enum": [
+          "GET_MY_COMPETITIONS",
+          "GET_MY_COMPETITION",
+          "ADD_MY_COMPETITION",
+          "UPDATE_MY_COMPETITION",
+          "REMOVE_MY_COMPETITION",
+          "SELECT_MY_COMPETITION_PLAN",
           "GET_PLANNING_WORKSPACE",
           "GET_PROFILE_ANALYSES",
           "GET_PROFILE",
@@ -2865,6 +3218,35 @@
         "title": "AuditReferences",
         "type": "object"
       },
+      "ClarificationChoice": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "$ref": "#/$defs/ContextField"
+          },
+          "label": {
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "source_ref": {
+            "$ref": "#/$defs/ResultReference"
+          },
+          "value": {
+            "minLength": 1,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "value",
+          "label",
+          "source_ref"
+        ],
+        "title": "ClarificationChoice",
+        "type": "object"
+      },
       "ClarificationReason": {
         "enum": [
           "MISSING_REQUIRED_CONTEXT",
@@ -2890,6 +3272,14 @@
             },
             "minItems": 1,
             "title": "Fields",
+            "type": "array"
+          },
+          "options": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ClarificationChoice"
+            },
+            "title": "Options",
             "type": "array"
           },
           "question": {
@@ -3218,6 +3608,10 @@
       "invocation_id": "strip",
       "source_request_id": "strip"
     },
+    "ClarificationChoice": {
+      "label": "strip",
+      "value": "strip"
+    },
     "ClarificationRequest": {
       "clarification_id": "strip",
       "question": "strip",
@@ -3245,6 +3639,14 @@
       "submitted_at": "utc",
       "text": "strip"
     },
+    "MyCompetitionCommand": {
+      "student_id": "strip"
+    },
+    "MyCompetitionTarget": {
+      "competition_id": "strip",
+      "edition_id": "strip",
+      "track_id": "strip"
+    },
     "PlanReference": {
       "milestone_ids": {
         "items": "strip"
@@ -3263,6 +3665,11 @@
     },
     "ReasonReference": {
       "reason_code": "strip"
+    },
+    "RelationshipReference": {
+      "host_scope": "strip",
+      "relationship_id": "strip",
+      "student_id": "strip"
     },
     "ResultReference": {
       "ref_id": "strip"

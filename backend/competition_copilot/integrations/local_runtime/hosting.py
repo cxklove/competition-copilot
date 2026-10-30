@@ -60,6 +60,8 @@ class LocalInvocationHost:
             message = None
             if "skill_command" in fields:
                 message = "INVALID_SKILL_LEVEL" if "level" in fields else "INVALID_PROFILE_FIELD"
+            if "my_competition_command" in fields and "edition_id" in fields:
+                message = "TARGET_INCOMPLETE: EDITION_REQUIRED"
             if "profile_update" in fields:
                 message = ("INVALID_WEEKLY_HOURS" if "weekly_available_hours" in fields else
                            "INVALID_EDUCATION_LEVEL" if "education_level" in fields else

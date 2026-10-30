@@ -7,6 +7,7 @@ import { HitlPanel } from './HitlPanel.tsx';
 import { ResultPanel } from '../results/ResultPanel.tsx';
 import { ErrorPresentation } from '../results/ErrorPresentation.tsx';
 import type { ArtifactReader } from '../results/artifacts.ts';
+import { validateArtifacts } from '../results/artifacts.ts';
 import type { AgentContext, PlanReference } from '../runtime/generated/contracts.ts';
 import { collectPlanChoices, planChoiceKey } from './plans.ts';
 import type { PlanChoice } from './plans.ts';
@@ -31,6 +32,7 @@ export function Workspace({
   embedded = false,
   onSnapshot,
   contextSelection,
+  onPlanSelection,
   externalBusy = false,
   resultRecords = [],
   renderPlanningWorkspace,
@@ -45,6 +47,7 @@ export function Workspace({
   embedded?: boolean;
   onSnapshot?: (snapshot: WorkspaceSnapshot) => void;
   contextSelection?: CompetitionSelection;
+  onPlanSelection?: (reference: PlanChoice['reference']) => void;
   externalBusy?: boolean;
   resultRecords?: readonly ReadRecord[];
   renderPlanningWorkspace?: (context: AgentContext) => ReactNode;
@@ -65,6 +68,40 @@ export function Workspace({
   const selectedPlan = plans.find((plan) => planChoiceKey(plan.reference) === selectedPlanKey);
   const pending = state.uiStatus === 'SUBMITTING';
   const response = state.response;
+  const pendingEdition = useRef<{
+    requestId: string;
+    studentId: string;
+    competitionId: string;
+    editionId: string;
+  } | null>(null);
+  useEffect(() => {
+    const choice = pendingEdition.current;
+    if (
+      !choice ||
+      response?.request_id !== choice.requestId ||
+      response.outcome !== 'COMPLETED' ||
+      !readArtifacts
+    )
+      return;
+    try {
+      const artifact = validateArtifacts(response, readArtifacts(response)).find(
+        (a) => a.model === 'SkillGapDecision',
+      );
+      if (
+        artifact?.model === 'SkillGapDecision' &&
+        studentId.trim() === choice.studentId &&
+        competitionId.trim() === choice.competitionId &&
+        artifact.value.target.competition_id === choice.competitionId &&
+        artifact.value.target.edition_id === choice.editionId
+      ) {
+        setEditionId(choice.editionId);
+        setTrackId(artifact.value.target.track_id ?? '');
+      }
+    } catch {
+      // Invalid delivery cannot complete the workspace target.
+    }
+    pendingEdition.current = null;
+  }, [response, readArtifacts, studentId, competitionId]);
   const needs = response?.outcome === 'NEEDS_CLARIFICATION';
   const waits = response?.outcome === 'WAITING_FOR_APPROVAL';
   const locked = pending || needs || waits || state.continuationUnconfirmed || externalBusy;
@@ -100,6 +137,39 @@ export function Workspace({
     // action until it can execute instead of consuming and silently dropping it.
     if (contextSelection.action && locked) return;
     handledSelection.current = contextSelection.sequence;
+    const switched =
+      competitionId.trim() !== contextSelection.competitionId ||
+      ('editionId' in contextSelection &&
+        (editionId.trim() !== (contextSelection.editionId ?? '') ||
+          trackId.trim() !== (contextSelection.trackId ?? '')));
+    if (
+      switched ||
+      ('planRef' in contextSelection && !contextSelection.planRef) ||
+      (selectedPlan && selectedPlan.reference.student_id !== studentId.trim())
+    ) {
+      setSelectedPlanKey('');
+      setUseLocalPlan(false);
+    }
+    if (contextSelection.planRef) {
+      const ref = contextSelection.planRef;
+      if (
+        ref.student_id === studentId.trim() &&
+        ref.target.competition_id === contextSelection.competitionId &&
+        ref.target.edition_id === contextSelection.editionId &&
+        (ref.target.track_id ?? '') === (contextSelection.trackId ?? '')
+      ) {
+        setPlans((previous) =>
+          previous.some((p) => planChoiceKey(p.reference) === planChoiceKey(ref))
+            ? previous
+            : [
+                ...previous,
+                { reference: ref, status: contextSelection.planStatus ?? 'unavailable' },
+              ],
+        );
+        setSelectedPlanKey(planChoiceKey(ref));
+        setUseLocalPlan(false);
+      }
+    }
     if (competitionId.trim() !== contextSelection.competitionId) {
       setCompetitionId(contextSelection.competitionId);
       setEditionId('');
@@ -116,6 +186,8 @@ export function Workspace({
       else delete scope.competition_id;
       delete scope.edition_id;
       delete scope.track_id;
+      delete scope.plan_ref;
+      if (contextSelection.planRef) scope.plan_ref = contextSelection.planRef;
       if (contextSelection.editionId) scope.edition_id = contextSelection.editionId;
       if (contextSelection.trackId) scope.track_id = contextSelection.trackId;
       void submit(
@@ -208,7 +280,7 @@ export function Workspace({
   const hasSelectedPlan = !!(selectedPlan || (useLocalPlan && localPlan));
   const hasTarget = !!(competitionId.trim() && editionId.trim());
   function sendAction(action: GuidedAction) {
-    if (locked || actionHint(action, hasTarget, hasSelectedPlan)) return;
+    if (locked || actionHint(action, hasTarget, hasSelectedPlan, !!competitionId.trim())) return;
     void submit(action.message, studentId, explicitContext(), action.intent);
   }
 
@@ -329,7 +401,16 @@ export function Workspace({
                 response={response}
                 interaction={state.interaction}
                 disabled={pending || state.continuationUnconfirmed}
-                clarify={clarify}
+                clarify={(token, values) => {
+                  if (values.edition_id && response)
+                    pendingEdition.current = {
+                      requestId: response.request_id,
+                      studentId: studentId.trim(),
+                      competitionId: competitionId.trim(),
+                      editionId: values.edition_id,
+                    };
+                  return clarify(token, values);
+                }}
                 decide={decide}
                 plans={[...plans.map((plan) => plan.reference), ...(localPlan ? [localPlan] : [])]}
               />
@@ -364,7 +445,12 @@ export function Workspace({
                 <legend>快捷操作</legend>
                 <div className="guided-action-buttons">
                   {guidedActions.map((action) => {
-                    const hint = actionHint(action, hasTarget, hasSelectedPlan);
+                    const hint = actionHint(
+                      action,
+                      hasTarget,
+                      hasSelectedPlan,
+                      !!competitionId.trim(),
+                    );
                     return (
                       <button
                         key={action.intent}
@@ -453,6 +539,10 @@ export function Workspace({
                   onChange={(event) => {
                     setSelectedPlanKey(event.target.value);
                     setUseLocalPlan(false);
+                    const choice = plans.find(
+                      (plan) => planChoiceKey(plan.reference) === event.target.value,
+                    );
+                    if (choice) onPlanSelection?.(choice.reference);
                   }}
                 >
                   <option value="">未选择生成的计划</option>

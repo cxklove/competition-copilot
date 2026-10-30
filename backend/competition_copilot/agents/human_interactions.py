@@ -91,6 +91,12 @@ def resolve_clarification(state: AgentState, response: ClarificationResponse,
     fields = response.values.provided_fields
     if not set(fields).issubset(question.fields):
         raise ValueError("Only requested clarification fields may be supplied")
+    for name, field in (("competition_id", "COMPETITION"), ("edition_id", "EDITION"),
+                        ("track_id", "TRACK")):
+        allowed = {option.value for option in question.options if option.field == field}
+        value = getattr(response.values, name)
+        if value is not None and allowed and value not in allowed:
+            raise ValueError("Clarification choice is outside the authoritative scope")
     args = dict(arguments or {})
     if artifact_ref is not None:
         args = _fill_only(args, {"artifact_ref": artifact_ref.model_dump(mode="json")})

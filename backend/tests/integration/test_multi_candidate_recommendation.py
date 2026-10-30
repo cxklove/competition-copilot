@@ -67,6 +67,28 @@ def test_anchor_membership_not_global_target_but_only_for_p6():
     assert conflict(batch(), actual=caller(track_id="explicit-track"))
 
 
+def test_selected_plan_is_not_consumed_by_recommendation_but_plan_actions_stay_exact():
+    from test_local_cloud_llm import PLAN
+
+    from competition_copilot.agents.contracts import PlanReference
+
+    selected = PlanReference.model_validate(PLAN)
+    actual = caller(student_id=selected.student_id,
+                    competition_id=selected.target.competition_id,
+                    edition_id=selected.target.edition_id, plan_ref=selected)
+    payload = {"contexts": [{"student_profile": {"id": selected.student_id},
+        "candidate": {"competition_id": c, "edition_id": e}}
+        for c, e in ((selected.target.competition_id, selected.target.edition_id),
+                     ("other", "other-edition"))]}
+    assert not conflict(payload, actual=actual)
+    assert actual.context.plan_ref == selected
+    # A foreign Plan injected into actual capability arguments is still rejected.
+    payload["contexts"][1]["plan_id"] = "foreign-plan"
+    assert conflict(payload, actual=actual)
+    assert conflict({"target": {"competition_id": "other", "edition_id": "other-edition"}},
+                    actual=actual, capability="get_planning_workspace")
+
+
 @pytest.mark.parametrize("mutation", ["absent-anchor", "different-student", "internal-conflict", "plan", "top-level-conflict"])
 def test_alternative_batch_never_weakens_identity_guards(mutation):
     payload = json.loads(json.dumps(batch()))

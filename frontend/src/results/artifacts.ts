@@ -5,6 +5,11 @@ import type * as Models from './generated/artifacts.ts';
 import type { AgentResponse, ResultReference } from '../runtime/generated/contracts.ts';
 
 type Values = {
+  MyCompetitionProjection: Models.MyCompetitionProjection;
+  MyCompetitionsProjection: Models.MyCompetitionsProjection;
+  MyCompetitionMutationResult: Models.MyCompetitionMutationResult;
+  MyPlanSelectionResult: Models.MyPlanSelectionResult;
+
   PlanningWorkspaceProjection: Models.PlanningWorkspaceProjection;
   ProfileAnalysesProjection: Models.ProfileAnalysesProjection;
   SkillCatalogProjection: Models.SkillCatalogProjection;
@@ -33,6 +38,11 @@ export type LinkedArtifact = {
 // Fake composition supplies presets; Local hosting supplies validated receipt projections.
 export type ArtifactReader = (response: AgentResponse) => unknown;
 const kinds: Record<keyof Values, string[]> = {
+  MyCompetitionProjection: ['TOOL_RESULT'],
+  MyCompetitionsProjection: ['TOOL_RESULT'],
+  MyCompetitionMutationResult: ['TOOL_RESULT'],
+  MyPlanSelectionResult: ['TOOL_RESULT'],
+
   PlanningWorkspaceProjection: ['TOOL_RESULT'],
   ProfileAnalysesProjection: ['TOOL_RESULT'],
   SkillCatalogProjection: ['TOOL_RESULT'],

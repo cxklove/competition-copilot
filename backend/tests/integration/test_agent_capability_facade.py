@@ -153,6 +153,8 @@ def roundtrip(result):
 
 def test_explicit_inventory_and_metadata(facade):
     expected = {
+        "get_my_competitions", "get_my_competition", "add_my_competition",
+        "update_my_competition", "remove_my_competition", "select_my_competition_plan",
         "list_competitions", "get_competition", "list_competition_editions",
         "get_competition_edition", "list_edition_tracks", "get_competition_track",
         "check_eligibility", "get_recommendations", "analyze_skill_gap", "build_plan",
@@ -171,6 +173,7 @@ def test_explicit_inventory_and_metadata(facade):
         # Profile self-edit is authorized by its Application actor binding;
         # plan revision alone retains the separate human approval workflow.
         assert (item.access == "MUTATING") == (item.capability in (
+            CapabilityId.ADD_MY_COMPETITION, CapabilityId.UPDATE_MY_COMPETITION, CapabilityId.REMOVE_MY_COMPETITION, CapabilityId.SELECT_MY_COMPETITION_PLAN,
             CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL,
             CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL))
     assert facade.list_capabilities() == metadata

@@ -11,9 +11,14 @@ export const guidedActions = [
 
 export type GuidedAction = (typeof guidedActions)[number];
 
-export function actionHint(action: GuidedAction, hasTarget: boolean, hasPlan: boolean): string {
+export function actionHint(
+  action: GuidedAction,
+  hasTarget: boolean,
+  hasPlan: boolean,
+  hasCompetition = hasTarget,
+): string {
   if (action.intent === 'REQUEST_PLAN_REVISION' && !hasPlan) return '请先生成或选择一个计划。';
-  if (['ANALYZE_SKILL_GAP', 'BUILD_PLAN'].includes(action.intent) && !hasTarget)
-    return '请先选择比赛和届次。';
+  if (action.intent === 'ANALYZE_SKILL_GAP' && !hasCompetition) return '请先选择比赛。';
+  if (action.intent === 'BUILD_PLAN' && !hasTarget) return '请先选择比赛和届次。';
   return '';
 }

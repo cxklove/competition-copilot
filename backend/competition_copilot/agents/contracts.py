@@ -18,6 +18,7 @@ from pydantic import (
     model_validator,
 )
 
+from competition_copilot.application.my_competitions import MyCompetitionCommand
 from competition_copilot.application.profile_skills import SkillCommand
 from competition_copilot.application.profiles import ProfileUpdate
 from competition_copilot.domain.digital_twin import StableId
@@ -58,6 +59,13 @@ class AgentContract(BaseModel):
 
 
 class AgentIntent(StrEnum):
+    GET_MY_COMPETITIONS = "GET_MY_COMPETITIONS"
+    GET_MY_COMPETITION = "GET_MY_COMPETITION"
+    ADD_MY_COMPETITION = "ADD_MY_COMPETITION"
+    UPDATE_MY_COMPETITION = "UPDATE_MY_COMPETITION"
+    REMOVE_MY_COMPETITION = "REMOVE_MY_COMPETITION"
+    SELECT_MY_COMPETITION_PLAN = "SELECT_MY_COMPETITION_PLAN"
+
     GET_PLANNING_WORKSPACE = "GET_PLANNING_WORKSPACE"
     GET_PROFILE_ANALYSES = "GET_PROFILE_ANALYSES"
     GET_PROFILE = "GET_PROFILE"
@@ -189,11 +197,14 @@ class AgentContext(AgentContract):
         return self
 
 
+
+
 class AgentRequest(AgentContract):
     request_id: StableId
     user_message: StableId
     # User-selected operation only; never capability arguments or authorization.
     intent: AgentIntent | None = None
+    my_competition_command: MyCompetitionCommand | None = None
     profile_update: ProfileUpdate | None = None
     skill_command: SkillCommand | None = None
     profile_result_refs: tuple[StableId, ...] | None = None
@@ -202,6 +213,11 @@ class AgentRequest(AgentContract):
 
     @model_validator(mode="after")
     def profile_command(self):
+        if self.my_competition_command is not None:
+            expected = {"add": AgentIntent.ADD_MY_COMPETITION, "update": AgentIntent.UPDATE_MY_COMPETITION,
+                        "remove": AgentIntent.REMOVE_MY_COMPETITION}[self.my_competition_command.operation]
+            if self.intent != expected or self.context.student_id != self.my_competition_command.student_id:
+                raise ValueError("Relationship command requires matching intent and student")
         if self.profile_result_refs is not None and self.intent != AgentIntent.GET_PROFILE_ANALYSES:
             raise ValueError("Profile result query requires explicit GET_PROFILE_ANALYSES")
         if self.skill_command is not None:
@@ -234,12 +250,20 @@ class ClarificationReason(StrEnum):
     MISSING_APPROVAL_CONTEXT = "MISSING_APPROVAL_CONTEXT"
 
 
+class ClarificationChoice(AgentContract):
+    field: ContextField
+    value: StableId
+    label: StableId
+    source_ref: ResultReference
+
+
 class ClarificationRequest(AgentContract):
     clarification_id: StableId
     source_request_id: StableId
     reason: ClarificationReason
     fields: tuple[ContextField, ...] = Field(min_length=1)
     question: StableId
+    options: tuple[ClarificationChoice, ...] = ()
 
     @field_validator("fields")
     @classmethod
@@ -318,6 +342,13 @@ class ApprovalResponse(AgentContract):
 
 
 class CapabilityId(StrEnum):
+    GET_MY_COMPETITIONS = "get_my_competitions"
+    GET_MY_COMPETITION = "get_my_competition"
+    ADD_MY_COMPETITION = "add_my_competition"
+    UPDATE_MY_COMPETITION = "update_my_competition"
+    REMOVE_MY_COMPETITION = "remove_my_competition"
+    SELECT_MY_COMPETITION_PLAN = "select_my_competition_plan"
+
     GET_PLANNING_WORKSPACE = "get_planning_workspace"
     GET_PROFILE_ANALYSES = "get_profile_analyses"
     GET_PROFILE = "get_profile"

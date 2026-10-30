@@ -124,7 +124,7 @@ class McpToolRegistry:
             expected_reason = (
                 ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED if meta is None else
                 ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED
-                if item.capability_id in (CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL) else
+                if item.capability_id in (CapabilityId.ADD_MY_COMPETITION, CapabilityId.UPDATE_MY_COMPETITION, CapabilityId.REMOVE_MY_COMPETITION, CapabilityId.SELECT_MY_COMPETITION_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL) else
                 ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW
                 if meta.access == CapabilityAccess.MUTATING else
                 ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED
@@ -193,6 +193,7 @@ def build_mcp_tool_registry() -> McpToolRegistry:
             "Evaluate supplied student facts under existing P5 rules; does not override status or infer missing facts.",
             CapabilityAccess.DECISION, CheckEligibilityInput, "P5 CompetitionEligibilityEvaluator"),
     ), exclusions=(
+        McpExposureDecision(CapabilityId.ADD_MY_COMPETITION, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.ADD_PROFILE_SKILL, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.ANALYZE_EVENT_IMPACT, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.ANALYZE_SKILL_GAP, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
@@ -203,13 +204,18 @@ def build_mcp_tool_registry() -> McpToolRegistry:
         McpExposureDecision(CapabilityId.DIFF_COMPETITION_SNAPSHOT, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.EXPLAIN_REPLANNING, ExposureReason.UPSTREAM_CAPABILITY_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.GET_COMPETITION_DETAILS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_MY_COMPETITION, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.GET_MY_COMPETITIONS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_PLANNING_WORKSPACE, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_PROFILE, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_PROFILE_ANALYSES, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_RECOMMENDATIONS, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
         McpExposureDecision(CapabilityId.GET_SKILL_CATALOG, ExposureReason.TRUSTED_ARTIFACT_BOUNDARY_REQUIRED),
+        McpExposureDecision(CapabilityId.REMOVE_MY_COMPETITION, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.REMOVE_PROFILE_SKILL, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.REVISE_PLAN, ExposureReason.MUTATING_REQUIRES_HUMAN_FLOW),
+        McpExposureDecision(CapabilityId.SELECT_MY_COMPETITION_PLAN, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
+        McpExposureDecision(CapabilityId.UPDATE_MY_COMPETITION, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.UPDATE_PROFILE, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
         McpExposureDecision(CapabilityId.UPDATE_PROFILE_SKILL, ExposureReason.SELF_AUTHORIZED_MUTATION_NOT_EXPOSED),
     ))

@@ -3378,9 +3378,10 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 | PX3.2 — Profile Read / Edit | CLOSED_VERIFIED | 七项基础资料、版本化 Repository、Runtime explicit read/edit | host-scoped in-memory；已通过前置验收 |
 | PX3.3 — Skills Read / Edit | CLOSED_VERIFIED | 正式技能目录、增改删、自评证据原子更新、ProfileReference CAS | host-scoped in-memory；已通过前置验收 |
 | PX3.4 — Derived Result Staleness | CLOSED_VERIFIED | 正式引用三态、调用 lineage、相关分析、显式重新分析/规划 | Browser Smoke PASS；Final Independent Review REVIEW_PASS；不改变旧结论，不自动重算或重规划 |
-| PX4 — My Competitions + Planning Workspace | IN_PROGRESS | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | PX4.1 CLOSED_VERIFIED；PX4.2 READY_TO_START；不覆盖资格或 Plan 状态 |
+| PX4 — My Competitions + Planning Workspace | IN_PROGRESS | 我的赛事生命周期、Plan Workspace、Milestone Timeline、Current Plan / Status / Version | PX4.1 CLOSED_VERIFIED；PX4.2 CLOSED_VERIFIED_LOCAL；不覆盖资格或 Plan 状态 |
 | PX4.1 — Planning Readiness & Actionable Preparation | CLOSED_VERIFIED | 正式只读 Workspace、已确认约束、准备建议、待确认、时间参考及 Plan freshness | Browser Smoke PASS；Final Independent Review REVIEW_PASS；P8 truth、P11 authority 不变 |
-| PX4.2 — My Competitions Workspace | READY_TO_START | 后续我的赛事 Workspace | 本轮仅同步 readiness；未进入实现 |
+| PX4.2 — My Competitions Workspace | CLOSED_VERIFIED_LOCAL | 显式赛事关系、正式结果选择、只读摘要与产品工作区 | 本地 Browser Smoke、Frontend full regression 通过；host-scoped in-memory；CI_PIPELINE_STABILITY_GAP OPEN，不代表 GitHub Actions 全绿 |
+| PX4.3 | NOT_STARTED | 后续工作包 | 本轮不进入实施 |
 | PX5 — Events / Approval / Version | PLANNED | Competition Updates / Event Feed、Before / After、Impact、Approval Center、PlanDiff、Version History | 复用 Snapshot → Diff → Event → Impact → Decision → policy → approval → execution → actual PlanDiff / lineage；不新增 mutation authority |
 | PX6 — Guided Demo & Reliability | PLANNED | Guided Actions、Scenario Selector、Demo Mode、Quick Journey、Runtime Health、Demo Reset、Notification UX、统一状态与现场可靠性 | 复用已有 Demo Polish 2.1 explicit actions；其余能力仍待实现；不得自动重试、绕过验证或把 UI reset 当作后端状态已重置 |
 
@@ -3417,7 +3418,7 @@ PX 状态是独立的产品工作流标记，不重开冻结阶段，也不替�
 - 完整事件历史仍为 EVENT_HISTORY_PERSISTENCE_GAP，明确显示“暂未提供完整赛事变化历史”；
   当前会话证据单列，controlled demo 不冒充官方变化；不增加 Event Ledger/Database。
   submission window 为 DATA_CONTRACT_GAP，当前不实现。Discovery 原路径保持不变。
-- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 当前 CLOSED_VERIFIED，PX4 IN_PROGRESS，PX4.1 CLOSED_VERIFIED，PX4.2 READY_TO_START。
+- P12/P13/P14 保持 CLOSED_FROZEN；P15 保持 NOT_STARTED；PX3 当前 CLOSED_VERIFIED，PX4 IN_PROGRESS，PX4.1 CLOSED_VERIFIED，PX4.2 CLOSED_VERIFIED_LOCAL。
   PX2 Final Independent Review 已 REVIEW_PASS；PX2 Core 关闭为 CLOSED_VERIFIED。
 - PX2.2 验证：新增 Reader/Runtime 24 passed；扩展 targeted 142 passed；Backend full
   2774 passed；Frontend results/local targeted 85 passed、full 261 passed；Ruff、schema
@@ -3501,7 +3502,7 @@ PX2.1 = REVIEW_COMPLETE；PX2.2 = REVIEW_PASS。
 - P12/P13/P14 保持 CLOSED_FROZEN；PX1/PX2 Core/PX2.3 保持 CLOSED_VERIFIED；当前 PX3 CLOSED_VERIFIED，P15 未开始。
 - 继续保留 demo 边界：Local PlanRegistry 为 in-memory，generated plans 在 server restart 后不持久化。
   候选仅覆盖逐条准入的三条 evidence，不代表全部 Raw 时间文本；没有 runtime temporal crawler、自动 parser 或 LLM extraction。
-  当时 PX3 = READY_TO_START 仅为准备状态；当前 PX3 已 CLOSED_VERIFIED，PX4 IN_PROGRESS，PX4.1 CLOSED_VERIFIED，PX4.2 READY_TO_START；P15 仍 NOT_STARTED。
+  当时 PX3 = READY_TO_START 仅为准备状态；当前 PX3 已 CLOSED_VERIFIED，PX4 IN_PROGRESS，PX4.1 CLOSED_VERIFIED，PX4.2 CLOSED_VERIFIED_LOCAL；P15 仍 NOT_STARTED。
 - 初版验证：Backend targeted 39 passed、full 2789 passed；Frontend targeted 109 passed、full 285 passed；
   Ruff、两项 schema export drift check、frontend lint/build、git diff --check PASS。
   Backend full 首次受 sandbox pytest 临时目录权限影响，沙箱外相同命令重跑全通过；未修改测试预期规避问题。
@@ -3852,7 +3853,7 @@ P15 NOT_STARTED. No commit or push.
 ## PX4.1 — Planning Readiness & Actionable Preparation
 
 Status: CLOSED_VERIFIED (Browser Smoke PASS; Final Independent Review REVIEW_PASS).
-PX4 IN_PROGRESS; PX4.2 READY_TO_START only; PX1/PX2/PX3 CLOSED_VERIFIED;
+At the historical PX4.1 closure checkpoint: PX4 IN_PROGRESS; PX4.2 READY_TO_START only; PX1/PX2/PX3 CLOSED_VERIFIED;
 P12/P13/P14 CLOSED_FROZEN; P15 NOT_STARTED. No PX4.2 implementation, commit or push.
 
 Implemented PlanningWorkspaceProjection / Reader, ConfirmedConstraint,
@@ -3938,7 +3939,7 @@ reference used, original stages 1/2 preserved, no P8 on Workspace-only read and 
 P11 call. Evidence: tmp/px41-workspace-browser (local ignored artifacts).
 At this surfacing-fix checkpoint PX4.1 was IMPLEMENTED_AWAITING_REVIEW; no PX4.2/P15, commit or push.
 
-### PX4.1 Final Status Sync — CLOSED_VERIFIED
+### PX4.1 Final Status Sync — CLOSED_VERIFIED (historical checkpoint)
 
 Browser Smoke = PASS. Final Independent Review = REVIEW_PASS. These accepted
 results close PX4.1; earlier implementation/blocker notes above retain historical
@@ -3995,5 +3996,246 @@ Runtime/result schema drift checks and diff check passed. Prior full regressions
 and Browser Smoke evidence remain recorded above; no new regression run is claimed
 by this status-only sync. Ready for full regression.
 
-PX4.2 is READY_TO_START only. No PX4.2 implementation, P15 work, production business
+At this historical PX4.1 sync, PX4.2 was READY_TO_START only. No PX4.2 implementation, P15 work, production business
 logic changes, reopening P12-P14, commit or push is included in this sync.
+
+
+## PX4.2 My Competitions Workspace implementation checkpoint
+
+Historical checkpoint status: IMPLEMENTED_AWAITING_REVIEW. Current status is recorded in the final local status sync below. PX4 IN_PROGRESS; PX4.1 CLOSED_VERIFIED.
+PX1/PX2/PX3 CLOSED_VERIFIED; P12/P13/P14 CLOSED_FROZEN; P15 NOT_STARTED.
+No PX4.3 work, commit or push.
+
+Implemented: immutable student/exact-target relationships; SAVED/PREPARING; exact
+RelationshipReference/CAS/host scope; authorized host-memory repository and explicit
+Runtime reads/mutations; selected result read store with invocation bindings and
+sequence-based selection; no prerequisite promotion; immutable read summaries,
+profile freshness, authoritative display names, temporal references and next-action-v1;
+existing My Competitions navigation, filters, detail/recommendation/planning add
+controls, explicit set-current and remove confirmation. Manual selected plans retain
+original lineage. No implicit latest Plan selection or timestamp heuristic.
+
+Relationship != Current Context != derived truth. Relationship mutations do not
+run P5/P7/P8/P11, create CompetitionEvent/PlanDiff/Approval or delete derived results.
+No new MCP tool. Original P5-P11 authorities and PX4.1 truth remain unchanged.
+
+Known gaps remain: PROFILE_PERSISTENCE_GAP; SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP;
+TASK_PROGRESS_PERSISTENCE_GAP; FULL_EVENT_HISTORY_GAP; Submission Window
+DATA_CONTRACT_GAP; legacy PX3.4_ELIGIBILITY_FRESHNESS_GAP; durable My Competitions
+persistence; durable result history; full account/identity system;
+CI_PIPELINE_STABILITY_GAP. New P5 invocations gain formal application lineage,
+but historical records are not migrated and the legacy gap is not declared closed.
+
+Validation results are reported with the implementation handoff. The current
+checkout's pre-existing raw digest startup failure is reported separately; it is
+not masked by skipping tests or changing CI, provider verification or tracked data.
+
+Implementation handoff validation: Backend targeted 185 passed; Frontend targeted
+96 passed. Ruff, Runtime schema export check, generated result artifact drift,
+Frontend lint/build and git diff --check passed. Backend full: 2731 passed,
+220 failed, 62 errors; Frontend full: 304 passed, 71 failed. Full-suite failures
+remain blocked by existing reviewed raw fixture digest mismatches (RoboMaster
+temporal evidence and FWWB ingestion), which also prevent checkout Local Runtime
+startup. New Runtime integration tests replay only manifest-matching reviewed
+bytes in isolated OS temporary fixtures; checkout data and verification are unchanged.
+Ready for PX4.2 Browser Smoke: NO until that separate startup blocker is resolved.
+
+### PX4.2 raw byte integrity blocker verification (2026-10-28)
+
+The startup blocker is resolved by restoring only CRLF bytes in
+`data/raw/fwwb-2026.json` and `data/raw/robomaster-rmuc-2026.json`. Both now match
+the existing P2 human-review manifest SHA256 exactly. JSON content, manifests,
+verifiers, attributes and production code are unchanged in this fix.
+History shows HEAD and the original fixture commit 58d97ed both contain LF bytes
+that do not match the manifest; this is COMMITTED_FIXTURE_MISMATCH, not just
+working-tree drift. Therefore the two repaired fixtures intentionally remain
+modified relative to HEAD. Existing `data/raw/*.json -text` preserves the repaired
+bytes once committed; no commit was made here.
+
+Validation: all 9 manifest raw bindings PASS; ingestion/temporal/Local Runtime
+and My Competitions targeted tests 321 passed; PX4.2 backend targeted 185 passed;
+backend full 3021 passed; direct Local Runtime port-0 startup PASS. PX4.2 frontend
+targeted 96 passed; Local Runtime plus My Competitions targeted 42 passed/3 failed;
+frontend full 372 passed/3 failed. The remaining failures are in
+`frontend/tests/local.test.tsx`: response correlation at line 133 and request-count
+assertions at lines 724 and 967. They are not startup failures and are left for a
+separate scoped fix. Ruff, lint, build and diff check PASS.
+
+Ready for PX4.2 Browser Smoke: YES for the locally running formal product chain.
+Full frontend regression is not PASS. CI_PIPELINE_STABILITY_GAP remains open;
+At this historical checkpoint PX4.2 remained IMPLEMENTED_AWAITING_REVIEW; no PX4.3/P15 work was included.
+## PX4.2 Recommendation / Plan context blocker fix (2026-10-28)
+
+RECOMMENDATION_PLAN_CONTEXT_CONFLICT is fixed by capability-specific backend
+routing. A selected Plan remains in the raw request/session but is not consumed
+as a P6 anchor. No frontend selection clearing or Domain truth changes.
+At this historical checkpoint PX4.2 remained IMPLEMENTED_AWAITING_REVIEW; PX4.3/P15 were not started by this fix.
+
+Verification: backend routing/recommendation/Plan-bound/P11/PX4.2 targeted 148
+passed; focused recommendation/context tests 23 passed; frontend focused real HTTP
+tests 3 passed and PX4.2 frontend targeted 96 passed. Backend full 3026 passed.
+Frontend full 374 passed/3 failed: previously recorded response correlation and
+request-count assertions in local.test.tsx remain outside this blocker fix.
+Ruff, frontend lint/build and diff check passed.
+
+Real Chrome recheck PASS: selected COMAP Plan -> explicit recommendation -> Huawei
+candidate Add with Huawei target -> original COMAP Planning Workspace. Natural
+language recommendation also succeeds while retaining the selected exact Plan.
+Ready to re-run full PX4.2 Browser Smoke. CI_PIPELINE_STABILITY_GAP remains open.
+
+Multiple Editions: AUTOMATED_TEST=PASS (repository/application exact-key tests);
+BROWSER=NOT_VERIFIED, reason FORMAL_TEST_DATA_COVERAGE_GAP. Do not manufacture a
+second production Edition or claim browser coverage from automated fixtures.
+## PX4.2 exact target completion blocker fix (2026-10-28)
+
+Reproduction correction: this checkout already rejects ADD without Edition at
+typed Runtime admission, with no persisted relationship. The reproduced gaps were
+generic error diagnostics, no in-place Edition selection on incomplete Add, no
+public authoritative Edition choices in SkillGap clarification, and the Copilot
+SkillGap shortcut preventing a competition-only request from reaching completion.
+
+Implemented: safe EDITION_REQUIRED diagnostic; authoritative Edition READ-backed
+Add selector; typed clarification options and structured reply scope validation;
+canonical context preparation/resume; validated P7 result completion of Workspace
+Edition. Track remains conditional. No inferred latest/first target, partial
+relationship, automatic business analysis or P5/P7 Domain change.
+
+Real Chrome clean-host acceptance PASS: China Graduate Mathematical Modeling
+competition-only Add makes no mutation before explicit Edition selection;
+confirmation creates exact 2026 SAVED relationship; Set Current propagates Edition
+and track=None; P7 executes without asking Edition again. A competition-only
+SkillGap request separately renders a labelled selector, submits edition_id and
+completes P7 with the canonical target. UNKNOWN result truth remains legitimate.
+
+Validation: backend targeted 226 passed; backend full 3033 passed; frontend
+targeted 78 passed plus 3 focused real HTTP tests; frontend full 376 passed/3 failed
+(the previously recorded local.test.tsx response-correlation and request-count
+assertions). Ruff, schema/generated drift, frontend lint/build and diff check PASS.
+At this historical checkpoint, ready to resume PX4.2 Browser Smoke; PX4.2 remained IMPLEMENTED_AWAITING_REVIEW;
+CI_PIPELINE_STABILITY_GAP stays open. No PX4.3/P15 work or commit.
+
+## PX4.2 final local status sync (2026-10-30)
+
+This is the current status source. Earlier implementation, blocker and PX4.1
+sync sections retain their historical checkpoint results and are superseded here.
+Previous review outcome: IMPLEMENTED_AWAITING_REGRESSION.
+New status: **CLOSED_VERIFIED_LOCAL**, not the unrestricted CLOSED_VERIFIED status.
+
+| Stage | Current status |
+|---|---|
+| PX1 Product Shell | CLOSED_VERIFIED |
+| PX2 Competition Experience | CLOSED_VERIFIED |
+| PX3 My Profile / Skills | CLOSED_VERIFIED |
+| PX4 My Competitions + Planning Workspace | IN_PROGRESS |
+| PX4.1 Planning Readiness & Actionable Preparation | CLOSED_VERIFIED |
+| PX4.2 My Competitions Workspace | CLOSED_VERIFIED_LOCAL |
+| PX4.3 | NOT_STARTED |
+| P12 / P13 / P14 | CLOSED_FROZEN |
+| P15 Evaluation | NOT_STARTED |
+
+### Delivered capabilities
+
+- Immutable StudentCompetitionRelationship records explicit user intent only:
+  SAVED / PREPARING, student and exact Competition + required Edition + optional
+  Track. Edition existence/parent and provided Track parent are validated.
+  Track=None is an edition-level identity, never a wildcard.
+- RelationshipReference includes identity, target, version, digest and host scope;
+  state updates/removal use CAS. Trusted actor authorization and student isolation
+  apply to reads and mutations; browser student_id alone does not authorize writes.
+- Host-scoped in-memory repository; service restart loses relationships, with a
+  product persistence notice. No reconstruction from context, recommendations or Plans.
+- DerivedResultReadStore and independent selected-result mapping:
+  `(student + exact target + result kind) -> selected exact result`.
+  Successful top-level P5/P7/P8 execution retains trusted invocation bindings and
+  selects results consistently for explicit UI and natural-language paths.
+  Monotonic execution sequencing prevents late older results from overwriting
+  newer selections. No timestamp/latest/list-last heuristic or prerequisite selection.
+- MyCompetitionProjection / MyCompetitionsReader compose authoritative display
+  identity, Eligibility, SkillGap, selected exact PlanReference, per-result
+  freshness, PX4.1 planning summary, temporal summary and next-action-v1.
+  Unavailable/invalid results remain distinct from not-analyzed results.
+  Current preparation/advisory summary does not imply an associated formal Plan.
+- Primary `#/my-competitions` workspace, ALL / SAVED / PREPARING filters, explicit
+  lifecycle controls and Detail / Recommendation / Planning Workspace integration.
+
+### Architecture boundaries retained
+
+My Competition != Current Context, Recommendation result, Eligibility, SkillGap
+or Plan. ADD/UPDATE/REMOVE do not set current or execute P5/P7/P8/P11, create
+CompetitionEvent/PlanDiff, or trigger Approval. REMOVE deletes only the relationship;
+retained Eligibility, SkillGap, Plan and selected-result mappings remain available.
+Re-add creates a new relationship identity; old references cannot mutate it.
+Set Current explicitly propagates Competition/Edition/optional Track without
+changing relationship state/version. Reads do not execute business analysis.
+P5-P11 Domain truth/authority is unchanged; no unexpected MCP exposure.
+TemporalCandidate remains a pending time reference, never an official deadline.
+
+### Resolved Browser Smoke blockers
+
+| Blocker | Final state | Verified behavior |
+|---|---|---|
+| ADD_MY_COMPETITION_TARGET_VALIDATION_GAP | RESOLVED | Missing/empty Edition cannot create a relationship; existing typed validation retained with clear diagnostics and parent checks |
+| TARGET_COMPLETION_UX_GAP | RESOLVED | Authoritative Edition selector, explicit choice; no latest/first selection or normal free-text internal ID entry |
+| CLARIFICATION_TARGET_RESOLUTION_GAP | RESOLVED | Structured Edition answer validates scope, merges edition_id into canonical target and resumes SkillGap preparation |
+| RECOMMENDATION_PLAN_CONTEXT_CONFLICT | RESOLVED | Recommendation is profile-driven discovery; selected plan_ref neither anchors nor narrows candidates; actual Plan-bound actions retain exact validation |
+
+Browser critical path PASS after blocker fixes: exact Edition add, card display,
+Set Current, selected Eligibility/SkillGap/Plan, per-result profile staleness,
+remove preservation, re-add identity, competition-only structured SkillGap
+completion, and recommendation/candidate Add with a selected Plan retained.
+
+### Regression alignment and accepted verification
+
+| Former failure | Classification | Resolution |
+|---|---|---|
+| local.test.tsx:133 response undefined | TEST_HARNESS_BUG | Correlate by expected request_id, with observed request/response diagnostics; no completion-order or last-response assumption |
+| local.test.tsx:868 total requests 5 vs 2 | OUTDATED_ASSERTION | Separate READ / BUSINESS / MUTATION; verify business invocation counts |
+| local.test.tsx:1114 total requests 8 vs 4 | OUTDATED_ASSERTION | Same semantic classification; actual P7 invocation count = 1, no duplicate SkillGap execution |
+
+The five-request trace included BUILD_PLAN, SELECT_MY_COMPETITION_PLAN,
+DISCOVER_COMPETITIONS and two GET_MY_COMPETITIONS reads. The eight-request trace
+included one ANALYZE_SKILL_GAP, one DISCOVER_COMPETITIONS, four GET_MY_COMPETITIONS
+and two GET_COMPETITION_DETAILS reads. READs remain visible in the trace.
+Regression alignment changed test infrastructure/assertions only: production code
+changed = NO; new production blocker = NO.
+
+Testing principle: total Runtime request count is not a business invocation count.
+Assert action kind and P5/P7/P8/P11 invocation counts. Additional valid projection
+READs are permitted; automatic business execution is not. Match response/request
+by request_id, never array position, last response or completion order.
+
+| Accepted local verification | Result |
+|---|---|
+| Architecture Review / Implementation | PASS |
+| Browser Smoke after blocker fixes / Final Independent Review | PASS |
+| Frontend full | 383 passed / 0 failed / 0 skipped |
+| PX4.2 backend targeted | 61 passed |
+| PX4.2 frontend targeted | 82 passed |
+| Lint / Build / Diff Check | PASS |
+| Multiple Editions automated coverage | PASS |
+| Multiple Editions browser coverage | NOT_VERIFIED — FORMAL_TEST_DATA_COVERAGE_GAP; formal data lacks a second Edition for the same Competition |
+
+These are recorded accepted verification results; this docs-only sync does not
+claim new test execution. Local closure covers the local product chain, Browser
+Smoke and targeted/full frontend regression. It does not mean GitHub Actions is
+green. CI_PIPELINE_STABILITY_GAP remains **OPEN**, an independent engineering debt.
+
+### Known gaps preserved
+
+- PROFILE_PERSISTENCE_GAP: host-scoped in-memory profile storage.
+- SKILL_REQUIREMENT_DATA_ENRICHMENT_GAP: required_level still often null.
+- TASK_PROGRESS_PERSISTENCE_GAP: no persisted advisory checkbox/progress.
+- FULL_EVENT_HISTORY_GAP / EVENT_HISTORY_PERSISTENCE_GAP.
+- Submission Window DATA_CONTRACT_GAP.
+- PX3.4_ELIGIBILITY_FRESHNESS_GAP for historical results without complete lineage;
+  new invocation binding does not migrate old results.
+- HISTORICAL_RESULT_SELECTION_MIGRATION_GAP: old results without selected mappings
+  are not guessed or silently attached.
+- Durable My Competitions persistence and durable result history remain unsolved.
+- Multiple Editions browser coverage remains NOT_VERIFIED, with the formal data
+  coverage reason above; automated PASS does not substitute for browser evidence.
+- CI_PIPELINE_STABILITY_GAP remains OPEN; existing account/identity and other
+  unclosed gaps recorded elsewhere are unchanged.
+
+No CI work, raw-fixture changes, production logic changes, PX4.3/P15 implementation,
+commit or push is part of this status sync. Ready for PX4.2 commit preparation.

@@ -41,6 +41,18 @@ from competition_copilot.application.eligibility import (
     CompetitionEligibilityEvaluator,
     EligibilityTargetError,
 )
+from competition_copilot.application.my_competitions import (
+    MyCompetitionCommand,
+    MyCompetitionEditor,
+    MyCompetitionMutationResult,
+    MyCompetitionProjection,
+    MyCompetitionQuery,
+    MyCompetitionsProjection,
+    MyCompetitionsReader,
+    MyPlanSelection,
+    MyPlanSelectionResult,
+    MyPlanSelector,
+)
 from competition_copilot.application.planning_workspace import (
     PlanningWorkspaceProjection,
     PlanningWorkspaceQuery,
@@ -236,6 +248,14 @@ class CapabilityStatus(StrEnum):
 
 class CapabilityErrorCode(StrEnum):
     INVALID_INPUT = "INVALID_INPUT"
+    MY_COMPETITION_ALREADY_EXISTS = "MY_COMPETITION_ALREADY_EXISTS"
+    MY_COMPETITION_NOT_FOUND = "MY_COMPETITION_NOT_FOUND"
+    MY_COMPETITION_VERSION_CONFLICT = "MY_COMPETITION_VERSION_CONFLICT"
+    MY_COMPETITION_FORBIDDEN = "MY_COMPETITION_FORBIDDEN"
+    MY_COMPETITION_INVALID_TARGET = "MY_COMPETITION_INVALID_TARGET"
+    MY_COMPETITION_INVALID_REFERENCE = "MY_COMPETITION_INVALID_REFERENCE"
+    MY_COMPETITION_REPOSITORY_UNAVAILABLE = "MY_COMPETITION_REPOSITORY_UNAVAILABLE"
+
     PLAN_REFERENCE_UNAVAILABLE = "PLAN_REFERENCE_UNAVAILABLE"
     PLANNING_IDENTITY_MISMATCH = "PLANNING_IDENTITY_MISMATCH"
     PROFILE_NOT_FOUND = "PROFILE_NOT_FOUND"
@@ -283,6 +303,13 @@ _READ = MappingProxyType({
 })
 _SPECS = MappingProxyType({
     **_READ,
+    CapabilityId.GET_MY_COMPETITIONS: (GetProfileQuery, MyCompetitionsProjection),
+    CapabilityId.GET_MY_COMPETITION: (MyCompetitionQuery, MyCompetitionProjection),
+    CapabilityId.ADD_MY_COMPETITION: (MyCompetitionCommand, MyCompetitionMutationResult),
+    CapabilityId.UPDATE_MY_COMPETITION: (MyCompetitionCommand, MyCompetitionMutationResult),
+    CapabilityId.REMOVE_MY_COMPETITION: (MyCompetitionCommand, MyCompetitionMutationResult),
+    CapabilityId.SELECT_MY_COMPETITION_PLAN: (MyPlanSelection, MyPlanSelectionResult),
+
     CapabilityId.GET_PLANNING_WORKSPACE: (PlanningWorkspaceQuery, PlanningWorkspaceProjection),
     CapabilityId.GET_PROFILE_ANALYSES: (ProfileAnalysesQuery, ProfileAnalysesProjection),
     CapabilityId.GET_PROFILE: (GetProfileQuery, StudentProfileProjection),
@@ -305,6 +332,7 @@ _SPECS = MappingProxyType({
 })
 
 CapabilityOutput = (
+    MyCompetitionsProjection | MyCompetitionProjection | MyCompetitionMutationResult | MyPlanSelectionResult |
     PlanningWorkspaceProjection | ProfileAnalysesProjection | SkillCatalogProjection | StudentProfileProjection | ProfileMutationResult | CompetitionDetailProjection | ListCompetitionsOutput | GetCompetitionOutput | ListCompetitionEditionsOutput
     | GetCompetitionEditionOutput | ListEditionTracksOutput | GetCompetitionTrackOutput
     | EligibilityDecision | RecommendationRankingResult | SkillGapDecision
@@ -405,10 +433,14 @@ class AgentCapabilityFacade:
         skill_catalog: SkillCatalogReader | None = None,
         skill_editor: StudentSkillEditor | None = None,
         profile_analyses: ProfileAnalysesReader | None = None,
+        my_competitions: MyCompetitionsReader | None = None,
+        my_competition_editor: MyCompetitionEditor | None = None,
+        my_plan_selector: MyPlanSelector | None = None,
         planning_workspace: PlanningWorkspaceReader | None = None,
         profile_reader: StudentProfileReader | None = None,
         profile_editor: StudentProfileEditor | None = None,
     ):
+        self._my_competitions, self._my_competition_editor, self._my_plan_selector = my_competitions, my_competition_editor, my_plan_selector
         self._planning_workspace = planning_workspace
         self._profile_analyses = profile_analyses
         self._skill_catalog, self._skill_editor = skill_catalog, skill_editor
@@ -434,8 +466,8 @@ class AgentCapabilityFacade:
             description=f"Delegate {capability.value} to the existing deterministic authority.",
             input_schema_json=_input_schema_json(models[0]),
             output_type=models[1].__name__,
-            access=(CapabilityAccess.READ if capability in _READ or capability in (CapabilityId.GET_PLANNING_WORKSPACE, CapabilityId.BUILD_COMPETITION_SNAPSHOT, CapabilityId.GET_PROFILE, CapabilityId.GET_PROFILE_ANALYSES, CapabilityId.GET_SKILL_CATALOG) else
-                    CapabilityAccess.MUTATING if capability in (CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL)
+            access=(CapabilityAccess.READ if capability in _READ or capability in (CapabilityId.GET_MY_COMPETITIONS, CapabilityId.GET_MY_COMPETITION, CapabilityId.GET_PLANNING_WORKSPACE, CapabilityId.BUILD_COMPETITION_SNAPSHOT, CapabilityId.GET_PROFILE, CapabilityId.GET_PROFILE_ANALYSES, CapabilityId.GET_SKILL_CATALOG) else
+                    CapabilityAccess.MUTATING if capability in (CapabilityId.ADD_MY_COMPETITION, CapabilityId.UPDATE_MY_COMPETITION, CapabilityId.REMOVE_MY_COMPETITION, CapabilityId.SELECT_MY_COMPETITION_PLAN, CapabilityId.REVISE_PLAN, CapabilityId.UPDATE_PROFILE, CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL)
                     else CapabilityAccess.DECISION),
             requires_explicit_approval=capability == CapabilityId.REVISE_PLAN,
         ) for capability, models in sorted(_SPECS.items(), key=lambda pair: pair[0].value))
@@ -508,6 +540,17 @@ class AgentCapabilityFacade:
             return error(CapabilityErrorCode.EXECUTION_REJECTED)
 
     def _delegate(self, capability, value):
+        if capability in (CapabilityId.GET_MY_COMPETITIONS, CapabilityId.GET_MY_COMPETITION):
+            self._require(self._my_competitions)
+            return self._my_competitions.read(value) if capability == CapabilityId.GET_MY_COMPETITIONS else self._my_competitions.get(value)
+        if capability == CapabilityId.SELECT_MY_COMPETITION_PLAN:
+            self._require(self._my_plan_selector)
+            return self._my_plan_selector.select(value)
+        if capability in (CapabilityId.ADD_MY_COMPETITION, CapabilityId.UPDATE_MY_COMPETITION, CapabilityId.REMOVE_MY_COMPETITION):
+            self._require(self._my_competition_editor)
+            if capability.value != value.operation + "_my_competition":
+                raise _InvocationRejected(CapabilityErrorCode.INVALID_INPUT)
+            return self._my_competition_editor.mutate(value)
         if capability == CapabilityId.GET_PLANNING_WORKSPACE:
             self._require(self._planning_workspace)
             return self._planning_workspace.read(value)

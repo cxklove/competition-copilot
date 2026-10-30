@@ -178,6 +178,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "request-1",
@@ -199,6 +200,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "request-1",
@@ -220,6 +222,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "request-1",
@@ -241,6 +244,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": " request-1 ",
@@ -265,6 +269,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "   ",
@@ -289,6 +294,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "",
@@ -313,6 +319,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": true,
@@ -334,6 +341,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "request-1\u001f",
@@ -355,6 +363,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "\u0085request-1\u001f",
@@ -2966,6 +2975,7 @@
             "fields": [
               "COMPETITION"
             ],
+            "options": [],
             "question": "   ",
             "reason": "AMBIGUOUS_TARGET",
             "source_request_id": "request-1"
@@ -3024,6 +3034,7 @@
               "COMPETITION",
               "COMPETITION"
             ],
+            "options": [],
             "question": "Which competition?",
             "reason": "AMBIGUOUS_TARGET",
             "source_request_id": "request-1"
@@ -3079,6 +3090,7 @@
               "COMPETITION",
               "TRACK"
             ],
+            "options": [],
             "question": "Which competition?",
             "reason": "AMBIGUOUS_TARGET",
             "source_request_id": "request-1"
@@ -3134,6 +3146,7 @@
               "TRACK",
               "COMPETITION"
             ],
+            "options": [],
             "question": "Which competition?",
             "reason": "AMBIGUOUS_TARGET",
             "source_request_id": "request-1"
@@ -4221,6 +4234,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "request-1",
@@ -4243,6 +4257,7 @@
           },
           "conversation_id": null,
           "intent": null,
+          "my_competition_command": null,
           "profile_result_refs": null,
           "profile_update": null,
           "request_id": "request-1",
@@ -4461,6 +4476,7 @@
         "fields": [
           "COMPETITION"
         ],
+        "options": [],
         "question": "Which competition?",
         "reason": "AMBIGUOUS_TARGET",
         "source_request_id": "request-1"
@@ -4650,6 +4666,7 @@
     },
     "conversation_id": null,
     "intent": null,
+    "my_competition_command": null,
     "profile_result_refs": null,
     "profile_update": null,
     "request_id": "request-1",

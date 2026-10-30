@@ -21,6 +21,12 @@ from competition_copilot.agents.contracts import (
     WorkflowStatus,
 )
 from competition_copilot.agents.state import AgentState
+from competition_copilot.application.my_competitions import (
+    MyCompetitionMutationResult,
+    MyCompetitionProjection,
+    MyCompetitionsProjection,
+    MyPlanSelectionResult,
+)
 from competition_copilot.domain.decision import Evidence
 from competition_copilot.domain.digital_twin import (
     CompetitionSnapshot,
@@ -325,6 +331,9 @@ def build_explanation_context(state: AgentState, receipt: AgentCapabilityResult 
             fact(name, f"{name}：{observation.state.value}。")
             if observation.state == "unknown":
                 uncertainty.append("未观测事实仍为 UNKNOWN，不能视为不存在")
+    elif isinstance(data, (MyCompetitionsProjection, MyCompetitionProjection, MyCompetitionMutationResult, MyPlanSelectionResult)):
+        result_type, status, title = type(data).__name__, "READ_OR_SELF_MUTATION_RECORDED", "我的赛事"
+        fact("workspace", "我的赛事操作已返回；关系与业务分析结果分别展示。")
     elif isinstance(data, EventBatch):
         result_type, status, title = "EventBatch", "EVENTS_RECORDED", "赛事事件"
         for i, event in enumerate(data.events[:10]):

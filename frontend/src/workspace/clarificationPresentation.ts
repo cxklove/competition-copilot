@@ -12,6 +12,12 @@ export const clarificationLabels: Partial<Record<ContextField, string>> = {
   CAPABILITY_INVOCATION: '高级调用信息',
 };
 export const intentLabels: Record<AgentIntent, string> = {
+  GET_MY_COMPETITIONS: '查看我的赛事',
+  GET_MY_COMPETITION: '查看已加入赛事',
+  ADD_MY_COMPETITION: '加入我的赛事',
+  UPDATE_MY_COMPETITION: '更新赛事关系状态',
+  REMOVE_MY_COMPETITION: '移出我的赛事',
+  SELECT_MY_COMPETITION_PLAN: '关联正式计划',
   GET_PLANNING_WORKSPACE: '查看备赛工作区',
   GET_PROFILE_ANALYSES: '查看分析所用画像版本',
   GET_SKILL_CATALOG: '查看技能目录',

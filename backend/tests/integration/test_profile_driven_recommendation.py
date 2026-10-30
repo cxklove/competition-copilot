@@ -124,3 +124,72 @@ def test_explicit_rerun_reads_updated_repository_skill_and_changes_overlap_not_o
         assert not any(c["component_id"] == "verified-skill-overlap-v1"
                        for c in evaluation["score_components"])
     assert ranking_a == original  # No ranking-change requirement, and no mutation of A.
+
+
+@pytest.mark.parametrize("explicit", [True, False])
+def test_selected_plan_does_not_change_profile_discovery_or_candidate_add(explicit):
+    from copy import deepcopy
+
+    from competition_copilot.integrations.local_runtime.composition import (
+        create_local_host,
+    )
+
+    target = create_local_host(ROOT)
+    scope = {"student_id": STUDENT, "competition_id": "comap-mcm",
+             "edition_id": "comap-mcm-2027"}
+
+    def execute(intent, context, **extra):
+        body = request("给我推荐几个比赛" if intent is None else intent, context)
+        if intent is not None:
+            body["request"]["intent"] = intent
+        body["request"].update(extra)
+        return invoke(target, body)
+
+    generated = execute("BUILD_PLAN", scope)
+    selected = generated["runtime"]["response"]["plan_refs"][0]
+    original = deepcopy(selected)
+    without = execute("GET_RECOMMENDATIONS", scope)
+    context = {**scope, "plan_ref": selected}
+    with_plan = execute("GET_RECOMMENDATIONS" if explicit else None, context)
+    ranking = artifacts(with_plan, "RecommendationRankingResult")[0]
+    assert ranking == artifacts(without, "RecommendationRankingResult")[0]
+    candidates = [x["evaluation"]["candidate"] for bucket in ("confirmed", "uncertain", "blocked")
+                  for x in ranking[bucket]]
+    assert len(candidates) == 12
+    other = next(c for c in candidates if c["competition_id"] == "huawei-ict")
+    added = execute("ADD_MY_COMPETITION", {"student_id": STUDENT},
+        my_competition_command={"operation": "add", "student_id": STUDENT,
+            "target": other, "state": "SAVED"})
+    relation = artifacts(added, "MyCompetitionMutationResult")[0]["snapshot"]["relationship"]
+    assert relation["competition_id"] == other["competition_id"]
+    assert relation["edition_id"] == other["edition_id"]
+    assert relation["track_id"] == other.get("track_id")
+    workspace = execute("GET_PLANNING_WORKSPACE", context)
+    assert artifacts(workspace, "PlanningWorkspaceProjection")[0]["plan_ref"] == original
+    assert context["plan_ref"] == original
+    result_ref = next(a["ref"]["ref_id"] for a in with_plan["presentation"]["artifacts"]
+                      if a["model"] == "RecommendationRankingResult")
+    assert target.profile_input_bindings[result_ref].input_profile_ref == target.profile_repository.get(STUDENT).profile_ref
+
+
+@pytest.mark.parametrize("mutation", ["digest", "version"])
+def test_plan_bound_workspace_still_rejects_invalid_exact_reference(mutation):
+    from copy import deepcopy
+
+    from competition_copilot.integrations.local_runtime.composition import (
+        create_local_host,
+    )
+
+    target = create_local_host(ROOT)
+    context = {"student_id": STUDENT, "competition_id": "comap-mcm",
+               "edition_id": "comap-mcm-2027"}
+    body = request("BUILD_PLAN", context)
+    body["request"]["intent"] = "BUILD_PLAN"
+    selected = deepcopy(invoke(target, body)["runtime"]["response"]["plan_refs"][0])
+    if mutation == "digest":
+        selected["content_digest"] = "f" * 64
+    else:
+        selected["version"] += 1
+    body = request("Read exact plan", {**context, "plan_ref": selected})
+    body["request"]["intent"] = "GET_PLANNING_WORKSPACE"
+    assert invoke(target, body)["runtime"]["response"]["outcome"] == "FAILED"

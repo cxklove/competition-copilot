@@ -521,7 +521,7 @@ a dedicated workspace and a contextual entry across business pages. The current
 workspace and semantic result components are the reusable implementation baseline;
 PX1 implementation is described below; later business pages remain planned.
 
-- **PX0 / Design: DOCUMENTED. PX1 / PX2 / PX3: CLOSED_VERIFIED. PX2.1: COMPLETE. PX2.2: CLOSED_VERIFIED. PX4: IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START. PX5/PX6: PLANNED.**
+- **PX0 / Design: DOCUMENTED. PX1 / PX2 / PX3: CLOSED_VERIFIED. PX2.1: COMPLETE. PX2.2: CLOSED_VERIFIED. PX4: IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.2 CLOSED_VERIFIED_LOCAL. PX5/PX6: PLANNED.**
   P12/P13/P14 remain CLOSED_FROZEN; P15 remains NOT_STARTED.
 - Planned navigation: 首页、赛事中心、我的赛事、我的能力、备赛计划、赛事动态、Copilot.
   Approval Center placement remains a later navigation decision. Deliver incrementally.
@@ -546,7 +546,7 @@ Authority/data-flow boundaries:
 ### PX1 — product shell, Dashboard and current context
 
 Status: CLOSED_VERIFIED. The design handoff above describes the PX0
-baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3 is CLOSED_VERIFIED, PX4 IN_PROGRESS (PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START) and PX5/PX6 PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
+baseline; PX1 is implemented; PX2.2's authoritative reads and history boundary are documented below. PX3 is CLOSED_VERIFIED, PX4 IN_PROGRESS (PX4.1 CLOSED_VERIFIED; PX4.2 CLOSED_VERIFIED_LOCAL) and PX5/PX6 PLANNED. PX1 did not change backend; PX2.2 adds the approved readonly projection.
 
 The default `#/home` presents current explicit context, the selected plan's known
 version/status, the most recent validated reply, a pending approval only when the
@@ -657,7 +657,7 @@ Independent review passed; this closure does not claim production Cloud deployme
 
 **PX2.4 Temporal Information Enrichment — CLOSED_VERIFIED**, FINAL INDEPENDENT RE-REVIEW = REVIEW_PASS.
 PX2 Competition Experience overall is CLOSED_VERIFIED: PX2.1 COMPLETE,
-PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is CLOSED_VERIFIED; PX4 IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START (implementation not started);
+PX2.2/PX2.3/PX2.4 CLOSED_VERIFIED. PX3 is CLOSED_VERIFIED; PX4 IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.2 CLOSED_VERIFIED_LOCAL;
 P15 remains NOT_STARTED and P12/P13/P14 remain CLOSED_FROZEN.
 `PX2.4 TEMPORAL_INFORMATION_PROJECTION_GAP` was the design baseline: the previous timeline
 could not express official date text awaiting structured verification. PX2.4 adds
@@ -796,7 +796,7 @@ no full account/identity system, incomplete required_level coverage
 tasks under incomplete constraints (PLANNING_ACTIONABILITY_GAP, PX4 high priority),
 unavailable complete Competition Event History and Submission Window DATA_CONTRACT_GAP.
 At the PX3 sync, PX4 was READY_TO_START. Current status: PX4 IN_PROGRESS;
-PX4.1 CLOSED_VERIFIED; PX4.2 My Competitions Workspace READY_TO_START only.
+PX4.1 CLOSED_VERIFIED; PX4.2 My Competitions Workspace CLOSED_VERIFIED_LOCAL.
 PX1/PX2 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
 
 ## PX4.1 Planning Workspace — CLOSED_VERIFIED
@@ -819,7 +819,7 @@ Viewing, refreshing or saving a profile never executes them automatically.
 Detail/profile CTAs preserve canonical context. PLANNING_ACTIONABILITY_GAP is
 mitigated without changing P8 truth or P11 authority. Browser Smoke PASS;
 Final Independent Review REVIEW_PASS. PX4 IN_PROGRESS; PX4.1 CLOSED_VERIFIED;
-PX4.2 READY_TO_START only; no PX4.2/P15 implementation.
+PX4.2 CLOSED_VERIFIED_LOCAL; PX4.3/P15 NOT_STARTED.
 
 Targeted frontend verification (from frontend):
 
@@ -838,3 +838,63 @@ panel through GET_PLANNING_WORKSPACE, using the full returned exact PlanReferenc
 The left chat stays concise. No refresh, route change or second plan-selection
 click is required. The original Plan renderer remains folded under 计划原文 / 审计;
 advisory tasks are independent and never inserted into the original milestones.
+
+
+## PX4.2 My Competitions - CLOSED_VERIFIED_LOCAL
+
+The existing `#/my-competitions` navigation is now a workspace with ALL / SAVED /
+PREPARING filters, authoritative target names, result/freshness summaries, time
+references and deterministic next-action CTAs. `MyCompetitions.tsx` contains the
+read projection consumer and explicit relationship controls shared by Competition
+Detail, Recommendation and Planning Workspace. It never calculates business truth.
+
+Joining requires an explicitly selected Edition; Track remains optional and exact.
+Add/update/remove use Runtime typed actions and backend snapshots; there is no
+authoritative browser bookmark state. Set-current is a separate existing workspace
+selection, carries the full target and clears incompatible selected Plan context.
+Removing a relationship leaves Current Context and previous analyses/plans intact.
+
+Relationships are local Demo host memory and are lost on service restart. Provider
+failures, not-analyzed results, invalid references and profile freshness are distinct.
+Candidate times remain labelled official/pending references, never deadlines.
+
+Targeted: `node --import tsx --test tests/my-competitions.test.tsx tests/workspace.test.tsx`.
+### PX4.2 exact target completion
+
+Add controls with a competition-only target lazily read authoritative Editions
+through the existing Runtime detail READ and display an unselected Edition chooser.
+Only explicit confirmation sends ADD. Exact recommendation/workspace targets keep
+their direct Add path. Runtime clarification options render as label/id selects;
+the reply sends `edition_id`, not supplemental text. P7 completion can restore the
+workspace Edition only from its validated result matching the submitted choice.
+No latest/first selection, automatic analysis or inferred Track is introduced.
+
+### PX4.2 local closure and regression alignment (2026-10-30)
+
+Current status: CLOSED_VERIFIED_LOCAL. Local Browser Smoke and Final Independent
+Review PASS after the exact-target and Recommendation/Plan-context blocker fixes.
+PX4 remains IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.3/P15 NOT_STARTED.
+CI_PIPELINE_STABILITY_GAP remains OPEN: local closure does not mean GitHub Actions
+is green. Durable relationships/result history and other documented gaps remain.
+
+Frontend full: **383 passed / 0 failed / 0 skipped**. PX4.2 frontend targeted:
+82 passed; backend targeted: 61 passed. Lint, build and diff check PASS. Regression
+alignment changed only test infrastructure/assertions, with no production change
+and no new production blocker.
+
+The former response-correlation failure was TEST_HARNESS_BUG: use request_id to
+match each response to its request. `tests/runtimeTrace.ts` waits for the matching
+identity and reports observed requests/responses on timeout; completion order,
+array positions and the last response are not valid correlation mechanisms.
+The former 5-vs-2 and 8-vs-4 count failures were OUTDATED_ASSERTION. Extra projection
+READs are legitimate; the latter trace contains exactly one P7 invocation.
+
+No-auto-analysis tests classify READ / BUSINESS / MUTATION and assert business
+intent counts (P5/P7/P8/P11), never total Runtime request counts. READs remain in
+the trace. Rendering, relationship mutations and Set Current must not start
+business analysis. The full trace is retained for diagnostics.
+
+Multiple Editions: automated coverage PASS; browser coverage NOT_VERIFIED due to
+FORMAL_TEST_DATA_COVERAGE_GAP (no second formal Edition for the same Competition).
+This is neither browser PASS nor an implementation failure. Detailed verification
+and all open gaps are in [Development Plan](../docs/DEVELOPMENT_PLAN.md).

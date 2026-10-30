@@ -15,6 +15,8 @@ import {
 import type { GuidedAction } from './actions.ts';
 
 export type CompetitionSelection = {
+  planRef?: import('../runtime/generated/contracts.ts').PlanReference | null;
+  planStatus?: string;
   sequence: number;
   competitionId: string;
   editionId?: string;

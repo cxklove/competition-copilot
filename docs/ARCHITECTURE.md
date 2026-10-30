@@ -3131,7 +3131,7 @@ plan selection/HITL/PlanDiff components without computing business results.
 
 PX 是独立的产品体验路线，不是 P15 Evaluation，也不重开 P12/P13/P14
 CLOSED_FROZEN 基线。PX0 / Design 已 DOCUMENTED，PX1 / PX2 Core 为 CLOSED_VERIFIED；
-PX2 整体 CLOSED_VERIFIED：PX2.1 COMPLETE、PX2.2–PX2.4 CLOSED_VERIFIED；PX3 CLOSED_VERIFIED，PX4 IN_PROGRESS（PX4.1 CLOSED_VERIFIED；PX4.2 READY_TO_START），PX5–PX6 PLANNED。阶段状态与范围由
+PX2 整体 CLOSED_VERIFIED：PX2.1 COMPLETE、PX2.2–PX2.4 CLOSED_VERIFIED；PX3 CLOSED_VERIFIED，PX4 IN_PROGRESS（PX4.1 CLOSED_VERIFIED；PX4.2 CLOSED_VERIFIED_LOCAL），PX5–PX6 PLANNED。阶段状态与范围由
 [DEVELOPMENT_PLAN](DEVELOPMENT_PLAN.md#post-p14-product-experience-upgrade-px) 维护，
 页面、导航、状态与证据设计由
 [PRODUCT_SPEC](PRODUCT_SPEC.md#post-p14-product-experience-design) 维护。
@@ -3313,13 +3313,13 @@ Complete Competition Event History remains unavailable; Submission Window remain
 DATA_CONTRACT_GAP. No business truth or missing date/requirement is invented.
 
 At the PX3 sync, PX4 was READY_TO_START. Current status: PX4 IN_PROGRESS;
-PX4.1 CLOSED_VERIFIED; PX4.2 My Competitions Workspace READY_TO_START only.
+PX4.1 CLOSED_VERIFIED; PX4.2 My Competitions Workspace CLOSED_VERIFIED_LOCAL.
 
 ## PX4.1 Planning Readiness & Actionable Preparation — CLOSED_VERIFIED
 
 Browser Smoke PASS; Final Independent Review REVIEW_PASS. PX4 IN_PROGRESS;
-PX4.2 READY_TO_START only; PX1-PX3 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
-No PX4.2 work. Runtime explicit GET_PLANNING_WORKSPACE -> Facade READ ->
+PX4.2 CLOSED_VERIFIED_LOCAL; PX1-PX3 CLOSED_VERIFIED; P12-P14 CLOSED_FROZEN; P15 NOT_STARTED.
+The PX4.1 implementation did not include PX4.2 work. Runtime explicit GET_PLANNING_WORKSPACE -> Facade READ ->
 PlanningWorkspaceReader -> abstract ProfileRepository / PlanRegistry /
 PlanInputLineageReader, existing CompetitionDetailReader and SkillCatalogReader ->
 immutable JSON-safe projection. Explicit MCP exclusion; no parallel business API.
@@ -3354,3 +3354,85 @@ component and session reference. No registry latest lookup or digest/version
 reconstruction occurs. Original stages use the existing Plan renderer only inside
 folded audit; suggestions remain outside Plan milestones. Legacy standalone result
 rendering remains available. The automatic follow-up is a read, never P7/P8/P11.
+
+
+## PX4.2 My Competitions Workspace - CLOSED_VERIFIED_LOCAL
+
+My Competitions is an explicit student-intent collection, independent of Current
+Context and P5-P11 truth. A relationship contains only identity, exact target,
+SAVED/PREPARING state and version/audit metadata. It contains no copied eligibility,
+SkillGap, plan, name, deadline, score or progress truth. Edition is required; Track
+is optional. Existing contracts do not declare a universal Track-required flag;
+Track existence must not be interpreted as a requirement to choose the first Track.
+
+Runtime -> CapabilityFacade -> Application -> Repository interface -> host-memory
+adapter. Trusted server actor scope authorizes reads and self-mutations. References
+include target, student, identity, version, canonical digest and host scope. Re-add
+allocates a new identity. State changes and removal use exact CAS, never updated_at.
+
+A separate DerivedResultReadStore retains immutable validated canonical result JSON
+plus trusted student/target/kind, exact result reference, digest, invocation-time
+ProfileReference and monotonic execution sequence. Its selected-result index is
+independent of relationships. Only successful explicit top-level business invocations
+select results; prerequisites do not. Out-of-order completion cannot supersede a
+newer invocation. Manual Plan selection resolves exact references and original
+lineage, never binds an old plan to the current profile. Reads do not select.
+
+MyCompetitionsReader snapshots relationships and the current profile, resolves
+authoritative display data, selected results, exact Plan/lineage, PX4.1 planning
+summary and temporal evidence. Per-result CURRENT/STALE/UNKNOWN is separate from
+availability. A missing selected Plan means not associated, not proof of no Plan.
+Provider failure is not not-analyzed or a pending confirmation. Planning summary
+composition rejects a changed profile binding during its read. No reader runs
+P5/P7/P8/P11. next-action-v1 only projects a labelled action and reason code.
+
+ADD/UPDATE/REMOVE never set current, run business analysis, generate events/diffs
+or invoke Approval. REMOVE only deletes the relationship; retained results and
+PlanRegistry remain untouched. Explicit set-current and result CTAs reuse existing
+product paths. TemporalCandidate cannot become a deadline. P5-P11 truth is unchanged.
+
+Persistence remains HOST_MEMORY for relationships, selected results and profile/plan
+state. Durable relationships/results, accounts, requirement level enrichment, task
+progress, full event history, Submission Window and legacy Eligibility freshness
+coverage remain gaps. CI_PIPELINE_STABILITY_GAP is independent and not fixed here.
+### PX4.2 local verification boundary (2026-10-30)
+
+PX4.2 is CLOSED_VERIFIED_LOCAL; PX4 remains IN_PROGRESS, PX4.1 CLOSED_VERIFIED,
+PX4.3/P15 NOT_STARTED and P12-P14 CLOSED_FROZEN. Local Browser Smoke, independent
+review and frontend regression passed. CI_PIPELINE_STABILITY_GAP stays OPEN;
+GitHub Actions success is not implied. Historical checkpoint states in the
+Development Plan are retained as dated evidence.
+
+My Competition != Current Context != Recommendation result; relationship intent
+is also distinct from Eligibility, SkillGap and Plan truth. Exact selected Plan
+summary and current read-side planning/advisory summary are separate: advisory
+can exist without an associated formal Plan. Missing historical selected-result
+mapping is not reconstructed by guessing. Durable relationships, result history
+and legacy profile-lineage gaps remain open.
+
+Runtime test responses must correlate by request_id, not array/completion order.
+No-auto-analysis assertions count P5/P7/P8/P11 business invocations by action kind;
+additional legitimate READs do not imply additional business execution.
+
+## PX4.2 Recommendation and selected Plan context separation
+
+GET_RECOMMENDATIONS is profile-driven discovery. Routing excludes the caller's
+selected `plan_ref` from P6 trusted identity scopes, regardless of whether the
+request is explicit or naturally routed. The original request/audit and workspace
+selection retain that reference. Multi-candidate scope depends on the capability
+and prepared candidate batch, not the presence of a selected Plan. Recommendation
+payload student/target identity conflicts and injected plan identities are still
+rejected. Other target-bound and Plan-bound capabilities retain exact reference,
+target, digest and version validation. Candidate Add uses the recommendation's
+own exact target; no relationship or P5-P11 authority changes are included.
+## PX4.2 canonical Edition completion
+
+My Competition targets continue to require competition + Edition with optional
+Track; a blank or missing Edition cannot be persisted. Missing-target completion
+is presentation/preparation, not P5/P7 Domain decision logic. Authoritative Edition
+READ choices flow through typed `ClarificationRequest.options`; structured answers
+must belong to the offered scope and fill canonical context before P7/P8 input
+preparation repeats. Add uses the same authoritative data through Runtime detail
+READ and requires explicit choice/confirmation. No relationship, Current Context,
+or analysis is silently created by reading choices. Existing exact-target/parent
+guards and conditional Track semantics remain in force.

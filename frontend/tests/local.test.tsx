@@ -22,6 +22,12 @@ import type { PlanReference } from '../src/runtime/generated/contracts.ts';
 import { collectPlanChoices } from '../src/workspace/plans.ts';
 import { createPresentedClient } from '../src/results/ErrorPresentation.tsx';
 import { stopLocalRuntime, waitForLocalRuntime } from './runtimeStartup.ts';
+import {
+  businessInvocations,
+  responseSnapshotKey,
+  runtimeTrace,
+  waitForResponseByRequestId,
+} from './runtimeTrace.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 let baseUrl: string;
@@ -84,11 +90,11 @@ test('competition card selection is canonical, visible and shared across Dashboa
     { name: '设为当前赛事：华为ICT大赛' },
     { timeout: 10000 },
   );
-  const before = value.calls.length;
+  const before = businessInvocations(value);
   fireEvent.click(select);
   const selected = await view.findByRole('button', { name: '当前赛事：华为ICT大赛' });
   assert.equal((selected as HTMLButtonElement).disabled, true);
-  assert.equal(value.calls.length, before); // context selection is not a business invocation
+  assert.deepEqual(businessInvocations(value), before); // reads may occur; analysis must not
   assert.equal(
     view.getByRole('status', { name: '当前赛事范围' }).textContent,
     '当前范围：华为ICT大赛',
@@ -129,10 +135,10 @@ test('competition card selection is canonical, visible and shared across Dashboa
   assert.equal(outbound.context?.edition_id, undefined);
   assert.equal(outbound.context?.track_id, undefined);
   await settled(view);
-  const index = value.calls.findIndex((call) => call.request === outbound);
-  assert.equal(value.responses[index].response?.outcome, 'COMPLETED');
+  const matched = await waitForResponseByRequestId(value, outbound.request_id);
+  assert.equal(matched.response?.outcome, 'COMPLETED');
   assert.ok(
-    validateArtifacts(value.responses[index].response!, value.deliveries[index].presentation).some(
+    validateArtifacts(matched.response!, value.readArtifacts(matched.response!)).some(
       (artifact) => artifact.model === 'RecommendationRankingResult',
     ),
   );
@@ -193,6 +199,150 @@ test('profile recommendation CTA needs only current student and sends no candida
   assert.equal((view.getByLabelText('竞赛 ID') as HTMLInputElement).value, '');
   assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, '');
   assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
+  window.history.replaceState(null, '', '/');
+});
+
+for (const naturalLanguage of [false, true]) {
+  test(`selected exact Plan survives ${naturalLanguage ? 'natural language' : 'explicit'} recommendation and candidate add`, async () => {
+    window.history.replaceState(null, '', '/');
+    const value = composition();
+    const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+    const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+    fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+    for (const [name, text] of [
+      [/学生 ID/, 'local-recommendation-demo'],
+      ['竞赛 ID', 'comap-mcm'],
+      ['届次 ID', 'comap-mcm-2027'],
+    ] as const)
+      fireEvent.change(view.getByLabelText(name), { target: { value: text } });
+    fireEvent.click(view.getByRole('button', { name: '生成备赛计划' }));
+    await settled(view);
+    const select = view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement;
+    const { waitFor } = await import('@testing-library/react');
+    await waitFor(() => assert.ok(select.value), { timeout: 10000 });
+    const selected = select.value;
+    const exactRef = JSON.parse(selected) as PlanReference;
+    if (naturalLanguage) await send(view, '给我推荐几个比赛');
+    else fireEvent.click(view.getByRole('button', { name: '查看赛事推荐' }));
+    await view.findByRole('heading', { name: '推荐结果' }, { timeout: 10000 });
+    assert.equal(select.value, selected);
+    const request = value.calls.findLast(
+      (c) =>
+        c.request?.user_message === (naturalLanguage ? '给我推荐几个比赛' : '查看适合我的赛事推荐'),
+    )!.request!;
+    // Raw request/audit context survives; backend decides which context P6 consumes.
+    assert.deepEqual(request.context?.plan_ref, exactRef);
+    const response = value.responses.find((r) => r.response?.request_id === request.request_id)!;
+    assert.equal(response.response?.outcome, 'COMPLETED');
+    const candidate = view.container.querySelector('article.recommendation-card')!;
+    const add = within(candidate as HTMLElement).getByRole('button', {
+      name: /加入我的赛事|已关注/,
+    });
+    if (add.textContent === '加入我的赛事') {
+      await waitFor(() => assert.equal((add as HTMLButtonElement).disabled, false));
+      fireEvent.click(add);
+      await within(candidate as HTMLElement).findByRole('button', { name: '已关注' });
+      const command = value.calls.findLast((c) => c.request?.intent === 'ADD_MY_COMPETITION')!
+        .request!.my_competition_command!;
+      assert.equal(command.target.competition_id, 'china-graduate-math-modeling');
+      assert.equal(command.target.edition_id, 'china-graduate-math-modeling-2026');
+    }
+    assert.equal(select.value, selected);
+    fireEvent.click(nav.getByRole('link', { name: '备赛计划' }));
+    await view.findByRole('heading', { name: '备赛概览' }, { timeout: 10000 });
+    const read = value.calls.findLast(
+      (c) => c.request?.intent === 'GET_PLANNING_WORKSPACE',
+    )!.request!;
+    assert.deepEqual(read.context?.plan_ref, exactRef);
+    window.history.replaceState(null, '', '/');
+  });
+}
+
+test('competition-only SkillGap uses authoritative Edition selector and resumes canonical target', async () => {
+  const value = composition();
+  const view = mount(value);
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-recommendation-demo' },
+  });
+  fireEvent.change(view.getByLabelText('竞赛 ID'), {
+    target: { value: 'china-graduate-math-modeling' },
+  });
+  fireEvent.click(view.getByRole('button', { name: '分析技能差距' }));
+  const chooser = await view.findByRole('combobox', { name: '届次' }, { timeout: 10000 });
+  assert.equal(view.queryByRole('textbox', { name: '届次' }), null);
+  assert.ok(
+    within(chooser).getByRole('option', { name: '2026年“华为杯”第二十三届中国研究生数学建模竞赛' }),
+  );
+  fireEvent.change(chooser, { target: { value: 'china-graduate-math-modeling-2026' } });
+  fireEvent.click(view.getByRole('button', { name: '提交补充信息' }));
+  await view.findByRole('heading', { name: '技能差距分析' }, { timeout: 10000 });
+  const { waitFor } = await import('@testing-library/react');
+  await waitFor(() =>
+    assert.equal(
+      (view.getByLabelText('届次 ID') as HTMLInputElement).value,
+      'china-graduate-math-modeling-2026',
+    ),
+  );
+  const answer = value.calls.find((call) => call.clarification)!.clarification!.values;
+  assert.deepEqual(answer, { edition_id: 'china-graduate-math-modeling-2026' });
+  const completed = value.responses.findLast((r) => r.response?.intent === 'ANALYZE_SKILL_GAP')!;
+  assert.equal(completed.response?.outcome, 'COMPLETED');
+});
+
+test('Detail incomplete Add offers Edition choice, persists exact scope and Set Current carries it', async () => {
+  window.history.replaceState(null, '', '/#/copilot');
+  const value = composition();
+  const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
+  const nav = within(view.getByRole('navigation', { name: '产品导航' }));
+  fireEvent.change(view.getByLabelText(/学生 ID/), {
+    target: { value: 'local-undergraduate' },
+  });
+  fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
+  fireEvent.click(
+    await view.findByRole(
+      'button',
+      { name: /查看详情.*中国研究生数学建模竞赛/ },
+      { timeout: 10000 },
+    ),
+  );
+  await view.findByRole('button', { name: '加入我的赛事' });
+  const { waitFor } = await import('@testing-library/react');
+  const initialAdds = value.calls.filter((c) => c.request?.intent === 'ADD_MY_COMPETITION').length;
+  await waitFor(() =>
+    assert.equal(
+      (view.getByRole('button', { name: '加入我的赛事' }) as HTMLButtonElement).disabled,
+      false,
+    ),
+  );
+  fireEvent.click(view.getByRole('button', { name: '加入我的赛事' }));
+  const chooser = await view.findByRole('combobox', { name: '请选择届次' }, { timeout: 10000 });
+  assert.equal(
+    value.calls.filter((c) => c.request?.intent === 'ADD_MY_COMPETITION').length,
+    initialAdds,
+  );
+  assert.equal((chooser as HTMLSelectElement).value, '');
+  fireEvent.change(chooser, { target: { value: 'china-graduate-math-modeling-2026' } });
+  fireEvent.click(view.getByRole('button', { name: '确认加入' }));
+  await view.findByRole('button', { name: '已关注' }, { timeout: 10000 });
+  const target = value.calls.findLast((c) => c.request?.intent === 'ADD_MY_COMPETITION')!.request!
+    .my_competition_command!.target;
+  assert.deepEqual(target, {
+    competition_id: 'china-graduate-math-modeling',
+    edition_id: 'china-graduate-math-modeling-2026',
+    track_id: null,
+  });
+  fireEvent.click(nav.getByRole('link', { name: '我的赛事' }));
+  await view.findByText('2026年“华为杯”第二十三届中国研究生数学建模竞赛');
+  const card = [...view.container.querySelectorAll('article')].find((e) =>
+    e.textContent?.includes('中国研究生数学建模竞赛'),
+  )!;
+  fireEvent.click(within(card as HTMLElement).getByRole('button', { name: '设为当前赛事' }));
+  fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
+  assert.equal((view.getByLabelText('届次 ID') as HTMLInputElement).value, target.edition_id);
+  assert.equal((view.getByLabelText(/赛道 ID/) as HTMLInputElement).value, '');
+  fireEvent.click(view.getByRole('button', { name: '分析技能差距' }));
+  await view.findByRole('heading', { name: '技能差距分析' }, { timeout: 10000 });
+  assert.equal(view.queryByRole('combobox', { name: '届次' }), null);
   window.history.replaceState(null, '', '/');
 });
 
@@ -681,11 +831,6 @@ test('real Planning Workspace automatically surfaces exact generated Plan, prese
 test('product navigation preserves a real generated selected plan, version/status and exact outbound ref', async () => {
   window.history.replaceState(null, '', '/');
   const value = composition();
-  const workflowCalls = () =>
-    value.calls.filter(
-      (call) =>
-        !['GET_PROFILE_ANALYSES', 'GET_PLANNING_WORKSPACE'].includes(call.request?.intent ?? ''),
-    );
   let next = 0;
   const view = render(
     <ProductApp
@@ -706,7 +851,9 @@ test('product navigation preserves a real generated selected plan, version/statu
     fireEvent.click(view.getByRole('button', { name: '生成备赛计划' }));
   });
   await settled(view);
-  const ref = value.responses[0].response!.plan_refs![0];
+  const planRequest = value.calls.find((c) => c.request?.intent === 'BUILD_PLAN')!.request!;
+  const planResponse = await waitForResponseByRequestId(value, planRequest.request_id);
+  const ref = planResponse.response!.plan_refs![0];
   const option = await view.findByRole('option', { name: new RegExp(ref.plan_id) });
   const select = view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement;
   assert.deepEqual(JSON.parse(select.value), ref);
@@ -721,7 +868,9 @@ test('product navigation preserves a real generated selected plan, version/statu
     { name: 'COMAP Mathematical Contest in Modeling' },
     { timeout: 10000 },
   );
-  assert.equal(workflowCalls().length, 2);
+  if (process.env.COPILOT_TEST_TRACE === '1')
+    console.log('PLAN_NAV_TRACE ' + JSON.stringify(runtimeTrace(value)));
+  assert.deepEqual(businessInvocations(value), ['BUILD_PLAN']);
   fireEvent.click(view.getByRole('button', { name: /查看详情.*COMAP/ }));
   await view.findByRole('tab', { name: '赛事概览' }, { timeout: 10000 });
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
@@ -746,13 +895,14 @@ test('product navigation preserves a real generated selected plan, version/statu
     (view.getByRole('combobox', { name: '当前计划 / 选择计划' }) as HTMLSelectElement).value,
     selected,
   );
-  assert.equal(workflowCalls().length, 3);
+  assert.deepEqual(businessInvocations(value), ['BUILD_PLAN']);
   await act(async () => {
     fireEvent.click(view.getByRole('button', { name: '调整当前计划' }));
   });
   await view.findByRole('alert', {}, { timeout: 10000 });
-  assert.deepEqual(workflowCalls()[3].request?.context?.plan_ref, ref);
-  assert.equal(workflowCalls().length, 4);
+  const revision = value.calls.find((c) => c.request?.intent === 'REQUEST_PLAN_REVISION')!.request!;
+  assert.deepEqual(revision.context?.plan_ref, ref);
+  assert.deepEqual(businessInvocations(value), ['BUILD_PLAN', 'REQUEST_PLAN_REVISION']);
   assert.ok(view.getByText('当前计划暂无可执行的调整依据'));
   window.history.replaceState(null, '', '/');
 });
@@ -799,9 +949,9 @@ test('real competition center searches formal records, binds canonical context a
   assert.equal(value.calls[2].request?.intent, 'ANALYZE_SKILL_GAP');
   assert.equal(value.calls[2].request?.context?.competition_id, 'huawei-ict');
   assert.equal(value.responses[2].response?.outcome, 'NEEDS_CLARIFICATION');
-  assert.equal(
-    (view.getByRole('button', { name: '分析技能差距' }) as HTMLButtonElement).disabled,
-    true,
+  const { waitFor } = await import('@testing-library/react');
+  await waitFor(() =>
+    assert.equal(view.getByRole('button', { name: '分析技能差距' }).matches(':disabled'), true),
   );
   assert.equal(value.calls.length, 3);
   assert.deepEqual(value.responses[0], original);
@@ -817,15 +967,44 @@ test('real competition center searches formal records, binds canonical context a
 function composition(gate?: Promise<void>) {
   const calls: AgentArtsInvocationEnvelope[] = [];
   const deliveries: Array<{ runtime: unknown; presentation: unknown; count: number }> = [];
-  let attachment: unknown;
+  const presentations = new Map<string, unknown>();
   const fetcher: typeof fetch = async function (this: typeof globalThis, url, init) {
     // Native browser fetch requires its Window/global receiver (Node does not).
     assert.equal(this, globalThis);
     assert.equal(new URL(String(url)).pathname, '/runtime/invoke');
     calls.push(JSON.parse(init!.body as string));
     assert.equal(init!.credentials, 'omit');
-    const response = await fetch(url, init);
+    const response = await fetch(url, init).catch((error: unknown) => {
+      if (process.env.COPILOT_TEST_TRACE === '1') {
+        const outbound = JSON.parse(init!.body as string) as AgentArtsInvocationEnvelope;
+        console.log(
+          'LOCAL_RUNTIME_TRANSPORT_FAILURE ' +
+            JSON.stringify({
+              request_id: outbound.request?.request_id,
+              intent: outbound.request?.intent,
+              error: String(error),
+              cause: error instanceof Error ? String(error.cause) : undefined,
+            }),
+        );
+      }
+      throw error;
+    });
     const delivery = await response.clone().json();
+    if (delivery.runtime.response)
+      presentations.set(
+        responseSnapshotKey(delivery.runtime.response),
+        structuredClone(delivery.presentation),
+      );
+    if (process.env.COPILOT_TEST_TRACE === '1') {
+      const outbound = JSON.parse(init!.body as string) as AgentArtsInvocationEnvelope;
+      console.log(
+        'LOCAL_RUNTIME_TRACE ' +
+          JSON.stringify({
+            request_id: outbound.request?.request_id ?? delivery.runtime.response?.request_id,
+            intent: outbound.request?.intent ?? delivery.runtime.response?.intent,
+          }),
+      );
+    }
     deliveries.push({ ...delivery, count: Number(response.headers.get('X-Local-Handler-Count')) });
     if (gate) await gate;
     return response;
@@ -834,9 +1013,7 @@ function composition(gate?: Promise<void>) {
   const client = createPresentedClient(
     new LocalRuntimeTransport(
       config,
-      (value) => {
-        attachment = value;
-      },
+      () => {}, // Per-response snapshots above replace the old shared "last attachment".
       fetcher,
     ),
     config,
@@ -848,7 +1025,8 @@ function composition(gate?: Promise<void>) {
     responses.push(result);
     return result;
   };
-  const readArtifacts: ArtifactReader = () => attachment;
+  const readArtifacts: ArtifactReader = (response) =>
+    presentations.get(responseSnapshotKey(response));
   return { client, readArtifacts, calls, deliveries, responses };
 }
 
@@ -932,8 +1110,6 @@ test('standalone policy read shows reviewed facts without running a student elig
 test('real P7 result supplies exact requirement snapshot to detail without a new analysis or inferred proficiency', async () => {
   window.history.replaceState(null, '', '/');
   const value = composition();
-  const workflowCalls = () =>
-    value.calls.filter((call) => call.request?.intent !== 'GET_PROFILE_ANALYSES');
   const view = render(<ProductApp client={value.client} readArtifacts={value.readArtifacts} />);
   const nav = within(view.getByRole('navigation', { name: '产品导航' }));
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
@@ -947,7 +1123,9 @@ test('real P7 result supplies exact requirement snapshot to detail without a new
     fireEvent.click(view.getByRole('button', { name: '分析技能差距' }));
   });
   await settled(view);
-  assert.equal(value.responses[0].response?.intent, 'ANALYZE_SKILL_GAP');
+  const gapRequest = value.calls.find((c) => c.request?.intent === 'ANALYZE_SKILL_GAP')!.request!;
+  const gapResponse = await waitForResponseByRequestId(value, gapRequest.request_id);
+  assert.equal(gapResponse.response?.intent, 'ANALYZE_SKILL_GAP');
   fireEvent.click(nav.getByRole('link', { name: '赛事中心' }));
   await view.findByRole(
     'heading',
@@ -964,10 +1142,12 @@ test('real P7 result supplies exact requirement snapshot to detail without a new
   const panel = within(view.getByRole('tabpanel'));
   assert.ok(panel.getByText('所需能力等级暂未明确'));
   assert.ok(panel.getByText('暂无法确认是否存在能力差距'));
-  assert.equal(workflowCalls().length, 4);
+  if (process.env.COPILOT_TEST_TRACE === '1')
+    console.log('P7_DETAIL_TRACE ' + JSON.stringify(runtimeTrace(value)));
+  assert.deepEqual(businessInvocations(value), ['ANALYZE_SKILL_GAP']);
   fireEvent.click(nav.getByRole('link', { name: 'Copilot' }));
   assert.ok(view.getByRole('heading', { name: '技能差距分析' }));
-  assert.equal(workflowCalls().length, 4);
+  assert.deepEqual(businessInvocations(value), ['ANALYZE_SKILL_GAP']);
   assert.ok(
     value.calls
       .filter((call) => call.request?.intent === 'GET_PROFILE_ANALYSES')

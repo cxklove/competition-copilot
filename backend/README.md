@@ -2851,7 +2851,7 @@ PLANNING_ACTIONABILITY_GAP (PX4 high priority) records P8 over-concentration on
 uncertainty-resolution tasks when constraints are incomplete; P8 truth is unchanged.
 Complete Event History remains unavailable; Submission Window is DATA_CONTRACT_GAP.
 At the PX3 status sync, PX4 was READY_TO_START. Current status: PX4 IN_PROGRESS,
-PX4.1 CLOSED_VERIFIED, PX4.2 My Competitions Workspace READY_TO_START only.
+PX4.1 CLOSED_VERIFIED, PX4.2 My Competitions Workspace CLOSED_VERIFIED_LOCAL.
 
 ## PX4.1 Planning Readiness & Actionable Preparation — CLOSED_VERIFIED
 
@@ -2884,7 +2884,7 @@ Plan version/digest/status/timestamps/milestones. Only explicit CTAs invoke P7/P
 PLANNING_ACTIONABILITY_GAP is mitigated through this read-side layer; data coverage,
 host-memory persistence, account, Event History and Submission Window gaps remain.
 Browser Smoke PASS; Final Independent Review REVIEW_PASS. PX4 IN_PROGRESS;
-PX4.1 CLOSED_VERIFIED; PX4.2 READY_TO_START only; no PX4.2/P15 implementation.
+PX4.1 CLOSED_VERIFIED; PX4.2 CLOSED_VERIFIED_LOCAL; PX4.3/P15 NOT_STARTED.
 P12-P14 CLOSED_FROZEN; PX1-PX3 CLOSED_VERIFIED; P15 NOT_STARTED.
 
 PX4.1 target clarification: repository profile lookup is independent of target
@@ -2903,3 +2903,64 @@ Targeted verification from the repository root:
 ```powershell
 .\backend\.venv\Scripts\python -m pytest backend/tests/application/test_planning_workspace.py backend/tests/integration/test_planning_workspace_runtime.py backend/tests/integration/test_mcp_exposure_contract.py
 ```
+
+
+## PX4.2 My Competitions Workspace - CLOSED_VERIFIED_LOCAL
+
+- `repositories/student_competition.py` defines immutable intent snapshots, exact
+  references/CAS and result read-store protocols. `infrastructure/student_competition_memory.py`
+  implements atomic host-memory storage. `application/my_competitions.py` owns
+  authorized relationship commands, read composition and next-action-v1.
+- Runtime explicit READ: GET_MY_COMPETITIONS / GET_MY_COMPETITION. Self-authorized
+  MUTATING: ADD_MY_COMPETITION / UPDATE_MY_COMPETITION / REMOVE_MY_COMPETITION.
+  SELECT_MY_COMPETITION_PLAN validates an existing exact PlanReference and its lineage.
+  These capabilities are explicitly excluded from MCP; no new REST CRUD endpoint.
+- Relationship identity is student + Competition + required Edition + optional Track.
+  None Track is edition scope, never a wildcard. Only SAVED / PREPARING are supported.
+  ADD validates formal parents; UPDATE changes state only; UPDATE/REMOVE require CAS.
+- Relationships and selected result snapshots are host-scoped in-memory. Restart
+  clears them. They are not rebuilt from plans, recommendations or Current Context.
+- Explicit successful top-level P5/P7/P8 actions retain results with trusted student,
+  target, invocation-time profile binding and an execution sequence allocated before
+  execution. Older invocations cannot replace newer selections; prerequisites do not
+  select. Result bodies are canonical validated JSON, with exact content digests.
+- Reads never call P5/P7/P8/P11. REMOVE never deletes analyses, plans or result
+  selections. No relationship operation creates CompetitionEvent, PlanDiff or Approval.
+- Plan summaries resolve only selected exact references. No timestamp/latest/registry
+  enumeration heuristic. Availability and per-result profile freshness remain separate.
+- The raw fixture byte-integrity startup blocker was resolved by restoring reviewed
+  bytes without changing the review manifest or fixture semantics. Local Runtime
+  startup is verified. CI_PIPELINE_STABILITY_GAP remains OPEN independently.
+
+Targeted: `python -m pytest backend/tests/application/test_my_competitions.py backend/tests/integration/test_my_competitions_runtime.py`.
+### PX4.2 exact target completion
+
+Relationship Edition was already mandatory. Malformed relationship commands now
+return safe `TARGET_INCOMPLETE: EDITION_REQUIRED` diagnostics, without persisting
+a partial relationship. Edition/Track parent validation remains in the editor.
+Missing Edition during P7/P8 preparation exposes typed authoritative choices in
+`ClarificationRequest.options`, sourced by the existing Edition READ capability.
+Structured replies are scope-validated and merged into canonical request context
+before preparation resumes. UNKNOWN skill-gap truth still means uncertainty,
+not an unresolved clarification. No P5/P7 Domain rules or MCP tools were changed.
+
+### PX4.2 local closure (2026-10-30)
+
+Status: CLOSED_VERIFIED_LOCAL, following Architecture Review, Implementation,
+Browser Smoke after blocker fixes and Final Independent Review PASS. PX4 remains
+IN_PROGRESS; PX4.1 CLOSED_VERIFIED; PX4.3/P15 NOT_STARTED; P12-P14 CLOSED_FROZEN.
+PX4.2 backend targeted: 61 passed; frontend targeted: 82 passed; frontend full:
+383 passed / 0 failed / 0 skipped. Lint, build and diff check PASS. These are
+recorded local verification results, not a claim that GitHub Actions is green.
+CI_PIPELINE_STABILITY_GAP stays OPEN.
+
+Recommendation is profile-driven discovery; selected plan_ref does not anchor or
+narrow it. Plan-bound actions retain exact PlanReference validation. Add uses the
+candidate's exact target. ADD/UPDATE/REMOVE do not change Current Context or run
+P5/P7/P8/P11, create CompetitionEvent/PlanDiff, or trigger Approval. REMOVE preserves
+retained Eligibility/SkillGap/Plan results and their selected-result mapping.
+Read/mutation authorization uses the trusted actor's permitted student scope;
+browser student_id does not grant authority.
+
+Known persistence, legacy lineage, data-coverage and CI gaps remain open; see the
+final local status sync in [Development Plan](../docs/DEVELOPMENT_PLAN.md).

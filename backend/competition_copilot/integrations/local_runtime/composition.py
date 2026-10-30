@@ -26,6 +26,11 @@ from competition_copilot.application.controlled_plan_observation import (
     ControlledPlanObservation,
     ControlledPlanRevisionPreparer,
 )
+from competition_copilot.application.my_competitions import (
+    MyCompetitionEditor,
+    MyCompetitionsReader,
+    MyPlanSelector,
+)
 from competition_copilot.application.planning_workspace import (
     MappedPlanInputLineageReader,
     PlanningWorkspaceReader,
@@ -74,6 +79,10 @@ from competition_copilot.infrastructure.repositories.student_memory import (
 from competition_copilot.infrastructure.skill_requirement_json import (
     JsonSkillRequirementProvider,
 )
+from competition_copilot.infrastructure.student_competition_memory import (
+    InMemoryDerivedResultReadStore,
+    InMemoryStudentCompetitionRepository,
+)
 from competition_copilot.integrations.agentarts.runtime import AgentArtsRuntimeAdapter
 from competition_copilot.integrations.local_runtime.hosting import (
     LocalInvocationHost,
@@ -82,6 +91,13 @@ from competition_copilot.integrations.local_runtime.hosting import (
 )
 from competition_copilot.integrations.local_runtime.plans import InMemoryPlanRegistry
 from competition_copilot.integrations.local_runtime.projection import presentation
+from competition_copilot.repositories.student_competition import (
+    DerivedResultReference,
+    MyCompetitionTarget,
+    RetainedDerivedResult,
+    canonical_json,
+    content_digest,
+)
 
 
 class OfflineIntentModel:
@@ -91,6 +107,7 @@ class OfflineIntentModel:
         text = request.user_message.casefold()
         intent, capability = "DISCOVER_COMPETITIONS", "list_competitions"
         for tokens, selected in (
+            (("我的赛事", "正在准备哪些"), ("GET_MY_COMPETITIONS", "get_my_competitions")),
             (("revision", "调整", "修订"), ("REQUEST_PLAN_REVISION", "revise_plan")),
             (("eligibility", "资格"), ("CHECK_ELIGIBILITY", "check_eligibility")),
             (("recommend", "推荐"), ("GET_RECOMMENDATIONS", "get_recommendations")),
@@ -196,6 +213,9 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
         (root / "data/local_runtime/generated_huawei_observation.json").read_bytes())
     revision_preparer = ControlledPlanRevisionPreparer(repository, observation)
 
+    relationship_repository = InMemoryStudentCompetitionRepository()
+    derived_results = InMemoryDerivedResultReadStore()
+    relationship_editor = MyCompetitionEditor(relationship_repository, repository, actor, clock=clock)
     profile_inputs = {}
     planning_workspace = PlanningWorkspaceReader(profile_repository, registry,
         MappedPlanInputLineageReader(MappingProxyType(profile_inputs)),
@@ -203,7 +223,13 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
             requirements, repository, temporal_evidence), skill_catalog, actor)
     profile_analyses = ProfileAnalysesReader(profile_repository, actor, MappingProxyType(profile_inputs))
 
+    my_competitions = MyCompetitionsReader(relationship_repository, derived_results, profile_repository, actor,
+        details=CompetitionDetailReader(repository, JsonEligibilityPolicyProvider(root / "data/eligibility"),
+            requirements, repository, temporal_evidence), planning=planning_workspace, plans=registry)
+    plan_selector = MyPlanSelector(derived_results, registry, MappedPlanInputLineageReader(profile_inputs), actor)
+
     def factory(request):
+        execution_sequence = derived_results.next_sequence()
         # Capture repository profile state before even the routing admission
         # preflight computes missing fields; target completeness is independent.
         context = request.context
@@ -229,9 +255,10 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
 
             model = PreparedIntentModel(cloud_models.intent if cloud_models else None, request)
         composition = build_seed_agent(seed_directory=root / "data/seed", policy_directory=root / "data/eligibility",
+            my_competitions=my_competitions, my_competition_editor=relationship_editor, my_plan_selector=plan_selector,
             inputs=bindings, scoring=RecommendationScoringEngine([WeightedSuitabilityScorer(VerifiedSkillOverlapScorer())]),
             intent_model=model,
-            explanation_model=cloud_models.explanation if cloud_models and request.intent not in ("GET_PLANNING_WORKSPACE", "GET_PROFILE_ANALYSES", "GET_PROFILE", "UPDATE_PROFILE", "GET_SKILL_CATALOG", "ADD_PROFILE_SKILL", "UPDATE_PROFILE_SKILL", "REMOVE_PROFILE_SKILL") else None,
+            explanation_model=cloud_models.explanation if cloud_models and request.intent not in ("GET_MY_COMPETITIONS", "GET_MY_COMPETITION", "ADD_MY_COMPETITION", "UPDATE_MY_COMPETITION", "REMOVE_MY_COMPETITION", "SELECT_MY_COMPETITION_PLAN", "GET_PLANNING_WORKSPACE", "GET_PROFILE_ANALYSES", "GET_PROFILE", "UPDATE_PROFILE", "GET_SKILL_CATALOG", "ADD_PROFILE_SKILL", "UPDATE_PROFILE_SKILL", "REMOVE_PROFILE_SKILL") else None,
             human_interpreter=cloud_models.human_interpreter if cloud_models else None,
             requirement_provider=requirements, temporal_evidence=temporal_evidence,
             profile_reader=profile_reader, profile_editor=profile_editor,
@@ -287,6 +314,14 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
             return prepared_payload, None
 
         payload = {}
+        if capability in ("get_my_competitions", "get_my_competition", "select_my_competition_plan"):
+            payload = {"student_id": context.student_id} if context.student_id else {}
+            if capability != "get_my_competitions" and context.competition_id and context.edition_id:
+                payload["target"] = {"competition_id": context.competition_id, "edition_id": context.edition_id, "track_id": context.track_id}
+            if capability == "select_my_competition_plan" and context.plan_ref:
+                payload["plan_ref"] = context.plan_ref.model_dump(mode="json")
+        if capability in ("add_my_competition", "update_my_competition", "remove_my_competition") and request.my_competition_command:
+            payload = request.my_competition_command.model_dump(mode="json")
         if capability == "get_planning_workspace":
             payload = {k: v for k, v in {"student_id": context.student_id,
                 "competition_id": context.competition_id, "edition_id": context.edition_id,
@@ -328,13 +363,39 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
             if capability == selected and getattr(context, name) is not None:
                 payload = {name: getattr(context, name)}
         if capability in ("analyze_skill_gap", "build_plan"):
+            def target_choices(selected_frame, pending):
+                if pending is None or "EDITION" not in pending.fields:
+                    return ()
+                from competition_copilot.agents.contracts import (
+                    CapabilityInvocationRequest,
+                )
+                from competition_copilot.agents.human_contracts import (
+                    ClarificationOption,
+                )
+
+                choice_ref = ResultReference(kind="TOOL_RESULT", ref_id=nonce + "/edition-choices")
+                choice_args = ResultReference(kind="CAPABILITY_ARGUMENTS", ref_id=choice_ref.ref_id + "/arguments")
+                result = composition.facade.execute(CapabilityInvocationRequest(
+                    invocation_id=choice_ref.ref_id + "/invoke", source_request_id=request.request_id,
+                    intent="GET_COMPETITION_DETAILS", capability="list_competition_editions",
+                    arguments_ref=choice_args),
+                    {"artifact_ref": choice_args.model_dump(mode="json"), "payload": {
+                        "competition_id": selected_frame.state.request.context.competition_id}},
+                    result_ref=choice_ref)
+                if result.status != "SUCCESS":
+                    raise ValueError("Edition choices unavailable")
+                return tuple(ClarificationOption(field="EDITION", value=item.id, label=item.name,
+                    source_ref=choice_ref) for item in result.data.editions)
+
             payload, pending = prepare_exact_target(frame)
-            frame = GraphInput(**{**frame.model_dump(), "pending_preparation": pending})
+            frame = GraphInput(**{**frame.model_dump(), "pending_preparation": pending,
+                "clarification_options": target_choices(frame, pending)})
 
             def resume_target(resolved):
                 nonlocal payload
                 payload, pending = prepare_exact_target(resolved)
                 return GraphInput(**{**resolved.model_dump(), "pending_preparation": pending,
+                    "clarification_options": target_choices(resolved, pending),
                     "arguments_json": json.dumps({"artifact_ref": args.model_dump(mode="json"),
                                                    "payload": payload})})
 
@@ -401,6 +462,20 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
                     receipt.data.after, plan_diff=receipt.data.plan_diff)
             if receipt.status == "SUCCESS" and receipt.capability == "build_plan":
                 registry.register(receipt.data)
+            # Only the successfully invoked top-level action selects a result.
+            # P6/P8 prerequisites are deliberately not promoted to user selections.
+            kinds = {"check_eligibility": "ELIGIBILITY", "analyze_skill_gap": "SKILL_GAP", "build_plan": "PLAN_REFERENCE"}
+            if (receipt.status == "SUCCESS" and receipt.capability == capability
+                    and receipt.capability in kinds and profile_snapshot
+                    and receipt.invocation_id == frame.routing_invocation_id):
+                body = PlanReference.from_plan(receipt.data) if capability == "build_plan" else receipt.data
+                t = body.target if capability != "check_eligibility" else body
+                target = MyCompetitionTarget(competition_id=t.competition_id, edition_id=t.edition_id, track_id=t.track_id)
+                ref = DerivedResultReference(result_ref_id=receipt.result_ref.ref_id, student_id=profile_snapshot.student_id,
+                    target=target, kind=kinds[capability], content_digest=content_digest(body.model_dump(mode="json")))
+                derived_results.retain_and_select(RetainedDerivedResult(reference=ref,
+                    payload_json=canonical_json(body.model_dump(mode="json")),
+                    input_profile_ref=profile_snapshot.profile_ref, execution_sequence=execution_sequence))
             return receipt
 
         composition.facade.execute = record  # Observe the same Facade, never replace its decisions.
@@ -408,6 +483,8 @@ def create_local_host(root, *, clock=lambda: datetime.now(timezone.utc), cloud_m
                             lambda response: presentation(response, receipts))
 
     host = LocalInvocationHost(factory, plan_registry=registry)
+    host.relationship_repository = relationship_repository
+    host.derived_result_store = derived_results
     host.profile_repository = profile_repository
     host.profile_input_bindings = MappingProxyType(profile_inputs)
     return host

@@ -81,8 +81,8 @@ def test_explicit_catalog_and_exclusions_cover_real_upstream():
     assert len(REGISTRY.tools) == 8
     approved = {m.capability: m for m in AgentCapabilityFacade().list_capabilities()}
     # PX3.2 adds Runtime profile actions, never MCP tools.
-    assert len(approved) == 25
-    assert len(REGISTRY.exclusions) == 19
+    assert len(approved) == 31
+    assert len(REGISTRY.exclusions) == 25
     assert {CapabilityId.GET_PLANNING_WORKSPACE, CapabilityId.GET_PROFILE, CapabilityId.GET_PROFILE_ANALYSES, CapabilityId.UPDATE_PROFILE, CapabilityId.GET_SKILL_CATALOG,
             CapabilityId.ADD_PROFILE_SKILL, CapabilityId.UPDATE_PROFILE_SKILL, CapabilityId.REMOVE_PROFILE_SKILL} <= {
         x.capability_id for x in REGISTRY.exclusions}

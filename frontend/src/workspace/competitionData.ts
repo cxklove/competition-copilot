@@ -6,6 +6,29 @@ import type {
 import type { AgentContext } from '../runtime/generated/contracts.ts';
 import type { ReadRecord } from './competitionSession.ts';
 
+export function competitionNamesFrom(
+  records: readonly ReadRecord[],
+): Pick<Competition, 'id' | 'name'>[] {
+  const found = new Map(competitionsFrom(records).map((value) => [value.id, value]));
+  const names = new Map<string, Pick<Competition, 'id' | 'name'>>(found);
+  for (const record of records)
+    for (const artifact of record.artifacts) {
+      const items =
+        artifact.model === 'MyCompetitionsProjection'
+          ? artifact.value.competitions
+          : artifact.model === 'MyCompetitionProjection'
+            ? [artifact.value]
+            : [];
+      for (const item of items)
+        if (item.display_identity.competition_name && !found.has(item.target.competition_id))
+          names.set(item.target.competition_id, {
+            id: item.target.competition_id,
+            name: item.display_identity.competition_name,
+          });
+    }
+  return [...names.values()];
+}
+
 export function competitionsFrom(records: readonly ReadRecord[]): Competition[] {
   const found = new Map<string, Competition>();
   for (const record of records)

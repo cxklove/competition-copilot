@@ -4,6 +4,7 @@ Concrete data adapters belong here, outside Agent/Tool/Domain dependencies.
 There are no default paths, clocks, profiles, scoring policies or model providers.
 """
 
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -91,6 +92,7 @@ def build_seed_agent(
     planning_workspace: PlanningWorkspaceReader | None = None,
     profile_reader: StudentProfileReader | None = None,
     profile_editor: StudentProfileEditor | None = None,
+    my_competitions=None, my_competition_editor=None, my_plan_selector=None,
     resume_preparer=None,
 ) -> AgentComposition:
     """Assemble the frozen authorities; caller supplies every workflow argument.
@@ -113,6 +115,7 @@ def build_seed_agent(
             CapabilityId.LIST_TRACKS: ListEditionTracksTool(repository),
             CapabilityId.GET_TRACK: GetCompetitionTrackTool(repository),
         },
+        my_competitions=my_competitions, my_competition_editor=my_competition_editor, my_plan_selector=my_plan_selector,
         eligibility=CompetitionEligibilityEvaluator(repository, policies),
         scoring=scoring, ranking=RecommendationRankingEngine(),
         skill_gap=SkillGapEngine(), planning_inputs=PlanningInputDeriver(),
